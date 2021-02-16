@@ -439,7 +439,6 @@ LetFormula.LetBody,Variable,&LocalQuantifiedOccurences);
             break;
         default:
             LocalCount = 0;
-            SAVE
             CodingError("Unknown formula type in count variables usage");
             break;
     }
