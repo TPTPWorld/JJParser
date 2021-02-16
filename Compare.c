@@ -1,13 +1,7 @@
-#include <stdio.h>
 #include <string.h>
-#include <assert.h>
 #include <ctype.h>
-#include <stdlib.h>
 #include "DataTypes.h"
 #include "Utilities.h"
-#include "Signature.h"
-#include "Parsing.h"
-#include "PrintTSTP.h"
 #include "Examine.h"
 #include "Compare.h"
 //-----------------------------------------------------------------------------
