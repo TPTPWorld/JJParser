@@ -438,6 +438,7 @@ ConditionalFormula.FormulaIfFalse,Variable,&LocalQuantifiedOccurences);
 LetFormula.LetBody,Variable,&LocalQuantifiedOccurences);
             break;
         default:
+            LocalCount = 0;
             CodingError("Unknown formula type in count variables usage");
             break;
     }
