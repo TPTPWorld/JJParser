@@ -1,5 +1,6 @@
 #ifndef DATATYPES_H
 #define DATATYPES_H
+#include <stdio.h>
 //-----------------------------------------------------------------------------
 //----Types for file and token handling
 typedef enum {
