@@ -11,7 +11,7 @@
 //-----------------------------------------------------------------------------
 double TreeCount(TREENODE Tree,CountType WhatToCount,int Expand) {
 
-    double Counter;
+    double Counter = 0;
     int Index;
 
     if (!Tree->Visited) {
@@ -127,7 +127,7 @@ double RootListCount(ROOTLIST RootListHead,CountType WhatToCount,int Expand) {
 //-----------------------------------------------------------------------------
 double TreeMaximal(TREENODE Tree,MaximizeType WhatToMaximize) {
 
-    double Maximal;
+    double Maximal = 0;
     int Index;
     double NextMaximal;
 
