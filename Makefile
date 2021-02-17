@@ -1,6 +1,6 @@
 #----Set TPTP_HOME if not already imported from environment
 TPTP_HOME ?= /home/tptp
-TPTP_HOME = /Users/geoff/MyDocuments/Development/GitSpace
+# TPTP_HOME = /Users/geoff/MyDocuments/Development/GitSpace
 JJPARSER = $(TPTP_HOME)/ServiceTools/JJParser
 
 CC = gcc
