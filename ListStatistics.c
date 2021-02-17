@@ -13,7 +13,7 @@
 #include "ListStatistics.h"
 #include "PrintTSTP.h"
 #include "Signature.h"
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 int ListCount(LISTNODE List,CountType WhatToCount) {
 
     int Counter;
@@ -133,7 +133,7 @@ AnnotatedFormula);
     
     return(Counter);
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 int HeadListCount(HEADLIST HeadListHead,CountType WhatToCount) {
 
     int Counter;
@@ -148,7 +148,7 @@ int HeadListCount(HEADLIST HeadListHead,CountType WhatToCount) {
 
     return(Counter);
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 int ListMaximal(LISTNODE List,MaximizeType WhatToMaximize) {
 
     int Maximal;
@@ -180,7 +180,7 @@ List->AnnotatedFormula));
 
     return(Maximal);
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 int HeadListMaximal(HEADLIST HeadListHead,MaximizeType WhatToMaximize) {
 
     int Maximal;
@@ -199,7 +199,7 @@ int HeadListMaximal(HEADLIST HeadListHead,MaximizeType WhatToMaximize) {
     
     return(Maximal);
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 void AnalyseSymbolList(char * SymbolList,double * NumberOfSymbols,
 double * NumberOfArity0,double * MinArity,double * MaxArity) {
 
@@ -233,7 +233,7 @@ double * NumberOfArity0,double * MinArity,double * MaxArity) {
         SymbolRecord = strtok_r(NULL,"\n",&RecordRestart);
     }
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 SymbolStatisticsType GetListSymbolUsageStatistics(HEADLIST HeadList) {
 
     char * PredicateCollector;
@@ -280,7 +280,7 @@ SymbolStatisticsType GetListSymbolUsageStatistics(HEADLIST HeadList) {
 
     return(SymbolStatistics);
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 ConnectiveStatisticsType GetListConnectiveUsageStatistics(HEADLIST HeadList) {
 
     LISTNODE ListNode;
@@ -309,7 +309,7 @@ FormulaConnectiveStatistics);
     }
     return(ConnectiveStatistics);
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 void GetMathmaticsUsage(LISTNODE ListHead,SIGNATURE Signature,
 double * NumberOfPredicates,double * NumberOfFunctions,
 double * NumberOfNumbers) {
@@ -423,7 +423,7 @@ strtod(Symbol,&EndPtr) != 0 || EndPtr != Symbol ||
 
     Free((void **)&SymbolUsage);
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 //----If the signature is non-NULL use it for symbols
 StatisticsType GetListStatistics(LISTNODE ListHead,SIGNATURE Signature) {
 
@@ -545,7 +545,7 @@ Statistics.FormulaStatistics.NumberOfCNF;
 
     return(Statistics);
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 void PrintMinMaxArity(FILE * Stream,double Arity) {
 
     if (Arity == -1) {
@@ -554,7 +554,7 @@ void PrintMinMaxArity(FILE * Stream,double Arity) {
         fprintf(Stream,"%.0f",Arity);
     }
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 void PrintListStatistics(FILE * Stream,StatisticsType Statistics) {
 
     if (Statistics.FormulaStatistics.NumberOfFOF > 0 || 
@@ -771,4 +771,4 @@ Statistics.SymbolStatistics.NumberOfNumbers,
 Statistics.ConnectiveStatistics.NumberOfMathVariables);
     }
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------

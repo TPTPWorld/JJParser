@@ -18,19 +18,19 @@
 #include "PrintXML.h"
 #include "PrintSMT2.h"
 #include "PrintSUMO.h"
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 void PrintFileTSTPFormula(PRINTFILE Stream,SyntaxType Language,FORMULA Formula,
 int Indent,int Pretty,ConnectiveType LastConnective,int TSTPSyntaxFlag);
 //----Pretty = 0 means one line, lots of ()s
 //----Pretty = 1 means nicest human readable
 
 static int PrintShortSymbols = 0;
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 void SetPrintShortSymbols(int Choice) {
 
     PrintShortSymbols = Choice;
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 char * GetPrintSymbol(TERM Term) {
 
     if (Term == NULL) {
@@ -52,7 +52,7 @@ VariableName));
         }
     }
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 PrintFormatType StringToPrintFormat(char * FormatString) {
 
     String ErrorMessage;
@@ -99,7 +99,7 @@ PrintFormatType StringToPrintFormat(char * FormatString) {
 //----Will never get here because CodingError exits
     return(nonprinttype);
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 char * PrintFormatToString(PrintFormatType Format) {
 
      switch (Format) {
@@ -138,7 +138,7 @@ char * PrintFormatToString(PrintFormatType Format) {
             break;
     }
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 void PrintFileIndent(PRINTFILE Stream,int Indent,int AlreadyIndented,
 int Pretty) {
 
@@ -150,7 +150,7 @@ int Pretty) {
         }
     }
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 void PrintIndent(FILE * Stream,int Indent,int AlreadyIndented,int Pretty) {
 
     PRINTFILE LocalStream;
@@ -160,7 +160,7 @@ void PrintIndent(FILE * Stream,int Indent,int AlreadyIndented,int Pretty) {
         ClosePrintFile(LocalStream);
     }
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 void PrintSpaces(PRINTFILE Stream,int Spaces) {
 
     int Index;
@@ -168,12 +168,12 @@ void PrintSpaces(PRINTFILE Stream,int Spaces) {
         PFprintf(Stream," ");
     }
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 int PositiveEquality(TERM Atom) {
 
     return(!strcmp(GetSymbol(Atom),"=") && GetArity(Atom) == 2);
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 int NegatedEquality(FORMULA Formula) {
 
     return(Formula->Type == unary && 
@@ -182,7 +182,7 @@ Formula->FormulaUnion.UnaryFormula.Formula->Type == atom &&
 PositiveEquality(Formula->FormulaUnion.UnaryFormula.Formula->
 FormulaUnion.Atom));
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 void PrintFileTSTPTerm(PRINTFILE Stream,SyntaxType Language,TERM Term,
 int Indent,int TSTPSyntaxFlag) {
 
@@ -323,7 +323,7 @@ TSTPSyntaxFlag);
         }
     }
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 void PrintStringTSTPTerm(char * PutOutputHere,SyntaxType Language,TERM Term,
 int Indent,int TSTPSyntaxFlag) {
 
@@ -334,7 +334,7 @@ int Indent,int TSTPSyntaxFlag) {
         ClosePrintFile(LocalStream);
     }
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 void PrintTSTPTerm(FILE * Stream,SyntaxType Language,TERM Term,int Indent,
 int TSTPSyntaxFlag) {
 
@@ -345,28 +345,28 @@ int TSTPSyntaxFlag) {
         ClosePrintFile(LocalStream);
     }
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 int TypeConnective(ConnectiveType Connective) {
 
     return(Connective == typedeclaration || Connective == subtype);
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 int DefnConnective(ConnectiveType Connective) {
 
     return(Connective == assignmentsym);
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 int TypeOrDefnConnective(ConnectiveType Connective) {
 
     return(TypeConnective(Connective) || DefnConnective(Connective));
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 int FlatBinaryConnective(ConnectiveType Connective) {
 
     return(Connective == application || Connective == maparrow ||
 Connective == xprodtype || Connective == uniontype);
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 int SymbolFormula(FORMULA Formula) {
 
 //----Atoms and FOL predicates are "symbols". Thus $ite() and $let() are in 
@@ -375,7 +375,7 @@ int SymbolFormula(FORMULA Formula) {
 (Formula->Type == atom && GetArity(Formula->FormulaUnion.Atom) >= 0));
 //NOT MORE FOR FOOL Formula->Type == ite_formula || Formula->Type == let_formula);
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 int LiteralFormula(FORMULA Formula) {
 
     return(SymbolFormula(Formula) ||
@@ -383,7 +383,7 @@ int LiteralFormula(FORMULA Formula) {
  Formula->FormulaUnion.UnaryFormula.Connective == negation &&
  LiteralFormula(Formula->FormulaUnion.UnaryFormula.Formula)));
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 int NegatedEquation(FORMULA Formula,FORMULA * LHS,FORMULA * RHS) {
 
     if (Formula->Type == unary && 
@@ -404,7 +404,7 @@ FormulaUnion.BinaryFormula.RHS;
         return(0);
     }
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 int Equation(FORMULA Formula,FORMULA * LHS,FORMULA * RHS) {
 
     if (Formula->Type == binary &&
@@ -420,24 +420,24 @@ Formula->FormulaUnion.BinaryFormula.Connective == equation) {
         return(NegatedEquation(Formula,LHS,RHS));
     }
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 int TypeFormula(FORMULA Formula) {
 
     return(Formula->Type == binary && 
 TypeConnective(Formula->FormulaUnion.BinaryFormula.Connective));
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 int DefnFormula(FORMULA Formula) {
 
     return(Formula->Type == assignment && 
 DefnConnective(Formula->FormulaUnion.BinaryFormula.Connective));
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 int TypeOrDefnFormula(FORMULA Formula) {
 
     return(TypeFormula(Formula) || DefnFormula(Formula));
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 int FlatEquation(FORMULA Formula) {
     
     FORMULA LHS;
@@ -446,10 +446,10 @@ int FlatEquation(FORMULA Formula) {
     return(Equation(Formula,&LHS,&RHS) &&
 LiteralFormula(LHS) && LiteralFormula(RHS));
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 //----Local mutual recursion
 int FlatFormula(FORMULA Formula);
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 int FlatBinaryFormula(FORMULA Formula) {
 
     return(Formula->Type == binary &&
@@ -457,38 +457,38 @@ FlatBinaryConnective(Formula->FormulaUnion.BinaryFormula.Connective) &&
 FlatFormula(Formula->FormulaUnion.BinaryFormula.LHS) &&
 FlatFormula(Formula->FormulaUnion.BinaryFormula.RHS));
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 int FlatTypeFormula(FORMULA Formula) {
 
     return(TypeFormula(Formula) &&
 SymbolFormula(Formula->FormulaUnion.BinaryFormula.LHS) &&
 FlatFormula(Formula->FormulaUnion.BinaryFormula.RHS));
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 int FlatDefnFormula(FORMULA Formula) {
 
     return(DefnFormula(Formula) &&
 SymbolFormula(Formula->FormulaUnion.BinaryFormula.LHS) &&
 FlatFormula(Formula->FormulaUnion.BinaryFormula.RHS));
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 int FlatTypeOrDefnFormula(FORMULA Formula) {
 
     return(FlatTypeFormula(Formula) || FlatDefnFormula(Formula));
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 int ApplicationFormula(FORMULA Formula) {
 
     return(Formula->Type == binary && 
 Formula->FormulaUnion.BinaryFormula.Connective == application);
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 int FlatFormula(FORMULA Formula) {
 
     return(LiteralFormula(Formula) || FlatEquation(Formula) || 
 FlatBinaryFormula(Formula) || FlatTypeOrDefnFormula(Formula));
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 int FlatQuantifiedVariable(QuantifiedFormulaType QuantifiedFormula) {
 
     if (QuantifiedFormula.VariableType == NULL) {
@@ -497,7 +497,7 @@ int FlatQuantifiedVariable(QuantifiedFormulaType QuantifiedFormula) {
         return(FlatFormula(QuantifiedFormula.VariableType));
     }
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 void PrintQuantifiedVariable(PRINTFILE Stream,SyntaxType Language,
 QuantifiedFormulaType QuantifiedFormula,int Indent,int Pretty,
 int TSTPSyntaxFlag) {
@@ -524,7 +524,7 @@ FlatBinaryFormula(QuantifiedFormula.VariableType)) {
 Indent,Pretty,FakeConnective,TSTPSyntaxFlag);
     }
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 void PrintFileTupleFormulae(PRINTFILE Stream,SyntaxType Language,
 int NumberOfElements,FORMULAArray TupleFormulae,int Indent,int Pretty,
 int TSTPSyntaxFlag) {
@@ -549,7 +549,7 @@ Indent+2,Pretty,outermost,TSTPSyntaxFlag);
     }
     PFprintf(Stream," ]");
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 void PrintFileTSTPFormula(PRINTFILE Stream,SyntaxType Language,FORMULA Formula,
 int Indent,int Pretty,ConnectiveType LastConnective,int TSTPSyntaxFlag) {
 //----TSTPSyntaxFlag = 2 is the case of a negated equation or equality - the
@@ -860,7 +860,7 @@ Formula->FormulaUnion.LetFormula.LetBody,Indent,Pretty,none,TSTPSyntaxFlag);
         }
     }
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 void PrintTSTPFormula(FILE * Stream,SyntaxType Language,FORMULA Formula,
 int Indent,int Pretty,ConnectiveType LastConnective,int TSTPSyntaxFlag) {
 
@@ -872,7 +872,7 @@ LastConnective,TSTPSyntaxFlag);
         ClosePrintFile(LocalStream);
     }
 }           
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 void PrintFileAnnotatedTSTPFormula(PRINTFILE Stream,SyntaxType Language,
 AnnotatedTSTPFormulaType AnnotatedTSTPFormula,PrintFormatType Format,
 int Pretty) {
@@ -960,7 +960,7 @@ AnnotatedTSTPFormula.FormulaWithVariables->Formula,0,Pretty,outermost,1);
     }
     PFprintf(Stream,").\n");
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 void PrintAnnotatedTSTPFormula(FILE * Stream,SyntaxType Language,
 AnnotatedTSTPFormulaType AnnotatedTSTPFormula,PrintFormatType Format,
 int Pretty) {
@@ -973,7 +973,7 @@ Format,Pretty);
         ClosePrintFile(LocalStream);
     }
 }           
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 void PrintFileTPTPClause(PRINTFILE Stream,SyntaxType Language,FORMULA Formula,
 int Indent,int AlreadyIndented,int NeedCommaNewline) {
 
@@ -1025,7 +1025,7 @@ Formula->FormulaUnion.BinaryFormula.RHS,Indent,0,1);
             break;
     }
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 void PrintTPTPClause(FILE * Stream,SyntaxType Language,FORMULA Formula,
 int Indent,int AlreadyIndented,int NeedCommaNewline) {
 
@@ -1037,7 +1037,7 @@ NeedCommaNewline);
         ClosePrintFile(LocalStream);
     }
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 void PrintFileAnnotatedTPTPFormula(PRINTFILE Stream,SyntaxType Language,
 AnnotatedTSTPFormulaType AnnotatedTSTPFormula,int Pretty) {
 
@@ -1073,7 +1073,7 @@ FormulaWithVariables->Formula,5,5,0);
     }
     PFprintf(Stream,").\n");
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 void PrintAnnotatedTPTPFormula(FILE * Stream,SyntaxType Language,
 AnnotatedTSTPFormulaType AnnotatedTSTPFormula,int Pretty) {
 
@@ -1085,7 +1085,7 @@ Pretty);
         ClosePrintFile(LocalStream);
     }
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 void PrintFileAnnotatedTSTPNode(PRINTFILE Stream,
 ANNOTATEDFORMULA AnnotatedFormula,PrintFormatType Format,int Pretty) {
 
@@ -1133,7 +1133,7 @@ AnnotatedFormula->AnnotatedFormulaUnion.AnnotatedTSTPFormula,Pretty);
         }
     }
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 void PrintStringAnnotatedTSTPNode(char * PutOutputHere,
 ANNOTATEDFORMULA AnnotatedFormula,PrintFormatType Format,int Pretty) {
 
@@ -1144,7 +1144,7 @@ ANNOTATEDFORMULA AnnotatedFormula,PrintFormatType Format,int Pretty) {
         ClosePrintFile(LocalStream);
     }
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 void PrintAnnotatedTSTPNode(FILE * Stream,ANNOTATEDFORMULA AnnotatedFormula,
 PrintFormatType Format,int Pretty) {
 
@@ -1155,7 +1155,7 @@ PrintFormatType Format,int Pretty) {
         ClosePrintFile(LocalStream);
     }
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 void PrintFileAnnotatedTSTPNodeWithStatus(PRINTFILE Stream,ANNOTATEDFORMULA
 AnnotatedFormula,PrintFormatType Format,int Pretty,StatusType Role) {
 
@@ -1177,7 +1177,7 @@ AnnotatedFormula,PrintFormatType Format,int Pretty,StatusType Role) {
     PrintFileAnnotatedTSTPNode(Stream,AnnotatedFormula,Format,Pretty);
     SetStatus(AnnotatedFormula,OldRole,OldSubRole);
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 void PrintAnnotatedTSTPNodeWithStatus(FILE * Stream,ANNOTATEDFORMULA
 AnnotatedFormula,PrintFormatType Format,int Pretty,StatusType Status) {
 
@@ -1189,7 +1189,7 @@ Format,Pretty,Status);
         ClosePrintFile(LocalStream);
     }
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 void PrintFileListOfAnnotatedTSTPNodes(PRINTFILE Stream,SIGNATURE Signature,
 LISTNODE Head,PrintFormatType Format,int Pretty) {
 
@@ -1246,7 +1246,7 @@ CONTENT_TSTP,FALSE);
             break;
     }
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 void PrintListOfAnnotatedTSTPNodes(FILE * Stream,SIGNATURE Signature,
 LISTNODE Head,PrintFormatType Format,int Pretty) {
 
@@ -1258,7 +1258,7 @@ Pretty);
         ClosePrintFile(LocalStream);
     }
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 void PrintFileListOfAnnotatedTSTPNodesWithStatus(PRINTFILE Stream,
 SIGNATURE Signature,LISTNODE Head,PrintFormatType Format,int Pretty,
 StatusType Status) {
@@ -1269,7 +1269,7 @@ Format,Pretty,Status);
         Head = Head->Next;
     }
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 void PrintListOfAnnotatedTSTPNodesWithStatus(FILE * Stream,SIGNATURE Signature,
 LISTNODE Head,PrintFormatType Format,int Pretty,StatusType Status) {
 
@@ -1281,4 +1281,4 @@ Format,Pretty,Status);
         ClosePrintFile(LocalStream);
     }
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------

@@ -8,7 +8,7 @@
 #include "Parsing.h"
 #include "Tree.h"
 #include "TreeStatistics.h"
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 double TreeCount(TREENODE Tree,CountType WhatToCount,int Expand) {
 
     double Counter = 0;
@@ -108,7 +108,7 @@ AnnotatedFormula,"");
 
     return(Counter);
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 double RootListCount(ROOTLIST RootListHead,CountType WhatToCount,int Expand) {
 
     double Counter;
@@ -124,7 +124,7 @@ double RootListCount(ROOTLIST RootListHead,CountType WhatToCount,int Expand) {
 
     return(Counter);
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 double TreeMaximal(TREENODE Tree,MaximizeType WhatToMaximize) {
 
     double Maximal = 0;
@@ -181,7 +181,7 @@ Tree->AnnotatedFormula,"");
 
     return(Maximal);
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 double RootListMaximal(ROOTLIST RootListHead,MaximizeType WhatToMaximize) {
 
     double Maximal;
@@ -201,7 +201,7 @@ double RootListMaximal(ROOTLIST RootListHead,MaximizeType WhatToMaximize) {
     
     return(Maximal);
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 int TreeHasCycle(TREENODE Root) {
 
     int Index;
@@ -224,7 +224,7 @@ int TreeHasCycle(TREENODE Root) {
     Root->Visited = 1;
     return(0);
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 int RootListHasCycle(ROOTLIST RootListHead) {
 
     ResetRootListVisited(RootListHead);
@@ -236,7 +236,7 @@ int RootListHasCycle(ROOTLIST RootListHead) {
     }
     return(0);
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 TreeStatisticsRecordType * GetTreeStatistics(ROOTLIST RootListHead,
 TreeStatisticsRecordType * Statistics) {
 
@@ -291,7 +291,7 @@ count_term_depth,0) / RootListCount(RootListHead,terms,0);
 
     return(Statistics);
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 void PrintTreeStatistics(FILE * Stream,TreeStatisticsRecordType Statistics) {
 
 //----Check if there are some FOF (NumberOfFormulae includes NumberOfCNF)
@@ -344,4 +344,4 @@ Statistics.NumberOfFOF > 0 || Statistics.NumberOfCNF > 0) {
 Statistics.MaxTermDepth,Statistics.AverageTermDepth);
     }
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------

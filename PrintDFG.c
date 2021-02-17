@@ -11,7 +11,7 @@
 #include "Modify.h"
 #include "PrintTSTP.h"
 #include "PrintDFG.h"
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 int DFGPrintSignatureList(FILE * Stream,SYMBOLNODE Node,int JustPrinted) {
 
     String LocalSymbol;
@@ -62,7 +62,7 @@ JustPrinted);
     }
     return(NumberPrinted);
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 void PrintFileDFGTerm(PRINTFILE Stream,TERM Term) {
 
     int Index;
@@ -130,7 +130,7 @@ strcmp(StartOfSymbol,"true") && strcmp(StartOfSymbol,"false")) {
         }
     }
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 void PrintDFGTerm(FILE * Stream,TERM Term) {
 
     PRINTFILE LocalStream;
@@ -140,7 +140,7 @@ void PrintDFGTerm(FILE * Stream,TERM Term) {
         ClosePrintFile(LocalStream);
     }
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 char * DFGConnectiveToString(ConnectiveType Connective) {
 
     switch (Connective) {
@@ -174,7 +174,7 @@ char * DFGConnectiveToString(ConnectiveType Connective) {
             break;
     }       
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 void DFGPrintClause(FILE * Stream,FORMULA Formula,int Indent,
 int AlreadyIndented) {
 
@@ -210,7 +210,7 @@ FormulaUnion.Atom);
     }
 
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 void DFGPrintFormula(FILE * Stream,FORMULA Formula,SyntaxType Syntax,int Indent,
 int AlreadyIndented,int OrPrinted) {
 
@@ -289,7 +289,7 @@ Syntax,Indent+1,0,1);
             break;
     }
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 void DFGPrintAnnotatedTSTPNode(FILE * Stream,ANNOTATEDFORMULA 
 AnnotatedFormula) {
 
@@ -322,7 +322,7 @@ AnnotatedTSTPFormula.FormulaWithVariables->Formula,tptp_cnf,2,0,0);
     }
 
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 void DFGPrintHeader(FILE * Stream,LISTNODE Head,SIGNATURE Signature) {
 
     LISTNODE Node;
@@ -354,13 +354,13 @@ void DFGPrintHeader(FILE * Stream,LISTNODE Head,SIGNATURE Signature) {
     fprintf(Stream,"end_of_list.\n");
     fprintf(Stream,"\n");
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 void DFGPrintTailer(FILE * Stream) {
 
     fprintf(Stream,"end_problem.\n");
-    fprintf(Stream,"%%------------------------------------------------------------------------------\n");
+    fprintf(Stream,"%%--------------------------------------------------------------------------------------------------\n");
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 void DFGPrintListOfAnnotatedTSTPNodes(FILE * Stream,LISTNODE Head) {
 
     LISTNODE Node;
@@ -427,4 +427,4 @@ GetRole(Node->AnnotatedFormula,NULL) == conjecture) {
     fprintf(Stream,"end_of_list.\n");
     fprintf(Stream,"\n");
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------

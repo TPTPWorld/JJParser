@@ -10,7 +10,7 @@
 #include "PrintTSTP.h"
 #include "Examine.h"
 #include "Interpret.h"
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 int FormulaTrueInInterpretation(FORMULA Formula,InterpretationType 
 Interpretation) {
 
@@ -86,7 +86,7 @@ UnaryFormula.Formula,Interpretation));
     }
     return(0);
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 int TrueAnnotatedFormula(ANNOTATEDFORMULA AnnotatedFormula) {
 
     FORMULA TheFormula;
@@ -100,7 +100,7 @@ AnnotatedTSTPFormula.FormulaWithVariables->Formula;
         return(0);
     }
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 int FalseAnnotatedFormula(ANNOTATEDFORMULA AnnotatedFormula) {
 
     FORMULA TheFormula;
@@ -114,7 +114,7 @@ AnnotatedTSTPFormula.FormulaWithVariables->Formula;
         return(0);
     }
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 int AnnotatedFormulaTrueInInterpretation(ANNOTATEDFORMULA AnnotatedFormula,
 InterpretationType Interpretation) {
 
@@ -126,7 +126,7 @@ Interpretation));
         return(0);
     }
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 int ListOfAnnotatedFormulaTrueInInterpretation(LISTNODE Head,
 InterpretationType Interpretation) {
 
@@ -143,4 +143,4 @@ Interpretation)) {
 
     return(1);
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------

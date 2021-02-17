@@ -1,7 +1,7 @@
 #ifndef DATATYPES_H
 #define DATATYPES_H
 #include <stdio.h>
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 //----Types for file and token handling
 typedef enum {
     punctuation,
@@ -60,7 +60,7 @@ typedef struct {
 } PrintFile;
 
 typedef PrintFile * PRINTFILE;
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 //----Types for the signature
 typedef struct SymbolTag {
     char * NameSymbol;
@@ -82,7 +82,7 @@ typedef struct {
 } SignatureType;
 
 typedef SignatureType * SIGNATURE;
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 typedef enum {
 //----First order and upwards
     disjunction,
@@ -141,7 +141,7 @@ typedef struct {
     VARIABLENODE * Variables;
     SIGNATURE Signature;
 } ContextType;
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 //----Terms
 typedef enum {
     connective,
@@ -202,7 +202,7 @@ typedef TermNodeType * TERM;
 
 typedef TERM * TERMArray;
 
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 //----Formula types
 typedef enum {
     tuple,
@@ -295,7 +295,7 @@ typedef struct TermWithVariablesTag {
 } TermWithVariablesType;
 
 typedef TermWithVariablesType * TERMWITHVARIABLES;
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 //----Annotated records
 typedef enum {
     tptp_tpi,
@@ -399,7 +399,7 @@ typedef struct {
 } AnnotatedFormulaType;
 
 typedef AnnotatedFormulaType * ANNOTATEDFORMULA;
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 //----Types for lists and trees of annotated formulae
 typedef struct TreeNodeTag {
     int NumberOfUses;
@@ -445,5 +445,5 @@ typedef struct ListListTag {
 
 typedef HeadListType * HEADLIST;
 
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 #endif

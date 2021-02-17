@@ -12,14 +12,14 @@
 #include "Tokenizer.h"
 #include "PrintKIF.h"
 #include "Examine.h"
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 void StartSUMOProof(FILE * Stream) {
 
     fprintf(Stream,"<queryResponse>\n");
     fprintf(Stream,"  <answer result='yes' number='1'>\n");
     fprintf(Stream,"    <proof>\n");
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 void SUMOPrintAnnotatedTSTPFormula(FILE * Stream,ANNOTATEDFORMULA
 AnnotatedFormula,LISTNODE Head) {
 
@@ -62,7 +62,7 @@ AnnotatedTSTPFormula.FormulaWithVariables->Formula,12,0,1);
     fprintf(Stream,"        </conclusion>\n");
     fprintf(Stream,"      </proofStep>\n");
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 void EndSUMOProof(FILE * Stream) {
 
     fprintf(Stream,"    </proof>\n");
@@ -70,7 +70,7 @@ void EndSUMOProof(FILE * Stream) {
     fprintf(Stream,"  <summary proofs='1'/>\n");
     fprintf(Stream,"</queryResponse>\n");
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 void SUMOPrintListOfAnnotatedTSTPNodes(FILE * Stream,LISTNODE Head) {
     
     StartSUMOProof(Stream);
@@ -99,4 +99,4 @@ Target->AnnotatedFormula,Head);
     }
     EndSUMOProof(Stream);
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------

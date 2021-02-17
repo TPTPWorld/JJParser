@@ -11,7 +11,7 @@
 #include "Examine.h"
 #include "Signature.h"
 #include "Parsing.h"
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 ANNOTATEDFORMULA NewAnnotatedFormula(SyntaxType Syntax) {
 
     ANNOTATEDFORMULA AnnotatedFormula;
@@ -22,7 +22,7 @@ ANNOTATEDFORMULA NewAnnotatedFormula(SyntaxType Syntax) {
 
     return(AnnotatedFormula);
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 ANNOTATEDFORMULA NewAnnotatedTSTPFormula(SyntaxType Syntax) {
 
     ANNOTATEDFORMULA AnnotatedFormula;
@@ -41,7 +41,7 @@ AnnotatedFormulaUnion.AnnotatedTSTPFormula.Source = NULL;
 AnnotatedFormulaUnion.AnnotatedTSTPFormula.UsefulInfo = NULL;
     return(AnnotatedFormula);
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 void FreeAnnotatedTSTPFormula(ANNOTATEDFORMULA * AnnotatedFormula) {
 
     Free((void **)&((*AnnotatedFormula)->
@@ -58,7 +58,7 @@ AnnotatedFormulaUnion.AnnotatedTSTPFormula.Source),NULL);
 AnnotatedFormulaUnion.AnnotatedTSTPFormula.UsefulInfo),NULL);
     Free((void **)AnnotatedFormula);
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 ANNOTATEDFORMULA DuplicateAnnotatedTSTPFormula(ANNOTATEDFORMULA Original,
 SIGNATURE Signature,int ForceNewVariables) {
 
@@ -94,7 +94,7 @@ Context,0);
 
     return(AnnotatedFormula);
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 ANNOTATEDFORMULA ParseAnnotatedTSTPFormula(READFILE Stream,
 SIGNATURE Signature) {
 
@@ -205,4 +205,4 @@ ParseTerm(Stream,nontype,Context,&EndOfScope,non_logical_data,none,NULL,0);
 
     return(AnnotatedFormula);
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------

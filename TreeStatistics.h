@@ -1,6 +1,6 @@
 #ifndef TREESTATISTICS_H
 #define TREESTATISTICS_H
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 #include "DataTypes.h"
 #include "Statistics.h"
 
@@ -35,9 +35,9 @@ typedef struct {
     double AverageTermDepth;
     double NumberOfLiterals;
 } TreeStatisticsRecordType;
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 TreeStatisticsRecordType * GetTreeStatistics(ROOTLIST RootListHead,
 TreeStatisticsRecordType * Statistics);
 void PrintTreeStatistics(FILE * Stream,TreeStatisticsRecordType Statistics);
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 #endif

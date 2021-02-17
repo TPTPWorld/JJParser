@@ -11,47 +11,47 @@
 #include "Tokenizer.h"
 #include "Utilities.h"
 #include "FileUtilities.h"
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 //----Static for all, which really needs to be passed in when a stream is
 //----opened, rather than being set here and copied from here (Yaaaack)
 static int NeedNonLogicTokens = 0;
 static int Warnings = 0;
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 int GetNeedForNonLogicTokens(void) {
 
     return(NeedNonLogicTokens);
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 void SetNeedForNonLogicTokens(int OnOff) {
 
     NeedNonLogicTokens = OnOff;
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 int GetStreamNeedForNonLogicTokens(READFILE Stream) {
 
     return(Stream->NeedNonLogicTokens);
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 int GetWarnings(void) {
 
     return(Warnings);
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 void SetWarnings(int GiveWarnings) {
 
     Warnings = GiveWarnings;
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 int GetStreamWarnings(READFILE Stream) {
 
     return(Stream->Warnings);
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 int EndFile(TOKEN CurrentToken) {
 
     return(CurrentToken->KindToken == endeof);
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 void CharacterError(READFILE Stream) {
 
     String RestOfLine;
@@ -68,7 +68,7 @@ void CharacterError(READFILE Stream) {
 Stream->Line,Stream->Character,CurrentCharacter(Stream),RestOfLine);
     ReportError("SyntaxError",ErrorMessage,1);
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 //---- Function Character returns the following values depending on the 
 //---- Operation value:
 //---- -1 : Read into static, return that one
@@ -136,7 +136,7 @@ Stream->StringFileContent[Stream->StringOffset];
             break;
     }
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 StatusType CheckStringToStatus(char * String) {
 
     if (!strcmp(String,"initial")) {
@@ -279,7 +279,7 @@ StatusType CheckStringToStatus(char * String) {
     }
     return(nonstatus);
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 StatusType StringToStatus(char * String) {
 
     StatusType Role;
@@ -289,7 +289,7 @@ StatusType StringToStatus(char * String) {
     }
     return(Role);
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 char * StatusToString(StatusType Status) {
 
      switch (Status) {
@@ -437,7 +437,7 @@ char * StatusToString(StatusType Status) {
             break;
     }
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 ConnectiveType StringToConnective(char * String) {
 
     if (!strcmp(String,"|")) {
@@ -539,7 +539,7 @@ ConnectiveType StringToConnective(char * String) {
     CodingError("String not a connective");
     return(none);
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 char * ConnectiveToString(ConnectiveType Connective) {
 
     switch (Connective) {
@@ -642,7 +642,7 @@ char * ConnectiveToString(ConnectiveType Connective) {
             break;
     }
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 SyntaxType StringToSyntax(char * String) {
 
     if (!strcmp(String,"tpi")) {
@@ -669,7 +669,7 @@ SyntaxType StringToSyntax(char * String) {
     CodingError("Not a string to make into a syntax type");
     return(nontype);
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 char * SyntaxToString(SyntaxType Syntax) {
 
     switch (Syntax) {
@@ -700,7 +700,7 @@ char * SyntaxToString(SyntaxType Syntax) {
             break;
     }
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 TOKEN BuildToken(TokenType TypeToken,char * LocalValue) {
 
     TOKEN NewToken;
@@ -713,7 +713,7 @@ TOKEN BuildToken(TokenType TypeToken,char * LocalValue) {
 //DEBUG printf("token built is ==%s==\n",NewToken->NameToken);
     return(NewToken);
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 TOKEN CloneToken(TOKEN TokenCopy) {
 
     return(BuildToken(TokenCopy->KindToken,TokenCopy->NameToken));
@@ -726,7 +726,7 @@ void FreeToken(TOKEN * Pointer) {
         Free((void **)Pointer);
     }
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 void IncrementTokenIndex(READFILE Stream,int* Index) {
 
     (*Index)++;
@@ -735,7 +735,7 @@ void IncrementTokenIndex(READFILE Stream,int* Index) {
         CharacterError(Stream);
     }
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 int NumberToken(READFILE Stream,char PreviousChar,char CurrentChar,
 SuperString LocalValue) {
 
@@ -809,7 +809,7 @@ SuperString LocalValue) {
         return(0);
     }
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 TOKEN QuotedToken(READFILE Stream,char OpeningQuote,TokenType Type) {
 
     static SuperString LocalValue;
@@ -851,7 +851,7 @@ LocalValue[Index] != '\\') {
 
     return(BuildToken(Type,LocalValue));
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 TOKEN GetNextToken(READFILE Stream) {
 
     int CurrentChar,PreviousChar;
@@ -1159,7 +1159,7 @@ PreviousChar != '*')) {
 //----Need a default return for the error cases which compiler doesn't get
     return(NULL);
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 TOKEN Token(READFILE Stream, int Operation) {
 
 //----Can't return the current token with a NULL file
@@ -1213,7 +1213,7 @@ void TokenWarning(READFILE Stream,char * Message) {
     printf("WARNING: Line %d Char %d Token \"%s\" : %s\n",
 Stream->Line,Stream->Character,CurrentToken(Stream)->NameToken,Message);
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 void TokenError(READFILE Stream,char * Message) {
 
     String RestOfLine;
@@ -1235,7 +1235,7 @@ Stream->Line,Stream->Character,CurrentToken(Stream)->NameToken,RestOfLine,
 Message == NULL ? "" : Message);
     ReportError("SyntaxError",ErrorMessage,1);
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 void SetTokenType(READFILE Stream,TokenType Type) {
 
     TOKEN ThisToken;
@@ -1247,7 +1247,7 @@ void SetTokenType(READFILE Stream,TokenType Type) {
 
     ThisToken->KindToken = Type;
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 int CheckTokenType(READFILE Stream,TokenType Type) {
 
     TOKEN ThisToken;
@@ -1264,7 +1264,7 @@ ThisToken->KindToken == number || ThisToken->KindToken == distinct_object)) ||
 (Type == name && (ThisToken->KindToken == lower_word ||
 ThisToken->KindToken == number)));
 }
-//------------------------------------------------------------------------------
+//--------------------------------------------------------------------------------------------------
 int CheckToken(READFILE Stream,TokenType Type,char * Value) {
 
 //DEBUG printf("Current type = %d Require %d\n",CurrentToken(Stream)->KindToken,Type);
@@ -1272,7 +1272,7 @@ int CheckToken(READFILE Stream,TokenType Type,char * Value) {
     return(CheckTokenType(Stream,Type) && 
 !strcmp(CurrentToken(Stream)->NameToken,Value));
 }
-//------------------------------------------------------------------------------
+//--------------------------------------------------------------------------------------------------
 int TakeTokenType(READFILE Stream,TokenType Type) {
 
     if (CheckTokenType(Stream,Type)) {
@@ -1283,7 +1283,7 @@ int TakeTokenType(READFILE Stream,TokenType Type) {
         return(0);
     }
 }
-//------------------------------------------------------------------------------
+//--------------------------------------------------------------------------------------------------
 int TakeToken(READFILE Stream,TokenType Type,char * Value) {
 
     String Message;
@@ -1298,21 +1298,21 @@ int TakeToken(READFILE Stream,TokenType Type,char * Value) {
         return(0);
     }
 }
-//------------------------------------------------------------------------------
+//--------------------------------------------------------------------------------------------------
 void EnsureTokenType(READFILE Stream,TokenType Type) {
 
     if (!CheckTokenType(Stream,Type)) {
         TokenError(Stream,"Wrong token type");
     }
 }
-//------------------------------------------------------------------------------
+//--------------------------------------------------------------------------------------------------
 void EnsureTokenNotType(READFILE Stream,TokenType NotType) {
 
     if (CheckTokenType(Stream,NotType)) {
         TokenError(Stream,"Wrong token type");
     }
 }
-//------------------------------------------------------------------------------
+//--------------------------------------------------------------------------------------------------
 void EnsureToken(READFILE Stream,TokenType Type,char * Value) {
 
     String Message;
@@ -1322,7 +1322,7 @@ void EnsureToken(READFILE Stream,TokenType Type,char * Value) {
         TokenError(Stream,Message);
     }
 }
-//------------------------------------------------------------------------------
+//--------------------------------------------------------------------------------------------------
 int AcceptTokenType(READFILE Stream,TokenType Type) {
 
     if (CheckTokenType(Stream,Type)) {
@@ -1333,7 +1333,7 @@ int AcceptTokenType(READFILE Stream,TokenType Type) {
         return(0);
     }
 } 
-//------------------------------------------------------------------------------
+//--------------------------------------------------------------------------------------------------
 int AcceptToken(READFILE Stream,TokenType Type,char * Value) {
 
     String Message;
@@ -1348,17 +1348,17 @@ int AcceptToken(READFILE Stream,TokenType Type,char * Value) {
         return(0);
     }
 } 
-//------------------------------------------------------------------------------
+//--------------------------------------------------------------------------------------------------
 int NextThenAcceptTokenType(READFILE Stream,TokenType Type) {
  
     NextToken(Stream); 
     return(AcceptTokenType(Stream,Type));
     
 } 
-//------------------------------------------------------------------------------
+//--------------------------------------------------------------------------------------------------
 int NextThenAcceptToken(READFILE Stream,TokenType Type,char * Value) {
  
     NextToken(Stream); 
     return(AcceptToken(Stream,Type,Value));
 } 
-//------------------------------------------------------------------------------
+//--------------------------------------------------------------------------------------------------

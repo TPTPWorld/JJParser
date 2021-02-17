@@ -10,7 +10,7 @@
 #include "Signature.h"
 #include "Parsing.h"
 #include "ParseTSTP.h"
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 FORMULA ParseLiterals(READFILE Stream,ContextType Context,
 VARIABLENODE * EndOfScope) {
 
@@ -52,7 +52,7 @@ Context,EndOfScope);
         return(Formula);
     }
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 FORMULAWITHVARIABLES ParseTPTPClauseWithVariables(READFILE Stream,
 SIGNATURE Signature) {
 
@@ -75,7 +75,7 @@ SIGNATURE Signature) {
 
     return(TPTPClauseWithVariables);
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 ANNOTATEDFORMULA ParseAnnotatedTPTPClause(READFILE Stream,
 SIGNATURE Signature) {
 
@@ -102,7 +102,7 @@ ParseTPTPClauseWithVariables(Stream,Signature);
 
     return(AnnotatedFormula);
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 ANNOTATEDFORMULA ParseAnnotatedTPTPFormula(READFILE Stream,
 SIGNATURE Signature) {
 
@@ -129,4 +129,4 @@ ParseFormulaWithVariables(Stream,tptp_fof,Signature,1);
 
     return(AnnotatedFormula);
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------

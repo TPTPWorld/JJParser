@@ -10,17 +10,17 @@
 #include "List.h"
 #include "PrintTSTP.h"
 #include "Tree.h"
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 void SetUserData(TREENODE TreeNode,void * UserData) {
 
     TreeNode->UserData = UserData;
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 void * GetUserData(TREENODE TreeNode) {
 
     return(TreeNode->UserData);
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 void ResetTreeVisited(TREENODE Tree) {
 
     int Index;
@@ -32,7 +32,7 @@ void ResetTreeVisited(TREENODE Tree) {
         }
     }
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 void ResetRootListVisited(ROOTLIST RootListHead) {
 
     while (RootListHead != NULL) {
@@ -42,7 +42,7 @@ void ResetRootListVisited(ROOTLIST RootListHead) {
         RootListHead = RootListHead->Next;
     }
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 //----Returns 1/0 if all ancestors are not conjectures
 int GetRootListWithAxiomAncestorLeaves(TREENODE Root,LISTNODE * ListSoFar,
 LISTNODE * AddHere,int IgnoreDuplicates) {
@@ -102,7 +102,7 @@ ListSoFar,Root->AnnotatedFormula) == NULL) {
         return(AllAxiomAncestors);
     }
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 LISTNODE GetListWithAxiomAncestorLeaves(ROOTLIST RootListHead,
 int IgnoreDuplicates) {
 
@@ -124,7 +124,7 @@ int IgnoreDuplicates) {
     }
     return(ListWithoutConjectureAncestor);
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 int AllParentsHaveSyntax(TREENODE Root,SyntaxType Syntax) {
 
     int Index;
@@ -136,7 +136,7 @@ int AllParentsHaveSyntax(TREENODE Root,SyntaxType Syntax) {
     }
     return(1);
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 void GetRootSyntaxLeafList(TREENODE Root,LISTNODE * LeafListHead,
 int IgnoreDuplicates,SyntaxType Syntax) {
 
@@ -172,7 +172,7 @@ IgnoreDuplicates,Syntax);
         }
     }
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 LISTNODE GetSyntaxLeafList(ROOTLIST RootListHead,int IgnoreDuplicates,
 SyntaxType Syntax) {
 
@@ -187,7 +187,7 @@ IgnoreDuplicates,Syntax);
     }
     return(LeafListHead);
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 //----Beware, this does not reset the visited tag, so if using it repeatedly
 //----you may want to do that - depends on the application.
 void GetRootLeafList(TREENODE Root,LISTNODE * LeafListHead,
@@ -217,7 +217,7 @@ LeafListHead,Root->AnnotatedFormula) == NULL) {
         }
     }
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 LISTNODE GetLeafList(ROOTLIST RootListHead,int IgnoreDuplicates) {
 
     LISTNODE LeafListHead;
@@ -230,7 +230,7 @@ LISTNODE GetLeafList(ROOTLIST RootListHead,int IgnoreDuplicates) {
     }
     return(LeafListHead);
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 int DoGetRootLemmaList(TREENODE Root,LISTNODE * LeafListHead,int Duplicates) {
 
     int Index;
@@ -269,13 +269,13 @@ Root->Parents[LemmaIndex]->AnnotatedFormula);
         return(OnConjecturePath);
     }
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 int GetRootLemmaList(TREENODE Root,LISTNODE * LeafListHead,int Duplicates) {
 
     ResetTreeVisited(Root);
     return(DoGetRootLemmaList(Root,LeafListHead,Duplicates));
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 ROOTLIST GetFalseNodes(ROOTLIST RootListHead,LISTNODE Head) {
 
     ROOTLIST FalseList;
@@ -295,7 +295,7 @@ Head->AnnotatedFormula)) == NULL) {
     }
     return(FalseList);
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 ROOTLIST GetFalseRootList(ROOTLIST RootListHead) {
 
     ROOTLIST FalseRootList;
@@ -310,7 +310,7 @@ ROOTLIST GetFalseRootList(ROOTLIST RootListHead) {
 
     return(FalseRootList);
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 TREENODE GetFalseRootNode(ROOTLIST RootListHead) {
 
     while (RootListHead != NULL) {
@@ -322,7 +322,7 @@ TREENODE GetFalseRootNode(ROOTLIST RootListHead) {
 
     return(NULL);
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 LISTNODE GetRootList(LISTNODE Head) {
 
     LISTNODE RootList;
@@ -369,7 +369,7 @@ GetName((*Remover)->AnnotatedFormula,ParentName))) {
 
     return(RootList);
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 TREENODE * NewParentsList(int NumberOfParents) {
 
     TREENODE * ParentsList;
@@ -382,7 +382,7 @@ TREENODE * NewParentsList(int NumberOfParents) {
 
     return(ParentsList);
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 TREENODE NewTreeNode(ANNOTATEDFORMULA AnnotatedFormula) {
 
     TREENODE TreeNode;
@@ -398,7 +398,7 @@ TREENODE NewTreeNode(ANNOTATEDFORMULA AnnotatedFormula) {
     TreeNode->UserData = NULL;
     return(TreeNode);
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 ROOTLIST NewRootNode(TREENODE TheTree) {
 
     ROOTLIST RootList;
@@ -413,7 +413,7 @@ ROOTLIST NewRootNode(TREENODE TheTree) {
 
     return(RootList);
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 void AddRootNode(ROOTLIST * From,ROOTLIST Next,TREENODE TheTree) {
 
     ROOTLIST NewNode;
@@ -422,7 +422,7 @@ void AddRootNode(ROOTLIST * From,ROOTLIST Next,TREENODE TheTree) {
     NewNode->Next = Next;
     *From = NewNode;
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 void FreeTree(TREENODE * Tree) {
 
     int Index;
@@ -458,7 +458,7 @@ void FreeTree(TREENODE * Tree) {
         }
     }
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 void FreeRootNode(ROOTLIST * FreeThis,int MustFreeTree) {
 
     if (MustFreeTree) {
@@ -469,7 +469,7 @@ void FreeRootNode(ROOTLIST * FreeThis,int MustFreeTree) {
     }
     Free((void **)FreeThis);
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 void FreeARootNode(ROOTLIST * ToDelete,int MustFreeTree) {
 
     ROOTLIST NextOne;
@@ -482,7 +482,7 @@ void FreeARootNode(ROOTLIST * ToDelete,int MustFreeTree) {
     FreeRootNode(ToDelete,MustFreeTree);
     *ToDelete = NextOne;
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 void FreeRootList(ROOTLIST * Head,int MustFreeTree) {
 
     if (MustFreeTree) {
@@ -492,7 +492,7 @@ void FreeRootList(ROOTLIST * Head,int MustFreeTree) {
         FreeARootNode(Head,MustFreeTree);
     }
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 TREENODE DoAnnotatedFormulaInTree(TREENODE ATree,ANNOTATEDFORMULA 
 LookingForThis) {
 
@@ -522,7 +522,7 @@ Parents[ParentIndex],LookingForThis)) != NULL) {
 
     return(NULL);
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 TREENODE AnnotatedFormulaInTree(TREENODE ATree,ANNOTATEDFORMULA 
 LookingForThis) {
 
@@ -533,7 +533,7 @@ LookingForThis) {
     ResetTreeVisited(ATree);
     return(TreeNodeFound);
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 TREENODE AnnotatedFormulaInTrees(ROOTLIST RootListHead,ANNOTATEDFORMULA 
 LookingForThis) {
 
@@ -549,7 +549,7 @@ LookingForThis)) != NULL) {
     }
     return(NULL);
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 int CountParents(char * ParentNames) {
 
     int NumberOfParents;
@@ -564,7 +564,7 @@ int CountParents(char * ParentNames) {
 
     return(NumberOfParents);
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 TREENODE InListOfTreeNodes(ROOTLIST Head,ANNOTATEDFORMULA LookingForThis) {
 
     while (Head != NULL) {
@@ -577,7 +577,7 @@ LookingForThis) {
 
     return(NULL);
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 //----Using a reference parameter rather than returning so that the linking
 //----is done immediately to allow search what we have done already
 TREENODE BuildTree(LISTNODE * NodesNotInTree,char * Name,TREENODE * TheTree,
@@ -647,7 +647,7 @@ ParentIndex++) {
     }
     return(*TheTree);
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 ROOTLIST BuildRootList(LISTNODE Head) {
 
     LISTNODE NodesNotInTree;
@@ -705,7 +705,7 @@ ROOTLIST BuildRootList(LISTNODE Head) {
 
     return(RootListHead);
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 void DFSWithIndent(FILE * Stream,TREENODE Root,char * Indent) {
 
     String Name;
@@ -723,12 +723,12 @@ GetName(Root->AnnotatedFormula,Name),Root->NumberOfUses,Root->Visited);
     }
 
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 void DFS(FILE * Stream,TREENODE Root) {
 
     DFSWithIndent(Stream,Root,"");
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 void PrintRootList(FILE * Stream,ROOTLIST RootListHead) {
 
     while (RootListHead != NULL) {
@@ -740,7 +740,7 @@ void PrintRootList(FILE * Stream,ROOTLIST RootListHead) {
         RootListHead = RootListHead->Next;
     }
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 void PrintTreeAnnotatedNodesInPostOrder(FILE * Stream,TREENODE TreeRoot) {
 
     int Index;
@@ -758,7 +758,7 @@ TreeRoot->Parents[Index]);
         fprintf(Stream,"\n");
     }
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 void PrintRootListAnnotatedNodesInPostOrder(FILE * Stream,
 ROOTLIST RootListHead) {
 
@@ -769,7 +769,7 @@ ROOTLIST RootListHead) {
     }
     ResetRootListVisited(RootListHead);
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 void ListTreeAnnotatedNodesInPostOrder(TREENODE TreeRoot,
 LISTNODE * AddNextHere) {
 
@@ -791,7 +791,7 @@ AddNextHere);
         AddListNode(AddNextHere,NULL,TreeRoot->AnnotatedFormula);
     }
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 LISTNODE ListRootListAnnotatedNodesInPostOrder(ROOTLIST RootListHead) {
 
     LISTNODE PostOrderList;
@@ -810,9 +810,9 @@ LISTNODE ListRootListAnnotatedNodesInPostOrder(ROOTLIST RootListHead) {
     ResetRootListVisited(RootListHead);
     return(PostOrderList);
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 //----All the code below here is for binary trees of tree nodes
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 //----Search in binary root tree by annotated formula name
 ROOTBTREE * GetNodeFromRootBTreeByAnnotatedFormulaName(ROOTBTREE * Root,
 char * Name) {
@@ -835,7 +835,7 @@ Name));
         }
     }   
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 ROOTBTREE AddRootBTreeNode(ROOTBTREE * Root,TREENODE TreeNode) {
 
     int Comparison;
@@ -861,7 +861,7 @@ AnnotatedFormulaUnion.AnnotatedTSTPFormula.Name);
         }
     }
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 void FreeRootBTree(ROOTBTREE * Root,int MustFreeTree) {
 
     if (Root == NULL) {
@@ -874,7 +874,7 @@ void FreeRootBTree(ROOTBTREE * Root,int MustFreeTree) {
         FreeRootNode(Root,MustFreeTree);
     }
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 void PrintRootBTreeOfAnnotatedFormulae(ROOTBTREE Root) {
 
     if (Root != NULL) {
@@ -883,4 +883,4 @@ void PrintRootBTreeOfAnnotatedFormulae(ROOTBTREE Root) {
         PrintRootBTreeOfAnnotatedFormulae(Root->Next);
     }
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------

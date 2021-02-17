@@ -5,7 +5,7 @@
 #include <string.h>
 
 #include "Statistics.h"
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 void InitializeFormulaStatistics(FormulaStatisticsType * 
 FormulaStatistics) {
 
@@ -34,7 +34,7 @@ FormulaStatistics) {
     FormulaStatistics->MaxClauseSize = 0;
     FormulaStatistics->AverageClauseSize = 0;
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 void InitializeSymbolStatistics(SymbolStatisticsType * 
 SymbolStatistics) {
 
@@ -52,7 +52,7 @@ SymbolStatistics) {
     SymbolStatistics->NumberOfMathFunctions = 0;
     SymbolStatistics->NumberOfNumbers = 0;
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 void InitializeConnectiveStatistics(ConnectiveStatisticsType * 
 ConnectiveStatistics) {
 
@@ -99,7 +99,7 @@ ConnectiveStatistics) {
     ConnectiveStatistics->NumberOfGlobalTypeDecs = 0;
     ConnectiveStatistics->NumberOfGlobalDefns = 0;
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 void InitializeStatistics(StatisticsType * Statistics) {
 
     InitializeFormulaStatistics(&(Statistics->FormulaStatistics));
@@ -107,7 +107,7 @@ void InitializeStatistics(StatisticsType * Statistics) {
     InitializeConnectiveStatistics(&(Statistics->ConnectiveStatistics));
 
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 void AddOnConnectiveStatistics(ConnectiveStatisticsType *
 ConnectiveStatistics,ConnectiveStatisticsType MoreConnectiveStatistics) {
 
@@ -187,4 +187,4 @@ MoreConnectiveStatistics.NumberOfGlobalTypeDecs;
     ConnectiveStatistics->NumberOfGlobalDefns +=
 MoreConnectiveStatistics.NumberOfGlobalDefns;
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------

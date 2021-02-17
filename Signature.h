@@ -1,8 +1,8 @@
 #ifndef SIGNATURE_H
 #define SIGNATURE_H
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 #include "DataTypes.h"
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 SIGNATURE DuplicateSignature(SIGNATURE Original);
 void FreeSignature(SIGNATURE * Signature);
 int RemovedUnusedSymbols(SIGNATURE Signature);
@@ -26,5 +26,5 @@ char ** FunctorUsageStartsHere);
 void GetSignatureSymbolUsageStatistics(SYMBOLNODE SignatureNode,
 double * NumberOfSymbols,double * NumberOfSymbolsArity0,
 double * MinSymbolArity,double * MaxSymbolArity);
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 #endif

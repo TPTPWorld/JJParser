@@ -22,7 +22,7 @@
 #include "PrintXML.h"
 #include "PrintSMT2.h"
 #include "SystemOnTPTP.h"
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 int main(int argc, char *argv[]) {
 
     LISTNODE Head;
@@ -83,7 +83,7 @@ int main(int argc, char *argv[]) {
     FreeSignature(&Signature);
     return(EXIT_SUCCESS);
 
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 //----Test stats
     ListStatistics = GetListStatistics(Head,Signature);
     PrintListStatistics(stdout,ListStatistics);
@@ -722,4 +722,4 @@ SZSOutputToString(SZSO1));
     return(EXIT_SUCCESS);
 
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------

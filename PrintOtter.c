@@ -12,7 +12,7 @@
 #include "Modify.h"
 #include "PrintTSTP.h"
 #include "PrintOtter.h"
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 char * OtterConnectiveToString(ConnectiveType Connective) {
 
     switch (Connective) {
@@ -46,12 +46,12 @@ char * OtterConnectiveToString(ConnectiveType Connective) {
             break;
     }       
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 int OtterAssociative(ConnectiveType Connective) {
 
     return(Connective == disjunction || Connective == conjunction);
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 void OtterPrintFormula(FILE * Stream,SyntaxType Language,FORMULA Formula,
 int Indent,int AlreadyIndented,int Pretty,ConnectiveType LastConnective,
 ConnectiveType NextConnective) {
@@ -180,7 +180,7 @@ Formula->FormulaUnion.UnaryFormula.Connective,none);
     }
 
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 void OtterPrintAnnotatedTSTPNode(FILE * Stream,ANNOTATEDFORMULA 
 AnnotatedFormula) {
 
@@ -218,7 +218,7 @@ AnnotatedFormulaUnion.AnnotatedTSTPFormula.FormulaWithVariables->Formula,
     }
 
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 void OtterPrintHeader(FILE * Stream,LISTNODE Head,SIGNATURE Signature) {
 
     LISTNODE Node;
@@ -237,12 +237,12 @@ void OtterPrintHeader(FILE * Stream,LISTNODE Head,SIGNATURE Signature) {
     fprintf(Stream,"clear(print_given).\n");
     fprintf(Stream,"\n");
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 void OtterPrintTailer(FILE * Stream) {
 
-    fprintf(Stream,"%%------------------------------------------------------------------------------\n");
+    fprintf(Stream,"%%--------------------------------------------------------------------------------------------------\n");
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 void OtterPrintListOfAnnotatedTSTPNodes(FILE * Stream,LISTNODE Head) {
 
     LISTNODE Node;
@@ -278,4 +278,4 @@ strstr(Node->AnnotatedFormula->AnnotatedFormulaUnion.Comment,"%--------------")
     fprintf(Stream,"\n");
 
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------

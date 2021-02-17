@@ -1,8 +1,8 @@
 #ifndef TOKENIZER_H
 #define TOKENIZER_H
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 #include "DataTypes.h"
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 #define NextCharacter(Stream) Character(Stream,1)
 #define CurrentCharacter(Stream) Character(Stream,0)
 #define CurrentCharacterMove(Stream) Character(Stream,-1)
@@ -10,7 +10,7 @@
 #define CurrentToken(Stream) Token(Stream,0)
 #define CurrentTokenMove(Stream) Token(Stream,-1)
 #define TakeCurrentToken(Stream) Token(Stream,2)
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 int GetNeedForNonLogicTokens(void);
 void SetNeedForNonLogicTokens(int OnOff);
 int GetStreamNeedForNonLogicTokens(READFILE Stream);
@@ -47,5 +47,5 @@ int AcceptTokenType(READFILE Stream,TokenType Type);
 int AcceptToken(READFILE Stream,TokenType Type,char * Value);
 int NextThenAcceptTokenType(READFILE Stream,TokenType Type);
 int NextThenAcceptToken(READFILE Stream,TokenType Type,char * Value);
-//------------------------------------------------------------------------------
+//--------------------------------------------------------------------------------------------------
 #endif

@@ -1,8 +1,8 @@
 #ifndef TREE_H
 #define TREE_H
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 #include "DataTypes.h"
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 void SetUserData(TREENODE TreeNode,void * UserData);
 void * GetUserData(TREENODE TreeNode);
 
@@ -40,5 +40,5 @@ char * Name);
 ROOTBTREE AddRootBTreeNode(ROOTBTREE * Root,TREENODE TreeNode);
 void FreeRootBTree(ROOTBTREE * Root,int MustFreeTree);
 void PrintRootBTreeOfAnnotatedFormulae(ROOTBTREE Root);
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 #endif

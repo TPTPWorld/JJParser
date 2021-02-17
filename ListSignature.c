@@ -5,7 +5,7 @@
 #include "Signature.h"
 #include "Utilities.h"
 #include "DataTypes.h"
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 SIGNATURE NewSignature(void) {
 
     SIGNATURE Signature;
@@ -18,7 +18,7 @@ SIGNATURE NewSignature(void) {
 
     return(Signature);
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 void FreeSignatureList(SYMBOLNODE * Symbols) {
 
     SYMBOLNODE ToFree;
@@ -31,7 +31,7 @@ void FreeSignatureList(SYMBOLNODE * Symbols) {
         Free((void **)&ToFree);
     }
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 void FreeSignature(SIGNATURE * Signature) {
 
     FreeSignatureList(&((*Signature)->Variables));
@@ -45,7 +45,7 @@ void FreeSignature(SIGNATURE * Signature) {
 
     Free((void **)Signature);
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 int RemovedUnusedSymbolsFromList(SYMBOLNODE * Symbols) {
 
     int NumberRemoved;
@@ -66,7 +66,7 @@ int RemovedUnusedSymbolsFromList(SYMBOLNODE * Symbols) {
 
     return(NumberRemoved);
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 int RemovedUnusedSymbols(SIGNATURE Signature) {
 
     int TotalRemoved;
@@ -79,27 +79,27 @@ int RemovedUnusedSymbols(SIGNATURE Signature) {
 
     return(TotalRemoved);
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 char * GetSignatureSymbol(SYMBOLNODE SymbolNode) {
 
     return(SymbolNode->NameSymbol);
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 int GetSignatureArity(SYMBOLNODE SymbolNode) {
 
     return(SymbolNode->Arity);
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 int GetSignatureUses(SYMBOLNODE SymbolNode) {
 
     return(SymbolNode->NumberOfUses);
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 void IncreaseSymbolUseCount(SYMBOLNODE Symbol,int HowMuch) {
 
     Symbol->NumberOfUses += HowMuch;
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 SYMBOLNODE IsSymbolInSignatureList(SYMBOLNODE List,char * Name,int Arity) {
 
     while (List != NULL && !(!strcmp(GetSignatureSymbol(List),Name) &&
@@ -109,7 +109,7 @@ GetSignatureArity(List) == Arity)) {
 
     return(List);
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 SYMBOLNODE InsertIntoSignatureList(SYMBOLNODE * List,char * Name,int Arity) {
 
     SYMBOLNODE Symbol;
@@ -128,7 +128,7 @@ SYMBOLNODE InsertIntoSignatureList(SYMBOLNODE * List,char * Name,int Arity) {
         return(Symbol);
     }
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 void PrintSignatureList(SYMBOLNODE List) {
 
     while (List != NULL) {
@@ -137,7 +137,7 @@ GetSignatureUses(List));
         List = List->NextSymbol;
     }
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 void PrintSignature(SIGNATURE Signature) {
 
     printf("Variables:  ");
@@ -153,4 +153,4 @@ void PrintSignature(SIGNATURE Signature) {
     PrintSignatureList(Signature->NonLogicals);
     printf("\n");
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------

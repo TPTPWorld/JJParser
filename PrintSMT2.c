@@ -14,7 +14,7 @@
 #include "PrintSMT2.h"
 #include <search.h>
 
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 
 void SMT2EscapedString(FILE * Stream, const char *s) {
   const char *p;
@@ -54,7 +54,7 @@ void SMT2EscapedString(FILE * Stream, const char *s) {
     //print the last part of s
     fputs(s,Stream);
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 
 void SMT2SanitizeSymbol(FILE * Stream, char * StartOfSymbol, int Arity,
                         int Isvariable){
@@ -111,7 +111,7 @@ void SMT2PrintTerm(FILE * Stream,TERM Term) {
         fprintf(Stream,")");
     }
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 char * SMT2ConnectiveToString(ConnectiveType Connective) {
 
     switch (Connective) {
@@ -150,11 +150,11 @@ static const char* uniq_sort = "sort__smt2";
 const char * SMT2TypeToString( TERM Variable ){
   return uniq_sort;
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 int SMT2Associative(ConnectiveType Connective) {
     return(Connective == disjunction || Connective == conjunction);
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 void SMT2PrintFormula(FILE * Stream,FORMULA Formula,int Indent,int AlreadyIndented,int Pretty) {
     switch (Formula->Type) {
         case quantified:
@@ -295,7 +295,7 @@ void SMT2PrintAnnotatedTSTPNode(FILE * Stream,ANNOTATEDFORMULA AnnotatedFormula)
     }
 }
 
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 void SMT2PrintListOfAnnotatedTSTPNodes(FILE * Stream,LISTNODE Head) {
 
     LISTNODE Node;
@@ -324,7 +324,7 @@ void SMT2PrintListOfAnnotatedTSTPNodes(FILE * Stream,LISTNODE Head) {
     fprintf(Stream,"\n");
     fprintf(Stream,"(check-sat)\n");
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 void SMT2PrintSignatureList(FILE * Stream,SYMBOLNODE Node,int Predicate) {
 
     char * StartOfSymbol;
@@ -349,7 +349,7 @@ strcmp(StartOfSymbol,"$true") && strcmp(StartOfSymbol,"$false")) {
     }
     return;
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 void SMT2PrintHeader(FILE * Stream,LISTNODE Head,SIGNATURE Signature) {
 
     LISTNODE Node;
@@ -370,4 +370,4 @@ void SMT2PrintHeader(FILE * Stream,LISTNODE Head,SIGNATURE Signature) {
 
     fprintf(Stream,"\n");
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------

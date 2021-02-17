@@ -4,12 +4,12 @@
 #include "Utilities.h"
 #include "Examine.h"
 #include "Compare.h"
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 int SameTerm(TERM Term1,TERM Term2,int AllowVariableRenaming,
 int AllowCommutation,VARIABLERENAMING * RenamedVariables);
 int DoSameFormula(FORMULA Formula1,FORMULA Formula2,int AllowVariableRenaming,
 int AllowCommutation,VARIABLERENAMING * RenamedVariables);
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 int SameVariables(VARIABLENODE Variable1,VARIABLENODE Variable2,
 int AllowVariableRenaming,VARIABLERENAMING * RenamedVariables) {
 
@@ -46,7 +46,7 @@ SameTerm(Variable1->Instantiation,Variable2->Instantiation,
 AllowVariableRenaming,0,RenamedVariables));
 
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 int SameArguments(TERM Arguments1[],TERM Arguments2[],int Arity,
 int AllowVariableRenaming,VARIABLERENAMING * RenamedVariables) {
 
@@ -60,7 +60,7 @@ AllowVariableRenaming,0,RenamedVariables)) {
     }
     return(1);
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 int SameTerm(TERM Term1,TERM Term2,int AllowVariableRenaming,
 int AllowCommutation,VARIABLERENAMING * RenamedVariables) {
 
@@ -117,7 +117,7 @@ Term2->TheSymbol.Variable,AllowVariableRenaming,RenamedVariables));
             break;
     }
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 int SameQuantifiedFormula(QuantifiedFormulaType Formula1,QuantifiedFormulaType 
 Formula2,int AllowVariableRenaming,int AllowCommutation,
 VARIABLERENAMING * RenamedVariables) {
@@ -129,7 +129,7 @@ RenamedVariables) &&
 DoSameFormula(Formula1.Formula,Formula2.Formula,AllowVariableRenaming,
 AllowCommutation,RenamedVariables));
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 int SameBinaryFormula(BinaryFormulaType Formula1,BinaryFormulaType Formula2,
 int AllowVariableRenaming,int AllowCommutation,
 VARIABLERENAMING * RenamedVariables) {
@@ -140,7 +140,7 @@ AllowCommutation,RenamedVariables) &&
 DoSameFormula(Formula1.RHS,Formula2.RHS,AllowVariableRenaming,
 AllowCommutation,RenamedVariables));
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 int SameUnaryFormula(UnaryFormulaType Formula1,UnaryFormulaType Formula2,
 int AllowVariableRenaming,int AllowCommutation,
 VARIABLERENAMING * RenamedVariables) {
@@ -149,7 +149,7 @@ VARIABLERENAMING * RenamedVariables) {
 DoSameFormula(Formula1.Formula,Formula2.Formula,AllowVariableRenaming,
 AllowCommutation,RenamedVariables));
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 int DoSameFormula(FORMULA Formula1,FORMULA Formula2,int AllowVariableRenaming,
 int AllowCommutation,VARIABLERENAMING * RenamedVariables) {
 
@@ -188,7 +188,7 @@ FormulaUnion.Atom,AllowVariableRenaming,AllowCommutation,RenamedVariables));
     }
 
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 int SameFormula(FORMULA Formula1,FORMULA Formula2,int AllowVariableRenaming,
 int AllowCommutation) {
 
@@ -209,7 +209,7 @@ AllowCommutation,&RenamedVariables);
 
     return(Result);
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 int SameFormulaInAnnotatedFormulae(ANNOTATEDFORMULA AnnotatedFormula1,
 ANNOTATEDFORMULA AnnotatedFormula2,int AllowVariableRenaming,
 int AllowCommutation) {
@@ -225,7 +225,7 @@ AllowCommutation));
         return(0);
     }
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 //int SameFormulaInAnnotatedFormulaString(ANNOTATEDFORMULA AnnotatedFormula,
 //char * AnnotatedFormulaString,int AllowVariableRenaming) {
 //
@@ -243,4 +243,4 @@ AllowCommutation));
 //        return(0);
 //    }
 //}
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------

@@ -11,7 +11,7 @@
 #include "Parsing.h"
 #include "PrintTSTP.h"
 #include "List.h"
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 void ResetListVisited(LISTNODE Head) {
 
     while (Head != NULL) {
@@ -19,7 +19,7 @@ void ResetListVisited(LISTNODE Head) {
         Head = Head->Next;
     }
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 int ListLength(LISTNODE Head) {
 
     int Length;
@@ -32,7 +32,7 @@ int ListLength(LISTNODE Head) {
 
     return(Length);
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 //----Skip comments, blank lines, etc
 LISTNODE GetLogicNode(LISTNODE Head) {
 
@@ -42,7 +42,7 @@ LISTNODE GetLogicNode(LISTNODE Head) {
 
     return(Head);
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 LISTNODE NewListNode(ANNOTATEDFORMULA AnnotatedFormula) {
 
     LISTNODE NewNode;
@@ -55,7 +55,7 @@ LISTNODE NewListNode(ANNOTATEDFORMULA AnnotatedFormula) {
 
     return(NewNode);
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 //----Pushes new node onto the front
 void AddListNode(LISTNODE * From,LISTNODE Next,ANNOTATEDFORMULA
 AnnotatedFormulae) {
@@ -66,7 +66,7 @@ AnnotatedFormulae) {
     NewNode->Next = Next;
     *From = NewNode;
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 //----This one duplicates the list of nodes, using the same annotated formulae
 LISTNODE DuplicateListOfNodes(LISTNODE Head,int KeepNonLogicNodes) {
 
@@ -91,7 +91,7 @@ LISTNODE DuplicateListOfNodes(LISTNODE Head,int KeepNonLogicNodes) {
 
     return(DuplicateList);
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 //----This one also duplicates the annotated formula
 LISTNODE DuplicateListOfAnnotatedFormulae(LISTNODE Head,SIGNATURE Signature) {
 
@@ -110,7 +110,7 @@ Head->AnnotatedFormula,Signature));
 
     return(DuplicateList);
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 //----Simply does the memory deallocation for a list node. Not for users, who
 //----should use FreeAListNode() below.
 static void FreeListNode(LISTNODE * FreeThis) {
@@ -121,7 +121,7 @@ static void FreeListNode(LISTNODE * FreeThis) {
     FreeAnnotatedFormula(&((*FreeThis)->AnnotatedFormula));
     Free((void **)FreeThis);
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 //----Frees a list node is a list, and updates the linking
 void FreeAListNode(LISTNODE * ToDelete) {
 
@@ -135,7 +135,7 @@ void FreeAListNode(LISTNODE * ToDelete) {
     FreeListNode(ToDelete);
     *ToDelete = NextOne;
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 void FreeListOfAnnotatedFormulae(LISTNODE * Head) {
 
 //----Used to do this recursively, but run out of stack
@@ -143,7 +143,7 @@ void FreeListOfAnnotatedFormulae(LISTNODE * Head) {
         FreeAListNode(Head);
     }
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 LISTNODE AppendListsOfAnnotatedTSTPNodes(LISTNODE List1,LISTNODE List2) {
 
     LISTNODE LastNode;
@@ -159,7 +159,7 @@ LISTNODE AppendListsOfAnnotatedTSTPNodes(LISTNODE List1,LISTNODE List2) {
         return(List1);
     }
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 LISTNODE * GetLastNext(LISTNODE * Head) {
 
     while (*Head != NULL) {
@@ -167,7 +167,7 @@ LISTNODE * GetLastNext(LISTNODE * Head) {
     }
     return(Head);
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 //----Second must be address of malloced String so it can be realloced 
 //----if necessary
 char * GetAllNames(LISTNODE Head,char ** Names) {
@@ -185,7 +185,7 @@ char * GetAllNames(LISTNODE Head,char ** Names) {
 
     return(*Names);
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 int UniquelyNamed(LISTNODE Head) {
 
     char * AllNames;
@@ -211,7 +211,7 @@ int UniquelyNamed(LISTNODE Head) {
 
     return(OKSoFar);
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 LISTNODE * GetNodeFromListByNumber(LISTNODE * Head,int Number) {
 
     do {
@@ -234,7 +234,7 @@ LISTNODE * GetNodeFromListByNumber(LISTNODE * Head,int Number) {
 
     return(NULL);
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 ANNOTATEDFORMULA GetAnnotatedFormulaFromListByNumber(LISTNODE Head,int Number) {
 
     LISTNODE * NodePointer;
@@ -247,7 +247,7 @@ NULL) {
         return(NULL);
     }
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 //----The first parameter is a pointer to the pointer to the node in the real 
 //----data structure, so that the function can return a pointer to the real
 //----pointer in the data structure. This would not be possible if a pointer 
@@ -290,7 +290,7 @@ AnnotatedFormula,1,SameFormula))) {
 
     return(NULL);
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 LISTNODE * GetNodeFromListByAnnotatedFormulaName(LISTNODE * Head,
 char * Name) {
 
@@ -312,7 +312,7 @@ NULL;
     return(GetNodeFromListByAnnotatedFormulaFields(Head,&AnnotatedFormula,
 1,0,0));
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 ANNOTATEDFORMULA GetAnnotatedFormulaFromListByName(LISTNODE Head, char * Name) {
 
     LISTNODE * NodePointer;
@@ -325,7 +325,7 @@ NULL) {
         return(NULL);
     }
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 int GetNodesForNames(LISTNODE Head,StringParts ParentNames,int NumberOfParents,
 LISTNODE * ParentList) {
 
@@ -345,7 +345,7 @@ Head,ParentNames[ParentNumber])) == NULL) {
     }
     return(1);
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 LISTNODE * GetNodeFromListByAnnotatedFormula(LISTNODE * Head,ANNOTATEDFORMULA
 AnnotatedFormula) {
 
@@ -358,7 +358,7 @@ AnnotatedFormula) {
 
     return(NULL);
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 //----This one can remove those with the desired type
 LISTNODE SelectListOfAnnotatedFormulaeWithType(LISTNODE * Head,StatusType 
 DesiredRole,int DeletedSelected) {
@@ -393,14 +393,14 @@ DesiredRole,int DeletedSelected) {
     }
     return(ListWithRole);
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 //----For backwards compatitibility
 LISTNODE GetListOfAnnotatedFormulaeWithType(LISTNODE Head,StatusType 
 DesiredRole) {
 
     return(SelectListOfAnnotatedFormulaeWithType(&Head,DesiredRole,0));
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 LISTNODE GetListWithSyntaxType(LISTNODE Head,SyntaxType DesiredSyntax) {
 
     LISTNODE ListWithSyntaxType;
@@ -417,7 +417,7 @@ LISTNODE GetListWithSyntaxType(LISTNODE Head,SyntaxType DesiredSyntax) {
     }
     return(ListWithSyntaxType);
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 LISTNODE SelectListOfAnnotatedFormulaeWithParents(LISTNODE * Head,
 int DeletedSelected) {
 
@@ -444,7 +444,7 @@ int DeletedSelected) {
     }
     return(ListWithRole);
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 //----0 means empty intersection, 1 means non-empty intersection, 2 means Set1
 //----is a superset of Set2, 3 means they are equal, 4 means Set2 is a subset
 //----of Set2. Assumes all lists have been merged!
@@ -492,7 +492,7 @@ int AllowCommutation) {
     }
     return(-1);
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 //----If SameFormula = 1, then check modulo variable naming, if 2 then allow
 //----commutation of operators (not fully implemented yet)
 LISTNODE MergeInListOfAnnotatedFormulaeByFields(LISTNODE * MainList, 
@@ -540,7 +540,7 @@ Target->AnnotatedFormula,SameName,SameRole,SameFormula)) != NULL) {
 //----Return the new MainList
     return(*MainList);
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 int CompareAnnotatedFormulaeByUsefulInfoField(ANNOTATEDFORMULA Larger,
 ANNOTATEDFORMULA Smaller,char * FieldName,char DataType,int InvertOrder) {
 
@@ -587,7 +587,7 @@ ExtractTermArguments(LargerInfo) && ExtractTermArguments(SmallerInfo)) {
         return(0);
     }
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 //----Uses insertion sort :-(
 LISTNODE SlowSortByUsefulInfoField(LISTNODE * Head,char * FieldName,
 char DataType,int InvertOrder) {
@@ -619,7 +619,7 @@ CompareAnnotatedFormulaeByUsefulInfoField((*InsertionPoint)->AnnotatedFormula,
     }
     return(*Head);
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 char * QSortFieldName;
 char QSortDataType;
 int QSortInvertOrder;
@@ -638,7 +638,7 @@ const void * Smaller) {
 *((ANNOTATEDFORMULA *)Larger),*((ANNOTATEDFORMULA *)Smaller),QSortFieldName,
 QSortDataType,QSortInvertOrder));
 } 
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 LISTNODE SortByUsefulInfoField(LISTNODE * Head,char * FieldName,char DataType,
 int InvertOrder) {
 
@@ -682,7 +682,7 @@ QSortGreaterAnnotatedFormulaByUsefulInfoField);
     Free((void **)&AnnotatedFormulaArray);
     return(*Head);
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 void RandomizeAnnotatedFormulaeInList(LISTNODE Head,unsigned int Seed) {
 
     SeedRand(Seed);
@@ -691,7 +691,7 @@ void RandomizeAnnotatedFormulaeInList(LISTNODE Head,unsigned int Seed) {
         Head = Head->Next;
     }
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 //----Nasty quadratic randomizing
 void SlowRandomizeListOrder(LISTNODE * Head,unsigned int Seed) {
 
@@ -720,7 +720,7 @@ void SlowRandomizeListOrder(LISTNODE * Head,unsigned int Seed) {
     }
     *Head = RandomizedList;
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 void RandomizeListOrder(LISTNODE * Head,unsigned int Seed) {
 
     LISTNODE SplitHigh;
@@ -758,16 +758,16 @@ void RandomizeListOrder(LISTNODE * Head,unsigned int Seed) {
         }
     }
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 void RandomizeListOfAnnotatedFormulae(LISTNODE * Head,unsigned int Seed) {
 
     SeedRand(Seed);
     RandomizeListOrder(Head,0);
     RandomizeAnnotatedFormulaeInList(*Head,0);
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 //----All the code below here is for binary trees of formulae
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 void ResetBTreeVisited(BTREENODE Root) {
 
     if (Root != NULL) {
@@ -776,7 +776,7 @@ void ResetBTreeVisited(BTREENODE Root) {
         ResetBTreeVisited(Root->Next);
     }
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 //----Search in binary tree by annotated formula name
 BTREENODE * GetNodeFromBTreeByAnnotatedFormulaName(BTREENODE * Root,
 char * Name) {
@@ -799,7 +799,7 @@ Name));
         }
     }
 } 
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 BTREENODE AddBTreeNode(BTREENODE * Root,ANNOTATEDFORMULA AnnotatedFormula) {
 
     int Comparison;
@@ -828,7 +828,7 @@ AnnotatedFormulaUnion.AnnotatedTSTPFormula.Name);
         }
     }
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 BTREENODE ListToBTree(LISTNODE Head) {
 
     BTREENODE Root;
@@ -842,7 +842,7 @@ BTREENODE ListToBTree(LISTNODE Head) {
     }
     return(Root);
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 void FreeBTreeOfAnnotatedFormulae(BTREENODE * Root) {
 
     if (Root == NULL) {
@@ -855,7 +855,7 @@ void FreeBTreeOfAnnotatedFormulae(BTREENODE * Root) {
         FreeListNode(Root);
     }
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 void PrintBTreeOfAnnotatedFormulae(BTREENODE Root) {
 
     if (Root != NULL) {
@@ -864,7 +864,7 @@ void PrintBTreeOfAnnotatedFormulae(BTREENODE Root) {
         PrintBTreeOfAnnotatedFormulae(Root->Next);
     }
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 int BTreeDepth(BTREENODE Root) {
 
     int LastDepth;
@@ -878,4 +878,4 @@ int BTreeDepth(BTREENODE Root) {
         return(1 + (LastDepth > NextDepth ? LastDepth : NextDepth));
     }
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
