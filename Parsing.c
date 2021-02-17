@@ -455,16 +455,16 @@ VARIABLENODE * EndOfScope,TermType Type,int VariablesMustBeQuantified) {
     if (Language == tptp_thf && Type == predicate) {
         THFTerm = NewTerm();
         THFTerm->Type = formula;
-        THFTerm->TheSymbol.Formula = ParseFormula(Stream,Language,
-Context,EndOfScope,1,1,VariablesMustBeQuantified,none);
+        THFTerm->TheSymbol.Formula = ParseFormula(Stream,Language,Context,EndOfScope,1,1,
+VariablesMustBeQuantified,none);
         return(THFTerm);
     } else {
 //----If parsing non-logical, keep it like that, else it must be a term
         if (Type != non_logical_data) {
             Type = term;
         }
-        return(ParseTerm(Stream,Language,Context,EndOfScope,Type,
-free_variable,NULL,VariablesMustBeQuantified));
+        return(ParseTerm(Stream,Language,Context,EndOfScope,Type,free_variable,NULL,
+VariablesMustBeQuantified));
     }
 }
 //-------------------------------------------------------------------------------------------------
@@ -751,8 +751,8 @@ punctuation,"[") && !CheckTokenType(Stream,upper_word)) {
         NumberOfArguments = 0;
         Term->Arguments = NULL;
         AcceptToken(Stream,punctuation,"(");
-        Term->TheSymbol.ConditionalTerm.Condition = ParseFormula(Stream,
-Language,Context,EndOfScope,1,1,VariablesMustBeQuantified,none);
+        Term->TheSymbol.ConditionalTerm.Condition = ParseFormula(Stream,Language,Context,
+EndOfScope,1,1,VariablesMustBeQuantified,none);
         AcceptToken(Stream,punctuation,",");
 // TO FIX ... NEED TO ACCEPT FORMULAE HERE TOO
 // Test case tff(an,axiom,p($ite(q,r & f,r & g))).
@@ -1421,8 +1421,7 @@ VariablesMustBeQuantified);
                 Formula = ParseLETFormula(Stream,Language,Context,EndOfScope,
 VariablesMustBeQuantified);
             } else {
-                Formula = ParseAtom(Stream,Language,Context,EndOfScope,
-VariablesMustBeQuantified);
+                Formula = ParseAtom(Stream,Language,Context,EndOfScope,VariablesMustBeQuantified);
             }
             break;
     }
@@ -1441,8 +1440,7 @@ VariablesMustBeQuantified);
 ( AllowBinary &&
   ( CheckTokenType(Stream,binary_connective) ||
 //----THF and TFF have types. Should this be allowed independent of AllowBinary?
-    ( ( Language == tptp_thf ||
-        Language == tptp_tff  || Language == tptp_tcf ) &&
+    ( ( Language == tptp_thf || Language == tptp_tff  || Language == tptp_tcf ) &&
       CheckToken(Stream,punctuation,":")
     )
   ) 
@@ -1610,8 +1608,8 @@ LocalFormulaWithVariables,OriginalContext.Signature,0);
     return(Copy);
 }
 //-------------------------------------------------------------------------------------------------
-FORMULAWITHVARIABLES ParseFormulaWithVariables(READFILE Stream,
-SyntaxType Language,SIGNATURE Signature,int VariablesMustBeQuantified) {
+FORMULAWITHVARIABLES ParseFormulaWithVariables(READFILE Stream,SyntaxType Language,
+SIGNATURE Signature,int VariablesMustBeQuantified) {
 
     ContextType Context;
     FORMULAWITHVARIABLES FormulaWithVariables;
@@ -1627,8 +1625,8 @@ SyntaxType Language,SIGNATURE Signature,int VariablesMustBeQuantified) {
 
     NeedNonLogicTokens = Stream->NeedNonLogicTokens;
     Stream->NeedNonLogicTokens = 0;
-    FormulaWithVariables->Formula = ParseFormula(Stream,Language,
-Context,&EndOfScope,1,1,VariablesMustBeQuantified,none);
+    FormulaWithVariables->Formula = ParseFormula(Stream,Language,Context,&EndOfScope,1,1,
+VariablesMustBeQuantified,none);
     Stream->NeedNonLogicTokens = NeedNonLogicTokens;
     return(FormulaWithVariables);
 }

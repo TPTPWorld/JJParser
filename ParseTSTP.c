@@ -156,9 +156,8 @@ StringToStatus(CurrentToken(Stream)->NameToken);
     }
     AcceptToken(Stream,punctuation,",");
     AnnotatedFormula->
-AnnotatedFormulaUnion.AnnotatedTSTPFormula.FormulaWithVariables = 
-ParseFormulaWithVariables(Stream,Language,Signature,
-VariablesMustBeQuantifiedAlready);
+AnnotatedFormulaUnion.AnnotatedTSTPFormula.FormulaWithVariables = ParseFormulaWithVariables(Stream,
+Language,Signature,VariablesMustBeQuantifiedAlready);
 
 //----Create context for duplicating non-logical stuff
     Context.Variables = NULL;
