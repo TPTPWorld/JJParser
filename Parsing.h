@@ -1,10 +1,10 @@
 #ifndef PARSING_H
 #define PARSING_H
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 #include "DataTypes.h"
 #include "Tokenizer.h"
 #include "Utilities.h"
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 void SetAllowFreeVariables(int OnOff);
 void SetAllowFOFNumbers(int OnOff);
 
@@ -72,5 +72,5 @@ LISTNODE ParseStringOfFormulae(char * Content,SIGNATURE Signature,
 int ExpandIncludes,char * NameFilter);
 TERM ParseStringTerm(char * Content,SyntaxType Language,SIGNATURE Signature,
 int VariablesMustBeQuantifiedAlready);
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 #endif

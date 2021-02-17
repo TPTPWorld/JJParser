@@ -12,7 +12,7 @@
 #include "List.h"
 #include "Modify.h"
 #include "PrintTSTP.h"
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 int SetName(ANNOTATEDFORMULA AnnotatedFormula,char * Name) {
 
     assert(AnnotatedFormula != NULL);
@@ -27,7 +27,7 @@ CopyHeapString(Name);
     }   
 
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 //----Use with care - you're breaking the logic
 int SetSyntax(ANNOTATEDFORMULA AnnotatedFormula,SyntaxType Syntax) {
 
@@ -39,7 +39,7 @@ int SetSyntax(ANNOTATEDFORMULA AnnotatedFormula,SyntaxType Syntax) {
         return(0);
     }   
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 int SetStatus(ANNOTATEDFORMULA AnnotatedFormula,StatusType Status,
 StatusType SubStatus) {
 
@@ -54,7 +54,7 @@ SubStatus;
         return(0);
     }
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 void UninterpretNumbers(SYMBOLNODE Symbols,int Quote) {
 
     char * NotNumber;
@@ -83,14 +83,14 @@ void UninterpretNumbers(SYMBOLNODE Symbols,int Quote) {
         UninterpretNumbers(Symbols->NextSymbol,Quote);
     }
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 void UninterpretNumbersInSignature(SIGNATURE Signature,int Quote) {
 
     UninterpretNumbers(Signature->Functions,Quote);
 //----Need to do predicates too for THF
     UninterpretNumbers(Signature->Predicates,Quote);
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 void ShortenSymbols(SYMBOLNODE Symbols,char * FormatString,int MallocLength,
 long * SymbolIndex) {
 
@@ -113,7 +113,7 @@ SymbolIndex);
 SymbolIndex);
     }
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 void ShortenSymbolType(SYMBOLNODE Symbols,char ShortChar) {
 
     double NumberOfSymbols,NumberOfSymbolsArity0,MinSymbolArity,MaxSymbolArity;
@@ -128,14 +128,14 @@ void ShortenSymbolType(SYMBOLNODE Symbols,char ShortChar) {
     ShortenSymbols(Symbols,FormatString,NumberOfDigits+2,&SymbolIndex);
 
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 void ShortenSymbolsInSignature(SIGNATURE Signature) {
 
     ShortenSymbolType(Signature->Variables,'X');
     ShortenSymbolType(Signature->Functions,'f');
     ShortenSymbolType(Signature->Predicates,'p');
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 void AritizeSymbols(SYMBOLNODE Symbols) {
 
     char * SymbolAndArity;;
@@ -160,13 +160,13 @@ Symbols->Arity,SingleQuoted?"'":"");
         AritizeSymbols(Symbols->NextSymbol);
     }
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 void AritizeSymbolsInSignature(SIGNATURE Signature) {
     
     AritizeSymbols(Signature->Functions);
     AritizeSymbols(Signature->Predicates);
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 void DequoteSymbols(SYMBOLNODE Symbols) {
 
     int TakeIndex;
@@ -198,13 +198,13 @@ Symbols->NameSymbol[TakeIndex];
         DequoteSymbols(Symbols->NextSymbol);
     }
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 void DequoteSymbolsInSignature(SIGNATURE Signature) {
     
     DequoteSymbols(Signature->Functions);
     DequoteSymbols(Signature->Predicates);
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 void AppendVariableList(VARIABLENODE * OntoThis,VARIABLENODE AppendThis) {
 
 //----Move down to the end of the onto list
@@ -214,7 +214,7 @@ void AppendVariableList(VARIABLENODE * OntoThis,VARIABLENODE AppendThis) {
 //----Stick the append list on the end
     *OntoThis = AppendThis;
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 void ExpandAnnotatedFormulaAssumptions(ANNOTATEDFORMULA AnnotatedFormula,
 LISTNODE AllFormula,SIGNATURE Signature) {
 
@@ -326,7 +326,7 @@ DischargedNamesList,-1);
 //DEBUG printf("New formula with all assumptions and discharges removed is\n");
 //DEBUG PrintAnnotatedTSTPNode(stdout,AnnotatedFormula,tptp,1);
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 void ExpandListAssumptions(LISTNODE Head,SIGNATURE Signature) {
 
     LISTNODE Target;
@@ -338,7 +338,7 @@ Signature);
         Target = Target->Next;
     }
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 void DeDoubleNegateFormula(FORMULA * Formula) {
 
     FORMULA NegatedFormula,DoubleNegatedFormula;
@@ -356,7 +356,7 @@ FormulaUnion.UnaryFormula.Formula;
         }
     }
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 int DeDoubleNegate(ANNOTATEDFORMULA AnnotatedFormula) {
 
     if (CheckAnnotatedFormula(AnnotatedFormula,tptp_fof)) {
@@ -367,7 +367,7 @@ AnnotatedFormulaUnion.AnnotatedTSTPFormula.FormulaWithVariables->Formula));
         return(0);
     }
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 void NegateFormula(FORMULA * Formula) {
 
     FORMULA NegatedFormula;
@@ -378,7 +378,7 @@ void NegateFormula(FORMULA * Formula) {
     NegatedFormula->FormulaUnion.UnaryFormula.Formula = *Formula;
     *Formula = NegatedFormula;
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 int Negate(ANNOTATEDFORMULA AnnotatedFormula,int Simplify) {
 
     FORMULA NegatedFormula;
@@ -409,7 +409,7 @@ AnnotatedFormulaUnion.AnnotatedTSTPFormula.FormulaWithVariables->Formula));
         return(0);
     }
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 int NegateListOfAnnotatedTSTPNodes(LISTNODE Head,int Simplify) {
 
     LISTNODE Reverse;
@@ -430,7 +430,7 @@ int NegateListOfAnnotatedTSTPNodes(LISTNODE Head,int Simplify) {
         return(0);
     }
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 int NegateConjectures(LISTNODE Head,int Simplify) {
 
     int NumberNegated;
@@ -447,7 +447,7 @@ Status = negated_conjecture;
     }
     return(NumberNegated);
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 void UniqueifyVariableNames(ANNOTATEDFORMULA AnnotatedFormula) {
     
     VARIABLENODE VariableNode;
@@ -476,7 +476,7 @@ GetSignatureSymbol(VariableNode->VariableName),UniqueIndex++);
         VariableNode = VariableNode->NextVariable;
     }
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 int RemoveVacuousQuantifiersFromFormula(FORMULA * TheFormula,
 VARIABLENODE * TheVariables) {
 
@@ -535,7 +535,7 @@ FormulaUnion.UnaryFormula.Formula),TheVariables));
     }
 
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 int RemoveVacuousQuantifiersFromAnnotatedFormula(
 ANNOTATEDFORMULA AnnotatedFormula) {
 
@@ -549,7 +549,7 @@ AnnotatedFormulaUnion.AnnotatedTSTPFormula.FormulaWithVariables->Formula),
 FormulaWithVariables->Variables)));
     
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 void QuantifyFormula(FORMULA * UnquantifiedFormula,
 ConnectiveType Quantifier,VARIABLENODE VariableNode) {
 
@@ -579,7 +579,7 @@ TheSymbol.Variable = VariableNode;
         VariableNode = VariableNode->NextVariable;
     }
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 void Quantify(ANNOTATEDFORMULA AnnotatedFormula,ConnectiveType Quantifier) {
 
     if (Quantifier != universal && Quantifier != existential &&
@@ -596,7 +596,7 @@ AnnotatedFormula->AnnotatedFormulaUnion.AnnotatedTSTPFormula.
 FormulaWithVariables->Variables);
     }
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 void QuantifyList(LISTNODE Head,ConnectiveType Quantifier) {
 
     while (Head != NULL) {
@@ -604,7 +604,7 @@ void QuantifyList(LISTNODE Head,ConnectiveType Quantifier) {
         Head = Head->Next;
     }
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 void FOFify(ANNOTATEDFORMULA AnnotatedFormula,ConnectiveType Quantifier) {
 
     if (LogicalAnnotatedFormula(AnnotatedFormula)) {
@@ -614,7 +614,7 @@ void FOFify(ANNOTATEDFORMULA AnnotatedFormula,ConnectiveType Quantifier) {
         Quantify(AnnotatedFormula,Quantifier);
     }
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 void FOFifyList(LISTNODE Head,ConnectiveType Quantifier) {
 
     while (Head != NULL) {
@@ -622,7 +622,7 @@ void FOFifyList(LISTNODE Head,ConnectiveType Quantifier) {
         Head = Head->Next;
     }
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 void RandomizeFormula(FORMULA Formula,unsigned int Seed) {
 
     TERM TempTerm;
@@ -670,7 +670,7 @@ Formula->FormulaUnion.Atom->Arguments[1];
             break;
     }
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 void RandomizeAnnotatedFormula(ANNOTATEDFORMULA AnnotatedFormula,
 unsigned int Seed) {
 
@@ -680,7 +680,7 @@ unsigned int Seed) {
 AnnotatedTSTPFormula.FormulaWithVariables->Formula,0);
     }
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 void EnsureShortForm(ANNOTATEDFORMULA AnnotatedFormula) {
 
     if (ReallyAnAnnotatedFormula(AnnotatedFormula)) {
@@ -692,7 +692,7 @@ AnnotatedTSTPFormula.UsefulInfo),&(AnnotatedFormula->AnnotatedFormulaUnion.
 AnnotatedTSTPFormula.FormulaWithVariables->Variables));
     }
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 void EnsureLongForm(ANNOTATEDFORMULA AnnotatedFormula,SIGNATURE Signature) {
 
     if (ReallyAnAnnotatedFormula(AnnotatedFormula)) {
@@ -710,7 +710,7 @@ ParseStringTerm("[]",nontype,Signature,0);
         }
     }
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 void DoUpdateRecordInList(TERM TheList,SIGNATURE Signature,
 char * UsefulInformation,int DoRemove,int DoAdd) {
 
@@ -782,7 +782,7 @@ TheList->FlexibleArity * sizeof(TERM));
         TheList->Arguments[TheList->FlexibleArity - 1] = ListTerm;
     }
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 int RemoveNamedTermFromList(char * Name,TERM TheList,int MaxToRemove) {
 
     int ListIndex;
@@ -815,7 +815,7 @@ TheList->FlexibleArity * sizeof(TERM));
     }
     return(NumberRemoved);
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 int RemoveParentFromInferenceTerm(char * ParentName,TERM Source) {
 
 //----Nothing if not an inference term
@@ -826,7 +826,7 @@ GetArity(Source->Arguments[2]) == -1) {
 
     return(RemoveNamedTermFromList(ParentName,Source->Arguments[2],-1) > 0);
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 int SetSourceFromString(ANNOTATEDFORMULA AnnotatedFormula,SIGNATURE Signature,
 char * SourceString) {
 
@@ -844,7 +844,7 @@ Source;
         return(0);
     }
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 void DoUpdateUsefulInformationInAnnotatedFormula(
 ANNOTATEDFORMULA AnnotatedFormula,SIGNATURE Signature,
 char * UsefulInformation,int DoRemove,int DoAdd) {
@@ -860,28 +860,28 @@ char * UsefulInformation,int DoRemove,int DoAdd) {
 AnnotatedFormulaUnion.AnnotatedTSTPFormula.UsefulInfo,Signature,
 UsefulInformation,DoRemove,DoAdd);
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 void RemoveUsefulInformationFromAnnotatedFormula(
 ANNOTATEDFORMULA AnnotatedFormula,SIGNATURE Signature,char * PrincipleSymbol) {
 
     DoUpdateUsefulInformationInAnnotatedFormula(AnnotatedFormula,
 Signature,PrincipleSymbol,1,0);
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 void AddUsefulInformationToAnnotatedFormula(ANNOTATEDFORMULA AnnotatedFormula,
 SIGNATURE Signature,char * UsefulInformation) {
 
     DoUpdateUsefulInformationInAnnotatedFormula(AnnotatedFormula,
 Signature,UsefulInformation,0,1);
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 void UpdateUsefulInformationInAnnotatedFormula(ANNOTATEDFORMULA 
 AnnotatedFormula,SIGNATURE Signature,char * UsefulInformation) {
 
     DoUpdateUsefulInformationInAnnotatedFormula(AnnotatedFormula,
 Signature,UsefulInformation,1,1);
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 void StandardizeFormula(FORMULA * Formula) {
 
     switch ((*Formula)->Type) {
@@ -956,7 +956,7 @@ Formula));
             break;
     }
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 void StandardizeAnnotatedFormula(ANNOTATEDFORMULA AnnotatedFormula) {
 
     if (CheckAnnotatedFormula(AnnotatedFormula,tptp_fof)) {
@@ -964,7 +964,7 @@ void StandardizeAnnotatedFormula(ANNOTATEDFORMULA AnnotatedFormula) {
 AnnotatedFormulaUnion.AnnotatedTSTPFormula.FormulaWithVariables->Formula));
     }
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 void StandardizeListOfAnnotatedTSTPNodes(LISTNODE Head) {
 
     while (Head != NULL) {
@@ -972,4 +972,4 @@ void StandardizeListOfAnnotatedTSTPNodes(LISTNODE Head) {
         Head = Head->Next;
     }
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------

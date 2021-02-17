@@ -1,6 +1,6 @@
 #ifndef PRINTXML_H
 #define PRINTXML_H
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 #include <stdio.h>
 #include "DataTypes.h"
 #include "PrintTSTP.h"
@@ -31,9 +31,9 @@ typedef struct {
 } XMLOutputType;
 
 typedef XMLOutputType * XMLOutput;
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 void Error(char *message);
 void XMLPrintListOfAnnotatedTSTPNodes(FILE *Stream, LISTNODE Head,
 Content FormulaeContent, Boolean CommentedOriginal);
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 #endif

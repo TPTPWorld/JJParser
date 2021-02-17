@@ -12,35 +12,35 @@
 #include "Examine.h"
 #include "PrintXML.h"
 
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 void Warning(char * ErrorMessage) {
     fprintf(stderr,"Warning:  %s (continuing anyway)\n",ErrorMessage);
 }
 
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 void StringCat(String Dest, const char *Src) {
     strncat(Dest,Src,sizeof(String)-1);
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 void SuperStringCat(SuperString Dest, const char *Src) {
     strncat(Dest,Src,sizeof(SuperString)-1);
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 void StringCpy(String Dest, const char *Src) {
     strncpy(Dest,Src,sizeof(String)-1);
     Dest[sizeof(String)-1]='\0';
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 void SuperStringCpy(SuperString Dest, const char *Src) {
     strncpy(Dest,Src,sizeof(SuperString)-1);
     Dest[sizeof(SuperString)-1]='\0';
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 void Error(char *message) {
     fprintf(stderr,"ERROR: %s\n",message);
     exit(1);
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 void InitXMLOutput(XMLOutput Out, FILE *Stream,
 Content FormulaeContent, Boolean CommentedOriginal) {
     Out->Stream=Stream;
@@ -48,15 +48,15 @@ Content FormulaeContent, Boolean CommentedOriginal) {
     Out->FormulaeContent=FormulaeContent;
     Out->CommentedOriginal=CommentedOriginal;
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 void CleanXMLOutput(XMLOutput Out) {
     assert(Out->IndentLevel==0);
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 void Indent(XMLOutput Out) {
     fprintf(Out->Stream,"%*s",Out->IndentLevel*2,"");
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 void XMLEscapedString(XMLOutput Out, const char *s) {
     FILE * Stream=Out->Stream;
     const char *ref,*p;
@@ -86,13 +86,13 @@ void XMLEscapedString(XMLOutput Out, const char *s) {
     }
     fputs(s,Stream);
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 void EndTag(XMLOutput Out, const char *name) {
     Out->IndentLevel--;
     Indent(Out);
     fprintf(Out->Stream,"</%s>\n",name);
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 void StartTag(XMLOutput Out, const char *name, AttrNameType *attrNames,
 AttrValueType *attrValues, Boolean empty) {
 
@@ -116,8 +116,8 @@ AttrValueType *attrValues, Boolean empty) {
     }
     fprintf(Out->Stream,">\n");
 }
-//-----------------------------------------------------------------------------
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 
 char * XMLConnectiveToString(ConnectiveType Connective) {
 
@@ -170,7 +170,7 @@ char * XMLConnectiveToString(ConnectiveType Connective) {
     }
 }
 
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 void XMLPrintTSTPTerm(XMLOutput Out, TERM Term) {
 
     int Arity=GetArity(Term);
@@ -241,7 +241,7 @@ printf("====%s====\n",symbol);
         EndTag(Out,tagName);
     }
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 void XMLPrintTSTPFormula(XMLOutput Out,FORMULA Formula) {
     
     if (Formula == NULL)
@@ -309,7 +309,7 @@ XMLConnectiveToString(Formula->FormulaUnion.UnaryFormula.Connective);
         }
     }
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 void XMLPrintAnnotatedTSTPFormula(XMLOutput Out, SyntaxType Syntax,
 AnnotatedTSTPFormulaType AnnotatedTSTPFormula) {
     static AttrNameType names[]={"name","syntax","status",NULL};
@@ -374,7 +374,7 @@ AnnotatedTSTPFormula.FormulaWithVariables->Formula,6,1,outermost,1);
     }
     EndTag(Out,"formula");
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 LISTNODE XMLPrintComments(XMLOutput Out, LISTNODE Head) {
 
     if (Head->AnnotatedFormula->Syntax!=comment) {
@@ -402,7 +402,7 @@ LISTNODE XMLPrintComments(XMLOutput Out, LISTNODE Head) {
     fprintf(Out->Stream,"]]></comment>\n");
     return(Head);
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 void XMLPrintListOfAnnotatedTSTPNodes(FILE * Stream, LISTNODE Head, Content 
 FormulaeContent, Boolean CommentedOriginal) {
     XMLOutputType Out;
@@ -446,4 +446,4 @@ FormulaeContent, Boolean CommentedOriginal) {
     EndTag(&Out,"tstp");
     CleanXMLOutput(&Out);
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------

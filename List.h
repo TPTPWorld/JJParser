@@ -1,8 +1,8 @@
 #ifndef LIST_H
 #define LIST_H
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 #include "DataTypes.h"
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 void ResetListVisited(LISTNODE Head);
 int ListLength(LISTNODE Head);
 LISTNODE GetLogicNode(LISTNODE Head);
@@ -57,5 +57,5 @@ BTREENODE ListToBTree(LISTNODE Head);
 void FreeBTreeOfAnnotatedFormulae(BTREENODE * Root);
 void PrintBTreeOfAnnotatedFormulae(BTREENODE Root);
 int BTreeDepth(BTREENODE Root);
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 #endif

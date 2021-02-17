@@ -1,6 +1,6 @@
 #ifndef UTILITIES_H
 #define UTILITIES_H
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 #define STRINGLENGTH 1024
 #define SUPERSTRINGLENGTH 40960
 #define MAX_STRING_PARTS 10240
@@ -8,7 +8,7 @@
 typedef char String[STRINGLENGTH];
 typedef char SuperString[SUPERSTRINGLENGTH];
 typedef char * StringParts[MAX_STRING_PARTS];
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 int GetSZSStatusReporting(void);
 void SetSZSStatusReporting(int UseSZSStatusReporting);
 void ReportError(const char * SZSStatus,char * ErrorDetails,int Exit);
@@ -35,5 +35,5 @@ int Tokenize(char * BigString,StringParts SmallParts,char * Delimiters);
 void PrintTimeStamp(char * Message);
 void Trim(char * TheString);
 void StringToLower(char * TheString);
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 #endif

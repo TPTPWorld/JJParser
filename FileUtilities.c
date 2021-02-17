@@ -12,7 +12,7 @@
 #include "Utilities.h"
 #include "Tokenizer.h"
 #include "FileUtilities.h"
-//------------------------------------------------------------------------------
+//--------------------------------------------------------------------------------------------------
 READFILE NewReadFile(void) {
 
     READFILE Stream;
@@ -34,7 +34,7 @@ READFILE NewReadFile(void) {
 
     return(Stream);
 }
-//------------------------------------------------------------------------------
+//--------------------------------------------------------------------------------------------------
 PRINTFILE NewPrintFile(void) {
 
     PRINTFILE Stream;
@@ -47,7 +47,7 @@ PRINTFILE NewPrintFile(void) {
 
     return(Stream);
 }
-//------------------------------------------------------------------------------
+//--------------------------------------------------------------------------------------------------
 void PathBasename(char * Path,String Basename,char * Suffix) {
 
     char * Slash;
@@ -64,7 +64,7 @@ void PathBasename(char * Path,String Basename,char * Suffix) {
         *Slash = '\0';
     }
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 char * ExpandFileName(char * FileName,String ExpandedFileName) {
 
     char * Home;
@@ -105,7 +105,7 @@ char * ExpandFileName(char * FileName,String ExpandedFileName) {
     strcpy(ExpandedFileName,"");
     return(ExpandedFileName);
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 char * ExpandAndFindFileName(char * FileName,char * IncludingFileName,
 String ExpandedFileName) {
 
@@ -234,7 +234,7 @@ ExtensionIndex++) {
 
     return(NULL);
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 char * CleanTheFileName(char * OriginalFileName,char * CleanFileName) {
 
 //    int Index;
@@ -256,7 +256,7 @@ CleanFileName[0] == CleanFileName[strlen(CleanFileName)-1]) {
 //    }
     return(CleanFileName);
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 FILE * OpenFileInMode(String FileName,char * Mode) {
     
     FILE * Stream;
@@ -272,7 +272,7 @@ Mode);
         return(Stream);
     }
 }   
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 PRINTFILE OpenFILEPrintFile(FILE * OpenStream,char * FileName) {
 
     PRINTFILE Stream;
@@ -287,7 +287,7 @@ PRINTFILE OpenFILEPrintFile(FILE * OpenStream,char * FileName) {
 
     return(Stream);
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 PRINTFILE OpenStringPrintFile(char * Content) {
 
     PRINTFILE Stream;
@@ -301,7 +301,7 @@ PRINTFILE OpenStringPrintFile(char * Content) {
 
     return(Stream);
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 PRINTFILE OpenPrintFile(char * OriginalFileName) {
 
     String FileName;
@@ -328,7 +328,7 @@ PRINTFILE OpenPrintFile(char * OriginalFileName) {
 
     return(Stream);
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 void ClosePrintFile(PRINTFILE Stream) {
 
     if (Stream->FileHandle != NULL) {
@@ -341,7 +341,7 @@ void ClosePrintFile(PRINTFILE Stream) {
     } 
     Free((void **)&Stream);
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 void PFprintf(PRINTFILE Stream,char * Format,...) {
 
     va_list Data;
@@ -362,7 +362,7 @@ void PFprintf(PRINTFILE Stream,char * Format,...) {
     }
     va_end(Data);
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 READFILE OpenFILEReadFile(char * FileName,FILE * OpenStream) {
 
     READFILE Stream;
@@ -377,7 +377,7 @@ READFILE OpenFILEReadFile(char * FileName,FILE * OpenStream) {
 
     return(Stream);
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 READFILE OpenStringReadFile(char * Content) {
 
     READFILE Stream;
@@ -392,7 +392,7 @@ READFILE OpenStringReadFile(char * Content) {
 
     return(Stream);
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 READFILE OpenReadFile(char * OriginalFileName,char * IncludingFileName) {
 
     String FinalFileName;
@@ -441,7 +441,7 @@ READFILE OpenReadFile(char * OriginalFileName,char * IncludingFileName) {
 
     return(Stream);
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 void CloseReadFile(READFILE Stream) {
 
     assert((Stream->FileHandle != NULL || Stream->StringFileContent != NULL) &&
@@ -461,7 +461,7 @@ void CloseReadFile(READFILE Stream) {
     FreeToken(&(Stream->Auxilliary));
     Free((void **)&Stream);
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 void RemoveFile(String FileName) {
 
     String ErrorMessage;
@@ -472,7 +472,7 @@ void RemoveFile(String FileName) {
         ReportError("OSError",ErrorMessage,0);
     }
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 void RemoveFileDirectory(String FileName) {
 
     char * Slash;
@@ -484,4 +484,4 @@ void RemoveFileDirectory(String FileName) {
     *Slash = '\0';
     RemoveFile(FileName);
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------

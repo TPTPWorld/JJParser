@@ -14,26 +14,26 @@
 #include "ParseTSTP.h"
 #include "ParseTPTP.h"
 #include "PrintTSTP.h"
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 static int AllowFreeVariables = 0;
 static int AllowFOFNumbers = 0;
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 void SetAllowFreeVariables(int OnOff) {
 
     AllowFreeVariables = OnOff;
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 void SetAllowFOFNumbers(int OnOff) {
 
     AllowFOFNumbers = OnOff;
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 void IncreaseVariableUseCount(VARIABLENODE Variable,int HowMuch) {
 
     Variable->NumberOfUses += HowMuch;
     IncreaseSymbolUseCount(Variable->VariableName,HowMuch);
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 void PrintVariableList(VARIABLENODE Variables,VARIABLENODE EndOfScope) {
 
     printf("Formula variables: ");
@@ -50,7 +50,7 @@ GetSignatureArity(Variables->VariableName),Variables->NumberOfUses,Variables);
     }
     printf("\n");
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 VARIABLENODE IsVariableInList(VARIABLENODE List,VARIABLENODE EndOfScope,
 char * Name) {
 
@@ -77,7 +77,7 @@ char * Name) {
 
     return(NodeFound);
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 VARIABLENODE NewVariable(void) {
 
     VARIABLENODE NewVariable;
@@ -91,7 +91,7 @@ VARIABLENODE NewVariable(void) {
 
     return(NewVariable);
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 void RemoveVariable(VARIABLENODE * Variables,VARIABLENODE * Variable) {
 
 //----Variables points to the pointer to the first element of the list of
@@ -110,7 +110,7 @@ void RemoveVariable(VARIABLENODE * Variables,VARIABLENODE * Variable) {
 //----Remove the list element
     Free((void **)Variable);
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 VARIABLENODE InsertVariable(READFILE Stream,SIGNATURE Signature,
 VARIABLENODE * Variables,VARIABLENODE * EndOfScope,int ForceNew,
 char * VariableName,ConnectiveType Quantification,
@@ -142,8 +142,7 @@ Quantification == free_variable && FoundVariable == NULL) {
         Variable->NumberOfUses = 1;
         Variable->Quantification = Quantification;
         Variable->Instantiation = NULL;
-        Variable->VariableName = InsertIntoSignature(Signature,variable,
-VariableName,0,NULL);
+        Variable->VariableName = InsertIntoSignature(Signature,variable,VariableName,0,NULL);
 
 //----If a tolerated free variable, add at top and don't change context
         if (FoundVariable == NULL && Quantification == free_variable &&
@@ -173,7 +172,7 @@ AllowFreeVariables) {
         return(Variable);
     }
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 VARIABLENODE ParallelCopyVariableList(VARIABLENODE Original) {
 
     VARIABLENODE Copy;
@@ -190,7 +189,7 @@ VARIABLENODE ParallelCopyVariableList(VARIABLENODE Original) {
     }
 
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 void ParallelCopyVariableInstantiations(VARIABLENODE Original,
 VARIABLENODE Copy) {
 
@@ -206,7 +205,7 @@ VARIABLENODE Copy) {
 Copy->NextVariable);
     }
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 TERM NewTerm(void) {
 
     TERM Term;
@@ -219,7 +218,7 @@ TERM NewTerm(void) {
 
     return(Term);
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 TERMWITHVARIABLES NewTermWithVariables(void) {
 
     TERMWITHVARIABLES TermWithVariables;
@@ -231,7 +230,7 @@ TERMWITHVARIABLES NewTermWithVariables(void) {
 
     return(TermWithVariables);
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 void FreeTerm(TERM * Term,VARIABLENODE * Variables) {
 
     int ArgumentIndex;
@@ -280,7 +279,7 @@ ArgumentIndex++) {
         Free((void **)Term);
     }
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 void FreeTermWithVariables(TERMWITHVARIABLES * TermWithVariables) {
 
     if (*TermWithVariables != NULL) {
@@ -291,7 +290,7 @@ void FreeTermWithVariables(TERMWITHVARIABLES * TermWithVariables) {
         Free((void **)TermWithVariables);
     }
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 FORMULA NewFormula(void) {
 
     FORMULA Formula;
@@ -301,7 +300,7 @@ FORMULA NewFormula(void) {
 
     return(Formula);
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 FORMULAWITHVARIABLES NewFormulaWithVariables(void) {
 
     FORMULAWITHVARIABLES FormulaWithVariables;
@@ -313,7 +312,7 @@ FORMULAWITHVARIABLES NewFormulaWithVariables(void) {
 
     return(FormulaWithVariables);
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 void FreeTupleFormulae(int NumberOfElements,FORMULAArray * TupleFormulae,
 VARIABLENODE * Variables) {
 
@@ -329,7 +328,7 @@ VARIABLENODE * Variables) {
         assert(*TupleFormulae == NULL);
     }
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 void FreeFormula(FORMULA * Formula,VARIABLENODE * Variables) {
 
     if (*Formula != NULL) {
@@ -404,7 +403,7 @@ Variables);
         Free((void **)Formula);
     }
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 void FreeFormulaWithVariables(FORMULAWITHVARIABLES * FormulaWithVariables) {
 
     if (*FormulaWithVariables != NULL) {
@@ -415,7 +414,7 @@ void FreeFormulaWithVariables(FORMULAWITHVARIABLES * FormulaWithVariables) {
         Free((void **)FormulaWithVariables);
     }
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 TERMArray NewArguments(int NumberOfArguments) {
 
     TERMArray Arguments;
@@ -428,7 +427,7 @@ TERMArray NewArguments(int NumberOfArguments) {
 
     return(Arguments);
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 TERMArray DuplicateArguments(TERMArray Original,ContextType Context,int Arity,
 int ForceNewVariables) {
 
@@ -446,7 +445,7 @@ Context,ForceNewVariables);
         return(NULL);
     }
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 TERM ParseArgument(READFILE Stream,SyntaxType Language,ContextType Context,
 VARIABLENODE * EndOfScope,TermType Type,int VariablesMustBeQuantified) {
 
@@ -468,7 +467,7 @@ Context,EndOfScope,1,1,VariablesMustBeQuantified,none);
 free_variable,NULL,VariablesMustBeQuantified));
     }
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 TERMArray ParseArguments(READFILE Stream,SyntaxType Language,
 ContextType Context,VARIABLENODE * EndOfScope,int * Arity,TermType Type,
 char * MatchingBracket,int VariablesMustBeQuantified) {
@@ -498,7 +497,7 @@ EndOfScope,Type,VariablesMustBeQuantified);
 
     return(Arguments);
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 //----This assumes it's in the context of duplicating a formula with variables
 TERM DuplicateTerm(TERM Original,ContextType Context,int ForceNewVariables) {
 
@@ -577,7 +576,7 @@ NumberOfArguments,ForceNewVariables);
         return(Term);
     }
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 TERMWITHVARIABLES DuplicateTermWithVariables(TERMWITHVARIABLES Original,
 SIGNATURE Signature,int ForceNewVariables) {
 
@@ -610,7 +609,7 @@ TermWithVariables->Variables);
 
     return(TermWithVariables); 
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 TermType KnownTermTypeOrError(READFILE Stream,SyntaxType Language) {
 
     if (CheckTokenType(Stream,upper_word)) {
@@ -647,7 +646,7 @@ Language == tptp_fof)) {
         }
     }
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 int InfixOperatorParsing(READFILE Stream,SyntaxType Language,
 TermType OriginallyExpectedType,TermType * ExpectedRHSTermType) {
 
@@ -667,10 +666,10 @@ TermType OriginallyExpectedType,TermType * ExpectedRHSTermType) {
 
     return(0);
 }
-//-----------------------------------------------------------------------------
-TERM ParseTerm(READFILE Stream,SyntaxType Language,ContextType Context,
-VARIABLENODE * EndOfScope,TermType Type,ConnectiveType VariableQuantifier,
-int * InfixNegatedAtom,int VariablesMustBeQuantified) {
+//-------------------------------------------------------------------------------------------------
+TERM ParseTerm(READFILE Stream,SyntaxType Language,ContextType Context,VARIABLENODE * EndOfScope,
+TermType Type,ConnectiveType VariableQuantifier,int * InfixNegatedAtom,
+int VariablesMustBeQuantified) {
 
     TokenType FunctorType;
     TERM InfixTerm,Term;
@@ -927,7 +926,7 @@ InfixRHSType,VariableQuantifier,NULL,VariablesMustBeQuantified);
         return(Term);
     }
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 TERMWITHVARIABLES ParseTermWithVariables(READFILE Stream,SyntaxType Language,
 SIGNATURE Signature,int VariablesMustBeQuantified) {
 
@@ -950,36 +949,36 @@ non_logical_data,none,NULL,VariablesMustBeQuantified);
     Stream->NeedNonLogicTokens = NeedNonLogicTokens;
     return(TermWithVariables);
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 int RightAssociative(ConnectiveType Connective) {
 
     return(Connective == disjunction || Connective == conjunction ||
 Connective == maparrow);
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 int LeftAssociative(ConnectiveType Connective) {
 
     return(Connective == disjunction || Connective == conjunction ||
 Connective == application || Connective == xprodtype ||
 Connective == uniontype);
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 int Associative(ConnectiveType Connective) {
 
     return(RightAssociative(Connective) || LeftAssociative(Connective));
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 int FullyAssociative(ConnectiveType Connective) {
 
     return(RightAssociative(Connective) && LeftAssociative(Connective));
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 int Symmetric(ConnectiveType Connective) {
 
     return(FullyAssociative(Connective) || Connective == equivalence ||
 Connective == nonequivalence);
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 //----Unused now, for chaning a right branch to a left branch
 FORMULA ChangeAssociationRightToLeft(FORMULA Formula) {
 
@@ -995,7 +994,7 @@ FormulaUnion.BinaryFormula.LHS;
         return(Formula);
     }
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 FORMULA ParseAtom(READFILE Stream,SyntaxType Language,ContextType Context,
 VARIABLENODE * EndOfScope,int VariablesMustBeQuantified) {
 
@@ -1020,7 +1019,7 @@ predicate,none,&InfixNegatedAtom,VariablesMustBeQuantified);
 
     return(Formula);
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 FORMULA ParseUnaryFormula(READFILE Stream,SyntaxType Language,
 ContextType Context,VARIABLENODE * EndOfScope,int VariablesMustBeQuantified) {
 
@@ -1053,7 +1052,7 @@ Language,Context,EndOfScope,0,0,VariablesMustBeQuantified,none);
     }
     return(Formula);
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 void ParseQuantifiedVariable(READFILE Stream,SyntaxType Language,
 ContextType Context,VARIABLENODE * EndOfScope,ConnectiveType Quantifier,
 int VariablesMustBeQuantified,QuantifiedFormulaType * QuantifiedFormula) {
@@ -1090,7 +1089,7 @@ Context,EndOfScope,VariablesMustBeQuantified);
         QuantifiedFormula->VariableType = NULL;
     }
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 FORMULA ParseQuantifiedRemainder(READFILE Stream,SyntaxType Language,
 ContextType Context,VARIABLENODE * EndOfScope,ConnectiveType Quantifier,
 int VariablesMustBeQuantified) {
@@ -1119,7 +1118,7 @@ VariablesMustBeQuantified);
         return(Formula);
     }
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 FORMULA ParseQuantifiedFormula(READFILE Stream,SyntaxType Language,
 ContextType Context,VARIABLENODE * EndOfScope,int VariablesMustBeQuantified) {
 
@@ -1143,7 +1142,7 @@ FormulaUnion.QuantifiedFormula.Quantifier,VariablesMustBeQuantified);
 
     return(Formula);
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 FORMULAArray DuplicateTupleFormulae(int NumberOfElements,
 FORMULAArray Original,ContextType Context,int ForceNewVariables) {
 
@@ -1156,7 +1155,7 @@ Original[NumberOfElements-1],Context,ForceNewVariables);
     }
     return(Duplicate);
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 FORMULAArray ParseTupleFormulae(READFILE Stream,SyntaxType Language,
 ContextType Context,VARIABLENODE * EndOfScope,int AllowBinary,
 int VariablesMustBeQuantified,ConnectiveType LastConnective,
@@ -1186,7 +1185,7 @@ Language,Context,EndOfScope,1,1,VariablesMustBeQuantified,none);
     AcceptToken(Stream,punctuation,"]");
     return(TupleFormulae);
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 FORMULA ParseTupleOrSequentFormula(READFILE Stream,SyntaxType Language,
 ContextType Context,VARIABLENODE * EndOfScope,int AllowBinary,
 int VariablesMustBeQuantified,ConnectiveType LastConnective) {
@@ -1219,7 +1218,7 @@ NumberOfElements;
 
     return(TupleOrSequent);
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 FORMULA ParseITEFormula(READFILE Stream,SyntaxType Language,
 ContextType Context,VARIABLENODE * EndOfScope,int VariablesMustBeQuantified) {
 
@@ -1242,7 +1241,7 @@ Stream,Language,Context,EndOfScope,1,1,VariablesMustBeQuantified,none);
 
     return(ITEFormula);
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 FORMULA ParseLETFormula(READFILE Stream,SyntaxType Language,
 ContextType Context,VARIABLENODE * EndOfScope,int VariablesMustBeQuantified) {
 
@@ -1266,7 +1265,7 @@ Context,EndOfScope,1,1,VariablesMustBeQuantified,none);
 
     return(LETFormula);
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 //----This assumes it's in the context of duplicating a formula with variables
 FORMULA DuplicateFormula(FORMULA Original,ContextType Context,
 int ForceNewVariables) {
@@ -1353,7 +1352,7 @@ Context,ForceNewVariables);
     }
     return(Formula);
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 FORMULA ParseLowPrecedenceBinary(READFILE Stream,SyntaxType Language,
 ContextType Context,VARIABLENODE * EndOfScope,int AllowBinary,
 int AllowInfixEquality,int VariablesMustBeQuantified,
@@ -1375,7 +1374,7 @@ assignmentsym);
         return(PossibleLHSFormula);
     }
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 FORMULA ParseFormula(READFILE Stream,SyntaxType Language,ContextType Context,
 VARIABLENODE * EndOfScope,int AllowBinary,int AllowInfixEquality,
 int VariablesMustBeQuantified,ConnectiveType LastConnective) {
@@ -1536,7 +1535,7 @@ EndOfScope,1,AllowInfixEquality,VariablesMustBeQuantified,BinaryFormula));
         return(Formula);
     }
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 FORMULAWITHVARIABLES DuplicateFormulaWithVariables(
 FORMULAWITHVARIABLES Original,SIGNATURE Signature,int ForceNewVariables) {
 
@@ -1569,7 +1568,7 @@ FormulaWithVariables->Variables);
 
     return(FormulaWithVariables); 
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 FORMULA DuplicateInternalFormulaWithVariables(FORMULA Original,ContextType 
 OriginalContext) {
 
@@ -1610,7 +1609,7 @@ LocalFormulaWithVariables,OriginalContext.Signature,0);
 
     return(Copy);
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 FORMULAWITHVARIABLES ParseFormulaWithVariables(READFILE Stream,
 SyntaxType Language,SIGNATURE Signature,int VariablesMustBeQuantified) {
 
@@ -1633,7 +1632,7 @@ Context,&EndOfScope,1,1,VariablesMustBeQuantified,none);
     Stream->NeedNonLogicTokens = NeedNonLogicTokens;
     return(FormulaWithVariables);
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 ANNOTATEDFORMULA ParseInclude(READFILE Stream,SIGNATURE Signature) {
 
     ContextType Context;
@@ -1660,7 +1659,7 @@ AnnotatedFormulaUnion.Include->Arguments[1]),"[]"))) {
 
     return(AnnotatedFormula);
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 ANNOTATEDFORMULA ParseComment(READFILE Stream) {
 
     ANNOTATEDFORMULA AnnotatedFormula;
@@ -1672,7 +1671,7 @@ CurrentToken(Stream)->NameToken);
 
     return(AnnotatedFormula);
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 ANNOTATEDFORMULA ParseBlankLine(READFILE Stream) {
 
     ANNOTATEDFORMULA AnnotatedFormula;
@@ -1682,7 +1681,7 @@ ANNOTATEDFORMULA ParseBlankLine(READFILE Stream) {
 
     return(AnnotatedFormula);
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 ANNOTATEDFORMULA DuplicateAnnotatedFormula(ANNOTATEDFORMULA Original,
 SIGNATURE Signature) {
 
@@ -1710,7 +1709,7 @@ SIGNATURE Signature) {
     }
     return(NULL);
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 void FreeAnnotatedFormula(ANNOTATEDFORMULA * AnnotatedFormula) {
 
     if (*AnnotatedFormula != NULL) {
@@ -1745,7 +1744,7 @@ AnnotatedFormulaUnion.Comment));
         }
     }
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 ANNOTATEDFORMULA ParseAnnotatedFormula(READFILE Stream,SIGNATURE Signature) {
 
     int NeedNonLogicTokens;
@@ -1774,7 +1773,7 @@ ANNOTATEDFORMULA ParseAnnotatedFormula(READFILE Stream,SIGNATURE Signature) {
     Stream->NeedNonLogicTokens = NeedNonLogicTokens;
     return(AnnotatedFormula);
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 //----Use this entry point if you want the count updated
 ANNOTATEDFORMULA ParseAndUseAnnotatedFormula(READFILE Stream,SIGNATURE 
 Signature) {
@@ -1787,7 +1786,7 @@ Signature) {
 
     return(AnnotatedFormula);
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 void GetIncludeParts(ANNOTATEDFORMULA AnnotatedFormula,String IncludeFile,
 SuperString IncludeFilter) {
 
@@ -1818,7 +1817,7 @@ AnnotatedFormulaUnion.Include->Arguments[1]->Arguments[Index]));
     }
 //DEBUG printf("==%s==%s==\n",IncludeFile,IncludeFilter);
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 LISTNODE GetIncludedAnnotatedFormulae(READFILE Stream,SIGNATURE Signature,
 int ExpandIncludes,ANNOTATEDFORMULA AnnotatedFormula) {
 
@@ -1859,7 +1858,7 @@ IncludedHead->AnnotatedFormula->AnnotatedFormulaUnion.Comment));
     }
     return(IncludedHead);
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 LISTNODE ParseREADFILEOfHeader(READFILE Stream) {
 
     SIGNATURE Signature;
@@ -1914,7 +1913,7 @@ strstr(AnnotatedFormula->AnnotatedFormulaUnion.Comment,"% File ") != NULL) {
     FreeSignature(&Signature);
     return(Head);
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 LISTNODE ParseREADFILEOfFormulae(READFILE Stream,
 SIGNATURE Signature,int ExpandIncludes,char * NameFilter) {
 
@@ -2002,7 +2001,7 @@ FormulaName);
 
     return(Head);
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 LISTNODE ParseFILEOfHeader(char * FileName,FILE * FileStream) {
 
     READFILE Stream; 
@@ -2017,7 +2016,7 @@ LISTNODE ParseFILEOfHeader(char * FileName,FILE * FileStream) {
 
     return(Head);
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 LISTNODE ParseFILEOfFormulae(char * FileName,FILE * FileStream,
 SIGNATURE Signature,int ExpandIncludes,char * NameFilter) {
 
@@ -2034,7 +2033,7 @@ NameFilter);
 
     return(Head);
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 LISTNODE ParseFileOfHeader(char * FileName) {
 
     READFILE Stream; 
@@ -2049,7 +2048,7 @@ LISTNODE ParseFileOfHeader(char * FileName) {
 
     return(Head);
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 //----Send NULL as the CurrentFileName when starting. It's used for resolving
 //----includes. Send NULL as the NameFilter if no filtering required.
 LISTNODE ParseFileOfFormulae(char * FileName,char * CurrentFileName,
@@ -2068,7 +2067,7 @@ NameFilter);
 
     return(Head);
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 LISTNODE ParseStringOfFormulae(char * Content,SIGNATURE Signature,
 int ExpandIncludes,char * NameFilter) {
 
@@ -2086,7 +2085,7 @@ NameFilter);
     return(Head);
 
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 TERM ParseStringTerm(char * Content,SyntaxType Language,SIGNATURE Signature,
 int VariablesMustBeQuantified) {
 
@@ -2107,4 +2106,4 @@ VariablesMustBeQuantified);
 
     return(Term);
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------

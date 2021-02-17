@@ -1,11 +1,11 @@
 #ifndef EXAMINE_H
 #define EXAMINE_H
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 #include "DataTypes.h"
 #include "SystemOnTPTP.h"
 #include "Utilities.h"
 #include "Statistics.h"
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 int CheckAnnotatedFormula(ANNOTATEDFORMULA AnnotatedFormula,
 SyntaxType ExpectedSyntax);
 int LogicalAnnotatedFormula(ANNOTATEDFORMULA AnnotatedFormula);
@@ -104,5 +104,5 @@ TERM GetUsefulInfoTERM(ANNOTATEDFORMULA AnnotatedFormula,char * Symbol,
 int OccurenceNumber);
 char * GetUsefulInfoTerm(ANNOTATEDFORMULA AnnotatedFormula,char * Symbol,
 int OccurenceNumber,char * PutInfoHere);
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 #endif

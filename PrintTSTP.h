@@ -1,6 +1,6 @@
 #ifndef PRINTTSTP_H
 #define PRINTTSTP_H
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 #include "DataTypes.h"
 
 typedef enum {
@@ -16,7 +16,7 @@ typedef enum {
     smt2,
     nonprinttype
 } PrintFormatType;
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 PrintFormatType StringToPrintFormat(char * String);
 char * PrintFormatToString(PrintFormatType Format);
 
@@ -41,5 +41,5 @@ void PrintListOfAnnotatedTSTPNodes(FILE * Stream,SIGNATURE Signature,
 LISTNODE Head,PrintFormatType Format,int Pretty);
 void PrintListOfAnnotatedTSTPNodesWithStatus(FILE * Stream,SIGNATURE Signature,
 LISTNODE Head,PrintFormatType Format,int Pretty,StatusType Status);
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 #endif

@@ -1,6 +1,6 @@
 #ifndef STATISTICS_H
 #define STATISTICS_H
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 #include "DataTypes.h"
 
 typedef enum {
@@ -137,7 +137,7 @@ typedef struct {
     SymbolStatisticsType SymbolStatistics;
     ConnectiveStatisticsType ConnectiveStatistics;
 } StatisticsType;
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 void InitializeStatistics(StatisticsType * Statistics);
 void InitializeFormulaStatistics(FormulaStatisticsType * FormulaStatistics);
 void InitializeSymbolStatistics(SymbolStatisticsType * SymbolStatistics);
@@ -145,5 +145,5 @@ void InitializeConnectiveStatistics(ConnectiveStatisticsType *
 ConnectiveStatistics);
 void AddOnConnectiveStatistics(ConnectiveStatisticsType * ConnectiveStatistics,
 ConnectiveStatisticsType MoreConnectiveStatistics);
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 #endif

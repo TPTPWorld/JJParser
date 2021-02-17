@@ -7,9 +7,9 @@
 #include "Signature.h"
 #include "Utilities.h"
 #include "DataTypes.h"
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 static int GlobalSymbolIndex;
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 SYMBOLNODE NewSignatureNode(char * Name,int Arity) {
 
     SYMBOLNODE Symbol;
@@ -34,7 +34,7 @@ SYMBOLNODE NewSignatureNode(char * Name,int Arity) {
 //DEBUG Symbol->NameSymbol,Symbol->Arity,Symbol->ShortSymbol);
     return(Symbol);
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 SIGNATURE NewSignature(void) {
 
     SIGNATURE Signature;
@@ -47,7 +47,7 @@ SIGNATURE NewSignature(void) {
 
     return(Signature);
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 SYMBOLNODE DuplicateSymbols(SYMBOLNODE Original) {
 
     SYMBOLNODE Copy;
@@ -63,7 +63,7 @@ SYMBOLNODE DuplicateSymbols(SYMBOLNODE Original) {
 
     return(Copy);
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 SIGNATURE DuplicateSignature(SIGNATURE Original) {
 
     SIGNATURE Copy;
@@ -76,7 +76,7 @@ SIGNATURE DuplicateSignature(SIGNATURE Original) {
 
     return(Copy);
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 void FreeSignatureList(SYMBOLNODE * Symbols) {
 
     if ((*Symbols) != NULL) {
@@ -87,7 +87,7 @@ void FreeSignatureList(SYMBOLNODE * Symbols) {
         Free((void **)Symbols);
     }
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 void FreeSignature(SIGNATURE * Signature) {
 
     FreeSignatureList(&((*Signature)->Variables));
@@ -101,7 +101,7 @@ void FreeSignature(SIGNATURE * Signature) {
 
     Free((void **)Signature);
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 SYMBOLNODE RemoveSignatureNodeFromTree(SYMBOLNODE * OneToDeletePtr) {
 
     SYMBOLNODE * LargestPointer;
@@ -130,7 +130,7 @@ SYMBOLNODE RemoveSignatureNodeFromTree(SYMBOLNODE * OneToDeletePtr) {
     Deleted->LastSymbol = NULL;
     return(Deleted);
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 int RemovedUnusedSymbolsFromList(SYMBOLNODE * Symbols) {
 
     int NumberRemoved;
@@ -151,7 +151,7 @@ NextSymbol));
 
     return(NumberRemoved);
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 int RemovedUnusedSymbols(SIGNATURE Signature) {
 
     int TotalRemoved;
@@ -164,32 +164,32 @@ int RemovedUnusedSymbols(SIGNATURE Signature) {
 
     return(TotalRemoved);
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 char * GetSignatureSymbol(SYMBOLNODE SymbolNode) {
 
     return(SymbolNode->NameSymbol);
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 char * GetSignatureShortSymbol(SYMBOLNODE SymbolNode) {
 
     return(SymbolNode->ShortSymbol);
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 int GetSignatureArity(SYMBOLNODE SymbolNode) {
 
     return(SymbolNode->Arity);
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 int GetSignatureUses(SYMBOLNODE SymbolNode) {
 
     return(SymbolNode->NumberOfUses);
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 void IncreaseSymbolUseCount(SYMBOLNODE Symbol,int HowMuch) {
 
     Symbol->NumberOfUses += HowMuch;
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 SYMBOLNODE IsSymbolInSignatureList(SYMBOLNODE List,char * Name,int Arity) {
 
     if (List == NULL || (!strcmp(GetSignatureSymbol(List),Name) &&
@@ -204,7 +204,7 @@ SYMBOLNODE IsSymbolInSignatureList(SYMBOLNODE List,char * Name,int Arity) {
         return(IsSymbolInSignatureList(List->NextSymbol,Name,Arity));
     }
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 SYMBOLNODE * IsSymbolInSignatureListPointer(SYMBOLNODE * List,char * Name,
 int Arity) {
 
@@ -225,7 +225,7 @@ Arity));
 Arity));
     }
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 SYMBOLNODE InsertIntoSignatureList(SYMBOLNODE * List,char * Name,int Arity,
 READFILE Stream) {
 
@@ -266,7 +266,7 @@ Name,GetSignatureArity(*Current),Arity);
 //DEBUG PrintSignatureTree(*List);
     return(*Current);
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 SYMBOLNODE InsertNodeIntoSignatureList(SYMBOLNODE * List,
 SYMBOLNODE NodeToInsert,READFILE Stream) {
 
@@ -296,7 +296,7 @@ Stream));
 Stream));
     }
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 SYMBOLNODE InsertIntoSignature(SIGNATURE Signature,TermType Type,
 char * Name,int Arity,READFILE Stream) {
 
@@ -351,7 +351,7 @@ Arity);
             break;
     }
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 void DoNextInSignature(SYMBOLNODE SignatureTree,SYMBOLNODE Current,
 int * CurrentFound,int * NextFound,SYMBOLNODE * Next) {
 
@@ -402,7 +402,7 @@ CurrentFound,NextFound,Next);
         *CurrentFound = 1;
     }
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 SYMBOLNODE NextInSignatureTree(SYMBOLNODE SignatureTree,SYMBOLNODE Current) {
 
     SYMBOLNODE Next;
@@ -415,7 +415,7 @@ SYMBOLNODE NextInSignatureTree(SYMBOLNODE SignatureTree,SYMBOLNODE Current) {
     DoNextInSignature(SignatureTree,Current,&CurrentFound,&NextFound,&Next);
     return(Next);
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 void ListSignatureBySearch(SYMBOLNODE SignatureTree) {
 
     SYMBOLNODE Current;
@@ -428,7 +428,7 @@ GetSignatureArity(Current),GetSignatureUses(Current));
         Current = NextInSignatureTree(SignatureTree,Current);
     }
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 void PrintSignatureTree(SYMBOLNODE SignatureTree) {
 
     if (SignatureTree != NULL) {
@@ -439,7 +439,7 @@ GetSignatureArity(SignatureTree),GetSignatureUses(SignatureTree));
         PrintSignatureTree(SignatureTree->NextSymbol);
     }
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 void PrintSignature(SIGNATURE Signature) {
 
     printf("Variables:\n");
@@ -455,7 +455,7 @@ void PrintSignature(SIGNATURE Signature) {
     PrintSignatureTree(Signature->NonLogicals);
     printf("\n");
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 void DoGetSignatureSymbolUsage(char ** PutUsageHere,char ** PutNextHere,
 SYMBOLNODE Current,long * UsageLength,int * SpareLength) {
 
@@ -492,7 +492,7 @@ Current->NumberOfUses);
 UsageLength,SpareLength);
     }
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 //----PutUsageHere must be address of a malloced String
 char * GetSignatureSymbolUsage(SIGNATURE Signature,char ** PutUsageHere,
 char ** FunctorUsageStartsHere) {
@@ -517,7 +517,7 @@ char ** FunctorUsageStartsHere) {
     *FunctorUsageStartsHere = *PutUsageHere + FunctorUsageOffset;
     return(*PutUsageHere);
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 void DoGetSignatureSymbolUsageStatistics(SYMBOLNODE SignatureNode,
 double * NumberOfSymbols,double * NumberOfSymbolsArity0,
 double * MinSymbolArity,double * MaxSymbolArity) {
@@ -543,7 +543,7 @@ NumberOfSymbols,NumberOfSymbolsArity0,MinSymbolArity,MaxSymbolArity);
 NumberOfSymbols,NumberOfSymbolsArity0,MinSymbolArity,MaxSymbolArity);
     }
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 void GetSignatureSymbolUsageStatistics(SYMBOLNODE SignatureNode,
 double * NumberOfSymbols,double * NumberOfSymbolsArity0,
 double * MinSymbolArity,double * MaxSymbolArity) {
@@ -555,4 +555,4 @@ double * MinSymbolArity,double * MaxSymbolArity) {
     DoGetSignatureSymbolUsageStatistics(SignatureNode,NumberOfSymbols,
 NumberOfSymbolsArity0,MinSymbolArity,MaxSymbolArity);
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------

@@ -12,10 +12,10 @@
 #include "PrintTSTP.h"
 #include "Examine.h"
 #include "SystemOnTPTP.h"
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 char * GetInferenceParentNames(TERM InferenceTerm,String PutNamesHere);
 int CountVariableUsageInTerm(TERM Term,VARIABLENODE Variable);
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 char * GetSymbol(TERM Term) {
 
     if (Term == NULL) {
@@ -28,7 +28,7 @@ char * GetSymbol(TERM Term) {
         return(GetSignatureSymbol(Term->TheSymbol.NonVariable));
     }
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 int GetArity(TERM Term) {
 
     if (Term == NULL) {
@@ -48,7 +48,7 @@ int GetArity(TERM Term) {
         return(GetSignatureArity(Term->TheSymbol.NonVariable));
     }
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 int LooksLikeAReal(char * RealString) {
 
     int NumberScanned;
@@ -84,7 +84,7 @@ int LooksLikeAReal(char * RealString) {
 //         return(0);
 //     }
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 int LooksLikeAnInteger(char * IntegerString) {
 
     int NumberScanned;
@@ -103,7 +103,7 @@ int LooksLikeAnInteger(char * IntegerString) {
 //     }
 //     return(LooksLikeAnUnsignedInteger(&IntegerString[Index]));
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 int LooksLikeAnUnsignedInteger(char * UnsignedIntegerString) {
 
     if (*UnsignedIntegerString == '-' || *UnsignedIntegerString == '+') {
@@ -123,7 +123,7 @@ int LooksLikeAnUnsignedInteger(char * UnsignedIntegerString) {
 //     }
 //     return(1);
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 int LooksLikeARational(char * RationalString) {
 
     char * Slash;
@@ -138,13 +138,13 @@ LooksLikeAnUnsignedInteger(Slash+1));
         return(0);
     }
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 int LooksLikeANumber(char * NumberString) {
 
     return(LooksLikeAnInteger(NumberString) || 
 LooksLikeARational(NumberString) || LooksLikeAReal(NumberString));
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 int LooksLikeAList(TERM Term,int MinElements,int MaxElements) {
 
     if (Term == NULL) {
@@ -155,7 +155,7 @@ int LooksLikeAList(TERM Term,int MinElements,int MaxElements) {
 (MinElements == -1 || GetArity(Term) >= MinElements) && 
 (MaxElements == -1 || GetArity(Term) <= MaxElements));
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 int CheckRole(StatusType Role,StatusType DesiredRole) {
 
      return(Role == DesiredRole || (DesiredRole == axiom_like &&
@@ -165,7 +165,7 @@ Role == lemma || Role == theorem || Role == corollary || Role == external)) ||
 (DesiredRole == not_conjecture && Role != conjecture && 
 Role != negated_conjecture && Role != question));
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 int CheckAnnotatedFormulaRole(ANNOTATEDFORMULA AnnotatedFormula,
 StatusType DesiredRole) {
 
@@ -174,7 +174,7 @@ CheckRole(AnnotatedFormula->AnnotatedFormulaUnion.AnnotatedTSTPFormula.Status,
 DesiredRole));
 
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 int CheckAnnotatedFormula(ANNOTATEDFORMULA AnnotatedFormula,
 SyntaxType ExpectedSyntax) {
 
@@ -183,7 +183,7 @@ AnnotatedFormula->Syntax == ExpectedSyntax &&
 AnnotatedFormula->AnnotatedFormulaUnion.AnnotatedTSTPFormula.
 FormulaWithVariables != NULL);
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 int LogicalAnnotatedFormula(ANNOTATEDFORMULA AnnotatedFormula) {
 
     return(CheckAnnotatedFormula(AnnotatedFormula,tptp_thf) ||
@@ -192,18 +192,18 @@ CheckAnnotatedFormula(AnnotatedFormula,tptp_tcf) ||
 CheckAnnotatedFormula(AnnotatedFormula,tptp_fof) ||
 CheckAnnotatedFormula(AnnotatedFormula,tptp_cnf));
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 int TPIAnnotatedFormula(ANNOTATEDFORMULA AnnotatedFormula) {
 
     return(CheckAnnotatedFormula(AnnotatedFormula,tptp_tpi));
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 int ReallyAnAnnotatedFormula(ANNOTATEDFORMULA AnnotatedFormula) {
 
     return(LogicalAnnotatedFormula(AnnotatedFormula) ||
 TPIAnnotatedFormula(AnnotatedFormula));
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 int CopiedAnnotatedFormula(ANNOTATEDFORMULA AnnotatedFormula) {
 
 //----Logical
@@ -216,7 +216,7 @@ GetArity(AnnotatedFormula->AnnotatedFormulaUnion.AnnotatedTSTPFormula.Source)
 strcmp(GetSymbol(AnnotatedFormula->AnnotatedFormulaUnion.AnnotatedTSTPFormula.
 Source),"unknown"));
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 int InferredAnnotatedFormula(ANNOTATEDFORMULA AnnotatedFormula) {
 
 //DEBUG printf("logical %d\n",LogicalAnnotatedFormula(AnnotatedFormula));
@@ -234,14 +234,14 @@ Source),"inference") &&
 GetArity(AnnotatedFormula->AnnotatedFormulaUnion.AnnotatedTSTPFormula.Source) 
 == 3);
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 int DerivedAnnotatedFormula(ANNOTATEDFORMULA AnnotatedFormula) {
 
 //----Logical
     return(CopiedAnnotatedFormula(AnnotatedFormula) ||
 InferredAnnotatedFormula(AnnotatedFormula));
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 //----Extract the contents of a term (wot's in the ()s)
 int ExtractTermArguments(String Term) {
 
@@ -259,7 +259,7 @@ NULL) {
         return(0);
     }
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 //----Calling routine must provide enough space for info, or send NULL and
 //----take responsibility for the malloced memory.
 char * TSTPTermToString(TERM Term,char * PutTermHere) {
@@ -322,7 +322,7 @@ char * TSTPTermToString(TERM Term,char * PutTermHere) {
         return(Buffer);
     }
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 int CountVariableUsageInArguments(TERMArray Arguments,int Arity,
 VARIABLENODE Variable) {
 
@@ -335,7 +335,7 @@ VARIABLENODE Variable) {
     }
     return(Count);
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 int CountVariableUsageInTerm(TERM Term,VARIABLENODE Variable) {
 
     switch (Term->Type) {
@@ -363,7 +363,7 @@ CountVariableUsageInTerm(Term->TheSymbol.LetTerm.LetBody,Variable));
     }
 
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 int CountVariableUsageInTupleFormulae(int NumberOfElements,
 FORMULAArray TupleFormulae,VARIABLENODE Variable,int * QuantifiedOccurences) {
 
@@ -381,7 +381,7 @@ Variable,&LocalQuantifiedUsage);
     }
     return(TotalUsage);
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 int CountVariableUsageInFormula(FORMULA Formula,VARIABLENODE Variable,
 int * QuantifiedOccurences) {
 
@@ -451,7 +451,7 @@ LetFormula.LetBody,Variable,&LocalQuantifiedOccurences);
 
     return(LocalCount);
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 void NormalizeSymbolUsage(char * SymbolUsage) {
 
     SYMBOLNODE Head;
@@ -506,7 +506,7 @@ Head->NumberOfUses);
         Free((void **)&Searcher);
     }
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 void CollectVariablesInAtom(TERM Term,char ** Collector,int * CollectorLength) {
 
     SuperString Variable;
@@ -546,7 +546,7 @@ CollectorLength);
         }
     }
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 void CollectFunctorsInAtom(TERM Term,char ** Collector,int * CollectorLength) {
 
     SuperString FunctorAndArity;
@@ -598,7 +598,7 @@ Collector,CollectorLength);
         Free((void **)&VariableCollector);
     }
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 //----PutUsageHere must be address of a malloced String
 char * GetLiteralSymbolUsage(FORMULA Literal,char ** PutUsageHere,
 char ** VariablesStartHere) {
@@ -649,7 +649,7 @@ Literal->FormulaUnion.Atom->TheSymbol.NonVariable->Arity);
 
     return(*PutUsageHere);
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 void CollectSymbolsInTupleFormulae(int NumberOfElements,
 FORMULAArray TupleFormulae,char ** PredicateCollector,
 int * PredicateCollectorLength,char ** FunctorCollector,
@@ -664,7 +664,7 @@ PredicateCollector,PredicateCollectorLength,FunctorCollector,
 FunctorCollectorLength,VariableCollector,VariableCollectorLength);
     }
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 void CollectSymbolsInFormula(FORMULA Formula,char ** PredicateCollector,
 int * PredicateCollectorLength,char ** FunctorCollector,
 int * FunctorCollectorLength,char ** VariableCollector,
@@ -784,7 +784,7 @@ VariableCollector,VariableCollectorLength);
             break;
     }
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 //----PutUsageHere must be address of a malloced String
 char * GetFormulaSymbolUsage(FORMULA Formula,char ** PutUsageHere,
 char ** FunctorUsageStartsHere,char ** VariableUsageStartsHere) {
@@ -833,7 +833,7 @@ char ** FunctorUsageStartsHere,char ** VariableUsageStartsHere) {
 
     return(*PutUsageHere);
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 //----PutUsageHere must be address of a malloced String
 char * GetAnnotatedFormulaSymbolUsage(ANNOTATEDFORMULA AnnotatedTSTPFormula,
 char ** PutUsageHere,char ** FunctorUsageStartsHere) {
@@ -856,7 +856,7 @@ PutUsageHere,FunctorUsageStartsHere,&VariableUsage)) != NULL) {
         return(NULL);
     }
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 //----PutUsageHere must be address of a malloced String or pointer to NULL
 char * GetListOfAnnotatedFormulaSymbolUsage(LISTNODE ListNode,
 char ** PutUsageHere,char ** FunctorUsageStartsHere) {
@@ -913,7 +913,7 @@ char ** PutUsageHere,char ** FunctorUsageStartsHere) {
 
     return(*PutUsageHere);
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 //----PutPositivesHere and PutNegativesHere must be addresses of
 //----malloced empty strings
 void CollectVariablesOfPolarity(FORMULA DisjunctionOrLiteral,
@@ -962,7 +962,7 @@ PositivesLength);
     NormalizeSymbolUsage(*PutPositivesHere);
     NormalizeSymbolUsage(*PutNegativesHere);
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 int RangeRestrictedClause(ANNOTATEDFORMULA AnnotatedFormula) {
 
     char * PutPositivesHere;
@@ -1014,7 +1014,7 @@ AnnotatedTSTPFormula.FormulaWithVariables->Formula,&PutPositivesHere,
 
     return(RangeRestricted);
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 int CountFormulaLiteralsOfPolarity(FORMULA DisjunctionOrLiteral,int Sign) {
 
     if (DisjunctionOrLiteral == NULL) {
@@ -1049,7 +1049,7 @@ FormulaUnion.BinaryFormula.RHS,Sign));
             break;
     }
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 int GetSymbolUses(SIGNATURE Signature,TermType Type,char * Name,int Arity) {
 
     SYMBOLNODE List;
@@ -1070,7 +1070,7 @@ int GetSymbolUses(SIGNATURE Signature,TermType Type,char * Name,int Arity) {
         return(0);
     }
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 int CountLiteralsOfPolarity(ANNOTATEDFORMULA AnnotatedFormula,int * Positive,
 int * Negative) {
 
@@ -1087,7 +1087,7 @@ AnnotatedFormulaUnion.AnnotatedTSTPFormula.FormulaWithVariables->Formula;
     *Negative = CountFormulaLiteralsOfPolarity(DisjunctionOrLiteral,-1);
     return(1);
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 int HornClause(ANNOTATEDFORMULA AnnotatedFormula) {
 
     int Positive,Negative;
@@ -1095,7 +1095,7 @@ int HornClause(ANNOTATEDFORMULA AnnotatedFormula) {
     return(CountLiteralsOfPolarity(AnnotatedFormula,&Positive,&Negative) &&
 Positive <= 1);
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 int NonHornClause(ANNOTATEDFORMULA AnnotatedFormula) {
 
     int Positive,Negative;
@@ -1103,7 +1103,7 @@ int NonHornClause(ANNOTATEDFORMULA AnnotatedFormula) {
     return(CountLiteralsOfPolarity(AnnotatedFormula,&Positive,&Negative) &&
 Positive > 1);
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 int CountAnnotatedFormulaUniqueVariablesByUse(ANNOTATEDFORMULA 
 AnnotatedFormula,int MinUse,int MaxUse,ConnectiveType Quantification) {
 
@@ -1131,19 +1131,19 @@ VariableNode->NumberOfUses <= MaxUse)) &&
     }
 
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 int CountAnnotatedFormulaSingletons(ANNOTATEDFORMULA AnnotatedFormula) {
 
     return(CountAnnotatedFormulaUniqueVariablesByUse(AnnotatedFormula,1,1,
 none));
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 int CountAnnotatedFormulaUniqueVariables(ANNOTATEDFORMULA AnnotatedFormula) {
 
     return(CountAnnotatedFormulaUniqueVariablesByUse(AnnotatedFormula,-1,-1,
 none));
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 int CountTupleFormulaeTerms(int NumberOfElements,FORMULAArray TupleFormulae) {
 
     int ElementNumber;
@@ -1155,7 +1155,7 @@ int CountTupleFormulaeTerms(int NumberOfElements,FORMULAArray TupleFormulae) {
     }
     return(TotalTerms);
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 int CountFormulaTerms(FORMULA Formula) {
 
     switch(Formula->Type) {
@@ -1208,13 +1208,13 @@ CountFormulaTerms(Formula->FormulaUnion.LetFormula.LetBody));
             break;
     }
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 int CountAnnotatedFormulaTerms(ANNOTATEDFORMULA AnnotatedFormula) {
 
     return(CountFormulaTerms(AnnotatedFormula->AnnotatedFormulaUnion.
 AnnotatedTSTPFormula.FormulaWithVariables->Formula));
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 int CountTupleFormulaeAtomsByPredicate(int NumberOfElements,
 FORMULAArray TupleFormulae,char * Predicate) {
 
@@ -1228,7 +1228,7 @@ TupleFormulae[ElementNumber],Predicate);
     }
     return(TotalAtoms);
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 int CountFormulaAtomsByPredicate(FORMULA Formula,char * Predicate) {
 
     int Count;
@@ -1321,7 +1321,7 @@ Formula->FormulaUnion.LetFormula.LetBody,Predicate);
             break;
     }
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 int CountAnnotatedFormulaAtomsByPredicate(ANNOTATEDFORMULA AnnotatedFormula,
 char * Predicate) {
 
@@ -1333,7 +1333,7 @@ Predicate));
         return(-1);
     }
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 //----All the counters have to be previously initialized to 0
 ConnectiveStatisticsType GetTupleFormulaeConnectiveUsage(int NumberOfElements,
 FORMULAArray TupleFormulae) {
@@ -1352,7 +1352,7 @@ MoreConnectiveStatistics);
     }
     return(ConnectiveStatistics);
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 ConnectiveStatisticsType GetFormulaConnectiveUsage(FORMULA Formula) {
 
     ConnectiveStatisticsType ConnectiveStatistics;
@@ -1572,7 +1572,7 @@ MoreConnectiveStatistics);
     }
     return(ConnectiveStatistics);
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 int TupleFormulaeDepth(int NumberOfElements,FORMULAArray TupleFormulae) {
 
     int ElementNumber;
@@ -1585,7 +1585,7 @@ FormulaDepth(TupleFormulae[ElementNumber]));
     }
     return(MaximalDepth);
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 int FormulaDepth(FORMULA Formula) {
 
     switch(Formula->Type) {
@@ -1636,7 +1636,7 @@ Formula->FormulaUnion.LetFormula.LetBody));
             break;
     }
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 int AnnotatedFormulaDepth(ANNOTATEDFORMULA AnnotatedFormula) {
 
     if (LogicalAnnotatedFormula(AnnotatedFormula)) {
@@ -1646,7 +1646,7 @@ AnnotatedTSTPFormula.FormulaWithVariables->Formula));
         return(-1);
     }
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 int MaxTermDepth(TERM Term) {
 
     int MaxDepth;
@@ -1668,7 +1668,7 @@ Term->Arguments[Index]));
         return(1 + MaxDepth);
     }
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 int MaxTupleFormulaeTermDepth(int NumberOfElements,FORMULAArray TupleFormulae) {
 
     int ElementNumber;
@@ -1681,7 +1681,7 @@ TupleFormulae[ElementNumber]));
     }
     return(MaximalDepth);
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 int MaxFormulaTermDepth(FORMULA Formula) {
 
     switch(Formula->Type) {
@@ -1736,7 +1736,7 @@ MaxFormulaTermDepth(Formula->FormulaUnion.LetFormula.LetBody));
             break;
     }
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 int MaxAnnotatedFormulaTermDepth(ANNOTATEDFORMULA AnnotatedFormula) {
 
     if (LogicalAnnotatedFormula(AnnotatedFormula)) {
@@ -1746,7 +1746,7 @@ AnnotatedTSTPFormula.FormulaWithVariables->Formula));
         return(-1);
     }
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 int SumTermDepth(TERM Atom) {
 
     int SumDepth;
@@ -1759,7 +1759,7 @@ int SumTermDepth(TERM Atom) {
 
     return(SumDepth);
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 int SumTupleFormulaeTermDepth(int NumberOfElements,FORMULAArray TupleFormulae) {
 
     int ElementNumber;
@@ -1771,7 +1771,7 @@ int SumTupleFormulaeTermDepth(int NumberOfElements,FORMULAArray TupleFormulae) {
     }
     return(TotalDepth);
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 int SumFormulaTermDepth(FORMULA Formula) {
 
     switch(Formula->Type) {
@@ -1819,7 +1819,7 @@ SumFormulaTermDepth(Formula->FormulaUnion.LetFormula.LetBody));
             break;
     }
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 int SumAnnotatedFormulaTermDepth(ANNOTATEDFORMULA AnnotatedFormula) {
 
     if (LogicalAnnotatedFormula(AnnotatedFormula)) {
@@ -1829,13 +1829,13 @@ AnnotatedTSTPFormula.FormulaWithVariables->Formula));
         return(-1);
     }
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 SyntaxType GetSyntax(ANNOTATEDFORMULA AnnotatedFormula) {
 
     assert(AnnotatedFormula != NULL);
     return(AnnotatedFormula->Syntax);
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 SyntaxType GetListSyntax(LISTNODE Head) {
 
     SyntaxType SyntaxOfFirstAnnotatedFormula;
@@ -1857,7 +1857,7 @@ SyntaxOfFirstAnnotatedFormula != GetSyntax(Head->AnnotatedFormula)) {
     }
     return(SyntaxOfFirstAnnotatedFormula);
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 void GetListSyntaxTypes(LISTNODE Head,String SyntaxTypes) {
 
     int Syntax;
@@ -1878,7 +1878,7 @@ void GetListSyntaxTypes(LISTNODE Head,String SyntaxTypes) {
         }
     }
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 //----If PutNameHere is NULL, return pointer to original, else copy into
 //----PutNameHere and return pointer to that
 char * GetName(ANNOTATEDFORMULA AnnotatedFormula,char * PutNameHere) {
@@ -1896,7 +1896,7 @@ AnnotatedFormula->AnnotatedFormulaUnion.AnnotatedTSTPFormula.Name);
         return(NULL);
     }
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 StatusType GetRole(ANNOTATEDFORMULA AnnotatedFormula,StatusType * SubStatus) {
 
     if (AnnotatedFormula == NULL) {
@@ -1915,7 +1915,7 @@ AnnotatedFormulaUnion.AnnotatedTSTPFormula.Status);
         return(nonstatus);
     }
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 FORMULA GetUniversalCoreFormula(FORMULA QuantifiedFormula) {
 
     while (QuantifiedFormula->Type == quantified &&
@@ -1926,7 +1926,7 @@ Formula;
 
     return(QuantifiedFormula);
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 int ThereIsAConjecture(LISTNODE Head) {
 
     StatusType Role;
@@ -1941,7 +1941,7 @@ Role == negated_conjecture || Role == question) {
 
     return(0);
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 FORMULA GetLiteralFromClauseByNumber(FORMULA Clause,int Number) {
 
     if (Clause->Type == binary) {
@@ -1957,7 +1957,7 @@ Clause->FormulaUnion.BinaryFormula.RHS,Number-1));
         return(NULL);
     }
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 FORMULA GetLiteralFromAnnotatedClauseByNumber(ANNOTATEDFORMULA AnnotatedClause,
 int Number) {
 
@@ -1973,7 +1973,7 @@ Number));
         return(NULL);
     }
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 TERM GetSourceTERM(ANNOTATEDFORMULA AnnotatedFormula,char * SourceSymbol) {
 
     if (!ReallyAnAnnotatedFormula(AnnotatedFormula) || 
@@ -1989,7 +1989,7 @@ Source);
     }
     return(NULL);
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 char * GetSource(ANNOTATEDFORMULA AnnotatedFormula) {
 
     TERM SourceTerm;
@@ -2000,7 +2000,7 @@ char * GetSource(ANNOTATEDFORMULA AnnotatedFormula) {
         return(NULL);
     }
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 //----Calling routine must provide enough space for info, or send NULL and
 //----take responsibility for the malloced memory.
 char * GetSourceTerm(ANNOTATEDFORMULA AnnotatedFormula,char * PutInfoHere) {
@@ -2014,7 +2014,7 @@ AnnotatedTSTPFormula.Source,PutInfoHere));
         return(NULL);
     }
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 TERM GetInferenceRuleTERM(ANNOTATEDFORMULA AnnotatedFormula) {
 
     if (DerivedAnnotatedFormula(AnnotatedFormula) &&
@@ -2027,7 +2027,7 @@ Source->Arguments[0]);
         return(NULL);
     }
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 //----Calling routine must provide enough space for info, or send NULL and
 //----take responsibility for the malloced memory.
 char * GetInferenceRule(ANNOTATEDFORMULA AnnotatedFormula,char * PutNameHere) {
@@ -2050,7 +2050,7 @@ AnnotatedTSTPFormula.Source->Arguments[0],PutNameHere));
         return(NULL);
     }
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 TERM GetSourceInfoTERMFromSourceInfo(TERM InferenceInfo,char * Symbol,
 char * InferenceRuleName,int * Index) {
 
@@ -2069,7 +2069,7 @@ NonVariable->NameSymbol)) {
     }
     return(NULL);
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 void DoGetInferenceInfoTERMsFromInferenceRecord(TERM InferenceRecord,
 char * Symbol,TERMArray * ArrayOfInfoTERMs,int * NumberOfTerms) {
 
@@ -2102,7 +2102,7 @@ Arguments[Index],Symbol,ArrayOfInfoTERMs,NumberOfTerms);
         }
     }
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 //----Gets one from this layer, then looks through the parents to get more
 //----from nested inference records
 void GetInferenceInfoTERMsFromInferenceRecord(TERM InferenceRecord,
@@ -2112,7 +2112,7 @@ char * Symbol,TERMArray * ArrayOfInfoTERMs,int * NumberOfTerms) {
     DoGetInferenceInfoTERMsFromInferenceRecord(InferenceRecord,Symbol,
 ArrayOfInfoTERMs,NumberOfTerms);
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 TERMArray GetInferenceInfoTERMs(ANNOTATEDFORMULA AnnotatedFormula,
 char * Symbol,int * NumberOfTerms) {
 
@@ -2132,7 +2132,7 @@ AnnotatedFormulaUnion.AnnotatedTSTPFormula.Source,Symbol,
     }
     return(ArrayOfInfoTERMs);
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 TERM GetSourceInfoTERM(ANNOTATEDFORMULA AnnotatedFormula,char * SourceSymbol,
 char * InfoTermSymbol) {
 
@@ -2158,7 +2158,7 @@ Arguments[0]),&Index));
         return(NULL);
     }
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 //----Calling routine must provide enough space for info, or send NULL and
 //----take responsibility for the malloced memory.
 char * GetSourceInfoTerm(ANNOTATEDFORMULA AnnotatedFormula,char * SourceSymbol,
@@ -2173,7 +2173,7 @@ InfoTermSymbol)) != NULL) {
         return(NULL);
     }
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 TERM GetInferenceInfoTERM(ANNOTATEDFORMULA AnnotatedFormula,char * Symbol) {
 
     if (DerivedAnnotatedFormula(AnnotatedFormula)) {
@@ -2182,7 +2182,7 @@ TERM GetInferenceInfoTERM(ANNOTATEDFORMULA AnnotatedFormula,char * Symbol) {
         return(NULL);
     }
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 //----Gets a useful info term from an inference source
 //----Calling routine must provide enough space for info, or send NULL and
 //----take responsibility for the malloced memory.
@@ -2198,7 +2198,7 @@ NULL) {
         return(NULL);
     }
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 //----Calling routine must provide enough space for info, or send NULL and 
 //----take responsibility for the malloced memory.
 SZSResultArray GetInferenceSZSStatuses(ANNOTATEDFORMULA AnnotatedFormula,
@@ -2232,7 +2232,7 @@ ArrayOfStatusTERMs[Index]->Arguments[0]->TheSymbol.NonVariable->NameSymbol);
         return(ArrayOfSZSStatuses);
     }
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 //----Calling routine must provide enough space for info, or send NULL and 
 //----take responsibility for the malloced memory.
 char * GetInferenceStatus(ANNOTATEDFORMULA AnnotatedFormula,char * SZSStatus) {
@@ -2249,7 +2249,7 @@ char * GetInferenceStatus(ANNOTATEDFORMULA AnnotatedFormula,char * SZSStatus) {
     }
     return(BufferReturn(&Buffer,SZSStatus));
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 char * GetDischargedNames(ANNOTATEDFORMULA AnnotatedFormula,
 TERM * DischargeList) {
 
@@ -2288,7 +2288,7 @@ Arguments[1]->Arguments[NameIndex]),&BufferSize);
     }
     return(Buffer);
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 //----Get a list of assumptions in Malloced memory. User must Free the memory.
 char * ExtractAssumptionsList(TERM AssumptionsTerm) {
 
@@ -2315,7 +2315,7 @@ char * ExtractAssumptionsList(TERM AssumptionsTerm) {
         return(Buffer);
     }
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 //----Calling routine must provide enough space for info, or send NULL and
 //----take responsibility for the malloced memory.
 char * GetOneParentNames(TERM ParentSource,char * PutNamesHere) {
@@ -2347,7 +2347,7 @@ char * GetOneParentNames(TERM ParentSource,char * PutNamesHere) {
 
     return(BufferReturn(&Buffer,PutNamesHere));
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 //----Calling routine must provide enough space for info, or send NULL and
 //----take responsibility for the malloced memory.
 char * GetInferenceParentNames(TERM InferenceTerm,char * PutNamesHere) {
@@ -2372,7 +2372,7 @@ Arguments[Index],NULL),&BufferSize);
 
     return(BufferReturn(&Buffer,PutNamesHere));
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 //----Calling routine must provide enough space for info, or send NULL and
 //----take responsibility for the malloced memory.
 char * GetParentNames(ANNOTATEDFORMULA AnnotatedFormula,char * PutNamesHere) {
@@ -2405,7 +2405,7 @@ AnnotatedFormulaUnion.AnnotatedTSTPFormula.Source),&BufferSize);
 
     return(BufferReturn(&Buffer,PutNamesHere));
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 //----Same as GetParentNames but no theory names
 char * GetNodeParentNames(ANNOTATEDFORMULA AnnotatedFormula,
 char * PutNamesHere) {
@@ -2422,7 +2422,7 @@ char * PutNamesHere) {
 
     return(BufferReturn(&Buffer,PutNamesHere));
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 int GetNodeParentList(ANNOTATEDFORMULA AnnotatedFormula,LISTNODE Head,
 LISTNODE * Parents) {
 
@@ -2440,7 +2440,7 @@ LISTNODE * Parents) {
     Free((void **)&AllParentNames);
     return(1);
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 //----Calling routine must provide enough space for info, or send NULL and
 //----take responsibility for the malloced memory.
 char * GetFileSourceNameAndNode(ANNOTATEDFORMULA AnnotatedFormula,
@@ -2476,7 +2476,7 @@ AnnotatedFormulaUnion.AnnotatedTSTPFormula.Source;
         return(NULL);
     }
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 TERM GetUsefulInfoTERM(ANNOTATEDFORMULA AnnotatedFormula,char * Symbol,
 int OccurenceNumber) {
 
@@ -2503,7 +2503,7 @@ TheSymbol.NonVariable->NameSymbol) &&
     return(NULL);
 
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 //----Gets a term from the useful info global to a CNF/FOF node
 //----Calling routine must provide enough space for info, or send NULL and
 //----take responsibility for the malloced memory.
@@ -2519,4 +2519,4 @@ OccurenceNumber)) != NULL) {
         return(NULL);
     }
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------

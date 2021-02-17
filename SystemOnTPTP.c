@@ -9,7 +9,7 @@
 #include "FileUtilities.h"
 #include "Modify.h"
 #include "SystemOnTPTP.h"
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 static SZSResultTripleType ResultTriples[] = {
     {SZS,"SZS","SZSResultValue"},
     {SUC,"SUC","Success"},
@@ -154,7 +154,7 @@ static SZSOutputType OutputIsaPairs[][2] = {
     {IRf,IPr},
     {ICf,IRf}
 };
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 SZSResultType StringToSZSResult(char * SZSResult) {
 
     int Index;
@@ -170,7 +170,7 @@ Index++) {
     CodingError("String not an SZSResultType");
     return(nonszsresult);
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 char * SZSResultToUserString(SZSResultType SZSResult) {
 
     int Index;
@@ -185,7 +185,7 @@ Index++) {
     CodingError("Not a SZSResultType to convert to user string");
     return(NULL);
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 char * SZSResultToString(SZSResultType SZSResult) {
 
     int Index;
@@ -200,7 +200,7 @@ Index++) {
     CodingError("Not a SZSResultType to convert to string");
     return(NULL);
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 SZSOutputType StringToSZSOutput(char * SZSOutput) {
 
     int Index;
@@ -216,7 +216,7 @@ Index++) {
     CodingError("String not an SZSOutputType");
     return(nonszsoutput);
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 char * SZSOutputToUserString(SZSOutputType SZSOutput) {
 
     int Index;
@@ -231,7 +231,7 @@ Index++) {
     CodingError("Not a SZSOutputType to convert to user string");
     return(NULL);
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 char * SZSOutputToString(SZSOutputType SZSOutput) {
 
     int Index;
@@ -246,7 +246,7 @@ Index++) {
     CodingError("Not a SZSOutputType to convert to string");
     return(NULL);
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 int SZSIsA(SZSResultType SZSResult,SZSResultType DesiredResult) {
 
     int Index;
@@ -263,7 +263,7 @@ SZSIsA(ResultIsaPairs[Index][1],DesiredResult)) {
     }
     return(0);
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 int SZSOutputIsA(SZSOutputType SZSOutput,SZSOutputType DesiredOutput) {
 
     int Index;
@@ -280,7 +280,7 @@ SZSOutputIsA(OutputIsaPairs[Index][1],DesiredOutput)) {
     }
     return(0);
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 void SystemOnTPTPFileName(char * Directory,char * BaseName,char * Extension,
 String FileName) {
 
@@ -318,7 +318,7 @@ String FileName) {
 //----Copy across at end to avoid clashes with same variable in call
     strcpy(FileName,InternalFileName);
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 int MakeProblemFile(char * FilesDirectory,char * BaseName,char * Extension,
 String ProblemFileName,LISTNODE Head,StatusType AxiomsStatus,
 ANNOTATEDFORMULA Conjecture,StatusType ConjectureStatus) {
@@ -343,7 +343,7 @@ tptp,1,ConjectureStatus);
 
     return(1);
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 int SystemOnTPTPAvailable(void) {
 
     String UNIXCommand;
@@ -368,7 +368,7 @@ int SystemOnTPTPAvailable(void) {
         return(0);
     }
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 int SystemOnTPTPGetResult(int QuietnessLevel,char * ProblemFileName,
 char * ATPSystem,int TimeLimit,char * X2TSTPFlag,char * SystemOutputPrefix,
 char * OptionalFlags,int KeepOutputFiles,char * FilesDirectory,
@@ -501,7 +501,7 @@ strstr(SystemOutputLine,"% Output     : ") == SystemOutputLine &&
 
     return(GotResult);
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 //----1 means positive result, -1 means negative result, 0 means no result
 int SystemOnTPTP(LISTNODE Axioms,ANNOTATEDFORMULA Conjecture,
 char * PositiveChecker,char * PositiveResult,int TestNegative,
@@ -564,7 +564,7 @@ CopyUsersOutputFileName,OutputFileName,SystemResult,NULL)) {
 
     return(Correct);
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 SZSResultType SZSSystemOnTPTP(LISTNODE Axioms,ANNOTATEDFORMULA Conjecture,
 char * System,SZSResultType DesiredResult,int QuietnessLevel,int TimeLimit,
 char * X2TSTPFlag,char * SystemOutputPrefix,char * OptionalFlags,
@@ -649,7 +649,7 @@ SystemOutput)) {
     }
     return(SZSResult);
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 SZSResultType SZSSystemOnTPTPWithAlternate(LISTNODE Axioms,
 ANNOTATEDFORMULA Conjecture,char * System,SZSResultType DesiredResult,
 int QuietnessLevel,char * OptionalFlags,int TimeLimit,char * X2TSTPFlag,
@@ -683,7 +683,7 @@ OutputFileName,SZSOutput);
 
     return(SZSResult);
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 LISTNODE ApplyExternalProgram(LISTNODE Head,StatusType AsStatus,
 ANNOTATEDFORMULA Conjecture,const char * ExecuteFormatString,
 SIGNATURE Signature) {
@@ -715,4 +715,4 @@ Conjecture,conjecture)) {
     RemoveFile(ProblemFileName);
     return(AppliedHead);
 }
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------

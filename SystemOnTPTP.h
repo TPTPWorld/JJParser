@@ -1,10 +1,10 @@
 #ifndef SYSTEMONTPTP_H
 #define SYSTEMONTPTP_H
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 #include <unistd.h>
 #include "DataTypes.h"
 #include "PrintTSTP.h"
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 typedef enum {SZS,
               SUC,
               UNP,SAP,ESA,
@@ -45,12 +45,12 @@ typedef struct {
     char * TLAString;
     char * UserString;
 } SZSOutputTripleType;
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 #ifndef TPTP_HOME
     #define TPTP_HOME "/home/tptp"
 #endif
 #define SYSTEM_ON_TPTP "SystemExecution/SystemOnTPTP"
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 SZSResultType StringToSZSResult(char * SZSResult);
 char * SZSResultToUserString(SZSResultType SZSResult);
 char * SZSResultToString(SZSResultType SZSResult);
@@ -86,5 +86,5 @@ String OutputFileName,SZSOutputType * SZSOutput);
 LISTNODE ApplyExternalProgram(LISTNODE Head,StatusType AsStatus,
 ANNOTATEDFORMULA Conjecture,const char * ExecuteFormatString,
 SIGNATURE Signature);
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 #endif

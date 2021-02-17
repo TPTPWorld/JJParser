@@ -1,9 +1,9 @@
 #ifndef MODIFY_H
 #define MODIFY_H
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 #include "DataTypes.h"
 #include "Utilities.h"
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 int SetName(ANNOTATEDFORMULA AnnotatedFormula,char * Name);
 int SetSyntax(ANNOTATEDFORMULA AnnotatedFormula,SyntaxType Syntax);
 int SetStatus(ANNOTATEDFORMULA AnnotatedFormula,StatusType Status,
@@ -46,5 +46,5 @@ AnnotatedFormula,SIGNATURE Signature,char * UsefulInformation);
 void StandardizeFormula(FORMULA * Formula);
 void StandardizeAnnotatedFormula(ANNOTATEDFORMULA AnnotatedFormula);
 void StandardizeListOfAnnotatedTSTPNodes(LISTNODE Head);
-//-----------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 #endif
