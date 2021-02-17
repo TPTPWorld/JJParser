@@ -10,8 +10,8 @@ int AllowCommutation,VARIABLERENAMING * RenamedVariables);
 int DoSameFormula(FORMULA Formula1,FORMULA Formula2,int AllowVariableRenaming,
 int AllowCommutation,VARIABLERENAMING * RenamedVariables);
 //-------------------------------------------------------------------------------------------------
-int SameVariables(VARIABLENODE Variable1,VARIABLENODE Variable2,
-int AllowVariableRenaming,VARIABLERENAMING * RenamedVariables) {
+int SameVariables(VARIABLENODE Variable1,VARIABLENODE Variable2,int AllowVariableRenaming,
+VARIABLERENAMING * RenamedVariables) {
 
     VARIABLERENAMING RenamingNode;
     int SameVariableModuloRenaming;
@@ -41,20 +41,18 @@ Malloc(sizeof(VariableRenamingNode));
 Variable1->VariableName == Variable2->VariableName;
     }
 
-    return(SameVariableModuloRenaming &&
-SameTerm(Variable1->Instantiation,Variable2->Instantiation,
+    return(SameVariableModuloRenaming && SameTerm(Variable1->Instantiation,Variable2->Instantiation,
 AllowVariableRenaming,0,RenamedVariables));
-
 }
 //-------------------------------------------------------------------------------------------------
-int SameArguments(TERM Arguments1[],TERM Arguments2[],int Arity,
-int AllowVariableRenaming,VARIABLERENAMING * RenamedVariables) {
+int SameArguments(TERM Arguments1[],TERM Arguments2[],int Arity,int AllowVariableRenaming,
+VARIABLERENAMING * RenamedVariables) {
 
     int Index;
 
     for (Index = 0; Index < Arity; Index++) {
-        if (!SameTerm(Arguments1[Index],Arguments2[Index],
-AllowVariableRenaming,0,RenamedVariables)) {
+        if (!SameTerm(Arguments1[Index],Arguments2[Index],AllowVariableRenaming,0,
+RenamedVariables)) {
             return(0);
         }
     }
@@ -71,8 +69,7 @@ int AllowCommutation,VARIABLERENAMING * RenamedVariables) {
         return(Term1 == Term2);
     }
 
-    if (Term1->Type != Term2->Type || 
-Term1->FlexibleArity != Term2->FlexibleArity) {
+    if (Term1->Type != Term2->Type || Term1->FlexibleArity != Term2->FlexibleArity) {
         return(0);
     }
 
@@ -90,8 +87,7 @@ Term1->TheSymbol.NonVariable->Arity,AllowVariableRenaming,RenamedVariables)) {
                     Term1->Arguments[0] = Term1->Arguments[1];
                     Term1->Arguments[1] = TermSwapper;
                     SameModuloCommutation = SameArguments(Term1->Arguments,
-Term2->Arguments,Term1->TheSymbol.NonVariable->Arity,AllowVariableRenaming,
-RenamedVariables);
+Term2->Arguments,Term1->TheSymbol.NonVariable->Arity,AllowVariableRenaming,RenamedVariables);
                     TermSwapper = Term1->Arguments[0];
                     Term1->Arguments[0] = Term1->Arguments[1];
                     Term1->Arguments[1] = TermSwapper;
@@ -104,12 +100,12 @@ RenamedVariables);
             return(
 //----Checking the symbols' nodes automatically checks the arity
 Term1->TheSymbol.NonVariable == Term2->TheSymbol.NonVariable &&
-SameArguments(Term1->Arguments,Term2->Arguments,Term1->TheSymbol.NonVariable->
-Arity,AllowVariableRenaming,RenamedVariables));
+SameArguments(Term1->Arguments,Term2->Arguments,Term1->TheSymbol.NonVariable->Arity,
+AllowVariableRenaming,RenamedVariables));
             break;
         case variable:
-            return(SameVariables(Term1->TheSymbol.Variable,
-Term2->TheSymbol.Variable,AllowVariableRenaming,RenamedVariables));
+            return(SameVariables(Term1->TheSymbol.Variable,Term2->TheSymbol.Variable,
+ AllowVariableRenaming,RenamedVariables));
             break;
         default:
             CodingError("ERROR: Not a formula type for comparison");
@@ -119,15 +115,13 @@ Term2->TheSymbol.Variable,AllowVariableRenaming,RenamedVariables));
 }
 //-------------------------------------------------------------------------------------------------
 int SameQuantifiedFormula(QuantifiedFormulaType Formula1,QuantifiedFormulaType 
-Formula2,int AllowVariableRenaming,int AllowCommutation,
-VARIABLERENAMING * RenamedVariables) {
+Formula2,int AllowVariableRenaming,int AllowCommutation,VARIABLERENAMING * RenamedVariables) {
 
     return(Formula1.Quantifier == Formula2.Quantifier &&
 Formula1.ExistentialCount == Formula2.ExistentialCount &&
-SameTerm(Formula1.Variable,Formula2.Variable,AllowVariableRenaming,0,
-RenamedVariables) &&
-DoSameFormula(Formula1.Formula,Formula2.Formula,AllowVariableRenaming,
-AllowCommutation,RenamedVariables));
+SameTerm(Formula1.Variable,Formula2.Variable,AllowVariableRenaming,0,RenamedVariables) &&
+DoSameFormula(Formula1.Formula,Formula2.Formula,AllowVariableRenaming,AllowCommutation,
+RenamedVariables));
 }
 //-------------------------------------------------------------------------------------------------
 int SameBinaryFormula(BinaryFormulaType Formula1,BinaryFormulaType Formula2,
@@ -135,10 +129,8 @@ int AllowVariableRenaming,int AllowCommutation,
 VARIABLERENAMING * RenamedVariables) {
 
     return(Formula1.Connective == Formula2.Connective &&
-DoSameFormula(Formula1.LHS,Formula2.LHS,AllowVariableRenaming,
-AllowCommutation,RenamedVariables) &&
-DoSameFormula(Formula1.RHS,Formula2.RHS,AllowVariableRenaming,
-AllowCommutation,RenamedVariables));
+DoSameFormula(Formula1.LHS,Formula2.LHS,AllowVariableRenaming,AllowCommutation,RenamedVariables) &&
+DoSameFormula(Formula1.RHS,Formula2.RHS,AllowVariableRenaming,AllowCommutation,RenamedVariables));
 }
 //-------------------------------------------------------------------------------------------------
 int SameUnaryFormula(UnaryFormulaType Formula1,UnaryFormulaType Formula2,
