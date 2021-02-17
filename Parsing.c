@@ -142,8 +142,7 @@ Quantification == free_variable && FoundVariable == NULL) {
         Variable->NumberOfUses = 1;
         Variable->Quantification = Quantification;
         Variable->Instantiation = NULL;
-        Variable->VariableName = InsertIntoSignature(Signature,variable,
-VariableName,0,NULL);
+        Variable->VariableName = InsertIntoSignature(Signature,variable,VariableName,0,NULL);
 
 //----If a tolerated free variable, add at top and don't change context
         if (FoundVariable == NULL && Quantification == free_variable &&
@@ -668,9 +667,9 @@ TermType OriginallyExpectedType,TermType * ExpectedRHSTermType) {
     return(0);
 }
 //-------------------------------------------------------------------------------------------------
-TERM ParseTerm(READFILE Stream,SyntaxType Language,ContextType Context,
-VARIABLENODE * EndOfScope,TermType Type,ConnectiveType VariableQuantifier,
-int * InfixNegatedAtom,int VariablesMustBeQuantified) {
+TERM ParseTerm(READFILE Stream,SyntaxType Language,ContextType Context,VARIABLENODE * EndOfScope,
+TermType Type,ConnectiveType VariableQuantifier,int * InfixNegatedAtom,
+int VariablesMustBeQuantified) {
 
     TokenType FunctorType;
     TERM InfixTerm,Term;

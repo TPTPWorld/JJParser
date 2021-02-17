@@ -12,10 +12,8 @@ typedef struct VariableRenamingTag {
 
 typedef VariableRenamingNode * VARIABLERENAMING;
 //-------------------------------------------------------------------------------------------------
-int SameFormula(FORMULA Formula1,FORMULA Formula2,int AllowVariableRenaming,
-int AllowCommutation);
+int SameFormula(FORMULA Formula1,FORMULA Formula2,int AllowVariableRenaming,int AllowCommutation);
 int SameFormulaInAnnotatedFormulae(ANNOTATEDFORMULA AnnotatedFormula1,
-ANNOTATEDFORMULA AnnotatedFormula2,int AllowVariableRenaming,
-int AllowCommutation);
+ANNOTATEDFORMULA AnnotatedFormula2,int AllowVariableRenaming,int AllowCommutation);
 //-------------------------------------------------------------------------------------------------
 #endif
