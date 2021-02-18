@@ -191,10 +191,9 @@ int Indent,int TSTPSyntaxFlag) {
     char OpeningBracket,ClosingBracket;
     char * StartOfSymbol;
 
-//----All THF terms are formulae
-    if (Language == tptp_thf && Term->Type == formula) {
-        PrintFileTSTPFormula(Stream,tptp_thf,Term->TheSymbol.Formula,0,0,
-outermost,1);
+//----All THF and TFF (because of TFX) terms are formulae
+    if ((Language == tptp_thf || Language == tptp_tff) && Term->Type == formula) {
+        PrintFileTSTPFormula(Stream,tptp_thf,Term->TheSymbol.Formula,0,0,outermost,1);
 //----Check if a nested formula - no symbol
     } else if (Term->Type == nested_thf) {
         PFprintf(Stream,"$thf(");

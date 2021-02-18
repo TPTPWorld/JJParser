@@ -43,6 +43,7 @@ SIGNATURE NewSignature(void) {
     Signature->Variables = NULL;
     Signature->Functions = NULL;
     Signature->Predicates = NULL;
+    Signature->Types = NULL;
     Signature->NonLogicals = NULL;
 
     return(Signature);
@@ -72,6 +73,7 @@ SIGNATURE DuplicateSignature(SIGNATURE Original) {
     Copy->Variables = DuplicateSymbols(Original->Variables);
     Copy->Functions = DuplicateSymbols(Original->Functions);
     Copy->Predicates = DuplicateSymbols(Original->Predicates);
+    Copy->Types = DuplicateSymbols(Original->Types);
     Copy->NonLogicals = DuplicateSymbols(Original->NonLogicals);
 
     return(Copy);
@@ -160,6 +162,7 @@ int RemovedUnusedSymbols(SIGNATURE Signature) {
     TotalRemoved += RemovedUnusedSymbolsFromList(&(Signature->Variables));
     TotalRemoved += RemovedUnusedSymbolsFromList(&(Signature->Functions));
     TotalRemoved += RemovedUnusedSymbolsFromList(&(Signature->Predicates));
+    TotalRemoved += RemovedUnusedSymbolsFromList(&(Signature->Types));
     TotalRemoved += RemovedUnusedSymbolsFromList(&(Signature->NonLogicals));
 
     return(TotalRemoved);
@@ -205,8 +208,7 @@ SYMBOLNODE IsSymbolInSignatureList(SYMBOLNODE List,char * Name,int Arity) {
     }
 }
 //-------------------------------------------------------------------------------------------------
-SYMBOLNODE * IsSymbolInSignatureListPointer(SYMBOLNODE * List,char * Name,
-int Arity) {
+SYMBOLNODE * IsSymbolInSignatureListPointer(SYMBOLNODE * List,char * Name,int Arity) {
 
     if (*List == NULL) {
         return(NULL);
@@ -216,13 +218,11 @@ int Arity) {
 (Arity == -1 || GetSignatureArity(*List) == Arity)) {
         return(List);
     } else if (strcmp(Name,GetSignatureSymbol(*List)) < 0 ||
-(strcmp(Name,GetSignatureSymbol(*List)) == 0 &&
- Arity < GetSignatureArity(*List))) {
+(strcmp(Name,GetSignatureSymbol(*List)) == 0 && Arity < GetSignatureArity(*List))) {
         return(IsSymbolInSignatureListPointer(&((*List)->LastSymbol),Name,
 Arity));
     } else {
-        return(IsSymbolInSignatureListPointer(&((*List)->NextSymbol),Name,
-Arity));
+        return(IsSymbolInSignatureListPointer(&((*List)->NextSymbol),Name,Arity));
     }
 }
 //-------------------------------------------------------------------------------------------------
@@ -267,8 +267,7 @@ Name,GetSignatureArity(*Current),Arity);
     return(*Current);
 }
 //-------------------------------------------------------------------------------------------------
-SYMBOLNODE InsertNodeIntoSignatureList(SYMBOLNODE * List,
-SYMBOLNODE NodeToInsert,READFILE Stream) {
+SYMBOLNODE InsertNodeIntoSignatureList(SYMBOLNODE * List,SYMBOLNODE NodeToInsert,READFILE Stream) {
 
     SuperString DoubleUsage;
 
@@ -280,8 +279,8 @@ SYMBOLNODE NodeToInsert,READFILE Stream) {
 //----Same name and arity - something wrong here
     if (!strcmp(GetSignatureSymbol(*List),NodeToInsert->NameSymbol) &&
 GetSignatureArity(*List) == NodeToInsert->Arity) {
-        sprintf(DoubleUsage,"Symbol %s/%d already exists",
-NodeToInsert->NameSymbol,NodeToInsert->Arity);
+        sprintf(DoubleUsage,"Symbol %s/%d already exists",NodeToInsert->NameSymbol,
+NodeToInsert->Arity);
         ReportError(NULL,DoubleUsage,1);
         return(NULL);
     }
@@ -289,16 +288,14 @@ NodeToInsert->NameSymbol,NodeToInsert->Arity);
     if (strcmp(NodeToInsert->NameSymbol,GetSignatureSymbol(*List)) < 0 ||
 (strcmp(NodeToInsert->NameSymbol,GetSignatureSymbol(*List)) == 0 &&
  NodeToInsert->Arity < GetSignatureArity(*List))) {
-        return(InsertNodeIntoSignatureList(&((*List)->LastSymbol),NodeToInsert,
-Stream));
+        return(InsertNodeIntoSignatureList(&((*List)->LastSymbol),NodeToInsert,Stream));
     } else {
-        return(InsertNodeIntoSignatureList(&((*List)->NextSymbol),NodeToInsert,
-Stream));
+        return(InsertNodeIntoSignatureList(&((*List)->NextSymbol),NodeToInsert,Stream));
     }
 }
 //-------------------------------------------------------------------------------------------------
-SYMBOLNODE InsertIntoSignature(SIGNATURE Signature,TermType Type,
-char * Name,int Arity,READFILE Stream) {
+SYMBOLNODE InsertIntoSignature(SIGNATURE Signature,TermType Type,char * Name,int Arity,
+READFILE Stream) {
 
     String ErrorMessage;
     SYMBOLNODE * NodePointerPointer;
@@ -307,9 +304,9 @@ char * Name,int Arity,READFILE Stream) {
 //DEBUG printf("Insert %s/%d\n",Name,Arity);
     switch (Type) {
         case variable:
-            return(InsertIntoSignatureList(&(Signature->Variables),Name,Arity,
-Stream));
+            return(InsertIntoSignatureList(&(Signature->Variables),Name,Arity,Stream));
             break;
+//TODO - THIS NEEDS TO BE FIXED NOW I GET IT RIGHT
 //----Functions might have mistakenly been put into predicates when their
 //----type was declared. Note arity would be 0.
         case function:
@@ -322,11 +319,11 @@ Stream));
                 return(InsertNodeIntoSignatureList(&(Signature->Functions),
 NodePointer,Stream));
             } else {
-                return(InsertIntoSignatureList(&(Signature->Functions),Name,
-Arity,Stream));
+                return(InsertIntoSignatureList(&(Signature->Functions),Name,Arity,Stream));
             }
             break;
         case predicate:
+        case ho_symbol:
 //----Fucking hell, I process include files after the main file, so the
 //----mislabelling of functions as predicates might be in the other order
             if (Arity == 0 && (NodePointer = IsSymbolInSignatureList(
@@ -336,16 +333,15 @@ Signature->Functions,Name,-1)) != NULL) {
             }
 //----NOTE the fallthrough here
         case connective:
-            return(InsertIntoSignatureList(&(Signature->Predicates),Name,
-Arity,Stream));
+            return(InsertIntoSignatureList(&(Signature->Predicates),Name,Arity,Stream));
             break;
+        case a_type:
+            return(InsertIntoSignatureList(&(Signature->Types),Name,Arity,Stream));
         case non_logical_data:
-            return(InsertIntoSignatureList(&(Signature->NonLogicals),Name,
-Arity,Stream));
+            return(InsertIntoSignatureList(&(Signature->NonLogicals),Name,Arity,Stream));
             break;
         default:
-            sprintf(ErrorMessage,"Unknown type for signature, %s %d",Name,
-Arity);
+            sprintf(ErrorMessage,"Unknown type for signature, %s %d",Name,Arity);
             CodingError(ErrorMessage);
             return(NULL);
             break;
@@ -450,6 +446,9 @@ void PrintSignature(SIGNATURE Signature) {
     printf("\n");
     printf("Predicates:\n");
     PrintSignatureTree(Signature->Predicates);
+    printf("\n");
+    printf("Types:\n");
+    PrintSignatureTree(Signature->Types);
     printf("\n");
     printf("NonLogical:\n");
     PrintSignatureTree(Signature->NonLogicals);

@@ -1422,6 +1422,7 @@ VariablesMustBeQuantified);
 VariablesMustBeQuantified);
             } else {
                 Formula = ParseAtom(Stream,Language,Context,EndOfScope,VariablesMustBeQuantified);
+//---Here's where I need to capture the atom so that LATER (search for LATER) ...
             }
             break;
     }
@@ -1528,6 +1529,9 @@ EndOfScope,1,AllowInfixEquality,VariablesMustBeQuantified,BinaryFormula));
             TokenError(Stream,"TBA");
             return(NULL);
         }
+//LATER check the type of the atom if it's a type annotated formula. And if it's not a plain
+//symbol, throw a fit (this works right now tff(aaa,type,p(a) : $int).!!!). Here also move
+// things that are $tType to the new type DS.
     } else {
 //DEBUG printf("The next token is %s\n",CurrentToken(Stream)->NameToken);
         return(Formula);
@@ -2015,8 +2019,8 @@ LISTNODE ParseFILEOfHeader(char * FileName,FILE * FileStream) {
     return(Head);
 }
 //-------------------------------------------------------------------------------------------------
-LISTNODE ParseFILEOfFormulae(char * FileName,FILE * FileStream,
-SIGNATURE Signature,int ExpandIncludes,char * NameFilter) {
+LISTNODE ParseFILEOfFormulae(char * FileName,FILE * FileStream,SIGNATURE Signature,
+int ExpandIncludes,char * NameFilter) {
 
     READFILE Stream; 
     LISTNODE Head;
@@ -2025,8 +2029,7 @@ SIGNATURE Signature,int ExpandIncludes,char * NameFilter) {
         return(NULL);
     }
 
-    Head = ParseREADFILEOfFormulae(Stream,Signature,ExpandIncludes,
-NameFilter);
+    Head = ParseREADFILEOfFormulae(Stream,Signature,ExpandIncludes,NameFilter);
     CloseReadFile(Stream);
 
     return(Head);

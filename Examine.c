@@ -667,8 +667,7 @@ FunctorCollectorLength,VariableCollector,VariableCollectorLength);
 //-------------------------------------------------------------------------------------------------
 void CollectSymbolsInFormula(FORMULA Formula,char ** PredicateCollector,
 int * PredicateCollectorLength,char ** FunctorCollector,
-int * FunctorCollectorLength,char ** VariableCollector,
-int * VariableCollectorLength) {
+int * FunctorCollectorLength,char ** VariableCollector,int * VariableCollectorLength) {
 
     char * PredicateAndArity;
 
@@ -706,12 +705,11 @@ FunctorCollectorLength,VariableCollector,VariableCollectorLength);
         case binary:
 //DEBUG printf("CollectSymbolsInFormula: binary");
 //----Do LHS unless : or <<
-            if (Formula->FormulaUnion.BinaryFormula.Connective != 
-typedeclaration && Formula->FormulaUnion.BinaryFormula.Connective !=
-subtype) {
-                CollectSymbolsInFormula(Formula->FormulaUnion.BinaryFormula.LHS,
-PredicateCollector,PredicateCollectorLength,FunctorCollector,
-FunctorCollectorLength,VariableCollector,VariableCollectorLength);
+            if (Formula->FormulaUnion.BinaryFormula.Connective != typedeclaration && 
+Formula->FormulaUnion.BinaryFormula.Connective != subtype) {
+                CollectSymbolsInFormula(Formula->FormulaUnion.BinaryFormula.LHS,PredicateCollector,
+PredicateCollectorLength,FunctorCollector,FunctorCollectorLength,VariableCollector,
+VariableCollectorLength);
             }
 //----Don't do <<
             if (Formula->FormulaUnion.BinaryFormula.Connective != subtype) {

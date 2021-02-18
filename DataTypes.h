@@ -78,6 +78,7 @@ typedef struct {
     SYMBOLNODE Variables;
     SYMBOLNODE Functions;
     SYMBOLNODE Predicates;
+    SYMBOLNODE Types;
     SYMBOLNODE NonLogicals;
 } SignatureType;
 
@@ -145,8 +146,8 @@ typedef struct {
 //----Terms
 typedef enum {
     connective,
+    ho_symbol
     predicate,
-    term,
 //----Set TheSymbol = "[]" for a tuple "function"
     function,
     variable,
@@ -160,7 +161,7 @@ typedef enum {
     nested_fot,   // Used to record variable bindings in proofs
 //----Forcing a new variable to be inserted, replaced by variable
     new_variable,
-//----For formulae in THF
+//----For formulae in THF and TFX
     formula,
 //----For useful info, source, etc. Not in signature.
     non_logical_data,  
@@ -208,6 +209,7 @@ typedef enum {
     tuple,
     sequent,
     assignment,
+    type_declaration,
     quantified,
     binary,
     unary,

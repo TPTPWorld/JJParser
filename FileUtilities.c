@@ -106,8 +106,7 @@ char * ExpandFileName(char * FileName,String ExpandedFileName) {
     return(ExpandedFileName);
 }
 //-------------------------------------------------------------------------------------------------
-char * ExpandAndFindFileName(char * FileName,char * IncludingFileName,
-String ExpandedFileName) {
+char * ExpandAndFindFileName(char * FileName,char * IncludingFileName,String ExpandedFileName) {
 
     char * Paths[] = {
         "",

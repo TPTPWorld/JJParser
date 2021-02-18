@@ -276,8 +276,7 @@ count_formula_depth,0) / Statistics->NumberOfFormulae;
 cnf_nodes,1);
     }
     if (Statistics->NumberOfTCF > 0) {
-        Statistics->NumberOfTCFExpanded = RootListCount(RootListHead,
-tcf_nodes,1);
+        Statistics->NumberOfTCFExpanded = RootListCount(RootListHead,tcf_nodes,1);
     }
     if (Statistics->NumberOfCNF > 0 || Statistics->NumberOfTCF > 0) {
         Statistics->MaxClauseSize = RootListMaximal(RootListHead,literals);
