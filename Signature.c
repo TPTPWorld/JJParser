@@ -323,7 +323,8 @@ NodePointer,Stream));
             }
             break;
         case predicate:
-        case term ZZ:
+//TODO
+        case term:
 //----Fucking hell, I process include files after the main file, so the
 //----mislabelling of functions as predicates might be in the other order
             if (Arity == 0 && (NodePointer = IsSymbolInSignatureList(
