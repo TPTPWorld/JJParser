@@ -461,7 +461,7 @@ VariablesMustBeQuantified,none);
     } else {
 //----If parsing non-logical, keep it like that, else it must be a term
         if (Type != non_logical_data) {
-            Type = term;
+//TODO            Type = ZZZ term;
         }
         return(ParseTerm(Stream,Language,Context,EndOfScope,Type,free_variable,NULL,
 VariablesMustBeQuantified));
@@ -657,7 +657,7 @@ TermType OriginallyExpectedType,TermType * ExpectedRHSTermType) {
         return(1);
     }
 
-//----Non-logical contructs
+//----Non-logical constructs
     if (OriginallyExpectedType == non_logical_data &&
 (CheckToken(Stream,punctuation,"-") || CheckToken(Stream,punctuation,":"))) {
         *ExpectedRHSTermType = non_logical_data;
@@ -979,7 +979,7 @@ int Symmetric(ConnectiveType Connective) {
 Connective == nonequivalence);
 }
 //-------------------------------------------------------------------------------------------------
-//----Unused now, for chaning a right branch to a left branch
+//----Unused now, for changing a right branch to a left branch
 FORMULA ChangeAssociationRightToLeft(FORMULA Formula) {
 
     FORMULA RHS;

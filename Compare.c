@@ -19,8 +19,7 @@ VARIABLERENAMING * RenamedVariables) {
     if (AllowVariableRenaming) {
 //----Search through the renaming nodes for the orginal
         RenamingNode = *RenamedVariables;
-        while (RenamingNode != NULL && RenamingNode->OriginalVariable !=
-Variable1) {
+        while (RenamingNode != NULL && RenamingNode->OriginalVariable != Variable1) {
             RenamingNode = RenamingNode->NextVariableRenaming;
         }
 //----No renaming node yet, so make one

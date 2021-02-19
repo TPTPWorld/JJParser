@@ -323,7 +323,7 @@ NodePointer,Stream));
             }
             break;
         case predicate:
-        case ho_symbol:
+        case term ZZ:
 //----Fucking hell, I process include files after the main file, so the
 //----mislabelling of functions as predicates might be in the other order
             if (Arity == 0 && (NodePointer = IsSymbolInSignatureList(
@@ -337,6 +337,7 @@ Signature->Functions,Name,-1)) != NULL) {
             break;
         case a_type:
             return(InsertIntoSignatureList(&(Signature->Types),Name,Arity,Stream));
+            break;
         case non_logical_data:
             return(InsertIntoSignatureList(&(Signature->NonLogicals),Name,Arity,Stream));
             break;

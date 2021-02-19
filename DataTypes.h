@@ -146,10 +146,11 @@ typedef struct {
 //----Terms
 typedef enum {
     connective,
-    ho_symbol
+    term,
     predicate,
 //----Set TheSymbol = "[]" for a tuple "function"
     function,
+    a_type,
     variable,
     ite_term,
     let_term,
