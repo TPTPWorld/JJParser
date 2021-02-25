@@ -3,10 +3,12 @@
 //-------------------------------------------------------------------------------------------------
 #include "DataTypes.h"
 //-------------------------------------------------------------------------------------------------
+SIGNATURE NewSignature(void);
+SIGNATURE NewSignatureWithTypes(void);
 SIGNATURE DuplicateSignature(SIGNATURE Original);
 void FreeSignature(SIGNATURE * Signature);
+int RemovedUnusedSymbolsFromList(SYMBOLNODE * Symbols);
 int RemovedUnusedSymbols(SIGNATURE Signature);
-SIGNATURE NewSignature(void);
 char * GetSignatureSymbol(SYMBOLNODE SymbolNode);
 char * GetSignatureShortSymbol(SYMBOLNODE SymbolNode);
 int GetSignatureArity(SYMBOLNODE SymbolNode);

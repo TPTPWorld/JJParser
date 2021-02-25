@@ -65,7 +65,7 @@ int main(int argc, char *argv[]) {
     SZSOutputType SZSO1,SZSO2;
 
 //----One signature for all testing
-    Signature = NewSignature();
+    Signature = NewSignatureWithTypes();
 
 //----Read from file or stdin
     SetNeedForNonLogicTokens(1);
@@ -78,6 +78,8 @@ int main(int argc, char *argv[]) {
         Head = ParseFILEOfFormulae("--",stdin,Signature,1,NULL);
     }
     PrintListOfAnnotatedTSTPNodes(stdout,Signature,Head,tptp,1);
+    PrintSignature(Signature);
+    RemovedUnusedSymbolsFromList(&(Signature->Types));
     PrintSignature(Signature);
     FreeListOfAnnotatedFormulae(&Head);
     FreeSignature(&Signature);

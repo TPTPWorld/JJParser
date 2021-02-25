@@ -1,4 +1,4 @@
-tff(aaa,type,p(a) : $int).
+tff(aaa,type,p : $o).
 
 %tff(afs,axiom,p(f(a))).
 %

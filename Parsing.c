@@ -111,9 +111,8 @@ void RemoveVariable(VARIABLENODE * Variables,VARIABLENODE * Variable) {
     Free((void **)Variable);
 }
 //-------------------------------------------------------------------------------------------------
-VARIABLENODE InsertVariable(READFILE Stream,SIGNATURE Signature,
-VARIABLENODE * Variables,VARIABLENODE * EndOfScope,int ForceNew,
-char * VariableName,ConnectiveType Quantification,
+VARIABLENODE InsertVariable(READFILE Stream,SIGNATURE Signature,VARIABLENODE * Variables,
+VARIABLENODE * EndOfScope,int ForceNew,char * VariableName,ConnectiveType Quantification,
 int MustBeQuantifiedAlready) {
 
     VARIABLENODE Variable;
@@ -364,6 +363,7 @@ NULL);
                 break;
             case binary:
             case assignment:
+            case type_declaration:
                 FreeFormula(&((*Formula)->FormulaUnion.BinaryFormula.LHS),
 Variables);
                 assert((*Formula)->FormulaUnion.BinaryFormula.LHS == NULL);
@@ -561,24 +561,23 @@ ForceNewVariables);
             Term->TheSymbol.LetTerm.LetBody = 
 DuplicateTerm(Original->TheSymbol.LetTerm.LetBody,Context,0);
         } else {
-            Term->TheSymbol.NonVariable = InsertIntoSignature(Context.Signature,
-Term->Type,Original->TheSymbol.NonVariable->NameSymbol,
-Original->TheSymbol.NonVariable->Arity,NULL);
+            Term->TheSymbol.NonVariable = InsertIntoSignature(Context.Signature,Term->Type,
+Original->TheSymbol.NonVariable->NameSymbol,Original->TheSymbol.NonVariable->Arity,NULL);
 //----Check if a flexible arity case
             if (Term->TheSymbol.NonVariable->Arity == -1) {
                 NumberOfArguments = Term->FlexibleArity;
             } else {
                 NumberOfArguments = Term->TheSymbol.NonVariable->Arity;
             }
-            Term->Arguments = DuplicateArguments(Original->Arguments,Context,
-NumberOfArguments,ForceNewVariables);
+            Term->Arguments = DuplicateArguments(Original->Arguments,Context,NumberOfArguments,
+ForceNewVariables);
         }
         return(Term);
     }
 }
 //-------------------------------------------------------------------------------------------------
-TERMWITHVARIABLES DuplicateTermWithVariables(TERMWITHVARIABLES Original,
-SIGNATURE Signature,int ForceNewVariables) {
+TERMWITHVARIABLES DuplicateTermWithVariables(TERMWITHVARIABLES Original,SIGNATURE Signature,
+int ForceNewVariables) {
 
     ContextType Context;
     TERMWITHVARIABLES TermWithVariables;
@@ -875,19 +874,15 @@ VariablesMustBeQuantified);
 Term->Type == variable) {
 //----Force the term type to variable
         Term->Type = variable;
-        Term->TheSymbol.Variable = InsertVariable(Stream,Context.Signature,
-Context.Variables,EndOfScope,0,PrefixSymbol,free_variable,
-VariablesMustBeQuantified);
-    } else if (Term->Type == nested_thf || 
-Term->Type == nested_tff || Term->Type == nested_tcf ||
-Term->Type == nested_fof || Term->Type == nested_cnf || 
-Term->Type == nested_fot || 
+        Term->TheSymbol.Variable = InsertVariable(Stream,Context.Signature,Context.Variables,
+EndOfScope,0,PrefixSymbol,free_variable,VariablesMustBeQuantified);
+    } else if (Term->Type == nested_thf || Term->Type == nested_tff || Term->Type == nested_tcf ||
+Term->Type == nested_fof || Term->Type == nested_cnf || Term->Type == nested_fot || 
 Term->Type == ite_term || Term->Type == let_term) {
 //----Do nothing
     } else {
 //----Need to note connectives used as terms
-        if (FunctorType == unary_connective || 
-FunctorType == binary_connective ||
+        if (FunctorType == unary_connective || FunctorType == binary_connective ||
 (FunctorType == lower_word && !strcmp(PrefixSymbol,"="))) {
             Term->Type = connective;
         }
@@ -1367,8 +1362,7 @@ FORMULA PossibleLHSFormula) {
         BinaryFormula->FormulaUnion.BinaryFormula.Connective = assignmentsym;
         AcceptTokenType(Stream,binary_connective);
         BinaryFormula->FormulaUnion.BinaryFormula.RHS =
-ParseFormula(Stream,Language,Context,EndOfScope,1,1,VariablesMustBeQuantified,
-assignmentsym);
+ParseFormula(Stream,Language,Context,EndOfScope,1,1,VariablesMustBeQuantified,assignmentsym);
         return(BinaryFormula);
     } else {
         return(PossibleLHSFormula);
@@ -1376,8 +1370,8 @@ assignmentsym);
 }
 //-------------------------------------------------------------------------------------------------
 FORMULA ParseFormula(READFILE Stream,SyntaxType Language,ContextType Context,
-VARIABLENODE * EndOfScope,int AllowBinary,int AllowInfixEquality,
-int VariablesMustBeQuantified,ConnectiveType LastConnective) {
+VARIABLENODE * EndOfScope,int AllowBinary,int AllowInfixEquality,int VariablesMustBeQuantified,
+ConnectiveType LastConnective) {
 
     FORMULA Formula = NULL;
     FORMULA BinaryFormula = NULL;
@@ -1446,7 +1440,7 @@ VariablesMustBeQuantified);
     )
   ) 
 )  ) {
-//DEBUG printf("do infix because it is %s\n",CurrentToken(Stream)->NameToken);
+printf("do infix because it is %s\n",CurrentToken(Stream)->NameToken);
         NextConnective = StringToConnective(CurrentToken(Stream)->NameToken);
 //----If doing an (in)equation, no last connective for associativity
         if (NextConnective == equation || NextConnective == negequation) {
@@ -1457,32 +1451,27 @@ LastConnective == NextConnective)) {
             if ((LastConnective == none && !LeftAssociative(NextConnective)) || 
 RightAssociative(NextConnective)) {
                 BinaryFormula = NewFormula();
-                BinaryFormula->Type = NextConnective == assignmentsym ?
-assignment : binary;
+                BinaryFormula->Type = NextConnective == assignmentsym ?  assignment : 
+NextConnective == typecolon ? type_declaration : binary;
                 BinaryFormula->FormulaUnion.BinaryFormula.LHS = Formula;
                 BinaryFormula->FormulaUnion.BinaryFormula.Connective = 
 NextConnective;
 //----For : the LHS is "none" because ()s are not needed.
-                if (NextConnective == subtype ||
-NextConnective == typedeclaration || NextConnective == maparrow) {
+                if (NextConnective == subtype || NextConnective == typecolon || 
+NextConnective == maparrow) {
                     NextConnective = none;
                 }
 //----There are many different connectives here, so cannot "AcceptToken"
                 NextToken(Stream);
-                BinaryFormula->FormulaUnion.BinaryFormula.RHS = ParseFormula(
-Stream,Language,Context,EndOfScope,AllowBinary,1,VariablesMustBeQuantified,
-NextConnective);
+                BinaryFormula->FormulaUnion.BinaryFormula.RHS = ParseFormula(Stream,Language,
+Context,EndOfScope,AllowBinary,1,VariablesMustBeQuantified,NextConnective);
 //----Hack to fix negated infix equality
-                if (BinaryFormula->FormulaUnion.BinaryFormula.Connective ==
-negequation) {
+                if (BinaryFormula->FormulaUnion.BinaryFormula.Connective == negequation) {
                     InfixFormula = NewFormula();
                     InfixFormula->Type = unary;
-                    InfixFormula->FormulaUnion.UnaryFormula.Connective = 
-negation;
-                    BinaryFormula->FormulaUnion.BinaryFormula.Connective =
-equation;
-                    InfixFormula->FormulaUnion.UnaryFormula.Formula = 
-BinaryFormula;
+                    InfixFormula->FormulaUnion.UnaryFormula.Connective = negation;
+                    BinaryFormula->FormulaUnion.BinaryFormula.Connective = equation;
+                    InfixFormula->FormulaUnion.UnaryFormula.Formula = BinaryFormula;
                     BinaryFormula = InfixFormula;
                 }
 //----If finished a binary, still need to allow another binary of low 
@@ -1490,19 +1479,15 @@ BinaryFormula;
                 return(ParseLowPrecedenceBinary(Stream,Language,Context,
 EndOfScope,1,AllowInfixEquality,VariablesMustBeQuantified,BinaryFormula));
             } else if (LeftAssociative(NextConnective)) {
-                while (LastConnective == none || 
-LastConnective == NextConnective) {
+                while (LastConnective == none || LastConnective == NextConnective) {
                     BinaryFormula = NewFormula();
-                    BinaryFormula->Type = NextConnective == assignmentsym ?
-assignment : binary;
+                    BinaryFormula->Type = NextConnective == assignmentsym ? assignment : binary;
                     BinaryFormula->FormulaUnion.BinaryFormula.LHS = Formula;
-                    BinaryFormula->FormulaUnion.BinaryFormula.Connective =
-NextConnective;
+                    BinaryFormula->FormulaUnion.BinaryFormula.Connective = NextConnective;
 //----Only binary connectives are left associative, so I can "AcceptToken"
                     AcceptTokenType(Stream,binary_connective);
-                    BinaryFormula->FormulaUnion.BinaryFormula.RHS = 
-ParseFormula(Stream,Language,Context,EndOfScope,0,1,VariablesMustBeQuantified,
-NextConnective);
+                    BinaryFormula->FormulaUnion.BinaryFormula.RHS = ParseFormula(Stream,Language,
+Context,EndOfScope,0,1,VariablesMustBeQuantified,NextConnective);
                     Formula = BinaryFormula;
                     LastConnective = NextConnective;
 //----Check if we should continue a stream of binary. If a binary connective

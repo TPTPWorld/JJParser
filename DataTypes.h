@@ -103,7 +103,7 @@ typedef enum {
     sigmabinder,
     choicebinder,
     descriptionbinder,
-    typedeclaration,
+    typecolon,
     application,
     equation,
     typedequation,

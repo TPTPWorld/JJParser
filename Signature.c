@@ -10,6 +10,34 @@
 //-------------------------------------------------------------------------------------------------
 static int GlobalSymbolIndex;
 //-------------------------------------------------------------------------------------------------
+SIGNATURE NewSignature(void) {
+
+    SIGNATURE Signature;
+
+    Signature = (SIGNATURE)Malloc(sizeof(SignatureType));
+    Signature->Variables = NULL;
+    Signature->Functions = NULL;
+    Signature->Predicates = NULL;
+    Signature->Types = NULL;
+    Signature->NonLogicals = NULL;
+
+    return(Signature);
+}
+//-------------------------------------------------------------------------------------------------
+SIGNATURE NewSignatureWithTypes(void) {
+
+    SIGNATURE Signature;
+
+    Signature = NewSignature();
+    IncreaseSymbolUseCount(InsertIntoSignature(Signature,a_type,"$i",0,NULL),-1);
+    IncreaseSymbolUseCount(InsertIntoSignature(Signature,a_type,"$o",0,NULL),-1);
+    IncreaseSymbolUseCount(InsertIntoSignature(Signature,a_type,"$int",0,NULL),-1);
+    IncreaseSymbolUseCount(InsertIntoSignature(Signature,a_type,"$rat",0,NULL),-1);
+    IncreaseSymbolUseCount(InsertIntoSignature(Signature,a_type,"$real",0,NULL),-1);
+
+    return(Signature);
+}
+//-------------------------------------------------------------------------------------------------
 SYMBOLNODE NewSignatureNode(char * Name,int Arity) {
 
     SYMBOLNODE Symbol;
@@ -33,20 +61,6 @@ SYMBOLNODE NewSignatureNode(char * Name,int Arity) {
 //DEBUG printf("New symbol %s/%d with short name %s\n",
 //DEBUG Symbol->NameSymbol,Symbol->Arity,Symbol->ShortSymbol);
     return(Symbol);
-}
-//-------------------------------------------------------------------------------------------------
-SIGNATURE NewSignature(void) {
-
-    SIGNATURE Signature;
-
-    Signature = (SIGNATURE)Malloc(sizeof(SignatureType));
-    Signature->Variables = NULL;
-    Signature->Functions = NULL;
-    Signature->Predicates = NULL;
-    Signature->Types = NULL;
-    Signature->NonLogicals = NULL;
-
-    return(Signature);
 }
 //-------------------------------------------------------------------------------------------------
 SYMBOLNODE DuplicateSymbols(SYMBOLNODE Original) {
@@ -140,10 +154,8 @@ int RemovedUnusedSymbolsFromList(SYMBOLNODE * Symbols) {
 
     NumberRemoved = 0;
     if (*Symbols != NULL) {
-        NumberRemoved += RemovedUnusedSymbolsFromList(&((*Symbols)->
-LastSymbol));
-        NumberRemoved += RemovedUnusedSymbolsFromList(&((*Symbols)->
-NextSymbol));
+        NumberRemoved += RemovedUnusedSymbolsFromList(&((*Symbols)->LastSymbol));
+        NumberRemoved += RemovedUnusedSymbolsFromList(&((*Symbols)->NextSymbol));
         if ((*Symbols)->NumberOfUses  == 0) {
             ToFree = RemoveSignatureNodeFromTree(Symbols);
             Free((void **)&ToFree);
@@ -226,8 +238,7 @@ Arity));
     }
 }
 //-------------------------------------------------------------------------------------------------
-SYMBOLNODE InsertIntoSignatureList(SYMBOLNODE * List,char * Name,int Arity,
-READFILE Stream) {
+SYMBOLNODE InsertIntoSignatureList(SYMBOLNODE * List,char * Name,int Arity,READFILE Stream) {
 
     SuperString DuplicateArity;
     SYMBOLNODE * Current = List;
@@ -244,8 +255,7 @@ READFILE Stream) {
             } else {
                 if (Stream != NULL && GetStreamWarnings(Stream)) {
 //----Warning if symbol overloading is not allowed
-                    sprintf(DuplicateArity,
-"Multiple arity symbol %s, arity %d and now %d",
+                    sprintf(DuplicateArity,"Multiple arity symbol %s, arity %d and now %d",
 Name,GetSignatureArity(*Current),Arity);
                     TokenWarning(Stream,DuplicateArity);
                 }
@@ -253,8 +263,7 @@ Name,GetSignatureArity(*Current),Arity);
         }
 
         if (strcmp(Name,GetSignatureSymbol(*Current)) < 0 ||
-(strcmp(Name,GetSignatureSymbol(*Current)) == 0 &&
- Arity < GetSignatureArity(*Current))) {
+(strcmp(Name,GetSignatureSymbol(*Current)) == 0 && Arity < GetSignatureArity(*Current))) {
             Current = &((*Current)->LastSymbol);
         } else {
             Current = &((*Current)->NextSymbol);
@@ -316,8 +325,7 @@ READFILE Stream) {
                 NodePointer->Arity = Arity;
                 IncreaseSymbolUseCount(NodePointer,1);
 //DEBUG printf("Move %s/%d to functions\n",Name,NodePointer->Arity);
-                return(InsertNodeIntoSignatureList(&(Signature->Functions),
-NodePointer,Stream));
+                return(InsertNodeIntoSignatureList(&(Signature->Functions),NodePointer,Stream));
             } else {
                 return(InsertIntoSignatureList(&(Signature->Functions),Name,Arity,Stream));
             }
