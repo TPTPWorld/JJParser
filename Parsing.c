@@ -616,12 +616,10 @@ TermType KnownTermTypeOrError(READFILE Stream,SyntaxType Language) {
         return(variable);
     } else {
 //DEBUG printf("Found a function with functor %s\n",CurrentToken(Stream)->NameToken);
-        if (CheckTokenType(Stream,functor) || 
-CheckToken(Stream,punctuation,"[")) {
+        if (CheckTokenType(Stream,functor) || CheckToken(Stream,punctuation,"[")) {
 //DEBUG printf("%s parsed as a function\n",CurrentToken(Stream)->NameToken);
 //----Numbers not allowed in CNF or FOF
-            if (!AllowFOFNumbers && (Language == tptp_cnf || 
-Language == tptp_fof)) {
+            if (!AllowFOFNumbers && (Language == tptp_cnf || Language == tptp_fof)) {
                 EnsureTokenNotType(Stream,number);
             }
             if (CheckToken(Stream,lower_word,"$ite")) {
@@ -634,8 +632,7 @@ Language == tptp_fof)) {
         } else {
 //----Connectives are terms in THF
             if (Language == tptp_thf && 
-(CheckTokenType(Stream,binary_connective) || 
- CheckTokenType(Stream,unary_connective))) {
+(CheckTokenType(Stream,binary_connective) || CheckTokenType(Stream,unary_connective))) {
                 return(function);
             } else {
 //----Force an error
@@ -704,7 +701,13 @@ int VariablesMustBeQuantified) {
 //----      EnsureTokenType(Stream,predicate_symbol);
 //DEBUG printf("Found a predicate with symbol %s %d (want %d)\n",CurrentToken(Stream)->NameToken,CurrentToken(Stream)->KindToken,lower_word);
 //----Guess that it's a variable or function for infix predicate
-            TypeIfInfix = KnownTermTypeOrError(Stream,Language);
+            if (IsSymbolInSignatureList(Context.Signature->Types,CurrentToken(Stream)->NameToken,
+0) != NULL) {
+                Type = a_type;
+                TypeIfInfix = nonterm;
+            } else {
+                TypeIfInfix = KnownTermTypeOrError(Stream,Language);
+            }
             break;
         case non_logical_data:
 //DEBUG printf("Found a non-logical with symbol %s\n",CurrentToken(Stream)->NameToken);
@@ -779,17 +782,14 @@ Context,EndOfScope,term,none,NULL,VariablesMustBeQuantified);
     } else if ( 
         ( ( Type == predicate 
 //----Prevent THF connectives being used as predicates with arguments
-          && ( Language != tptp_thf 
-            || islower(PrefixSymbol[0]) ) ) 
+          && ( Language != tptp_thf || islower(PrefixSymbol[0]) ) ) 
         || Type == function 
         || Type == non_logical_data ) 
-      && ( CheckToken(Stream,punctuation,"(") 
-        || CheckToken(Stream,punctuation,"[") ) ) {
+      && ( CheckToken(Stream,punctuation,"(") || CheckToken(Stream,punctuation,"[") ) ) {
 //DEBUG printf("it ==%s==has arguments\n\n",PrefixSymbol);
 //----Variables, distinct objects and numbers cannot have arguments
 //THF TO FIX - Currently only allows ground predicates with arguments
-        if (FunctorType == upper_word || FunctorType == distinct_object || 
-FunctorType == number) {
+        if (FunctorType == upper_word || FunctorType == distinct_object || FunctorType == number) {
             TokenError(Stream,"Invalid form for a predicate");
         }
         if (CheckToken(Stream,punctuation,"(")) {
@@ -843,8 +843,7 @@ Context.Signature,0);
     }
 
 //----Check for infix predicate
-    if ((DoInfixProcessing = InfixOperatorParsing(Stream,Language,Type,
-&InfixRHSType))) {
+    if ((DoInfixProcessing = InfixOperatorParsing(Stream,Language,Type,&InfixRHSType))) {
         Term->Type = TypeIfInfix;
 //----If a term is expected, then if a variable it must be free here (infix =)
         if (InfixRHSType == term) {
@@ -865,13 +864,11 @@ Type == predicate && FunctorType == upper_word) {
 //----Insert symbol into signature. Could be LHS of infix.
     if (Term->Type == new_variable) {
         Term->Type = variable;
-        Term->TheSymbol.Variable = InsertVariable(Stream,Context.Signature,
-Context.Variables,EndOfScope,1,PrefixSymbol,VariableQuantifier,
-VariablesMustBeQuantified);
+        Term->TheSymbol.Variable = InsertVariable(Stream,Context.Signature,Context.Variables,
+EndOfScope,1,PrefixSymbol,VariableQuantifier,VariablesMustBeQuantified);
 //THF - this was Term->Type == variable, but I want to allow variable 
 //predicates. Will this work?
-    } else if ((Language == tptp_thf && FunctorType == upper_word) ||
-Term->Type == variable) {
+    } else if ((Language == tptp_thf && FunctorType == upper_word) || Term->Type == variable) {
 //----Force the term type to variable
         Term->Type = variable;
         Term->TheSymbol.Variable = InsertVariable(Stream,Context.Signature,Context.Variables,
@@ -881,7 +878,7 @@ Term->Type == nested_fof || Term->Type == nested_cnf || Term->Type == nested_fot
 Term->Type == ite_term || Term->Type == let_term) {
 //----Do nothing
     } else {
-//----Need to note connectives used as terms
+//----Need to note connectives used as terms in THF
         if (FunctorType == unary_connective || FunctorType == binary_connective ||
 (FunctorType == lower_word && !strcmp(PrefixSymbol,"="))) {
             Term->Type = connective;
@@ -981,8 +978,7 @@ FORMULA ChangeAssociationRightToLeft(FORMULA Formula) {
 
     if (Formula->FormulaUnion.BinaryFormula.RHS->Type == binary) {
         RHS = Formula->FormulaUnion.BinaryFormula.RHS;
-        Formula->FormulaUnion.BinaryFormula.RHS = RHS->
-FormulaUnion.BinaryFormula.LHS;
+        Formula->FormulaUnion.BinaryFormula.RHS = RHS->FormulaUnion.BinaryFormula.LHS;
         RHS->FormulaUnion.BinaryFormula.LHS = Formula;
         return(ChangeAssociationRightToLeft(RHS));
     } else {
@@ -1348,9 +1344,8 @@ Context,ForceNewVariables);
     return(Formula);
 }
 //-------------------------------------------------------------------------------------------------
-FORMULA ParseLowPrecedenceBinary(READFILE Stream,SyntaxType Language,
-ContextType Context,VARIABLENODE * EndOfScope,int AllowBinary,
-int AllowInfixEquality,int VariablesMustBeQuantified,
+FORMULA ParseLowPrecedenceBinary(READFILE Stream,SyntaxType Language,ContextType Context,
+VARIABLENODE * EndOfScope,int AllowBinary,int AllowInfixEquality,int VariablesMustBeQuantified,
 FORMULA PossibleLHSFormula) {
 
     FORMULA BinaryFormula = NULL;
@@ -1416,7 +1411,6 @@ VariablesMustBeQuantified);
 VariablesMustBeQuantified);
             } else {
                 Formula = ParseAtom(Stream,Language,Context,EndOfScope,VariablesMustBeQuantified);
-//---Here's where I need to capture the atom so that LATER (search for LATER) ...
             }
             break;
     }
@@ -1426,10 +1420,8 @@ VariablesMustBeQuantified);
     if (
 //----THF and TFX allow formulae as arguments of equality 
 ( AllowInfixEquality &&
-  ( Language == tptp_thf ||
-    Language == tptp_tff ) && 
-  ( CheckToken(Stream,lower_word,"=") || 
-    CheckToken(Stream,lower_word,"!=")
+  ( Language == tptp_thf || Language == tptp_tff ) && 
+  ( CheckToken(Stream,lower_word,"=") || CheckToken(Stream,lower_word,"!=")
   )
 ) ||
 ( AllowBinary &&
@@ -1440,7 +1432,7 @@ VariablesMustBeQuantified);
     )
   ) 
 )  ) {
-printf("do infix because it is %s\n",CurrentToken(Stream)->NameToken);
+//DEBUG printf("do infix because it is %s\n",CurrentToken(Stream)->NameToken);
         NextConnective = StringToConnective(CurrentToken(Stream)->NameToken);
 //----If doing an (in)equation, no last connective for associativity
         if (NextConnective == equation || NextConnective == negequation) {
@@ -1454,9 +1446,8 @@ RightAssociative(NextConnective)) {
                 BinaryFormula->Type = NextConnective == assignmentsym ?  assignment : 
 NextConnective == typecolon ? type_declaration : binary;
                 BinaryFormula->FormulaUnion.BinaryFormula.LHS = Formula;
-                BinaryFormula->FormulaUnion.BinaryFormula.Connective = 
-NextConnective;
-//----For : the LHS is "none" because ()s are not needed.
+                BinaryFormula->FormulaUnion.BinaryFormula.Connective = NextConnective;
+//----For some things set the connective to "none" because ()s are not needed.
                 if (NextConnective == subtype || NextConnective == typecolon || 
 NextConnective == maparrow) {
                     NextConnective = none;
@@ -1465,6 +1456,23 @@ NextConnective == maparrow) {
                 NextToken(Stream);
                 BinaryFormula->FormulaUnion.BinaryFormula.RHS = ParseFormula(Stream,Language,
 Context,EndOfScope,AllowBinary,1,VariablesMustBeQuantified,NextConnective);
+//----If a declaration of a type, move the LHS to Types in signature
+                if (BinaryFormula->Type == type_declaration) {
+                    if (BinaryFormula->FormulaUnion.BinaryFormula.RHS->Type == atom &&
+BinaryFormula->FormulaUnion.BinaryFormula.RHS->FormulaUnion.Atom->Type == a_type &&
+!strcmp("$tType",GetSymbol(BinaryFormula->FormulaUnion.BinaryFormula.RHS->FormulaUnion.Atom))) {
+//DEBUG printf("Need to move %s to Types\n",GetSymbol(BinaryFormula->FormulaUnion.BinaryFormula.LHS->FormulaUnion.Atom));
+                        if (MoveSignatureNode(&(Context.Signature->Predicates),
+&(Context.Signature->Types),GetSymbol(BinaryFormula->FormulaUnion.BinaryFormula.LHS->
+FormulaUnion.Atom),0,Stream) == NULL) {
+                            TokenError(Stream,"Could not move type FIX MESSAGE");
+                            return(NULL);
+                        }
+                    } else {
+printf("Fix the arity of %s from (hopefully 0) %d to %d\n",GetSymbol(BinaryFormula->FormulaUnion.BinaryFormula.LHS->FormulaUnion.Atom),GetArity(BinaryFormula->FormulaUnion.BinaryFormula.LHS->FormulaUnion.Atom),GetArityFromTyping(Stream,BinaryFormula->FormulaUnion.BinaryFormula.RHS));
+printf("If %s of type %s is not $o move to functions\n",GetSymbol(BinaryFormula->FormulaUnion.BinaryFormula.LHS->FormulaUnion.Atom),GetSymbol(GetResultFromTyping(Stream,BinaryFormula->FormulaUnion.BinaryFormula.RHS)));
+                    }
+                }
 //----Hack to fix negated infix equality
                 if (BinaryFormula->FormulaUnion.BinaryFormula.Connective == negequation) {
                     InfixFormula = NewFormula();
@@ -1511,14 +1519,14 @@ EndOfScope,1,AllowInfixEquality,VariablesMustBeQuantified,BinaryFormula));
                 return(NULL);
             }
         } else {
-            TokenError(Stream,"TBA");
+            TokenError(Stream,"Binary TBA");
             return(NULL);
         }
 //LATER check the type of the atom if it's a type annotated formula. And if it's not a plain
 //symbol, throw a fit (this works right now tff(aaa,type,p(a) : $int).!!!). Here also move
 // things that are $tType to the new type DS.
     } else {
-//DEBUG printf("The next token is %s\n",CurrentToken(Stream)->NameToken);
+//DEBUG printf("Not binary, the next token is %s\n",CurrentToken(Stream)->NameToken);
         return(Formula);
     }
 }

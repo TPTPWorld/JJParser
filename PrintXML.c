@@ -155,7 +155,7 @@ char * XMLConnectiveToString(ConnectiveType Connective) {
         case existential:
             return("existential");
             break;
-         case typedeclaration:
+         case typecolon:
               return("type-declaration");
               break;
          case maparrow:

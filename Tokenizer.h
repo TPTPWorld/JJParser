@@ -27,6 +27,7 @@ ConnectiveType StringToConnective(char * String);
 char * ConnectiveToString(ConnectiveType Connective);
 SyntaxType StringToSyntax(char * String);
 char * SyntaxToString(SyntaxType Syntax);
+char * TermTypeToString(TermType Type);
 TOKEN GetNextToken(READFILE CurrentFile);
 void FreeToken(TOKEN * Pointer);
 TOKEN Token(READFILE CurrentFile, int Operation);

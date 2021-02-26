@@ -29,6 +29,7 @@ SIGNATURE NewSignatureWithTypes(void) {
     SIGNATURE Signature;
 
     Signature = NewSignature();
+    IncreaseSymbolUseCount(InsertIntoSignature(Signature,a_type,"$tType",0,NULL),-1);
     IncreaseSymbolUseCount(InsertIntoSignature(Signature,a_type,"$i",0,NULL),-1);
     IncreaseSymbolUseCount(InsertIntoSignature(Signature,a_type,"$o",0,NULL),-1);
     IncreaseSymbolUseCount(InsertIntoSignature(Signature,a_type,"$int",0,NULL),-1);
@@ -231,8 +232,7 @@ SYMBOLNODE * IsSymbolInSignatureListPointer(SYMBOLNODE * List,char * Name,int Ar
         return(List);
     } else if (strcmp(Name,GetSignatureSymbol(*List)) < 0 ||
 (strcmp(Name,GetSignatureSymbol(*List)) == 0 && Arity < GetSignatureArity(*List))) {
-        return(IsSymbolInSignatureListPointer(&((*List)->LastSymbol),Name,
-Arity));
+        return(IsSymbolInSignatureListPointer(&((*List)->LastSymbol),Name,Arity));
     } else {
         return(IsSymbolInSignatureListPointer(&((*List)->NextSymbol),Name,Arity));
     }
@@ -319,8 +319,8 @@ READFILE Stream) {
 //----Functions might have mistakenly been put into predicates when their
 //----type was declared. Note arity would be 0.
         case function:
-            if ((NodePointerPointer = IsSymbolInSignatureListPointer(
-&(Signature->Predicates),Name,0)) != NULL) {
+            if ((NodePointerPointer = IsSymbolInSignatureListPointer(&(Signature->Predicates),
+Name,0)) != NULL) {
                 NodePointer =  RemoveSignatureNodeFromTree(NodePointerPointer);
                 NodePointer->Arity = Arity;
                 IncreaseSymbolUseCount(NodePointer,1);
@@ -355,6 +355,20 @@ Signature->Functions,Name,-1)) != NULL) {
             CodingError(ErrorMessage);
             return(NULL);
             break;
+    }
+}
+//-------------------------------------------------------------------------------------------------
+SYMBOLNODE MoveSignatureNode(SYMBOLNODE * FromList,SYMBOLNODE * ToList,char * Name,int Arity,
+READFILE Stream) {
+
+    SYMBOLNODE * NodePointerPointer;
+    SYMBOLNODE NodePointer;
+
+    if ((NodePointerPointer = IsSymbolInSignatureListPointer(FromList,Name,Arity)) != NULL) {
+        NodePointer =  RemoveSignatureNodeFromTree(NodePointerPointer);
+        return(InsertNodeIntoSignatureList(ToList,NodePointer,Stream));
+    } else {
+        return(NULL);
     }
 }
 //-------------------------------------------------------------------------------------------------

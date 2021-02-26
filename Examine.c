@@ -49,6 +49,30 @@ int GetArity(TERM Term) {
     }
 }
 //-------------------------------------------------------------------------------------------------
+TERM GetResultFromTyping(READFILE Stream,FORMULA TypeFormula) {
+
+    if (TypeFormula->Type == atom) {
+        return(TypeFormula->FormulaUnion.Atom);
+    } else if (TypeFormula->Type == binary) {
+        return(GetResultFromTyping(Stream,TypeFormula->FormulaUnion.BinaryFormula.RHS));
+    } else {
+        TokenError(Stream,"Could not get result type from typing");
+        return(NULL);
+    }
+}
+//-------------------------------------------------------------------------------------------------
+int GetArityFromTyping(READFILE Stream,FORMULA TypeFormula) {
+
+    if (TypeFormula->Type == atom) {
+        return(0);
+    } else if (TypeFormula->Type == binary) {
+        return(1);
+    } else {
+        TokenError(Stream,"Could not get result type from typing");
+        return(-1);
+    }
+}
+//-------------------------------------------------------------------------------------------------
 int LooksLikeAReal(char * RealString) {
 
     int NumberScanned;
@@ -166,22 +190,18 @@ Role == lemma || Role == theorem || Role == corollary || Role == external)) ||
 Role != negated_conjecture && Role != question));
 }
 //-------------------------------------------------------------------------------------------------
-int CheckAnnotatedFormulaRole(ANNOTATEDFORMULA AnnotatedFormula,
-StatusType DesiredRole) {
+int CheckAnnotatedFormulaRole(ANNOTATEDFORMULA AnnotatedFormula,StatusType DesiredRole) {
 
     return(ReallyAnAnnotatedFormula(AnnotatedFormula) &&
-CheckRole(AnnotatedFormula->AnnotatedFormulaUnion.AnnotatedTSTPFormula.Status,
-DesiredRole));
+CheckRole(AnnotatedFormula->AnnotatedFormulaUnion.AnnotatedTSTPFormula.Status,DesiredRole));
 
 }
 //-------------------------------------------------------------------------------------------------
 int CheckAnnotatedFormula(ANNOTATEDFORMULA AnnotatedFormula,
 SyntaxType ExpectedSyntax) {
 
-    return(AnnotatedFormula != NULL && 
-AnnotatedFormula->Syntax == ExpectedSyntax &&
-AnnotatedFormula->AnnotatedFormulaUnion.AnnotatedTSTPFormula.
-FormulaWithVariables != NULL);
+    return(AnnotatedFormula != NULL && AnnotatedFormula->Syntax == ExpectedSyntax &&
+AnnotatedFormula->AnnotatedFormulaUnion.AnnotatedTSTPFormula.FormulaWithVariables != NULL);
 }
 //-------------------------------------------------------------------------------------------------
 int LogicalAnnotatedFormula(ANNOTATEDFORMULA AnnotatedFormula) {
@@ -200,8 +220,7 @@ int TPIAnnotatedFormula(ANNOTATEDFORMULA AnnotatedFormula) {
 //-------------------------------------------------------------------------------------------------
 int ReallyAnAnnotatedFormula(ANNOTATEDFORMULA AnnotatedFormula) {
 
-    return(LogicalAnnotatedFormula(AnnotatedFormula) ||
-TPIAnnotatedFormula(AnnotatedFormula));
+    return(LogicalAnnotatedFormula(AnnotatedFormula) || TPIAnnotatedFormula(AnnotatedFormula));
 }
 //-------------------------------------------------------------------------------------------------
 int CopiedAnnotatedFormula(ANNOTATEDFORMULA AnnotatedFormula) {
@@ -238,8 +257,7 @@ GetArity(AnnotatedFormula->AnnotatedFormulaUnion.AnnotatedTSTPFormula.Source)
 int DerivedAnnotatedFormula(ANNOTATEDFORMULA AnnotatedFormula) {
 
 //----Logical
-    return(CopiedAnnotatedFormula(AnnotatedFormula) ||
-InferredAnnotatedFormula(AnnotatedFormula));
+    return(CopiedAnnotatedFormula(AnnotatedFormula) || InferredAnnotatedFormula(AnnotatedFormula));
 }
 //-------------------------------------------------------------------------------------------------
 //----Extract the contents of a term (wot's in the ()s)
@@ -249,8 +267,7 @@ int ExtractTermArguments(String Term) {
     char * Close;
     String Arguments;
 
-    if ((Open = strchr(Term,'(')) != NULL && (Close = strrchr(Term,')')) !=
-NULL) {
+    if ((Open = strchr(Term,'(')) != NULL && (Close = strrchr(Term,')')) != NULL) {
         *Close = '\0';
         strcpy(Arguments,Open+1);
         strcpy(Term,Arguments);
@@ -323,8 +340,7 @@ char * TSTPTermToString(TERM Term,char * PutTermHere) {
     }
 }
 //-------------------------------------------------------------------------------------------------
-int CountVariableUsageInArguments(TERMArray Arguments,int Arity,
-VARIABLENODE Variable) {
+int CountVariableUsageInArguments(TERMArray Arguments,int Arity,VARIABLENODE Variable) {
 
     int Count;
     int Index;
@@ -344,8 +360,8 @@ int CountVariableUsageInTerm(TERM Term,VARIABLENODE Variable) {
             break;
         case function:
         case predicate:
-            return(CountVariableUsageInArguments(Term->Arguments,Term->
-TheSymbol.NonVariable->Arity,Variable));
+            return(CountVariableUsageInArguments(Term->Arguments,
+Term->TheSymbol.NonVariable->Arity,Variable));
             break;
         case ite_term:
             return(
@@ -364,8 +380,8 @@ CountVariableUsageInTerm(Term->TheSymbol.LetTerm.LetBody,Variable));
 
 }
 //-------------------------------------------------------------------------------------------------
-int CountVariableUsageInTupleFormulae(int NumberOfElements,
-FORMULAArray TupleFormulae,VARIABLENODE Variable,int * QuantifiedOccurences) {
+int CountVariableUsageInTupleFormulae(int NumberOfElements,FORMULAArray TupleFormulae,
+VARIABLENODE Variable,int * QuantifiedOccurences) {
 
     int ElementNumber;
     int TotalUsage;
@@ -375,8 +391,8 @@ FORMULAArray TupleFormulae,VARIABLENODE Variable,int * QuantifiedOccurences) {
     TotalUsage = 0;
     LocalQuantifiedUsage = 0;
     for (ElementNumber = 0;ElementNumber < NumberOfElements;ElementNumber++) {
-        TotalUsage += CountVariableUsageInFormula(TupleFormulae[ElementNumber],
-Variable,&LocalQuantifiedUsage);
+        TotalUsage += CountVariableUsageInFormula(TupleFormulae[ElementNumber],Variable,
+&LocalQuantifiedUsage);
         *QuantifiedOccurences += LocalQuantifiedUsage;
     }
     return(TotalUsage);
@@ -395,35 +411,33 @@ int * QuantifiedOccurences) {
     switch (Formula->Type) {
         case sequent:
             LocalCount = CountVariableUsageInTupleFormulae(
-Formula->FormulaUnion.SequentFormula.NumberOfLHSElements,
-Formula->FormulaUnion.SequentFormula.LHS,Variable,&LocalQuantifiedOccurences);
+Formula->FormulaUnion.SequentFormula.NumberOfLHSElements,Formula->FormulaUnion.SequentFormula.LHS,
+Variable,&LocalQuantifiedOccurences);
             LocalCount += CountVariableUsageInTupleFormulae(
-Formula->FormulaUnion.SequentFormula.NumberOfRHSElements,
-Formula->FormulaUnion.SequentFormula.RHS,Variable,&LocalQuantifiedOccurences2);
+Formula->FormulaUnion.SequentFormula.NumberOfRHSElements,Formula->FormulaUnion.SequentFormula.RHS,
+Variable,&LocalQuantifiedOccurences2);
             LocalQuantifiedOccurences += LocalQuantifiedOccurences2;
             break;
         case quantified:
-            LocalCount = CountVariableUsageInFormula(Formula->
-FormulaUnion.QuantifiedFormula.Formula,Variable,&LocalQuantifiedOccurences);
-            if (Formula->FormulaUnion.QuantifiedFormula.Variable->
-TheSymbol.Variable == Variable) {
+            LocalCount = CountVariableUsageInFormula(
+Formula->FormulaUnion.QuantifiedFormula.Formula,Variable,&LocalQuantifiedOccurences);
+            if (Formula->FormulaUnion.QuantifiedFormula.Variable->TheSymbol.Variable == Variable) {
                 LocalQuantifiedOccurences++;
             }
             break;
         case binary:
-            LocalCount = CountVariableUsageInFormula(Formula->FormulaUnion.
-BinaryFormula.LHS,Variable,&LocalQuantifiedOccurences);
-            LocalCount += CountVariableUsageInFormula(Formula->FormulaUnion.
-BinaryFormula.RHS,Variable,&LocalQuantifiedOccurences2);
+            LocalCount = CountVariableUsageInFormula(
+Formula->FormulaUnion.BinaryFormula.LHS,Variable,&LocalQuantifiedOccurences);
+            LocalCount += CountVariableUsageInFormula(
+Formula->FormulaUnion.BinaryFormula.RHS,Variable,&LocalQuantifiedOccurences2);
             LocalQuantifiedOccurences += LocalQuantifiedOccurences2;
             break;
         case unary:
-            LocalCount = CountVariableUsageInFormula(Formula->FormulaUnion.
-UnaryFormula.Formula,Variable,&LocalQuantifiedOccurences);
+            LocalCount = CountVariableUsageInFormula(
+Formula->FormulaUnion.UnaryFormula.Formula,Variable,&LocalQuantifiedOccurences);
             break;
         case atom:
-            LocalCount = CountVariableUsageInTerm(Formula->FormulaUnion.Atom,
-Variable);
+            LocalCount = CountVariableUsageInTerm(Formula->FormulaUnion.Atom,Variable);
             break;
         case ite_formula:
             LocalCount = CountVariableUsageInFormula(Formula->FormulaUnion.
@@ -705,7 +719,7 @@ FunctorCollectorLength,VariableCollector,VariableCollectorLength);
         case binary:
 //DEBUG printf("CollectSymbolsInFormula: binary");
 //----Do LHS unless : or <<
-            if (Formula->FormulaUnion.BinaryFormula.Connective != typedeclaration && 
+            if (Formula->FormulaUnion.BinaryFormula.Connective != typecolon && 
 Formula->FormulaUnion.BinaryFormula.Connective != subtype) {
                 CollectSymbolsInFormula(Formula->FormulaUnion.BinaryFormula.LHS,PredicateCollector,
 PredicateCollectorLength,FunctorCollector,FunctorCollectorLength,VariableCollector,
@@ -1257,15 +1271,14 @@ Formula->FormulaUnion.QuantifiedFormula.Formula,Predicate);
             break;
         case binary:
 //----Do unless : or :=
-            if (Formula->FormulaUnion.BinaryFormula.Connective != 
-typedeclaration ) {
-                Count += CountFormulaAtomsByPredicate(Formula->
-FormulaUnion.BinaryFormula.LHS,Predicate);
-                Count += CountFormulaAtomsByPredicate(
-Formula->FormulaUnion.BinaryFormula.RHS,Predicate);
+            if (Formula->FormulaUnion.BinaryFormula.Connective != typecolon ) {
+                Count += CountFormulaAtomsByPredicate(Formula->FormulaUnion.BinaryFormula.LHS,
+Predicate);
+                Count += CountFormulaAtomsByPredicate( Formula->FormulaUnion.BinaryFormula.RHS,
+Predicate);
 //----Equality counts as an atom
-                if (Formula->FormulaUnion.BinaryFormula.Connective == 
-equation && (strlen(Predicate) == 0 || !strcmp(Predicate,"="))) {
+                if (Formula->FormulaUnion.BinaryFormula.Connective == equation && 
+(strlen(Predicate) == 0 || !strcmp(Predicate,"="))) {
                     Count++;
                 }
             } 
@@ -1428,15 +1441,13 @@ MoreConnectiveStatistics);
             break;
         case binary:
 //----Do LHS unless : or :=
-            if (Formula->FormulaUnion.BinaryFormula.Connective != 
-typedeclaration) {
+            if (Formula->FormulaUnion.BinaryFormula.Connective != typecolon) {
                 ConnectiveStatistics = GetFormulaConnectiveUsage(
 Formula->FormulaUnion.BinaryFormula.LHS);
             }
             MoreConnectiveStatistics = GetFormulaConnectiveUsage(
 Formula->FormulaUnion.BinaryFormula.RHS);
-            AddOnConnectiveStatistics(&ConnectiveStatistics,
-MoreConnectiveStatistics);
+            AddOnConnectiveStatistics(&ConnectiveStatistics,MoreConnectiveStatistics);
             switch(Formula->FormulaUnion.BinaryFormula.Connective) {
                 case disjunction:
                     ConnectiveStatistics.NumberOfDisjunctions++;
@@ -1490,7 +1501,7 @@ MoreConnectiveStatistics);
                     ConnectiveStatistics.NumberOfUnions++;
                     ConnectiveStatistics.NumberOfTypeConnectives++;
                     break;
-                case typedeclaration:
+                case typecolon:
                     ConnectiveStatistics.NumberOfGlobalTypeDecs++;
                     break;
                 case equation:

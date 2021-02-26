@@ -6,6 +6,11 @@
 #include "Utilities.h"
 #include "Statistics.h"
 //-------------------------------------------------------------------------------------------------
+char * GetSymbol(TERM Term);
+int GetArity(TERM Term);
+TERM GetResultFromTyping(READFILE Stream,FORMULA TypeFormula);
+int GetArityFromTyping(READFILE Stream,FORMULA TypeFormula);
+
 int CheckAnnotatedFormula(ANNOTATEDFORMULA AnnotatedFormula,
 SyntaxType ExpectedSyntax);
 int LogicalAnnotatedFormula(ANNOTATEDFORMULA AnnotatedFormula);
@@ -14,8 +19,6 @@ int ReallyAnAnnotatedFormula(ANNOTATEDFORMULA AnnotatedFormula);
 int CopiedAnnotatedFormula(ANNOTATEDFORMULA AnnotatedFormula);
 int InferredAnnotatedFormula(ANNOTATEDFORMULA AnnotatedFormula);
 int DerivedAnnotatedFormula(ANNOTATEDFORMULA AnnotatedFormula);
-char * GetSymbol(TERM Term);
-int GetArity(TERM Term);
 int LooksLikeANumber(char * NumberString);
 int LooksLikeAList(TERM Term,int MinElements,int MaxElements);
 int CheckRole(StatusType Role,StatusType DesiredRole);

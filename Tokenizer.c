@@ -516,7 +516,7 @@ ConnectiveType StringToConnective(char * String) {
         return(description);
     }
     if (!strcmp(String,":")) {
-        return(typedeclaration);
+        return(typecolon);
     }
     if (!strcmp(String,":=")) {
         return(assignmentsym);
@@ -615,7 +615,7 @@ char * ConnectiveToString(ConnectiveType Connective) {
         case description:
             return("@@-");
             break;
-        case typedeclaration:
+        case typecolon:
             return(":");
             break;
         case assignmentsym:
@@ -696,6 +696,70 @@ char * SyntaxToString(SyntaxType Syntax) {
             break;
         default:
             CodingError("Not a syntax to make into a string");
+            return(NULL);
+            break;
+    }
+}
+//-------------------------------------------------------------------------------------------------
+char * TermTypeToString(TermType Type) {
+
+    switch (Type) {
+        case connective:
+            return("connective");
+            break;
+        case term:
+            return("term");
+            break;
+        case predicate:
+            return("predicate");
+            break;
+        case function:
+            return("function");
+            break;
+        case a_type:
+            return("a_type");
+            break;
+        case variable:
+            return("variable");
+            break;
+        case ite_term:
+            return("ite_term");
+            break;
+        case let_term:
+            return("let_term");
+            break;
+        case nested_thf:
+            return("nested_thf");
+            break;
+        case nested_tff:
+            return("nested_tff");
+            break;
+        case nested_tcf:
+            return("nested_tcf");
+            break;
+        case nested_fof:
+            return("nested_fof");
+            break;
+        case nested_cnf:
+            return("nested_cnf");
+            break;
+        case nested_fot:
+            return("nested_fot");
+            break;
+        case new_variable:
+            return("new_variable");
+            break;
+        case formula:
+            return("formula");
+            break;
+        case non_logical_data:
+            return("non_logical_data");
+            break;
+        case nonterm:
+            return("nonterm");
+            break;
+        default:
+            CodingError("Not a term type to make into a string");
             return(NULL);
             break;
     }
