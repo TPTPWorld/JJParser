@@ -442,7 +442,7 @@ VARIABLENODE * EndOfScope,TermType Type,int VariablesMustBeQuantified) {
     TERM FormulaArgument;
 
 //----THF and TFF have formulae as arguments
-KEEP WORKING HERE ZZZZZZZZZZZ
+KEEP WORKING HERE ZZZZZZZZZZZZZ
     if (Language == tptp_thf || Language == tptp_tff) {
 // && WHY DID I CHECK THIS? Type == predicate) {
         FormulaArgument = NewTerm();
