@@ -41,9 +41,9 @@ int GetArity(TERM Term) {
     } else if (!strcmp(GetSymbol(Term),"[]")) {
         return(Term->FlexibleArity);
 //----Otherwise get from the signature, but check Arguments because declared
-//----symbols have wrong arity
-    } if (Term->Arguments == NULL) {
-          return(0);
+//----symbols have wrong arity THIS IS BEING FIXED NOW
+//    } if (Term->Arguments == NULL) {
+//          return(0);
     } else {
         return(GetSignatureArity(Term->TheSymbol.NonVariable));
     }
@@ -63,13 +63,31 @@ TERM GetResultFromTyping(READFILE Stream,FORMULA TypeFormula) {
 //-------------------------------------------------------------------------------------------------
 int GetArityFromTyping(READFILE Stream,FORMULA TypeFormula) {
 
+    int Arity;
+    FORMULA Side;
+
+//DEBUG printf("Get arity from type %s\n",FormulaTypeToString(TypeFormula->Type));
     if (TypeFormula->Type == atom) {
         return(0);
-    } else if (TypeFormula->Type == binary) {
-        return(1);
+    } else if (TypeFormula->Type == binary && 
+TypeFormula->FormulaUnion.BinaryFormula.Connective == maparrow) {
+        Arity = 1;
+//----Do xprods on LHS for TFF
+        Side = TypeFormula->FormulaUnion.BinaryFormula.LHS;
+        while (Side->Type == binary && Side->FormulaUnion.BinaryFormula.Connective == xprodtype) {
+            Arity++;
+            Side = Side->FormulaUnion.BinaryFormula.LHS;
+        }
+//----Do maps on RHS for THF
+        Side = TypeFormula->FormulaUnion.BinaryFormula.RHS;
+        while (Side->Type == binary && Side->FormulaUnion.BinaryFormula.Connective == maparrow) {
+            Arity++;
+            Side = Side->FormulaUnion.BinaryFormula.RHS;
+        }
+        return(Arity);
     } else {
-        TokenError(Stream,"Could not get result type from typing");
-        return(-1);
+        TokenError(Stream,"Could not get arity from typing");
+        return(0);
     }
 }
 //-------------------------------------------------------------------------------------------------

@@ -186,7 +186,6 @@ VARIABLENODE ParallelCopyVariableList(VARIABLENODE Original) {
         Copy->NextVariable = ParallelCopyVariableList(Original->NextVariable);
         return(Copy);
     }
-
 }
 //-------------------------------------------------------------------------------------------------
 void ParallelCopyVariableInstantiations(VARIABLENODE Original,
@@ -200,8 +199,7 @@ VARIABLENODE Copy) {
         }
     } else {
         Copy->Instantiation = Original->Instantiation;
-        ParallelCopyVariableInstantiations(Original->NextVariable,
-Copy->NextVariable);
+        ParallelCopyVariableInstantiations(Original->NextVariable,Copy->NextVariable);
     }
 }
 //-------------------------------------------------------------------------------------------------
@@ -251,22 +249,15 @@ void FreeTerm(TERM * Term,VARIABLENODE * Variables) {
         } else if ((*Term)->Type == nested_fot) {
             FreeTermWithVariables(&((*Term)->TheSymbol.NestedTerm));
         } else if ((*Term)->Type == ite_term) {
-            FreeFormula(&((*Term)->TheSymbol.ConditionalTerm.Condition),
-Variables);
-            FreeTerm(&((*Term)->TheSymbol.ConditionalTerm.TermIfTrue),
-Variables);
-            FreeTerm(&((*Term)->TheSymbol.ConditionalTerm.TermIfFalse),
-Variables);
+            FreeFormula(&((*Term)->TheSymbol.ConditionalTerm.Condition),Variables);
+            FreeTerm(&((*Term)->TheSymbol.ConditionalTerm.TermIfTrue),Variables);
+            FreeTerm(&((*Term)->TheSymbol.ConditionalTerm.TermIfFalse),Variables);
         } else if ((*Term)->Type == let_term) {
-            FreeFormula(&((*Term)->TheSymbol.LetTerm.LetTypes),
-Variables);
-            FreeFormula(&((*Term)->TheSymbol.LetTerm.LetDefn),
-Variables);
-            FreeTerm(&((*Term)->TheSymbol.LetTerm.LetBody),
-Variables);
+            FreeFormula(&((*Term)->TheSymbol.LetTerm.LetTypes),Variables);
+            FreeFormula(&((*Term)->TheSymbol.LetTerm.LetDefn),Variables);
+            FreeTerm(&((*Term)->TheSymbol.LetTerm.LetBody),Variables);
         } else {
-            for (ArgumentIndex=0;ArgumentIndex<GetArity(*Term);
-ArgumentIndex++) {
+            for (ArgumentIndex=0;ArgumentIndex<GetArity(*Term);ArgumentIndex++) {
                 FreeTerm(&((*Term)->Arguments[ArgumentIndex]),Variables);
                 assert((*Term)->Arguments[ArgumentIndex] == NULL);
             }
@@ -282,8 +273,7 @@ ArgumentIndex++) {
 void FreeTermWithVariables(TERMWITHVARIABLES * TermWithVariables) {
 
     if (*TermWithVariables != NULL) {
-        FreeTerm(&((*TermWithVariables)->Term),
-&((*TermWithVariables)->Variables));
+        FreeTerm(&((*TermWithVariables)->Term),&((*TermWithVariables)->Variables));
         assert((*TermWithVariables)->Term == NULL);
         assert((*TermWithVariables)->Variables == NULL);
         Free((void **)TermWithVariables);
@@ -449,15 +439,17 @@ Context,ForceNewVariables);
 TERM ParseArgument(READFILE Stream,SyntaxType Language,ContextType Context,
 VARIABLENODE * EndOfScope,TermType Type,int VariablesMustBeQuantified) {
 
-    TERM THFTerm;
+    TERM FormulaArgument;
 
-//----In THF all things are atoms (no terms), so it stays predicate
-    if (Language == tptp_thf && Type == predicate) {
-        THFTerm = NewTerm();
-        THFTerm->Type = formula;
-        THFTerm->TheSymbol.Formula = ParseFormula(Stream,Language,Context,EndOfScope,1,1,
+//----THF and TFF have formulae as arguments
+KEEP WORKING HERE ZZZZZZZZZZZ
+    if (Language == tptp_thf || Language == tptp_tff) {
+// && WHY DID I CHECK THIS? Type == predicate) {
+        FormulaArgument = NewTerm();
+        FormulaArgument->Type = formula;
+        FormulaArgument->TheSymbol.Formula = ParseFormula(Stream,Language,Context,EndOfScope,1,1,
 VariablesMustBeQuantified,none);
-        return(THFTerm);
+        return(FormulaArgument);
     } else {
 //----If parsing non-logical, keep it like that, else it must be a term
         if (Type != non_logical_data) {
@@ -468,30 +460,28 @@ VariablesMustBeQuantified));
     }
 }
 //-------------------------------------------------------------------------------------------------
-TERMArray ParseArguments(READFILE Stream,SyntaxType Language,
-ContextType Context,VARIABLENODE * EndOfScope,int * Arity,TermType Type,
-char * MatchingBracket,int VariablesMustBeQuantified) {
+TERMArray ParseArguments(READFILE Stream,SyntaxType Language,ContextType Context,
+VARIABLENODE * EndOfScope,int * Arity,TermType Type,char * MatchingBracket,
+int VariablesMustBeQuantified) {
 
     TERMArray Arguments;
 
 //----Disallows the () case, which is illegal in the BNF
-    if (!strcmp(MatchingBracket,"]") && 
-CheckToken(Stream,punctuation,MatchingBracket)) {
+    if (!strcmp(MatchingBracket,"]") && CheckToken(Stream,punctuation,MatchingBracket)) {
         Arguments = (TERMArray)NULL;
         *Arity = 0;
     } else {
         Arguments = (TERMArray)Malloc(sizeof(TERM));
         *Arity = 1;
-        Arguments[0] = ParseArgument(Stream,Language,Context,EndOfScope,
-Type,VariablesMustBeQuantified);
+        Arguments[0] = ParseArgument(Stream,Language,Context,EndOfScope,Type,
+VariablesMustBeQuantified);
         while (CheckToken(Stream,punctuation,",")) {
 //DEBUG printf("and another argument\n");
             AcceptToken(Stream,punctuation,",");
             (*Arity)++;
-            Arguments = (TERMArray)Realloc((void *)Arguments,
-*Arity * sizeof(TERM));
-            Arguments[*Arity - 1] = ParseArgument(Stream,Language,Context,
-EndOfScope,Type,VariablesMustBeQuantified);
+            Arguments = (TERMArray)Realloc((void *)Arguments,*Arity * sizeof(TERM));
+            Arguments[*Arity - 1] = ParseArgument(Stream,Language,Context,EndOfScope,Type,
+VariablesMustBeQuantified);
         }
     }
 
@@ -643,8 +633,8 @@ TermType KnownTermTypeOrError(READFILE Stream,SyntaxType Language) {
     }
 }
 //-------------------------------------------------------------------------------------------------
-int InfixOperatorParsing(READFILE Stream,SyntaxType Language,
-TermType OriginallyExpectedType,TermType * ExpectedRHSTermType) {
+int InfixOperatorParsing(READFILE Stream,SyntaxType Language,TermType OriginallyExpectedType,
+TermType * ExpectedRHSTermType) {
 
 //----For THF equality is dealt with as a binary operator
     if (Language != tptp_thf && OriginallyExpectedType == predicate && 
@@ -758,25 +748,25 @@ EndOfScope,1,1,VariablesMustBeQuantified,none);
         AcceptToken(Stream,punctuation,",");
 // TO FIX ... NEED TO ACCEPT FORMULAE HERE TOO
 // Test case tff(an,axiom,p($ite(q,r & f,r & g))).
-        Term->TheSymbol.ConditionalTerm.TermIfTrue = ParseTerm(Stream,
-Language,Context,EndOfScope,term,none,NULL,VariablesMustBeQuantified);
+        Term->TheSymbol.ConditionalTerm.TermIfTrue = ParseTerm(Stream,Language,Context,EndOfScope,
+term,none,NULL,VariablesMustBeQuantified);
         AcceptToken(Stream,punctuation,",");
-        Term->TheSymbol.ConditionalTerm.TermIfFalse = ParseTerm(Stream,
-Language,Context,EndOfScope,term,none,NULL,VariablesMustBeQuantified);
+        Term->TheSymbol.ConditionalTerm.TermIfFalse = ParseTerm(Stream,Language,Context,EndOfScope,
+term,none,NULL,VariablesMustBeQuantified);
         AcceptToken(Stream,punctuation,")");
     } else if (Type == let_term) {
         NumberOfArguments = 0;
         Term->Arguments = NULL;
         AcceptToken(Stream,punctuation,"(");
-        Term->TheSymbol.LetTerm.LetTypes = ParseFormula(Stream,Language,
-Context,EndOfScope,1,0,VariablesMustBeQuantified,none);
+        Term->TheSymbol.LetTerm.LetTypes = ParseFormula(Stream,Language,Context,EndOfScope,
+1,0,VariablesMustBeQuantified,none);
         AcceptToken(Stream,punctuation,",");
-        Term->TheSymbol.LetTerm.LetDefn = ParseFormula(Stream,Language,
-Context,EndOfScope,1,0,VariablesMustBeQuantified,none);
+        Term->TheSymbol.LetTerm.LetDefn = ParseFormula(Stream,Language,Context,EndOfScope,
+1,0,VariablesMustBeQuantified,none);
         AcceptToken(Stream,punctuation,",");
 // TO FIX ... NEED TO ACCEPT FORMULAE HERE TOO
-        Term->TheSymbol.LetTerm.LetBody = ParseTerm(Stream,Language,
-Context,EndOfScope,term,none,NULL,VariablesMustBeQuantified);
+        Term->TheSymbol.LetTerm.LetBody = ParseTerm(Stream,Language,Context,EndOfScope,term,none,
+NULL,VariablesMustBeQuantified);
         AcceptToken(Stream,punctuation,")");
 //----Deal with a list of things, with either ( or [ brackets
     } else if ( 
@@ -787,23 +777,21 @@ Context,EndOfScope,term,none,NULL,VariablesMustBeQuantified);
         || Type == non_logical_data ) 
       && ( CheckToken(Stream,punctuation,"(") || CheckToken(Stream,punctuation,"[") ) ) {
 //DEBUG printf("it ==%s==has arguments\n\n",PrefixSymbol);
+//----Now we can check that expected predicates look like predicates
 //----Variables, distinct objects and numbers cannot have arguments
 //THF TO FIX - Currently only allows ground predicates with arguments
-        if (FunctorType == upper_word || FunctorType == distinct_object || FunctorType == number) {
-            TokenError(Stream,"Invalid form for a predicate");
+        if (FunctorType == upper_word || FunctorType == distinct_object || FunctorType == number ||
+((Type == predicate || Type == function) && FunctorType != lower_word)) {
+            TokenError(Stream,"Invalid form for a principal symbol");
         }
         if (CheckToken(Stream,punctuation,"(")) {
-//----Now we can check that expected predicates look like predicates
-            if (Type == predicate && FunctorType != lower_word) {
-                TokenError(Stream,"Invalid form for a predicate");
-            }
             strcpy(MatchingBracket,")");
         } else {
             strcpy(MatchingBracket,"]");
         }
         AcceptTokenType(Stream,punctuation);
-        Term->Arguments = ParseArguments(Stream,Language,Context,EndOfScope,
-&NumberOfArguments,Type,MatchingBracket,VariablesMustBeQuantified);
+        Term->Arguments = ParseArguments(Stream,Language,Context,EndOfScope,&NumberOfArguments,
+Type,MatchingBracket,VariablesMustBeQuantified);
         AcceptToken(Stream,punctuation,MatchingBracket);
 //----Is it a nested formula?
     } else if (Type == nested_thf || Type == nested_tff || 
@@ -856,8 +844,7 @@ Context.Signature,0);
 //----language, where variables can be types in polymorphic cases.
         if (Language != tptp_thf && Language != tptp_tff &&
 Type == predicate && FunctorType == upper_word) {
-            TokenError(Stream,
-"Variables cannot be used as predicates in untyped languages");
+            TokenError(Stream,"Variables cannot be used as predicates except in THF");
         }
     }
 
@@ -996,8 +983,8 @@ VARIABLENODE * EndOfScope,int VariablesMustBeQuantified) {
     InfixNegatedAtom = 0;
     Formula = NewFormula();
     Formula->Type = atom;
-    Formula->FormulaUnion.Atom = ParseTerm(Stream,Language,Context,EndOfScope,
-predicate,none,&InfixNegatedAtom,VariablesMustBeQuantified);
+    Formula->FormulaUnion.Atom = ParseTerm(Stream,Language,Context,EndOfScope,predicate,none,
+&InfixNegatedAtom,VariablesMustBeQuantified);
 
 //----Hack to fix negated infix equality
     if (InfixNegatedAtom) {
@@ -1134,23 +1121,22 @@ FormulaUnion.QuantifiedFormula.Quantifier,VariablesMustBeQuantified);
     return(Formula);
 }
 //-------------------------------------------------------------------------------------------------
-FORMULAArray DuplicateTupleFormulae(int NumberOfElements,
-FORMULAArray Original,ContextType Context,int ForceNewVariables) {
+FORMULAArray DuplicateTupleFormulae(int NumberOfElements,FORMULAArray Original,
+ContextType Context,int ForceNewVariables) {
 
     FORMULAArray Duplicate;
     
     Duplicate = (FORMULAArray)Malloc(NumberOfElements * sizeof(FORMULA));
     while (NumberOfElements > 0) {
-        Duplicate[NumberOfElements-1] = DuplicateFormula(
-Original[NumberOfElements-1],Context,ForceNewVariables);
+        Duplicate[NumberOfElements-1] = DuplicateFormula(Original[NumberOfElements-1],Context,
+ForceNewVariables);
     }
     return(Duplicate);
 }
 //-------------------------------------------------------------------------------------------------
-FORMULAArray ParseTupleFormulae(READFILE Stream,SyntaxType Language,
-ContextType Context,VARIABLENODE * EndOfScope,int AllowBinary,
-int VariablesMustBeQuantified,ConnectiveType LastConnective,
-int * NumberOfElements) {
+FORMULAArray ParseTupleFormulae(READFILE Stream,SyntaxType Language,ContextType Context,
+VARIABLENODE * EndOfScope,int AllowBinary,int VariablesMustBeQuantified,
+ConnectiveType LastConnective,int * NumberOfElements) {
 
     FORMULAArray TupleFormulae;
 
@@ -1160,15 +1146,15 @@ int * NumberOfElements) {
     if (!CheckToken(Stream,punctuation,"]")) {
         (*NumberOfElements)++;
         TupleFormulae = (FORMULAArray)Malloc(sizeof(FORMULA));
-        TupleFormulae[*NumberOfElements-1] = ParseFormula(Stream,
-Language,Context,EndOfScope,1,1,VariablesMustBeQuantified,none);
+        TupleFormulae[*NumberOfElements-1] = ParseFormula(Stream,Language,Context,EndOfScope,1,1,
+VariablesMustBeQuantified,none);
         while (CheckToken(Stream,punctuation,",")) {
             AcceptToken(Stream,punctuation,",");
             (*NumberOfElements)++;
             TupleFormulae = (FORMULAArray)Realloc((void *)TupleFormulae,
 *NumberOfElements * sizeof(FORMULA));
-            TupleFormulae[*NumberOfElements-1] = ParseFormula(Stream,
-Language,Context,EndOfScope,1,1,VariablesMustBeQuantified,none);
+            TupleFormulae[*NumberOfElements-1] = ParseFormula(Stream,Language,Context,EndOfScope,
+1,1,VariablesMustBeQuantified,none);
         }
     } else {
         TupleFormulae = NULL;
@@ -1177,9 +1163,9 @@ Language,Context,EndOfScope,1,1,VariablesMustBeQuantified,none);
     return(TupleFormulae);
 }
 //-------------------------------------------------------------------------------------------------
-FORMULA ParseTupleOrSequentFormula(READFILE Stream,SyntaxType Language,
-ContextType Context,VARIABLENODE * EndOfScope,int AllowBinary,
-int VariablesMustBeQuantified,ConnectiveType LastConnective) {
+FORMULA ParseTupleOrSequentFormula(READFILE Stream,SyntaxType Language,ContextType Context,
+VARIABLENODE * EndOfScope,int AllowBinary,int VariablesMustBeQuantified,
+ConnectiveType LastConnective) {
 
     FORMULA TupleOrSequent;
     FORMULAArray FirstTuple;
@@ -1187,24 +1173,20 @@ int VariablesMustBeQuantified,ConnectiveType LastConnective) {
 
     EnsureToken(Stream,punctuation,"[");
     TupleOrSequent = NewFormula();
-    FirstTuple = ParseTupleFormulae(Stream,
-Language,Context,EndOfScope,AllowBinary,VariablesMustBeQuantified,
-LastConnective,&NumberOfElements);
+    FirstTuple = ParseTupleFormulae(Stream,Language,Context,EndOfScope,AllowBinary,
+VariablesMustBeQuantified,LastConnective,&NumberOfElements);
     if (CheckToken(Stream,binary_connective,"-->")) {
         TupleOrSequent->Type = sequent;
         TupleOrSequent->FormulaUnion.SequentFormula.LHS = FirstTuple;
-        TupleOrSequent->FormulaUnion.SequentFormula.NumberOfLHSElements = 
-NumberOfElements;
+        TupleOrSequent->FormulaUnion.SequentFormula.NumberOfLHSElements = NumberOfElements;
         AcceptToken(Stream,binary_connective,"-->");
-        TupleOrSequent->FormulaUnion.SequentFormula.RHS = ParseTupleFormulae(
-Stream,Language,Context,EndOfScope,AllowBinary,VariablesMustBeQuantified,
-LastConnective,&(TupleOrSequent->FormulaUnion.SequentFormula.
-NumberOfRHSElements));
+        TupleOrSequent->FormulaUnion.SequentFormula.RHS = ParseTupleFormulae(Stream,Language,
+Context,EndOfScope,AllowBinary,VariablesMustBeQuantified,LastConnective,
+&(TupleOrSequent->FormulaUnion.SequentFormula.NumberOfRHSElements));
     } else {
         TupleOrSequent->Type = tuple;
         TupleOrSequent->FormulaUnion.TupleFormula.Elements = FirstTuple;
-        TupleOrSequent->FormulaUnion.TupleFormula.NumberOfElements =
-NumberOfElements;
+        TupleOrSequent->FormulaUnion.TupleFormula.NumberOfElements = NumberOfElements;
     }
 
     return(TupleOrSequent);
@@ -1220,14 +1202,14 @@ ContextType Context,VARIABLENODE * EndOfScope,int VariablesMustBeQuantified) {
     
     AcceptToken(Stream,predicate_symbol,"$ite");
     AcceptToken(Stream,punctuation,"(");
-    ITEFormula->FormulaUnion.ConditionalFormula.Condition = ParseFormula(
-Stream,Language,Context,EndOfScope,1,1,VariablesMustBeQuantified,none);
+    ITEFormula->FormulaUnion.ConditionalFormula.Condition = ParseFormula(Stream,Language,Context,
+EndOfScope,1,1,VariablesMustBeQuantified,none);
     AcceptToken(Stream,punctuation,",");
-    ITEFormula->FormulaUnion.ConditionalFormula.FormulaIfTrue = ParseFormula(
-Stream,Language,Context,EndOfScope,1,1,VariablesMustBeQuantified,none);
+    ITEFormula->FormulaUnion.ConditionalFormula.FormulaIfTrue = ParseFormula(Stream,Language,
+Context,EndOfScope,1,1,VariablesMustBeQuantified,none);
     AcceptToken(Stream,punctuation,",");
-    ITEFormula->FormulaUnion.ConditionalFormula.FormulaIfFalse = ParseFormula(
-Stream,Language,Context,EndOfScope,1,1,VariablesMustBeQuantified,none);
+    ITEFormula->FormulaUnion.ConditionalFormula.FormulaIfFalse = ParseFormula(Stream,Language,
+Context,EndOfScope,1,1,VariablesMustBeQuantified,none);
     AcceptToken(Stream,punctuation,")");
 
     return(ITEFormula);
@@ -1244,22 +1226,21 @@ ContextType Context,VARIABLENODE * EndOfScope,int VariablesMustBeQuantified) {
     AcceptToken(Stream,predicate_symbol,"$let");
     AcceptToken(Stream,punctuation,"(");
 //----ParseFormula accepts tuples too :-)
-    LETFormula->FormulaUnion.LetFormula.LetTypes = ParseFormula(Stream,Language,
-Context,EndOfScope,1,0,0,none);
+    LETFormula->FormulaUnion.LetFormula.LetTypes = ParseFormula(Stream,Language,Context,EndOfScope,
+1,0,0,none);
     AcceptToken(Stream,punctuation,",");
-    LETFormula->FormulaUnion.LetFormula.LetDefn = ParseFormula(Stream,Language,
-Context,EndOfScope,1,1,0,none);
+    LETFormula->FormulaUnion.LetFormula.LetDefn = ParseFormula(Stream,Language,Context,EndOfScope,
+1,1,0,none);
     AcceptToken(Stream,punctuation,",");
-    LETFormula->FormulaUnion.LetFormula.LetBody = ParseFormula(Stream,Language,
-Context,EndOfScope,1,1,VariablesMustBeQuantified,none);
+    LETFormula->FormulaUnion.LetFormula.LetBody = ParseFormula(Stream,Language,Context,EndOfScope,
+1,1,VariablesMustBeQuantified,none);
     AcceptToken(Stream,punctuation,")");
 
     return(LETFormula);
 }
 //-------------------------------------------------------------------------------------------------
 //----This assumes it's in the context of duplicating a formula with variables
-FORMULA DuplicateFormula(FORMULA Original,ContextType Context,
-int ForceNewVariables) {
+FORMULA DuplicateFormula(FORMULA Original,ContextType Context,int ForceNewVariables) {
 
     FORMULA Formula;
 
@@ -1372,6 +1353,7 @@ ConnectiveType LastConnective) {
     FORMULA BinaryFormula = NULL;
     FORMULA InfixFormula = NULL;
     ConnectiveType NextConnective;
+    String ErrorMessage;
 
 //DEBUG printf("ParseFormula with token %s, allow binary %d\n",CurrentToken(Stream)->NameToken,AllowBinary);
     switch (CurrentToken(Stream)->KindToken) {
@@ -1465,12 +1447,26 @@ BinaryFormula->FormulaUnion.BinaryFormula.RHS->FormulaUnion.Atom->Type == a_type
                         if (MoveSignatureNode(&(Context.Signature->Predicates),
 &(Context.Signature->Types),GetSymbol(BinaryFormula->FormulaUnion.BinaryFormula.LHS->
 FormulaUnion.Atom),0,Stream) == NULL) {
-                            TokenError(Stream,"Could not move type FIX MESSAGE");
+                            sprintf(ErrorMessage,"Could not move %s to types",
+GetSymbol(BinaryFormula->FormulaUnion.BinaryFormula.LHS->FormulaUnion.Atom));
+                            TokenError(Stream,ErrorMessage);
                             return(NULL);
                         }
                     } else {
-printf("Fix the arity of %s from (hopefully 0) %d to %d\n",GetSymbol(BinaryFormula->FormulaUnion.BinaryFormula.LHS->FormulaUnion.Atom),GetArity(BinaryFormula->FormulaUnion.BinaryFormula.LHS->FormulaUnion.Atom),GetArityFromTyping(Stream,BinaryFormula->FormulaUnion.BinaryFormula.RHS));
-printf("If %s of type %s is not $o move to functions\n",GetSymbol(BinaryFormula->FormulaUnion.BinaryFormula.LHS->FormulaUnion.Atom),GetSymbol(GetResultFromTyping(Stream,BinaryFormula->FormulaUnion.BinaryFormula.RHS)));
+//DEBUG printf("Fix the arity of %s from (hopefully 0) %d to %d\n",GetSymbol(BinaryFormula->FormulaUnion.BinaryFormula.LHS->FormulaUnion.Atom),GetArity(BinaryFormula->FormulaUnion.BinaryFormula.LHS->FormulaUnion.Atom),GetArityFromTyping(Stream,BinaryFormula->FormulaUnion.BinaryFormula.RHS));
+                        BinaryFormula->FormulaUnion.BinaryFormula.LHS->FormulaUnion.Atom->TheSymbol.NonVariable->Arity = GetArityFromTyping(Stream,BinaryFormula->FormulaUnion.BinaryFormula.RHS);
+                        if (strcmp("$o",GetSymbol(GetResultFromTyping(Stream,BinaryFormula->FormulaUnion.BinaryFormula.RHS)))) {
+//DEBUG printf("Move %s of type %s to functions\n",GetSymbol(BinaryFormula->FormulaUnion.BinaryFormula.LHS->FormulaUnion.Atom),GetSymbol(GetResultFromTyping(Stream,BinaryFormula->FormulaUnion.BinaryFormula.RHS)));
+                            if (MoveSignatureNode(&(Context.Signature->Predicates),
+&(Context.Signature->Functions),GetSymbol(BinaryFormula->FormulaUnion.BinaryFormula.LHS->
+FormulaUnion.Atom),GetArity(BinaryFormula->FormulaUnion.BinaryFormula.LHS->FormulaUnion.Atom),
+Stream) == NULL) {
+                                sprintf(ErrorMessage,"Could not move %s to functions",
+GetSymbol(BinaryFormula->FormulaUnion.BinaryFormula.LHS->FormulaUnion.Atom));
+                                TokenError(Stream,ErrorMessage);
+                                return(NULL);
+                            }
+                        }
                     }
                 }
 //----Hack to fix negated infix equality
@@ -1647,8 +1643,8 @@ nontype,Context,NULL,non_logical_data,none,NULL,0);
 "include") || (((Arity = GetArity(AnnotatedFormula->
 AnnotatedFormulaUnion.Include)) != 1) && Arity != 2) || (Arity == 1 &&
 GetArity(AnnotatedFormula->AnnotatedFormulaUnion.Include->Arguments[0]) != 0) ||
-(Arity == 2 && strcmp(GetSymbol(AnnotatedFormula->
-AnnotatedFormulaUnion.Include->Arguments[1]),"[]"))) {
+(Arity == 2 && strcmp(GetSymbol(AnnotatedFormula->AnnotatedFormulaUnion.Include->Arguments[1]),
+"[]"))) {
         TokenError(Stream,"Ill-formed include directive");
     }
 

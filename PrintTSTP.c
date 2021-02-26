@@ -183,8 +183,8 @@ PositiveEquality(Formula->FormulaUnion.UnaryFormula.Formula->
 FormulaUnion.Atom));
 }
 //-------------------------------------------------------------------------------------------------
-void PrintFileTSTPTerm(PRINTFILE Stream,SyntaxType Language,TERM Term,
-int Indent,int TSTPSyntaxFlag) {
+void PrintFileTSTPTerm(PRINTFILE Stream,SyntaxType Language,TERM Term,int Indent,
+int TSTPSyntaxFlag) {
 
     int Index;
     int Arity;
@@ -288,7 +288,8 @@ TSTPSyntaxFlag);
             ClosingBracket = ')';
         }
         
-        if ((Arity = GetArity(Term)) > 0 || OpeningBracket == '[') {
+//----Need to check the args exist, because for type declarations they don't
+        if (((Arity = GetArity(Term)) > 0  && Term->Arguments != NULL) || OpeningBracket == '[') {
 //----Pretty printing of []ed lists - used for outmost lists, e.g., multiple
 //----inference() terms.
             PFprintf(Stream,"%c",OpeningBracket);

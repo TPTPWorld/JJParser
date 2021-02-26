@@ -765,6 +765,49 @@ char * TermTypeToString(TermType Type) {
     }
 }
 //-------------------------------------------------------------------------------------------------
+char * FormulaTypeToString(FormulaTypeType Type) {
+
+    switch (Type) {
+        case tuple:
+            return("tuple");
+            break;
+        case sequent:
+            return("sequent");
+            break;
+        case assignment:
+            return("assignment");
+            break;
+        case type_declaration:
+            return("type_declaration");
+            break;
+        case quantified:
+            return("quantified");
+            break;
+        case binary:
+            return("binary");
+            break;
+        case unary:
+            return("unary");
+            break;
+        case atom:
+            return("atom");
+            break;
+        case ite_formula:
+            return("ite_formula");
+            break;
+        case let_formula:
+            return("let_formula");
+            break;
+        case nonformulatype:
+            return("nonformulatype");
+            break;
+        default:
+            CodingError("Not a formula type to make into a string");
+            return(NULL);
+            break;
+    }
+}
+//-------------------------------------------------------------------------------------------------
 TOKEN BuildToken(TokenType TypeToken,char * LocalValue) {
 
     TOKEN NewToken;
