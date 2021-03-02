@@ -162,7 +162,7 @@ typedef enum {
     nested_fot,   // Used to record variable bindings in proofs
 //----Forcing a new variable to be inserted, replaced by variable
     new_variable,
-//----For formulae in THF and TFX
+//----For formulae arguments in THF and TFX
     formula,
 //----For useful info, source, etc. Not in signature.
     non_logical_data,  
@@ -186,7 +186,7 @@ typedef union {
     VARIABLENODE Variable;
     struct FormulaWithVariablesTag * NestedFormula;
     struct TermWithVariablesTag * NestedTerm;
-//----For nested THF formulae
+//----For nested THF and TFX formulae
     struct FormulaTypetag * Formula;
     ConditionalTermType ConditionalTerm;
     LetTermType LetTerm;

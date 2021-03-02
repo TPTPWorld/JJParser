@@ -44,18 +44,14 @@ AnnotatedFormulaUnion.AnnotatedTSTPFormula.UsefulInfo = NULL;
 //-------------------------------------------------------------------------------------------------
 void FreeAnnotatedTSTPFormula(ANNOTATEDFORMULA * AnnotatedFormula) {
 
-    Free((void **)&((*AnnotatedFormula)->
-AnnotatedFormulaUnion.AnnotatedTSTPFormula.Name));
-    assert((*AnnotatedFormula)->
-AnnotatedFormulaUnion.AnnotatedTSTPFormula.Name == NULL);
+    Free((void **)&((*AnnotatedFormula)->AnnotatedFormulaUnion.AnnotatedTSTPFormula.Name));
+    assert((*AnnotatedFormula)->AnnotatedFormulaUnion.AnnotatedTSTPFormula.Name == NULL);
     FreeFormulaWithVariables(&((*AnnotatedFormula)->
 AnnotatedFormulaUnion.AnnotatedTSTPFormula.FormulaWithVariables));
     assert((*AnnotatedFormula)->
 AnnotatedFormulaUnion.AnnotatedTSTPFormula.FormulaWithVariables == NULL);
-    FreeTerm(&((*AnnotatedFormula)->
-AnnotatedFormulaUnion.AnnotatedTSTPFormula.Source),NULL);
-    FreeTerm(&((*AnnotatedFormula)->
-AnnotatedFormulaUnion.AnnotatedTSTPFormula.UsefulInfo),NULL);
+    FreeTerm(&((*AnnotatedFormula)->AnnotatedFormulaUnion.AnnotatedTSTPFormula.Source),NULL);
+    FreeTerm(&((*AnnotatedFormula)->AnnotatedFormulaUnion.AnnotatedTSTPFormula.UsefulInfo),NULL);
     Free((void **)AnnotatedFormula);
 }
 //-------------------------------------------------------------------------------------------------

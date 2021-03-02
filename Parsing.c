@@ -338,32 +338,23 @@ void FreeFormula(FORMULA * Formula,VARIABLENODE * Variables) {
                 assert((*Formula)->FormulaUnion.SequentFormula.RHS == NULL);
                 break;
             case quantified:
-                FreeTerm(&((*Formula)->FormulaUnion.QuantifiedFormula.Variable),
-Variables);
-                assert((*Formula)->FormulaUnion.QuantifiedFormula.Variable == 
-NULL);
-                FreeFormula(&((*Formula)->FormulaUnion.QuantifiedFormula.
-VariableType),Variables);
-                assert((*Formula)->FormulaUnion.QuantifiedFormula.VariableType
-== NULL);
-                FreeFormula(&((*Formula)->
-FormulaUnion.QuantifiedFormula.Formula),Variables);
-                assert((*Formula)->FormulaUnion.QuantifiedFormula.Formula == 
-NULL);
+                FreeTerm(&((*Formula)->FormulaUnion.QuantifiedFormula.Variable), Variables);
+                assert((*Formula)->FormulaUnion.QuantifiedFormula.Variable == NULL);
+                FreeFormula(&((*Formula)->FormulaUnion.QuantifiedFormula.VariableType),Variables);
+                assert((*Formula)->FormulaUnion.QuantifiedFormula.VariableType == NULL);
+                FreeFormula(&((*Formula)->FormulaUnion.QuantifiedFormula.Formula),Variables);
+                assert((*Formula)->FormulaUnion.QuantifiedFormula.Formula == NULL);
                 break;
             case binary:
             case assignment:
             case type_declaration:
-                FreeFormula(&((*Formula)->FormulaUnion.BinaryFormula.LHS),
-Variables);
+                FreeFormula(&((*Formula)->FormulaUnion.BinaryFormula.LHS),Variables);
                 assert((*Formula)->FormulaUnion.BinaryFormula.LHS == NULL);
-                FreeFormula(&((*Formula)->FormulaUnion.BinaryFormula.RHS),
-Variables);
+                FreeFormula(&((*Formula)->FormulaUnion.BinaryFormula.RHS),Variables);
                 assert((*Formula)->FormulaUnion.BinaryFormula.RHS == NULL);
                 break;
             case unary:
-                FreeFormula(&((*Formula)->FormulaUnion.UnaryFormula.Formula),
-Variables);
+                FreeFormula(&((*Formula)->FormulaUnion.UnaryFormula.Formula),Variables);
                 assert((*Formula)->FormulaUnion.UnaryFormula.Formula == NULL);
                 break; 
             case atom:
@@ -371,20 +362,15 @@ Variables);
                 assert((*Formula)->FormulaUnion.Atom == NULL);
                 break;
             case ite_formula:
-                FreeFormula(&((*Formula)->FormulaUnion.ConditionalFormula.
-Condition),Variables);
-                FreeFormula(&((*Formula)->FormulaUnion.ConditionalFormula.
-FormulaIfTrue),Variables);
-                FreeFormula(&((*Formula)->FormulaUnion.ConditionalFormula.
-FormulaIfFalse),Variables);
+                FreeFormula(&((*Formula)->FormulaUnion.ConditionalFormula.Condition),Variables);
+                FreeFormula(&((*Formula)->FormulaUnion.ConditionalFormula.FormulaIfTrue),Variables);
+                FreeFormula(&((*Formula)->FormulaUnion.ConditionalFormula.FormulaIfFalse),
+Variables);
                 break;
             case let_formula:
-                FreeFormula(&((*Formula)->FormulaUnion.LetFormula.LetTypes),
-Variables);
-                FreeFormula(&((*Formula)->FormulaUnion.LetFormula.LetDefn),
-Variables);
-                FreeFormula(&((*Formula)->FormulaUnion.LetFormula.LetBody),
-Variables);
+                FreeFormula(&((*Formula)->FormulaUnion.LetFormula.LetTypes),Variables);
+                FreeFormula(&((*Formula)->FormulaUnion.LetFormula.LetDefn),Variables);
+                FreeFormula(&((*Formula)->FormulaUnion.LetFormula.LetBody),Variables);
                 break;
             default:
                 CodingError("Formula type unknown for freeing");
@@ -397,8 +383,7 @@ Variables);
 void FreeFormulaWithVariables(FORMULAWITHVARIABLES * FormulaWithVariables) {
 
     if (*FormulaWithVariables != NULL) {
-        FreeFormula(&((*FormulaWithVariables)->Formula),
-&((*FormulaWithVariables)->Variables));
+        FreeFormula(&((*FormulaWithVariables)->Formula),&((*FormulaWithVariables)->Variables));
         assert((*FormulaWithVariables)->Formula == NULL);
         assert((*FormulaWithVariables)->Variables == NULL);
         Free((void **)FormulaWithVariables);
@@ -440,15 +425,27 @@ TERM ParseArgument(READFILE Stream,SyntaxType Language,ContextType Context,
 VARIABLENODE * EndOfScope,TermType Type,int VariablesMustBeQuantified) {
 
     TERM FormulaArgument;
+//     FORMULA ToFree;
 
 //----THF and TFF have formulae as arguments
-KEEP WORKING HERE ZZZZZZZZZZZZZ
     if (Language == tptp_thf || Language == tptp_tff) {
-// && WHY DID I CHECK THIS? Type == predicate) {
         FormulaArgument = NewTerm();
         FormulaArgument->Type = formula;
         FormulaArgument->TheSymbol.Formula = ParseFormula(Stream,Language,Context,EndOfScope,1,1,
 VariablesMustBeQuantified,none);
+// //----If it looks like a term in TFF, convert
+//         if (FormulaArgument->TheSymbol.Formula->Type == atom && IsSymbolInSignatureList(
+// Context.Signature->Functions,GetSymbol(FormulaArgument->TheSymbol.Formula->FormulaUnion.Atom),
+// GetArity(FormulaArgument->TheSymbol.Formula->FormulaUnion.Atom))) {
+// //----Also check for tuples, should also do $ite, $let.
+// //DEBUG printf("Need to convert %s to a term\n",GetSymbol(
+// //DEBUG FormulaArgument->TheSymbol.Formula->FormulaUnion.Atom));
+//             FormulaArgument->Type = term;
+// /// COPY FROM HERE TO OTHER ZZZZ
+//             ToFree = FormulaArgument->TheSymbol.Formula;
+//             FormulaArgument = FormulaArgument->TheSymbol.Formula->FormulaUnion.Atom;
+//             Free((void **)&ToFree);
+//         }
         return(FormulaArgument);
     } else {
 //----If parsing non-logical, keep it like that, else it must be a term
@@ -1009,14 +1006,12 @@ ContextType Context,VARIABLENODE * EndOfScope,int VariablesMustBeQuantified) {
     AcceptTokenType(Stream,unary_connective);
 //----See if a ), which means it was a connective term
     if (CheckToken(Stream,punctuation,")")) {
-        if ((StringStream = OpenStringReadFile(
-ConnectiveToString(Connective))) == NULL) {
+        if ((StringStream = OpenStringReadFile(ConnectiveToString(Connective))) == NULL) {
             CodingError("Could not open string stream");
             return(NULL);
         }
 //----Unary connective as a term in THF
-        Formula = ParseAtom(StringStream,Language,Context,EndOfScope,
-VariablesMustBeQuantified);
+        Formula = ParseAtom(StringStream,Language,Context,EndOfScope,VariablesMustBeQuantified);
         CloseReadFile(StringStream);
 //        Formula->FormulaUnion.Atom = ParseTerm(StringStream,Language,Context,
 //EndOfScope,term,none,NULL,VariablesMustBeQuantified);
@@ -1025,8 +1020,8 @@ VariablesMustBeQuantified);
         Formula->Type = unary;
         Formula->FormulaUnion.UnaryFormula.Connective = Connective;
 //----No binary inside unary
-        Formula->FormulaUnion.UnaryFormula.Formula = ParseFormula(Stream,
-Language,Context,EndOfScope,0,0,VariablesMustBeQuantified,none);
+        Formula->FormulaUnion.UnaryFormula.Formula = ParseFormula(Stream,Language,Context,
+EndOfScope,0,0,VariablesMustBeQuantified,none);
     }
     return(Formula);
 }
@@ -1035,10 +1030,8 @@ void ParseQuantifiedVariable(READFILE Stream,SyntaxType Language,
 ContextType Context,VARIABLENODE * EndOfScope,ConnectiveType Quantifier,
 int VariablesMustBeQuantified,QuantifiedFormulaType * QuantifiedFormula) {
 
-    if (QuantifiedFormula->Quantifier == existential &&
-CheckTokenType(Stream,number)) {
-        QuantifiedFormula->ExistentialCount =
-atoi(CurrentToken(Stream)->NameToken);
+    if (QuantifiedFormula->Quantifier == existential && CheckTokenType(Stream,number)) {
+        QuantifiedFormula->ExistentialCount = atoi(CurrentToken(Stream)->NameToken);
         AcceptTokenType(Stream,number);
         AcceptToken(Stream,punctuation,":");
     } else {
@@ -1052,13 +1045,13 @@ ParseTerm(Stream,Language,Context,EndOfScope,new_variable,Quantifier,NULL,0);
 //----For THF0 require type, TFF optional type
     if (Language == tptp_thf) {
         AcceptToken(Stream,punctuation,":");
-        QuantifiedFormula->VariableType = ParseFormula(Stream,Language,
-Context,EndOfScope,-1,1,VariablesMustBeQuantified,none);
+        QuantifiedFormula->VariableType = ParseFormula(Stream,Language,Context,EndOfScope,-1,1,
+VariablesMustBeQuantified,none);
     } else if ((Language == tptp_tff || Language == tptp_tcf) && 
 CheckToken(Stream,punctuation,":")) {
         AcceptToken(Stream,punctuation,":");
-        QuantifiedFormula->VariableType = ParseAtom(Stream,Language,
-Context,EndOfScope,VariablesMustBeQuantified);
+        QuantifiedFormula->VariableType = ParseAtom(Stream,Language,Context,EndOfScope,
+VariablesMustBeQuantified);
 //----Check that it's a constant - nope, TFF1 allows type constructors
 //        if (GetArity(QuantifiedFormula->VariableType->FormulaUnion.Atom) != 0) {
 //            TokenError(Stream);
@@ -1079,8 +1072,8 @@ int VariablesMustBeQuantified) {
         AcceptToken(Stream,punctuation,":");
 //----No Binary formulae allowed (i.e., quantification binds tight). But = 
 //----and != do get allowed.
-        Formula = ParseFormula(Stream,Language,Context,EndOfScope,0,1,
-VariablesMustBeQuantified,none);
+        Formula = ParseFormula(Stream,Language,Context,EndOfScope,0,1,VariablesMustBeQuantified,
+none);
         return(Formula);
     } else {
         AcceptToken(Stream,punctuation,",");
@@ -1091,8 +1084,7 @@ VariablesMustBeQuantified,none);
 VariablesMustBeQuantified,&(Formula->FormulaUnion.QuantifiedFormula));
 //----Now get the rest of the variables
         Formula->FormulaUnion.QuantifiedFormula.Formula = 
-ParseQuantifiedRemainder(Stream,Language,Context,EndOfScope,Quantifier,
-VariablesMustBeQuantified);
+ParseQuantifiedRemainder(Stream,Language,Context,EndOfScope,Quantifier,VariablesMustBeQuantified);
         return(Formula);
     }
 }
@@ -1438,8 +1430,8 @@ NextConnective == maparrow) {
                 NextToken(Stream);
                 BinaryFormula->FormulaUnion.BinaryFormula.RHS = ParseFormula(Stream,Language,
 Context,EndOfScope,AllowBinary,1,VariablesMustBeQuantified,NextConnective);
-//----If a declaration of a type, move the LHS to Types in signature
                 if (BinaryFormula->Type == type_declaration) {
+//----If a declaration of a type, move the LHS to Types in signature
                     if (BinaryFormula->FormulaUnion.BinaryFormula.RHS->Type == atom &&
 BinaryFormula->FormulaUnion.BinaryFormula.RHS->FormulaUnion.Atom->Type == a_type &&
 !strcmp("$tType",GetSymbol(BinaryFormula->FormulaUnion.BinaryFormula.RHS->FormulaUnion.Atom))) {
@@ -1453,8 +1445,10 @@ GetSymbol(BinaryFormula->FormulaUnion.BinaryFormula.LHS->FormulaUnion.Atom));
                             return(NULL);
                         }
                     } else {
+//----Fix the arity of the declared symbol
 //DEBUG printf("Fix the arity of %s from (hopefully 0) %d to %d\n",GetSymbol(BinaryFormula->FormulaUnion.BinaryFormula.LHS->FormulaUnion.Atom),GetArity(BinaryFormula->FormulaUnion.BinaryFormula.LHS->FormulaUnion.Atom),GetArityFromTyping(Stream,BinaryFormula->FormulaUnion.BinaryFormula.RHS));
                         BinaryFormula->FormulaUnion.BinaryFormula.LHS->FormulaUnion.Atom->TheSymbol.NonVariable->Arity = GetArityFromTyping(Stream,BinaryFormula->FormulaUnion.BinaryFormula.RHS);
+//----If not of type $o, move the symbol to functions
                         if (strcmp("$o",GetSymbol(GetResultFromTyping(Stream,BinaryFormula->FormulaUnion.BinaryFormula.RHS)))) {
 //DEBUG printf("Move %s of type %s to functions\n",GetSymbol(BinaryFormula->FormulaUnion.BinaryFormula.LHS->FormulaUnion.Atom),GetSymbol(GetResultFromTyping(Stream,BinaryFormula->FormulaUnion.BinaryFormula.RHS)));
                             if (MoveSignatureNode(&(Context.Signature->Predicates),
@@ -1466,6 +1460,14 @@ GetSymbol(BinaryFormula->FormulaUnion.BinaryFormula.LHS->FormulaUnion.Atom));
                                 TokenError(Stream,ErrorMessage);
                                 return(NULL);
                             }
+// //----Must also make the atom to a term
+// printf("The LHS of the type declaration %s is a %s\n",GetSymbol(BinaryFormula->FormulaUnion.BinaryFormula.LHS->FormulaUnion.Atom),FormulaTypeToString(BinaryFormula->FormulaUnion.BinaryFormula.LHS->Type));
+// // ZZZZZZ
+//             FormulaArgument->Type = term;
+// /// COPY FROM HERE TO OTHER ZZZZ
+//             ToFree = FormulaArgument->TheSymbol.Formula;
+//             FormulaArgument = FormulaArgument->TheSymbol.Formula->FormulaUnion.Atom;
+//             Free((void **)&ToFree);
                         }
                     }
                 }
@@ -1518,9 +1520,6 @@ EndOfScope,1,AllowInfixEquality,VariablesMustBeQuantified,BinaryFormula));
             TokenError(Stream,"Binary TBA");
             return(NULL);
         }
-//LATER check the type of the atom if it's a type annotated formula. And if it's not a plain
-//symbol, throw a fit (this works right now tff(aaa,type,p(a) : $int).!!!). Here also move
-// things that are $tType to the new type DS.
     } else {
 //DEBUG printf("Not binary, the next token is %s\n",CurrentToken(Stream)->NameToken);
         return(Formula);
@@ -1707,13 +1706,11 @@ void FreeAnnotatedFormula(ANNOTATEDFORMULA * AnnotatedFormula) {
         if (--((*AnnotatedFormula)->NumberOfUses) == 0) {
             switch ((*AnnotatedFormula)->Syntax) {
                 case include:
-                    FreeTerm(&((*AnnotatedFormula)->
-AnnotatedFormulaUnion.Include),NULL);
+                    FreeTerm(&((*AnnotatedFormula)->AnnotatedFormulaUnion.Include),NULL);
                     Free((void **)AnnotatedFormula);
                     break;
                 case comment:
-                    Free((void **)&((*AnnotatedFormula)->
-AnnotatedFormulaUnion.Comment));
+                    Free((void **)&((*AnnotatedFormula)->AnnotatedFormulaUnion.Comment));
                     Free((void **)AnnotatedFormula);
                     break;
                 case blank_line:
@@ -1728,8 +1725,7 @@ AnnotatedFormulaUnion.Comment));
                     FreeAnnotatedTSTPFormula(AnnotatedFormula);
                     break;
                 default:
-                    CodingError(
-"Annotated formula syntax unknown for freeing\n");
+                    CodingError("Annotated formula syntax unknown for freeing\n");
                     break;
             }
         }
