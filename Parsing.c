@@ -257,11 +257,11 @@ void FreeTerm(TERM * Term,VARIABLENODE * Variables) {
             FreeFormula(&((*Term)->TheSymbol.LetTerm.LetDefn),Variables);
             FreeTerm(&((*Term)->TheSymbol.LetTerm.LetBody),Variables);
         } else {
-            for (ArgumentIndex=0;ArgumentIndex<GetArity(*Term);ArgumentIndex++) {
-                FreeTerm(&((*Term)->Arguments[ArgumentIndex]),Variables);
-                assert((*Term)->Arguments[ArgumentIndex] == NULL);
-            }
             if ((*Term)->Arguments != NULL) {
+                for (ArgumentIndex=0;ArgumentIndex<GetArity(*Term);ArgumentIndex++) {
+                    FreeTerm(&((*Term)->Arguments[ArgumentIndex]),Variables);
+                    assert((*Term)->Arguments[ArgumentIndex] == NULL);
+                }
                 Free((void **)&((*Term)->Arguments));
             }
             (*Term)->TheSymbol.NonVariable->NumberOfUses--;
@@ -425,32 +425,19 @@ TERM ParseArgument(READFILE Stream,SyntaxType Language,ContextType Context,
 VARIABLENODE * EndOfScope,TermType Type,int VariablesMustBeQuantified) {
 
     TERM FormulaArgument;
-//     FORMULA ToFree;
 
-//----THF and TFF have formulae as arguments
-    if (Language == tptp_thf || Language == tptp_tff) {
+//----THF and TFF have formulae as arguments. Type is prdicate if looking for arguments of a
+//----predicate or function in THF and TFF.
+    if ((Language == tptp_thf || Language == tptp_tff) && Type == predicate) {
         FormulaArgument = NewTerm();
         FormulaArgument->Type = formula;
         FormulaArgument->TheSymbol.Formula = ParseFormula(Stream,Language,Context,EndOfScope,1,1,
 VariablesMustBeQuantified,none);
-// //----If it looks like a term in TFF, convert
-//         if (FormulaArgument->TheSymbol.Formula->Type == atom && IsSymbolInSignatureList(
-// Context.Signature->Functions,GetSymbol(FormulaArgument->TheSymbol.Formula->FormulaUnion.Atom),
-// GetArity(FormulaArgument->TheSymbol.Formula->FormulaUnion.Atom))) {
-// //----Also check for tuples, should also do $ite, $let.
-// //DEBUG printf("Need to convert %s to a term\n",GetSymbol(
-// //DEBUG FormulaArgument->TheSymbol.Formula->FormulaUnion.Atom));
-//             FormulaArgument->Type = term;
-// /// COPY FROM HERE TO OTHER ZZZZ
-//             ToFree = FormulaArgument->TheSymbol.Formula;
-//             FormulaArgument = FormulaArgument->TheSymbol.Formula->FormulaUnion.Atom;
-//             Free((void **)&ToFree);
-//         }
         return(FormulaArgument);
     } else {
 //----If parsing non-logical, keep it like that, else it must be a term
         if (Type != non_logical_data) {
-//TODO            Type = ZZZ term;
+            Type = term;
         }
         return(ParseTerm(Stream,Language,Context,EndOfScope,Type,free_variable,NULL,
 VariablesMustBeQuantified));
@@ -668,6 +655,7 @@ int VariablesMustBeQuantified) {
     TypeIfInfix = nonterm;
 
 //DEBUG printf("ParseTerm with token %s\n",CurrentToken(Stream)->NameToken);
+//DEBUG printf("Hoping for a %s\n",TermTypeToString(Type));
 //----Record token type to check if brackets are legal later
     FunctorType = CurrentToken(Stream)->KindToken;
 
@@ -867,6 +855,19 @@ Term->Type == ite_term || Term->Type == let_term) {
 (FunctorType == lower_word && !strcmp(PrefixSymbol,"="))) {
             Term->Type = connective;
         }
+//----If is known to be a type from type declaration, fix this term type
+        if (Term->Type == predicate && IsSymbolInSignatureList(Context.Signature->Types,
+PrefixSymbol,NumberOfArguments) != NULL) {
+            Term->Type = a_type;
+        }
+//----If is known to be a function from type declaration, fix this term type
+        if (Term->Type == predicate && IsSymbolInSignatureList(Context.Signature->Functions,
+PrefixSymbol,NumberOfArguments) != NULL) {
+            Term->Type = function;
+        }
+//----Some functions and types might get inserted as predicates here when they appear on the LHS
+//----of a type declaration, but that gets fixed later when the parsing of the declaration is
+//----completed in ParseFormula.
         Term->TheSymbol.NonVariable = InsertIntoSignature(Context.Signature,
 Term->Type,PrefixSymbol,NumberOfArguments,Stream);
 //----Note that if the term is a THF connective that is not a term, then the
@@ -1460,14 +1461,6 @@ GetSymbol(BinaryFormula->FormulaUnion.BinaryFormula.LHS->FormulaUnion.Atom));
                                 TokenError(Stream,ErrorMessage);
                                 return(NULL);
                             }
-// //----Must also make the atom to a term
-// printf("The LHS of the type declaration %s is a %s\n",GetSymbol(BinaryFormula->FormulaUnion.BinaryFormula.LHS->FormulaUnion.Atom),FormulaTypeToString(BinaryFormula->FormulaUnion.BinaryFormula.LHS->Type));
-// // ZZZZZZ
-//             FormulaArgument->Type = term;
-// /// COPY FROM HERE TO OTHER ZZZZ
-//             ToFree = FormulaArgument->TheSymbol.Formula;
-//             FormulaArgument = FormulaArgument->TheSymbol.Formula->FormulaUnion.Atom;
-//             Free((void **)&ToFree);
                         }
                     }
                 }

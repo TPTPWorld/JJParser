@@ -55,6 +55,9 @@ TERM GetResultFromTyping(READFILE Stream,FORMULA TypeFormula) {
         return(TypeFormula->FormulaUnion.Atom);
     } else if (TypeFormula->Type == binary) {
         return(GetResultFromTyping(Stream,TypeFormula->FormulaUnion.BinaryFormula.RHS));
+//----Polymorphic types
+    } else if (TypeFormula->Type == quantified) {
+        return(GetResultFromTyping(Stream,TypeFormula->FormulaUnion.QuantifiedFormula.Formula));
     } else {
         TokenError(Stream,"Could not get result type from typing");
         return(NULL);
@@ -69,22 +72,31 @@ int GetArityFromTyping(READFILE Stream,FORMULA TypeFormula) {
 //DEBUG printf("Get arity from type %s\n",FormulaTypeToString(TypeFormula->Type));
     if (TypeFormula->Type == atom) {
         return(0);
-    } else if (TypeFormula->Type == binary && 
-TypeFormula->FormulaUnion.BinaryFormula.Connective == maparrow) {
-        Arity = 1;
+    } else if (TypeFormula->Type == binary) {
+        if (TypeFormula->FormulaUnion.BinaryFormula.Connective == maparrow) {
+            Arity = 1;
 //----Do xprods on LHS for TFF
-        Side = TypeFormula->FormulaUnion.BinaryFormula.LHS;
-        while (Side->Type == binary && Side->FormulaUnion.BinaryFormula.Connective == xprodtype) {
-            Arity++;
-            Side = Side->FormulaUnion.BinaryFormula.LHS;
-        }
+            Side = TypeFormula->FormulaUnion.BinaryFormula.LHS;
+            while (Side->Type == binary && 
+Side->FormulaUnion.BinaryFormula.Connective == xprodtype) {
+                Arity++;
+                Side = Side->FormulaUnion.BinaryFormula.LHS;
+            }
 //----Do maps on RHS for THF
-        Side = TypeFormula->FormulaUnion.BinaryFormula.RHS;
-        while (Side->Type == binary && Side->FormulaUnion.BinaryFormula.Connective == maparrow) {
-            Arity++;
-            Side = Side->FormulaUnion.BinaryFormula.RHS;
+            Side = TypeFormula->FormulaUnion.BinaryFormula.RHS;
+            while (Side->Type == binary && 
+Side->FormulaUnion.BinaryFormula.Connective == maparrow) {
+                Arity++;
+                Side = Side->FormulaUnion.BinaryFormula.RHS;
+            }
+            return(Arity);
+//TODO THIS IS ALMOST CERTAINLY WRONG
+        } else {
+            return(0);
         }
-        return(Arity);
+//----Polymorphic types
+    } else if (TypeFormula->Type == quantified) {
+        return(1 + GetArityFromTyping(Stream,TypeFormula->FormulaUnion.QuantifiedFormula.Formula));
     } else {
         TokenError(Stream,"Could not get arity from typing");
         return(0);

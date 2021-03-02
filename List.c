@@ -115,9 +115,9 @@ Head->AnnotatedFormula,Signature));
 //----should use FreeAListNode() below.
 static void FreeListNode(LISTNODE * FreeThis) {
 
-printf("freeing ...\n");
-PrintAnnotatedTSTPNode(stdout,(*FreeThis)->AnnotatedFormula,tptp,1);
-printf("it has %d uses\n",(*FreeThis)->AnnotatedFormula->NumberOfUses);
+// printf("freeing ...\n");
+// PrintAnnotatedTSTPNode(stdout,(*FreeThis)->AnnotatedFormula,tptp,1);
+// printf("it has %d uses\n",(*FreeThis)->AnnotatedFormula->NumberOfUses);
     FreeAnnotatedFormula(&((*FreeThis)->AnnotatedFormula));
     Free((void **)FreeThis);
 }
