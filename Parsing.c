@@ -654,8 +654,8 @@ int VariablesMustBeQuantified) {
     Term = NewTerm();
     TypeIfInfix = nonterm;
 
-//DEBUG printf("ParseTerm with token %s\n",CurrentToken(Stream)->NameToken);
-//DEBUG printf("Hoping for a %s\n",TermTypeToString(Type));
+printf("ParseTerm with token %s\n",CurrentToken(Stream)->NameToken);
+printf("Hoping for a %s\n",TermTypeToString(Type));
 //----Record token type to check if brackets are legal later
     FunctorType = CurrentToken(Stream)->KindToken;
 
@@ -682,6 +682,7 @@ int VariablesMustBeQuantified) {
                 TypeIfInfix = nonterm;
             } else {
                 TypeIfInfix = KnownTermTypeOrError(Stream,Language);
+printf("%s is a %s\n",CurrentToken(Stream)->NameToken,TermTypeToString(TypeIfInfix));
             }
             break;
         case non_logical_data:
@@ -828,8 +829,8 @@ Context.Signature,0);
 //----Cannot have a variable if a predicate was expected, unless in a typed
 //----language, where variables can be types in polymorphic cases.
         if (Language != tptp_thf && Language != tptp_tff &&
-Type == predicate && FunctorType == upper_word) {
-            TokenError(Stream,"Variables cannot be used as predicates except in THF");
+Type == predicate && TypeIfInfix == variable) {
+            TokenError(Stream,"Variables cannot be used as predicates except in THF and TFX");
         }
     }
 
@@ -840,7 +841,8 @@ Type == predicate && FunctorType == upper_word) {
 EndOfScope,1,PrefixSymbol,VariableQuantifier,VariablesMustBeQuantified);
 //THF - this was Term->Type == variable, but I want to allow variable 
 //predicates. Will this work?
-    } else if ((Language == tptp_thf && FunctorType == upper_word) || Term->Type == variable) {
+    } else if (((Language == tptp_thf || Language == tptp_tff) && TypeIfInfix == variable) || 
+Term->Type == variable) {
 //----Force the term type to variable
         Term->Type = variable;
         Term->TheSymbol.Variable = InsertVariable(Stream,Context.Signature,Context.Variables,
