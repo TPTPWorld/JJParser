@@ -621,7 +621,7 @@ int InfixOperatorParsing(READFILE Stream,SyntaxType Language,TermType Originally
 TermType * ExpectedRHSTermType) {
 
 //----For THF equality is dealt with as a binary operator
-    if (Language != tptp_thf && OriginallyExpectedType == predicate && 
+    if (Language != tptp_thf && Language != tptp_tff && OriginallyExpectedType == predicate && 
 (CheckToken(Stream,lower_word,"=") || CheckToken(Stream,lower_word,"!="))) {
         *ExpectedRHSTermType = term;
         return(1);
@@ -682,7 +682,7 @@ printf("Hoping for a %s\n",TermTypeToString(Type));
                 TypeIfInfix = nonterm;
             } else {
                 TypeIfInfix = KnownTermTypeOrError(Stream,Language);
-printf("%s is a %s\n",CurrentToken(Stream)->NameToken,TermTypeToString(TypeIfInfix));
+printf("%s could be a %s\n",CurrentToken(Stream)->NameToken,TermTypeToString(TypeIfInfix));
             }
             break;
         case non_logical_data:
@@ -741,6 +741,7 @@ term,none,NULL,VariablesMustBeQuantified);
 term,none,NULL,VariablesMustBeQuantified);
         AcceptToken(Stream,punctuation,")");
     } else if (Type == let_term) {
+printf("DOING A LET TERM\n");
         NumberOfArguments = 0;
         Term->Arguments = NULL;
         AcceptToken(Stream,punctuation,"(");
@@ -818,7 +819,9 @@ Context.Signature,0);
 
 //----Check for infix predicate
     if ((DoInfixProcessing = InfixOperatorParsing(Stream,Language,Type,&InfixRHSType))) {
-        Term->Type = TypeIfInfix;
+        if (Type == predicate && Language != tptp_thf && Language != tptp_tff) {
+            Term->Type = TypeIfInfix;
+        }
 //----If a term is expected, then if a variable it must be free here (infix =)
         if (InfixRHSType == term) {
             VariableQuantifier = free_variable;
@@ -867,11 +870,16 @@ PrefixSymbol,NumberOfArguments) != NULL) {
 PrefixSymbol,NumberOfArguments) != NULL) {
             Term->Type = function;
         }
+//----If is known to be a predicate from type declaration, fix this term type
+        if (Term->Type == function && IsSymbolInSignatureList(Context.Signature->Predicates,
+PrefixSymbol,NumberOfArguments) != NULL) {
+            Term->Type = predicate;
+        }
 //----Some functions and types might get inserted as predicates here when they appear on the LHS
 //----of a type declaration, but that gets fixed later when the parsing of the declaration is
 //----completed in ParseFormula.
-        Term->TheSymbol.NonVariable = InsertIntoSignature(Context.Signature,
-Term->Type,PrefixSymbol,NumberOfArguments,Stream);
+        Term->TheSymbol.NonVariable = InsertIntoSignature(Context.Signature,Term->Type,
+PrefixSymbol,NumberOfArguments,Stream);
 //----Note that if the term is a THF connective that is not a term, then the
 //----formula is deleted in ParseUnaryFormula and the NumberOfUses in the 
 //----signature will be decremented, possibly down to 0.
@@ -891,14 +899,14 @@ Term->Type,PrefixSymbol,NumberOfArguments,Stream);
         } else {
             InfixToken = CurrentToken(Stream)->NameToken;
         }
-        InfixTerm->TheSymbol.NonVariable = InsertIntoSignature(
-Context.Signature,InfixTerm->Type,InfixToken,2,Stream);
+        InfixTerm->TheSymbol.NonVariable = InsertIntoSignature(Context.Signature,InfixTerm->Type,
+InfixToken,2,Stream);
         InfixTerm->Arguments = NewArguments(2);
         InfixTerm->Arguments[0] = Term;
 //----Move on only after saving the infix operator
         NextToken(Stream);
-        InfixTerm->Arguments[1] = ParseTerm(Stream,Language,Context,EndOfScope,
-InfixRHSType,VariableQuantifier,NULL,VariablesMustBeQuantified);
+        InfixTerm->Arguments[1] = ParseTerm(Stream,Language,Context,EndOfScope,InfixRHSType,
+VariableQuantifier,NULL,VariablesMustBeQuantified);
         return(InfixTerm);
     } else {
 //----Non-infix
@@ -1016,8 +1024,6 @@ ContextType Context,VARIABLENODE * EndOfScope,int VariablesMustBeQuantified) {
 //----Unary connective as a term in THF
         Formula = ParseAtom(StringStream,Language,Context,EndOfScope,VariablesMustBeQuantified);
         CloseReadFile(StringStream);
-//        Formula->FormulaUnion.Atom = ParseTerm(StringStream,Language,Context,
-//EndOfScope,term,none,NULL,VariablesMustBeQuantified);
     } else {
         Formula = NewFormula();
         Formula->Type = unary;

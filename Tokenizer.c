@@ -1395,8 +1395,7 @@ int TakeToken(READFILE Stream,TokenType Type,char * Value) {
 
     String Message;
 
-    if (CheckTokenType(Stream,Type) && 
-!strcmp(CurrentToken(Stream)->NameToken,Value)) {
+    if (CheckTokenType(Stream,Type) && !strcmp(CurrentToken(Stream)->NameToken,Value)) {
         TakeCurrentToken(Stream); 
         return(1);
     } else {
@@ -1445,8 +1444,7 @@ int AcceptToken(READFILE Stream,TokenType Type,char * Value) {
 
     String Message;
 
-    if (CheckTokenType(Stream,Type) && 
-!strcmp(CurrentToken(Stream)->NameToken,Value)) {
+    if (CheckTokenType(Stream,Type) && !strcmp(CurrentToken(Stream)->NameToken,Value)) {
         NextToken(Stream); 
         return(1);
     } else {

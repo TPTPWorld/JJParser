@@ -1,3 +1,18 @@
+tff(4,axiom,
+    $ite(
+      $let(c: $int,
+        c:= 0,
+        $true),
+      $true,
+      $false) ).
+
+tff(5,axiom,
+    $ite($true,
+      $let(c: $int,
+        c:= 0,
+        $true),
+      $false) ).
+
 % tff(aaa,type,thing : $tType).
 % tff(bbb,type,f : $o > thing).
 % tff(eee,type,g : thing).

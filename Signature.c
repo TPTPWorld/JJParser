@@ -35,6 +35,32 @@ SIGNATURE NewSignatureWithTypes(void) {
     IncreaseSymbolUseCount(InsertIntoSignature(Signature,a_type,"$int",0,NULL),-1);
     IncreaseSymbolUseCount(InsertIntoSignature(Signature,a_type,"$rat",0,NULL),-1);
     IncreaseSymbolUseCount(InsertIntoSignature(Signature,a_type,"$real",0,NULL),-1);
+    IncreaseSymbolUseCount(InsertIntoSignature(Signature,predicate,"$true",0,NULL),-1);
+    IncreaseSymbolUseCount(InsertIntoSignature(Signature,predicate,"$false",0,NULL),-1);
+    IncreaseSymbolUseCount(InsertIntoSignature(Signature,predicate,"$is_int",1,NULL),-1);
+    IncreaseSymbolUseCount(InsertIntoSignature(Signature,predicate,"$is_rat",1,NULL),-1);
+    IncreaseSymbolUseCount(InsertIntoSignature(Signature,function,"$less",2,NULL),-1);
+    IncreaseSymbolUseCount(InsertIntoSignature(Signature,function,"$lesseq",2,NULL),-1);
+    IncreaseSymbolUseCount(InsertIntoSignature(Signature,function,"$greater",2,NULL),-1);
+    IncreaseSymbolUseCount(InsertIntoSignature(Signature,function,"$greatereq",2,NULL),-1);
+    IncreaseSymbolUseCount(InsertIntoSignature(Signature,function,"$uminus",1,NULL),-1);
+    IncreaseSymbolUseCount(InsertIntoSignature(Signature,function,"$sum",2,NULL),-1);
+    IncreaseSymbolUseCount(InsertIntoSignature(Signature,function,"$difference",2,NULL),-1);
+    IncreaseSymbolUseCount(InsertIntoSignature(Signature,function,"$product",2,NULL),-1);
+    IncreaseSymbolUseCount(InsertIntoSignature(Signature,function,"$quotient",2,NULL),-1);
+    IncreaseSymbolUseCount(InsertIntoSignature(Signature,function,"$quotient_e",2,NULL),-1);
+    IncreaseSymbolUseCount(InsertIntoSignature(Signature,function,"$quotient_t",2,NULL),-1);
+    IncreaseSymbolUseCount(InsertIntoSignature(Signature,function,"$quotient_f",2,NULL),-1);
+    IncreaseSymbolUseCount(InsertIntoSignature(Signature,function,"$remainder_e",2,NULL),-1);
+    IncreaseSymbolUseCount(InsertIntoSignature(Signature,function,"$remainder_t",2,NULL),-1);
+    IncreaseSymbolUseCount(InsertIntoSignature(Signature,function,"$remainder_f",2,NULL),-1);
+    IncreaseSymbolUseCount(InsertIntoSignature(Signature,function,"$floor",1,NULL),-1);
+    IncreaseSymbolUseCount(InsertIntoSignature(Signature,function,"$ceiling",1,NULL),-1);
+    IncreaseSymbolUseCount(InsertIntoSignature(Signature,function,"$truncate",1,NULL),-1);
+    IncreaseSymbolUseCount(InsertIntoSignature(Signature,function,"$round",1,NULL),-1);
+    IncreaseSymbolUseCount(InsertIntoSignature(Signature,function,"$to_int",1,NULL),-1);
+    IncreaseSymbolUseCount(InsertIntoSignature(Signature,function,"$to_rat",1,NULL),-1);
+    IncreaseSymbolUseCount(InsertIntoSignature(Signature,function,"$to_real",1,NULL),-1);
 
     return(Signature);
 }

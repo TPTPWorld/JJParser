@@ -78,7 +78,7 @@ int main(int argc, char *argv[]) {
         Head = ParseFILEOfFormulae("--",stdin,Signature,1,NULL);
     }
     PrintListOfAnnotatedTSTPNodes(stdout,Signature,Head,tptp,1);
-    RemovedUnusedSymbolsFromList(&(Signature->Types));
+    RemovedUnusedSymbols(Signature);
     PrintSignature(Signature);
     FreeListOfAnnotatedFormulae(&Head);
     FreeSignature(&Signature);
