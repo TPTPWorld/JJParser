@@ -245,14 +245,14 @@ void FreeTerm(TERM * Term,VARIABLENODE * Variables) {
             FreeFormulaWithVariables(&((*Term)->TheSymbol.NestedFormula));
         } else if ((*Term)->Type == nested_fot) {
             FreeTermWithVariables(&((*Term)->TheSymbol.NestedTerm));
-        } else if ((*Term)->Type == ite_term) {
-            FreeFormula(&((*Term)->TheSymbol.ConditionalTerm.Condition),Variables);
-            FreeTerm(&((*Term)->TheSymbol.ConditionalTerm.TermIfTrue),Variables);
-            FreeTerm(&((*Term)->TheSymbol.ConditionalTerm.TermIfFalse),Variables);
-        } else if ((*Term)->Type == let_term) {
-            FreeFormula(&((*Term)->TheSymbol.LetTerm.LetTypes),Variables);
-            FreeFormula(&((*Term)->TheSymbol.LetTerm.LetDefn),Variables);
-            FreeTerm(&((*Term)->TheSymbol.LetTerm.LetBody),Variables);
+//         } else if ((*Term)->Type == ite_term) {
+//             FreeFormula(&((*Term)->TheSymbol.ConditionalTerm.Condition),Variables);
+//             FreeTerm(&((*Term)->TheSymbol.ConditionalTerm.TermIfTrue),Variables);
+//             FreeTerm(&((*Term)->TheSymbol.ConditionalTerm.TermIfFalse),Variables);
+//         } else if ((*Term)->Type == let_term) {
+//             FreeFormula(&((*Term)->TheSymbol.LetTerm.LetTypes),Variables);
+//             FreeFormula(&((*Term)->TheSymbol.LetTerm.LetDefn),Variables);
+//             FreeTerm(&((*Term)->TheSymbol.LetTerm.LetBody),Variables);
         } else {
             if ((*Term)->Arguments != NULL) {
                 for (ArgumentIndex=0;ArgumentIndex<GetArity(*Term);ArgumentIndex++) {
@@ -510,23 +510,23 @@ Original->TheSymbol.NestedFormula,Context.Signature,1);
         } else if (Term->Type == nested_fot) {
             Term->TheSymbol.NestedTerm = DuplicateTermWithVariables(Original->
 TheSymbol.NestedTerm,Context.Signature,0);
-        } else if (Term->Type == ite_term) {
-            Term->TheSymbol.ConditionalTerm.Condition = 
-DuplicateFormula(Original->TheSymbol.ConditionalTerm.Condition,Context,
-ForceNewVariables);
-            Term->TheSymbol.ConditionalTerm.TermIfTrue = 
-DuplicateTerm(Original->TheSymbol.ConditionalTerm.TermIfTrue,Context,0);
-            Term->TheSymbol.ConditionalTerm.TermIfFalse = 
-DuplicateTerm(Original->TheSymbol.ConditionalTerm.TermIfFalse,Context,0);
-        } else if (Term->Type == let_term) {
-            Term->TheSymbol.LetTerm.LetTypes = 
-DuplicateFormula(Original->TheSymbol.LetTerm.LetTypes,Context,
-ForceNewVariables);
-            Term->TheSymbol.LetTerm.LetDefn = 
-DuplicateFormula(Original->TheSymbol.LetTerm.LetDefn,Context,
-ForceNewVariables);
-            Term->TheSymbol.LetTerm.LetBody = 
-DuplicateTerm(Original->TheSymbol.LetTerm.LetBody,Context,0);
+//         } else if (Term->Type == ite_term) {
+//             Term->TheSymbol.ConditionalTerm.Condition = 
+// DuplicateFormula(Original->TheSymbol.ConditionalTerm.Condition,Context,
+// ForceNewVariables);
+//             Term->TheSymbol.ConditionalTerm.TermIfTrue = 
+// DuplicateTerm(Original->TheSymbol.ConditionalTerm.TermIfTrue,Context,0);
+//             Term->TheSymbol.ConditionalTerm.TermIfFalse = 
+// DuplicateTerm(Original->TheSymbol.ConditionalTerm.TermIfFalse,Context,0);
+//         } else if (Term->Type == let_term) {
+//             Term->TheSymbol.LetTerm.LetTypes = 
+// DuplicateFormula(Original->TheSymbol.LetTerm.LetTypes,Context,
+// ForceNewVariables);
+//             Term->TheSymbol.LetTerm.LetDefn = 
+// DuplicateFormula(Original->TheSymbol.LetTerm.LetDefn,Context,
+// ForceNewVariables);
+//             Term->TheSymbol.LetTerm.LetBody = 
+// DuplicateTerm(Original->TheSymbol.LetTerm.LetBody,Context,0);
         } else {
             Term->TheSymbol.NonVariable = InsertIntoSignature(Context.Signature,Term->Type,
 Original->TheSymbol.NonVariable->NameSymbol,Original->TheSymbol.NonVariable->Arity,NULL);
@@ -586,13 +586,13 @@ TermType KnownTermTypeOrError(READFILE Stream,SyntaxType Language) {
             if (!AllowFOFNumbers && (Language == tptp_cnf || Language == tptp_fof)) {
                 EnsureTokenNotType(Stream,number);
             }
-            if (CheckToken(Stream,lower_word,"$ite")) {
-                return(ite_term);
-            } else if (CheckToken(Stream,lower_word,"$let")) {
-                return(let_term);
-            } else {
+//             if (CheckToken(Stream,lower_word,"$ite")) {
+//                 return(ite_term);
+//             } else if (CheckToken(Stream,lower_word,"$let")) {
+//                 return(let_term);
+//             } else {
                 return(function);
-            }
+//             }
         } else {
 //----Connectives are terms in THF
             if (Language == tptp_thf && 
@@ -715,38 +715,39 @@ punctuation,"[") && !CheckTokenType(Stream,upper_word)) {
 
 //----Is it a conditional term?
 //----FIX why TypeIfInfix??
-    if (DesiredType == ite_term || TypeIfInfix == ite_term) {
-        NumberOfArguments = 0;
-        Term->Arguments = NULL;
-        AcceptToken(Stream,punctuation,"(");
-        Term->TheSymbol.ConditionalTerm.Condition = ParseFormula(Stream,Language,Context,
-EndOfScope,1,1,VariablesMustBeQuantified,none);
-        AcceptToken(Stream,punctuation,",");
-// TO FIX ... NEED TO ACCEPT FORMULAE HERE TOO
-// Test case tff(an,axiom,p($ite(q,r & f,r & g))).
-        Term->TheSymbol.ConditionalTerm.TermIfTrue = ParseTerm(Stream,Language,Context,EndOfScope,
-term,none,NULL,VariablesMustBeQuantified);
-        AcceptToken(Stream,punctuation,",");
-        Term->TheSymbol.ConditionalTerm.TermIfFalse = ParseTerm(Stream,Language,Context,EndOfScope,
-term,none,NULL,VariablesMustBeQuantified);
-        AcceptToken(Stream,punctuation,")");
-    } else if (DesiredType == let_term) {
-printf("DOING A LET TERM\n");
-        NumberOfArguments = 0;
-        Term->Arguments = NULL;
-        AcceptToken(Stream,punctuation,"(");
-        Term->TheSymbol.LetTerm.LetTypes = ParseFormula(Stream,Language,Context,EndOfScope,
-1,0,VariablesMustBeQuantified,none);
-        AcceptToken(Stream,punctuation,",");
-        Term->TheSymbol.LetTerm.LetDefn = ParseFormula(Stream,Language,Context,EndOfScope,
-1,0,VariablesMustBeQuantified,none);
-        AcceptToken(Stream,punctuation,",");
-// TO FIX ... NEED TO ACCEPT FORMULAE HERE TOO
-        Term->TheSymbol.LetTerm.LetBody = ParseTerm(Stream,Language,Context,EndOfScope,term,none,
-NULL,VariablesMustBeQuantified);
-        AcceptToken(Stream,punctuation,")");
+//     if (DesiredType == ite_term || TypeIfInfix == ite_term) {
+//         NumberOfArguments = 0;
+//         Term->Arguments = NULL;
+//         AcceptToken(Stream,punctuation,"(");
+//         Term->TheSymbol.ConditionalTerm.Condition = ParseFormula(Stream,Language,Context,
+// EndOfScope,1,1,VariablesMustBeQuantified,none);
+//         AcceptToken(Stream,punctuation,",");
+// // TO FIX ... NEED TO ACCEPT FORMULAE HERE TOO
+// // Test case tff(an,axiom,p($ite(q,r & f,r & g))).
+//         Term->TheSymbol.ConditionalTerm.TermIfTrue = ParseTerm(Stream,Language,Context,EndOfScope,
+// term,none,NULL,VariablesMustBeQuantified);
+//         AcceptToken(Stream,punctuation,",");
+//         Term->TheSymbol.ConditionalTerm.TermIfFalse = ParseTerm(Stream,Language,Context,EndOfScope,
+// term,none,NULL,VariablesMustBeQuantified);
+//         AcceptToken(Stream,punctuation,")");
+//     } else if (DesiredType == let_term) {
+// printf("DOING A LET TERM\n");
+//         NumberOfArguments = 0;
+//         Term->Arguments = NULL;
+//         AcceptToken(Stream,punctuation,"(");
+//         Term->TheSymbol.LetTerm.LetTypes = ParseFormula(Stream,Language,Context,EndOfScope,
+// 1,0,VariablesMustBeQuantified,none);
+//         AcceptToken(Stream,punctuation,",");
+//         Term->TheSymbol.LetTerm.LetDefn = ParseFormula(Stream,Language,Context,EndOfScope,
+// 1,0,VariablesMustBeQuantified,none);
+//         AcceptToken(Stream,punctuation,",");
+// // TO FIX ... NEED TO ACCEPT FORMULAE HERE TOO
+//         Term->TheSymbol.LetTerm.LetBody = ParseTerm(Stream,Language,Context,EndOfScope,term,none,
+// NULL,VariablesMustBeQuantified);
+//         AcceptToken(Stream,punctuation,")");
 //----Deal with a list of things, with either ( or [ brackets
-    } else if (
+//    } else 
+    if (
 ( DesiredType == predicate || DesiredType == function || DesiredType == non_logical_data ) &&
 ( CheckToken(Stream,punctuation,"(") || CheckToken(Stream,punctuation,"[") ) ) {
 //DEBUG printf("it ==%s==has arguments\n\n",PrefixSymbol);
@@ -837,8 +838,8 @@ Term->Type == variable) {
         Term->TheSymbol.Variable = InsertVariable(Stream,Context.Signature,Context.Variables,
 EndOfScope,0,PrefixSymbol,free_variable,VariablesMustBeQuantified);
     } else if (Term->Type == nested_thf || Term->Type == nested_tff || Term->Type == nested_tcf ||
-Term->Type == nested_fof || Term->Type == nested_cnf || Term->Type == nested_fot || 
-Term->Type == ite_term || Term->Type == let_term) {
+Term->Type == nested_fof || Term->Type == nested_cnf || Term->Type == nested_fot) {
+// Term->Type == ite_term || Term->Type == let_term) {
 //----Do nothing
     } else {
 //----Need to note connectives used as terms in THF

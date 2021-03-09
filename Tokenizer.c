@@ -722,12 +722,12 @@ char * TermTypeToString(TermType Type) {
         case variable:
             return("variable");
             break;
-        case ite_term:
-            return("ite_term");
-            break;
-        case let_term:
-            return("let_term");
-            break;
+//         case ite_term:
+//             return("ite_term");
+//             break;
+//         case let_term:
+//             return("let_term");
+//             break;
         case nested_thf:
             return("nested_thf");
             break;
