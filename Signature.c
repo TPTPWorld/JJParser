@@ -333,40 +333,16 @@ SYMBOLNODE InsertIntoSignature(SIGNATURE Signature,TermType Type,char * Name,int
 READFILE Stream) {
 
     String ErrorMessage;
-    SYMBOLNODE * NodePointerPointer;
-    SYMBOLNODE NodePointer;
 
 //DEBUG printf("Insert %s/%d\n",Name,Arity);
     switch (Type) {
         case variable:
             return(InsertIntoSignatureList(&(Signature->Variables),Name,Arity,Stream));
             break;
-//TODO - THIS NEEDS TO BE FIXED NOW I GET IT RIGHT
-//----Functions might have mistakenly been put into predicates when their
-//----type was declared. Note arity would be 0.
         case function:
-            if ((NodePointerPointer = IsSymbolInSignatureListPointer(&(Signature->Predicates),
-Name,0)) != NULL) {
-                NodePointer =  RemoveSignatureNodeFromTree(NodePointerPointer);
-                NodePointer->Arity = Arity;
-                IncreaseSymbolUseCount(NodePointer,1);
-//DEBUG printf("Move %s/%d to functions\n",Name,NodePointer->Arity);
-                return(InsertNodeIntoSignatureList(&(Signature->Functions),NodePointer,Stream));
-            } else {
-                return(InsertIntoSignatureList(&(Signature->Functions),Name,Arity,Stream));
-            }
+            return(InsertIntoSignatureList(&(Signature->Functions),Name,Arity,Stream));
             break;
         case predicate:
-//TODO
-        case term:
-//----Fucking hell, I process include files after the main file, so the
-//----mislabelling of functions as predicates might be in the other order
-            if (Arity == 0 && (NodePointer = IsSymbolInSignatureList(
-Signature->Functions,Name,-1)) != NULL) {
-                IncreaseSymbolUseCount(NodePointer,1);
-                return(NodePointer);
-            }
-//----NOTE the fallthrough here
         case connective:
             return(InsertIntoSignatureList(&(Signature->Predicates),Name,Arity,Stream));
             break;

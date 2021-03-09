@@ -469,6 +469,21 @@ int FlatTypeOrDefnFormula(FORMULA Formula) {
     return(FlatTypeFormula(Formula) || FlatDefnFormula(Formula));
 }
 //-------------------------------------------------------------------------------------------------
+int FlatTuple(FORMULA Formula) {
+
+    int index;
+
+    if (Formula->Type != tuple) {
+        return(0);
+    }
+    for (index = 0; index < Formula->FormulaUnion.TupleFormula.NumberOfElements; index++) {
+        if (!FlatFormula(Formula->FormulaUnion.TupleFormula.Elements[index])) {
+            return(0);
+        }
+    }
+    return(1);
+}
+//-------------------------------------------------------------------------------------------------
 int ApplicationFormula(FORMULA Formula) {
 
     return(Formula->Type == binary && 
@@ -478,7 +493,7 @@ Formula->FormulaUnion.BinaryFormula.Connective == application);
 int FlatFormula(FORMULA Formula) {
 
     return(LiteralFormula(Formula) || FlatEquation(Formula) || 
-FlatBinaryFormula(Formula) || FlatTypeOrDefnFormula(Formula));
+FlatBinaryFormula(Formula) || FlatTypeOrDefnFormula(Formula) || FlatTuple(Formula));
 }
 //-------------------------------------------------------------------------------------------------
 int FlatQuantifiedVariable(QuantifiedFormulaType QuantifiedFormula) {
@@ -684,8 +699,7 @@ Formula->Type != type_declaration && !TypeOrDefnFormula(Formula);
                 }
                 PFprintf(Stream,"%s ",ConnectiveToString(Connective));
                 SideFormula = Formula->FormulaUnion.BinaryFormula.RHS;
-//----If didn't need a new line, and a type dec or defn then new line if 
-//----not flat RHS
+//----If didn't need a new line, and a type dec or defn then new line if not flat RHS
                 if (!NeedNewLine && (Formula->Type == assignment || TypeOrDefnFormula(Formula)) && 
 !FlatFormula(SideFormula) && Pretty) {
                     PFprintf(Stream,"\n");

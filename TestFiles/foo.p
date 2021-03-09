@@ -1,19 +1,14 @@
-tff(4,axiom,
-      $let(c: $int,
-        c:= 0,
-        $true) ).
+tff(f,type,f: [$int] > [$int]).
+tff(p,type,p: [$int] > $o).
 
-tff(5,axiom,
-      $let(c: $int,
-        c:= 0,
-        $true) ).
+tff(1,axiom,p(f([1]))).
 
 % tff(aaa,type,thing : $tType).
 % tff(bbb,type,f : $o > thing).
 % tff(eee,type,g : thing).
 % tff(ccc,type,p : (thing * $o) > $o).
 % tff(ddd,type,q : $o).
-% tff(afs,axiom,p(f(q),! [X:$int] : (q => p(g,$true)) )).
+% tff(afs,axiom,p(f(? [Y: $int] : (( q & q) => q )),! [X:$int] : (q => p(g,$true)) )).
 
 % tff(ddd,type,r : $o > $o).
 % tff(an,axiom,r($ite(q,r & f,r & g))).

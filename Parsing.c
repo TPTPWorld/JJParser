@@ -708,7 +708,7 @@ punctuation,"[") && !CheckTokenType(Stream,upper_word)) {
 //----Save the symbol for inserting in signature later
     PrefixSymbol = CopyHeapString(CurrentToken(Stream)->NameToken);
 //DEBUG printf("Found a type %d term %s\n",Type,PrefixSymbol);
-//----Move on if not a list or nested formula
+//----Move on if not a list 
     if (strcmp(PrefixSymbol,"[") && strcmp(PrefixSymbol,"(")) {
         NextToken(Stream);
     }
@@ -799,6 +799,7 @@ Context.Signature,0);
     if (!strcmp(PrefixSymbol,"[")) {
 //----Need an extra byte :-)
         Free((void **)&PrefixSymbol);
+printf("SHOULD NOT GET HERE UNLESS IN NON-LOGICAL DATA\n");
         PrefixSymbol = CopyHeapString("[]");
         Term->FlexibleArity = NumberOfArguments;
         NumberOfArguments = -1;
@@ -861,6 +862,10 @@ PrefixSymbol,NumberOfArguments) != NULL) {
         if (Term->Type == function && IsSymbolInSignatureList(Context.Signature->Predicates,
 PrefixSymbol,NumberOfArguments) != NULL) {
             Term->Type = predicate;
+        }
+//----Numbers and distinct objects are known to be functions
+        if (FunctorType == number || FunctorType == distinct_object) {
+            Term->Type = function;
         }
 //----Some functions and types might get inserted as predicates here when they appear on the LHS
 //----of a type declaration, but that gets fixed later when the parsing of the declaration is
@@ -1039,7 +1044,7 @@ int VariablesMustBeQuantified,QuantifiedFormulaType * QuantifiedFormula) {
 ParseTerm(Stream,Language,Context,EndOfScope,new_variable,Quantifier,NULL,0);
 //----Variable type
 //----For THF0 require type, TFF optional type
-    if (Language == tptp_thf) {
+    if (Language == tptp_thf || Language == tptp_tff) {
         AcceptToken(Stream,punctuation,":");
         QuantifiedFormula->VariableType = ParseFormula(Stream,Language,Context,EndOfScope,-1,1,
 VariablesMustBeQuantified,none);
@@ -1414,7 +1419,13 @@ Context,EndOfScope,AllowBinary,1,VariablesMustBeQuantified,NextConnective);
                     if (BinaryFormula->FormulaUnion.BinaryFormula.RHS->Type == atom &&
 BinaryFormula->FormulaUnion.BinaryFormula.RHS->FormulaUnion.Atom->Type == a_type &&
 !strcmp("$tType",GetSymbol(BinaryFormula->FormulaUnion.BinaryFormula.RHS->FormulaUnion.Atom))) {
-//DEBUG printf("Need to move %s to Types\n",GetSymbol(BinaryFormula->FormulaUnion.BinaryFormula.LHS->FormulaUnion.Atom));
+                        if (IsSymbolInSignatureList(Context.Signature->Types,GetSymbol(
+BinaryFormula->FormulaUnion.BinaryFormula.LHS->FormulaUnion.Atom),0)) {
+                            sprintf(ErrorMessage,"Duplicate type declaration for %s",
+GetSymbol(BinaryFormula->FormulaUnion.BinaryFormula.LHS->FormulaUnion.Atom));
+                            TokenError(Stream,ErrorMessage);
+                            return(NULL);
+                        }
                         if (MoveSignatureNode(&(Context.Signature->Predicates),
 &(Context.Signature->Types),GetSymbol(BinaryFormula->FormulaUnion.BinaryFormula.LHS->
 FormulaUnion.Atom),0,Stream) == NULL) {
@@ -1425,17 +1436,17 @@ GetSymbol(BinaryFormula->FormulaUnion.BinaryFormula.LHS->FormulaUnion.Atom));
                         }
                     } else {
 //----Fix the arity of the declared symbol
-//DEBUG printf("Fix the arity of %s from (hopefully 0) %d to %d\n",GetSymbol(BinaryFormula->FormulaUnion.BinaryFormula.LHS->FormulaUnion.Atom),GetArity(BinaryFormula->FormulaUnion.BinaryFormula.LHS->FormulaUnion.Atom),GetArityFromTyping(Stream,BinaryFormula->FormulaUnion.BinaryFormula.RHS));
                         BinaryFormula->FormulaUnion.BinaryFormula.LHS->FormulaUnion.Atom->
 TheSymbol.NonVariable->Arity = GetArityFromTyping(Stream,BinaryFormula->
 FormulaUnion.BinaryFormula.RHS);
 //----If not of type $o, move the symbol to functions (unless it was known to be a function in
-//----as earlier $let (yeaaragh)).
-                        if (strcmp("$o",GetSymbol(GetResultFromTyping(Stream,BinaryFormula->
-FormulaUnion.BinaryFormula.RHS))) && IsSymbolInSignatureList(Context.Signature->Predicates,
+//----an earlier $let (yeaaragh)).
+                        if ((GetResultFromTyping(Stream,BinaryFormula->
+FormulaUnion.BinaryFormula.RHS)->Type != atom || strcmp("$o",GetSymbol(GetResultFromTyping(
+Stream,BinaryFormula->FormulaUnion.BinaryFormula.RHS)->FormulaUnion.Atom))) && 
+IsSymbolInSignatureList(Context.Signature->Predicates,
 GetSymbol(BinaryFormula->FormulaUnion.BinaryFormula.LHS->FormulaUnion.Atom),
 GetArity(BinaryFormula->FormulaUnion.BinaryFormula.LHS->FormulaUnion.Atom))) {
-//DEBUG printf("Move %s of type %s to functions\n",GetSymbol(BinaryFormula->FormulaUnion.BinaryFormula.LHS->FormulaUnion.Atom),GetSymbol(GetResultFromTyping(Stream,BinaryFormula->FormulaUnion.BinaryFormula.RHS)));
                             if (MoveSignatureNode(&(Context.Signature->Predicates),
 &(Context.Signature->Functions),GetSymbol(BinaryFormula->FormulaUnion.BinaryFormula.LHS->
 FormulaUnion.Atom),GetArity(BinaryFormula->FormulaUnion.BinaryFormula.LHS->FormulaUnion.Atom),

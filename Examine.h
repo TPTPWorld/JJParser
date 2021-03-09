@@ -8,7 +8,7 @@
 //-------------------------------------------------------------------------------------------------
 char * GetSymbol(TERM Term);
 int GetArity(TERM Term);
-TERM GetResultFromTyping(READFILE Stream,FORMULA TypeFormula);
+FORMULA GetResultFromTyping(READFILE Stream,FORMULA TypeFormula);
 int GetArityFromTyping(READFILE Stream,FORMULA TypeFormula);
 
 int CheckAnnotatedFormula(ANNOTATEDFORMULA AnnotatedFormula,

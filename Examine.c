@@ -49,10 +49,12 @@ int GetArity(TERM Term) {
     }
 }
 //-------------------------------------------------------------------------------------------------
-TERM GetResultFromTyping(READFILE Stream,FORMULA TypeFormula) {
+FORMULA GetResultFromTyping(READFILE Stream,FORMULA TypeFormula) {
 
     if (TypeFormula->Type == atom) {
-        return(TypeFormula->FormulaUnion.Atom);
+        return(TypeFormula);
+    } else if (TypeFormula->Type == tuple) {
+        return(TypeFormula);
     } else if (TypeFormula->Type == binary) {
         return(GetResultFromTyping(Stream,TypeFormula->FormulaUnion.BinaryFormula.RHS));
 //----Polymorphic types
@@ -70,7 +72,7 @@ int GetArityFromTyping(READFILE Stream,FORMULA TypeFormula) {
     FORMULA Side;
 
 //DEBUG printf("Get arity from type %s\n",FormulaTypeToString(TypeFormula->Type));
-    if (TypeFormula->Type == atom) {
+    if (TypeFormula->Type == atom || TypeFormula->Type == tuple) {
         return(0);
     } else if (TypeFormula->Type == binary) {
         if (TypeFormula->FormulaUnion.BinaryFormula.Connective == maparrow) {
