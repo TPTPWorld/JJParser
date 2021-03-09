@@ -144,8 +144,7 @@ Quantification == free_variable && FoundVariable == NULL) {
         Variable->VariableName = InsertIntoSignature(Signature,variable,VariableName,0,NULL);
 
 //----If a tolerated free variable, add at top and don't change context
-        if (FoundVariable == NULL && Quantification == free_variable &&
-AllowFreeVariables) {
+        if (FoundVariable == NULL && Quantification == free_variable && AllowFreeVariables) {
 //DEBUG printf("Adding free variable %s\n",VariableName);
             Variable->NextVariable = (*Variables);
             *Variables = Variable;
@@ -188,8 +187,7 @@ VARIABLENODE ParallelCopyVariableList(VARIABLENODE Original) {
     }
 }
 //-------------------------------------------------------------------------------------------------
-void ParallelCopyVariableInstantiations(VARIABLENODE Original,
-VARIABLENODE Copy) {
+void ParallelCopyVariableInstantiations(VARIABLENODE Original,VARIABLENODE Copy) {
 
     if (Original == NULL) {
         if (Copy == NULL) {
@@ -220,8 +218,7 @@ TERMWITHVARIABLES NewTermWithVariables(void) {
 
     TERMWITHVARIABLES TermWithVariables;
 
-    TermWithVariables = 
-(TERMWITHVARIABLES)Malloc(sizeof(TermWithVariablesType));
+    TermWithVariables = (TERMWITHVARIABLES)Malloc(sizeof(TermWithVariablesType));
     TermWithVariables->Term = NULL;
     TermWithVariables->Variables = NULL;
 
@@ -294,8 +291,7 @@ FORMULAWITHVARIABLES NewFormulaWithVariables(void) {
 
     FORMULAWITHVARIABLES FormulaWithVariables;
 
-    FormulaWithVariables = 
-(FORMULAWITHVARIABLES)Malloc(sizeof(FormulaWithVariablesType));
+    FormulaWithVariables = (FORMULAWITHVARIABLES)Malloc(sizeof(FormulaWithVariablesType));
     FormulaWithVariables->Formula = NULL;
     FormulaWithVariables->Variables = NULL;
 
@@ -323,17 +319,14 @@ void FreeFormula(FORMULA * Formula,VARIABLENODE * Variables) {
     if (*Formula != NULL) {
         switch ((*Formula)->Type) {
             case tuple:
-                FreeTupleFormulae(
-(*Formula)->FormulaUnion.TupleFormula.NumberOfElements,
+                FreeTupleFormulae((*Formula)->FormulaUnion.TupleFormula.NumberOfElements,
 &((*Formula)->FormulaUnion.TupleFormula.Elements),Variables);
                 assert((*Formula)->FormulaUnion.TupleFormula.Elements == NULL);
                 break;
-                FreeTupleFormulae(
-(*Formula)->FormulaUnion.SequentFormula.NumberOfLHSElements,
+                FreeTupleFormulae((*Formula)->FormulaUnion.SequentFormula.NumberOfLHSElements,
 &((*Formula)->FormulaUnion.SequentFormula.LHS),Variables);
                 assert((*Formula)->FormulaUnion.SequentFormula.LHS == NULL);
-                FreeTupleFormulae(
-(*Formula)->FormulaUnion.SequentFormula.NumberOfRHSElements,
+                FreeTupleFormulae((*Formula)->FormulaUnion.SequentFormula.NumberOfRHSElements,
 &((*Formula)->FormulaUnion.SequentFormula.RHS),Variables);
                 assert((*Formula)->FormulaUnion.SequentFormula.RHS == NULL);
                 break;
@@ -412,8 +405,8 @@ int ForceNewVariables) {
     if (Arity > 0) {
         Arguments = NewArguments(Arity);
         for (ArgumentNumber=0;ArgumentNumber<Arity;ArgumentNumber++) {
-            Arguments[ArgumentNumber] = DuplicateTerm(Original[ArgumentNumber],
-Context,ForceNewVariables);
+            Arguments[ArgumentNumber] = DuplicateTerm(Original[ArgumentNumber],Context,
+ForceNewVariables);
         }
         return(Arguments);
     } else {
@@ -422,13 +415,14 @@ Context,ForceNewVariables);
 }
 //-------------------------------------------------------------------------------------------------
 TERM ParseArgument(READFILE Stream,SyntaxType Language,ContextType Context,
-VARIABLENODE * EndOfScope,TermType Type,int VariablesMustBeQuantified) {
+VARIABLENODE * EndOfScope,TermType DesiredType,int VariablesMustBeQuantified) {
 
     TERM FormulaArgument;
 
-//----THF and TFF have formulae as arguments. Type is prdicate if looking for arguments of a
+//----THF and TFF have formulae as arguments. Type is predicate if looking for arguments of a
 //----predicate or function in THF and TFF.
-    if ((Language == tptp_thf || Language == tptp_tff) && Type == predicate) {
+    if ((Language == tptp_thf || Language == tptp_tff) &&
+(DesiredType == function || DesiredType == predicate) ) {
         FormulaArgument = NewTerm();
         FormulaArgument->Type = formula;
         FormulaArgument->TheSymbol.Formula = ParseFormula(Stream,Language,Context,EndOfScope,1,1,
@@ -436,16 +430,16 @@ VariablesMustBeQuantified,none);
         return(FormulaArgument);
     } else {
 //----If parsing non-logical, keep it like that, else it must be a term
-        if (Type != non_logical_data) {
-            Type = term;
+        if (DesiredType != non_logical_data) {
+            DesiredType = term;
         }
-        return(ParseTerm(Stream,Language,Context,EndOfScope,Type,free_variable,NULL,
+        return(ParseTerm(Stream,Language,Context,EndOfScope,DesiredType,free_variable,NULL,
 VariablesMustBeQuantified));
     }
 }
 //-------------------------------------------------------------------------------------------------
 TERMArray ParseArguments(READFILE Stream,SyntaxType Language,ContextType Context,
-VARIABLENODE * EndOfScope,int * Arity,TermType Type,char * MatchingBracket,
+VARIABLENODE * EndOfScope,int * Arity,TermType DesiredType,char * MatchingBracket,
 int VariablesMustBeQuantified) {
 
     TERMArray Arguments;
@@ -457,18 +451,17 @@ int VariablesMustBeQuantified) {
     } else {
         Arguments = (TERMArray)Malloc(sizeof(TERM));
         *Arity = 1;
-        Arguments[0] = ParseArgument(Stream,Language,Context,EndOfScope,Type,
+        Arguments[0] = ParseArgument(Stream,Language,Context,EndOfScope,DesiredType,
 VariablesMustBeQuantified);
         while (CheckToken(Stream,punctuation,",")) {
 //DEBUG printf("and another argument\n");
             AcceptToken(Stream,punctuation,",");
             (*Arity)++;
             Arguments = (TERMArray)Realloc((void *)Arguments,*Arity * sizeof(TERM));
-            Arguments[*Arity - 1] = ParseArgument(Stream,Language,Context,EndOfScope,Type,
+            Arguments[*Arity - 1] = ParseArgument(Stream,Language,Context,EndOfScope,DesiredType,
 VariablesMustBeQuantified);
         }
     }
-
     return(Arguments);
 }
 //-------------------------------------------------------------------------------------------------
@@ -560,8 +553,7 @@ int ForceNewVariables) {
 
 //----Copy the variables list, setting each use to 0, and setting the
 //----instantiation to point to the original (cheating in duplication :-)
-    TermWithVariables->Variables = ParallelCopyVariableList(
-Original->Variables);
+    TermWithVariables->Variables = ParallelCopyVariableList(Original->Variables);
     
 //----Create a context for the parsing
     Context.Variables = &(TermWithVariables->Variables);
@@ -571,14 +563,12 @@ Original->Variables);
 //DEBUG PrintVariableList(Original->Variables,NULL);
 //DEBUG printf("parallel copy variables\n");
 //DEBUG PrintVariableList(FormulaWithVariables->Variables,NULL);
-    TermWithVariables->Term = DuplicateTerm(Original->Term,
-Context,ForceNewVariables);
+    TermWithVariables->Term = DuplicateTerm(Original->Term,Context,ForceNewVariables);
 //DEBUG printf("after copy variables\n");
 //DEBUG PrintVariableList(FormulaWithVariables->Variables,NULL);
 
 //----Set the variable instantiations to their rightful values
-    ParallelCopyVariableInstantiations(Original->Variables,
-TermWithVariables->Variables);
+    ParallelCopyVariableInstantiations(Original->Variables,TermWithVariables->Variables);
 
     return(TermWithVariables); 
 }
@@ -638,7 +628,7 @@ TermType * ExpectedRHSTermType) {
 }
 //-------------------------------------------------------------------------------------------------
 TERM ParseTerm(READFILE Stream,SyntaxType Language,ContextType Context,VARIABLENODE * EndOfScope,
-TermType Type,ConnectiveType VariableQuantifier,int * InfixNegatedAtom,
+TermType DesiredType,ConnectiveType VariableQuantifier,int * InfixNegatedAtom,
 int VariablesMustBeQuantified) {
 
     TokenType FunctorType;
@@ -655,14 +645,14 @@ int VariablesMustBeQuantified) {
     TypeIfInfix = nonterm;
 
 printf("ParseTerm with token %s\n",CurrentToken(Stream)->NameToken);
-printf("Hoping for a %s\n",TermTypeToString(Type));
+printf("Hoping for a %s\n",TermTypeToString(DesiredType));
 //----Record token type to check if brackets are legal later
     FunctorType = CurrentToken(Stream)->KindToken;
 
 //----If a generic term, look at first letter to decide which
-    switch (Type) {
+    switch (DesiredType) {
         case term:
-            Type = KnownTermTypeOrError(Stream,Language);
+            DesiredType = KnownTermTypeOrError(Stream,Language);
             break;
         case variable:
         case new_variable:
@@ -678,7 +668,7 @@ printf("Hoping for a %s\n",TermTypeToString(Type));
 //----Guess that it's a variable or function for infix predicate
             if (IsSymbolInSignatureList(Context.Signature->Types,CurrentToken(Stream)->NameToken,
 0) != NULL) {
-                Type = a_type;
+                DesiredType = a_type;
                 TypeIfInfix = nonterm;
             } else {
                 TypeIfInfix = KnownTermTypeOrError(Stream,Language);
@@ -689,17 +679,17 @@ printf("%s could be a %s\n",CurrentToken(Stream)->NameToken,TermTypeToString(Typ
 //DEBUG printf("Found a non-logical with symbol %s\n",CurrentToken(Stream)->NameToken);
 //----Nested formulae and terms
             if (CheckToken(Stream,lower_word,"$thf")) {
-                Type = nested_thf;
+                DesiredType = nested_thf;
             } else if (CheckToken(Stream,lower_word,"$tff")) {
-                Type = nested_tff;
+                DesiredType = nested_tff;
             } else if (CheckToken(Stream,lower_word,"$tcf")) {
-                Type = nested_tcf;
+                DesiredType = nested_tcf;
             } else if (CheckToken(Stream,lower_word,"$fof")) {
-                Type = nested_fof;
+                DesiredType = nested_fof;
             } else if (CheckToken(Stream,lower_word,"$cnf")) {
-                Type = nested_cnf;
+                DesiredType = nested_cnf;
             } else if (CheckToken(Stream,lower_word,"$fot")) {
-                Type = nested_fot;
+                DesiredType = nested_fot;
             } else {
                 TypeIfInfix = non_logical_data;
 //----Make sure it's something that looks like a term
@@ -713,7 +703,7 @@ punctuation,"[") && !CheckTokenType(Stream,upper_word)) {
             CodingError("Term type unknown in parsing");
             break;
     }
-    Term->Type = Type;
+    Term->Type = DesiredType;
 
 //----Save the symbol for inserting in signature later
     PrefixSymbol = CopyHeapString(CurrentToken(Stream)->NameToken);
@@ -725,7 +715,7 @@ punctuation,"[") && !CheckTokenType(Stream,upper_word)) {
 
 //----Is it a conditional term?
 //----FIX why TypeIfInfix??
-    if (Type == ite_term || TypeIfInfix == ite_term) {
+    if (DesiredType == ite_term || TypeIfInfix == ite_term) {
         NumberOfArguments = 0;
         Term->Arguments = NULL;
         AcceptToken(Stream,punctuation,"(");
@@ -740,7 +730,7 @@ term,none,NULL,VariablesMustBeQuantified);
         Term->TheSymbol.ConditionalTerm.TermIfFalse = ParseTerm(Stream,Language,Context,EndOfScope,
 term,none,NULL,VariablesMustBeQuantified);
         AcceptToken(Stream,punctuation,")");
-    } else if (Type == let_term) {
+    } else if (DesiredType == let_term) {
 printf("DOING A LET TERM\n");
         NumberOfArguments = 0;
         Term->Arguments = NULL;
@@ -756,19 +746,15 @@ printf("DOING A LET TERM\n");
 NULL,VariablesMustBeQuantified);
         AcceptToken(Stream,punctuation,")");
 //----Deal with a list of things, with either ( or [ brackets
-    } else if ( 
-        ( ( Type == predicate 
-//----Prevent THF connectives being used as predicates with arguments
-          && ( Language != tptp_thf || islower(PrefixSymbol[0]) ) ) 
-        || Type == function 
-        || Type == non_logical_data ) 
-      && ( CheckToken(Stream,punctuation,"(") || CheckToken(Stream,punctuation,"[") ) ) {
+    } else if (
+( DesiredType == predicate || DesiredType == function || DesiredType == non_logical_data ) &&
+( CheckToken(Stream,punctuation,"(") || CheckToken(Stream,punctuation,"[") ) ) {
 //DEBUG printf("it ==%s==has arguments\n\n",PrefixSymbol);
 //----Now we can check that expected predicates look like predicates
 //----Variables, distinct objects and numbers cannot have arguments
 //THF TO FIX - Currently only allows ground predicates with arguments
         if (FunctorType == upper_word || FunctorType == distinct_object || FunctorType == number ||
-((Type == predicate || Type == function) && FunctorType != lower_word)) {
+((DesiredType == predicate || DesiredType == function) && FunctorType != lower_word)) {
             TokenError(Stream,"Invalid form for a principal symbol");
         }
         if (CheckToken(Stream,punctuation,"(")) {
@@ -778,23 +764,23 @@ NULL,VariablesMustBeQuantified);
         }
         AcceptTokenType(Stream,punctuation);
         Term->Arguments = ParseArguments(Stream,Language,Context,EndOfScope,&NumberOfArguments,
-Type,MatchingBracket,VariablesMustBeQuantified);
+DesiredType,MatchingBracket,VariablesMustBeQuantified);
         AcceptToken(Stream,punctuation,MatchingBracket);
 //----Is it a nested formula?
-    } else if (Type == nested_thf || Type == nested_tff || 
-Type == nested_tcf || Type == nested_fof || Type == nested_cnf) {
+    } else if (DesiredType == nested_thf || DesiredType == nested_tff ||
+    DesiredType == nested_tcf || DesiredType == nested_fof || DesiredType == nested_cnf) {
         NumberOfArguments = 0;
         Term->Arguments = NULL;
         AcceptToken(Stream,punctuation,"(");
         Term->TheSymbol.NestedFormula = ParseFormulaWithVariables(Stream,
-Type == nested_thf ? tptp_thf : 
-Type == nested_tff ? tptp_tff : Type == nested_tcf ? tptp_tcf :
-Type == nested_fof ? tptp_fof : tptp_cnf,Context.Signature,0);
+DesiredType == nested_thf ? tptp_thf :
+DesiredType == nested_tff ? tptp_tff : DesiredType == nested_tcf ? tptp_tcf :
+DesiredType == nested_fof ? tptp_fof : tptp_cnf,Context.Signature,0);
 //----Have to allow unbound variables in nested terms, e.g., for bind/2
 //----terms in inference() terms where the list of bindings together makes
 //----"free" variables ground.
         AcceptToken(Stream,punctuation,")");
-    } else if (Type == nested_fot) {
+    } else if (DesiredType == nested_fot) {
         NumberOfArguments = 0;
         Term->Arguments = NULL;
         AcceptToken(Stream,punctuation,"(");
@@ -818,8 +804,8 @@ Context.Signature,0);
     }
 
 //----Check for infix predicate
-    if ((DoInfixProcessing = InfixOperatorParsing(Stream,Language,Type,&InfixRHSType))) {
-        if (Type == predicate && Language != tptp_thf && Language != tptp_tff) {
+    if ((DoInfixProcessing = InfixOperatorParsing(Stream,Language,DesiredType,&InfixRHSType))) {
+        if (DesiredType == predicate && Language != tptp_thf && Language != tptp_tff) {
             Term->Type = TypeIfInfix;
         }
 //----If a term is expected, then if a variable it must be free here (infix =)
@@ -832,7 +818,7 @@ Context.Signature,0);
 //----Cannot have a variable if a predicate was expected, unless in a typed
 //----language, where variables can be types in polymorphic cases.
         if (Language != tptp_thf && Language != tptp_tff &&
-Type == predicate && TypeIfInfix == variable) {
+DesiredType == predicate && TypeIfInfix == variable) {
             TokenError(Stream,"Variables cannot be used as predicates except in THF and TFX");
         }
     }
@@ -891,7 +877,7 @@ PrefixSymbol,NumberOfArguments,Stream);
 //----Build the infix structure
     if (DoInfixProcessing) {
         InfixTerm = NewTerm();
-        InfixTerm->Type = Type;
+        InfixTerm->Type = DesiredType;
 //----Insert the infix symbol
         if (InfixNegatedAtom != NULL && CheckToken(Stream,lower_word,"!=")) {
             InfixToken = "=";
@@ -1456,9 +1442,15 @@ GetSymbol(BinaryFormula->FormulaUnion.BinaryFormula.LHS->FormulaUnion.Atom));
                     } else {
 //----Fix the arity of the declared symbol
 //DEBUG printf("Fix the arity of %s from (hopefully 0) %d to %d\n",GetSymbol(BinaryFormula->FormulaUnion.BinaryFormula.LHS->FormulaUnion.Atom),GetArity(BinaryFormula->FormulaUnion.BinaryFormula.LHS->FormulaUnion.Atom),GetArityFromTyping(Stream,BinaryFormula->FormulaUnion.BinaryFormula.RHS));
-                        BinaryFormula->FormulaUnion.BinaryFormula.LHS->FormulaUnion.Atom->TheSymbol.NonVariable->Arity = GetArityFromTyping(Stream,BinaryFormula->FormulaUnion.BinaryFormula.RHS);
-//----If not of type $o, move the symbol to functions
-                        if (strcmp("$o",GetSymbol(GetResultFromTyping(Stream,BinaryFormula->FormulaUnion.BinaryFormula.RHS)))) {
+                        BinaryFormula->FormulaUnion.BinaryFormula.LHS->FormulaUnion.Atom->
+TheSymbol.NonVariable->Arity = GetArityFromTyping(Stream,BinaryFormula->
+FormulaUnion.BinaryFormula.RHS);
+//----If not of type $o, move the symbol to functions (unless it was known to be a function in
+//----as earlier $let (yeaaragh)).
+                        if (strcmp("$o",GetSymbol(GetResultFromTyping(Stream,BinaryFormula->
+FormulaUnion.BinaryFormula.RHS))) && IsSymbolInSignatureList(Context.Signature->Predicates,
+GetSymbol(BinaryFormula->FormulaUnion.BinaryFormula.LHS->FormulaUnion.Atom),
+GetArity(BinaryFormula->FormulaUnion.BinaryFormula.LHS->FormulaUnion.Atom))) {
 //DEBUG printf("Move %s of type %s to functions\n",GetSymbol(BinaryFormula->FormulaUnion.BinaryFormula.LHS->FormulaUnion.Atom),GetSymbol(GetResultFromTyping(Stream,BinaryFormula->FormulaUnion.BinaryFormula.RHS)));
                             if (MoveSignatureNode(&(Context.Signature->Predicates),
 &(Context.Signature->Functions),GetSymbol(BinaryFormula->FormulaUnion.BinaryFormula.LHS->
@@ -1466,7 +1458,7 @@ FormulaUnion.Atom),GetArity(BinaryFormula->FormulaUnion.BinaryFormula.LHS->Formu
 Stream) == NULL) {
                                 sprintf(ErrorMessage,"Could not move %s to functions",
 GetSymbol(BinaryFormula->FormulaUnion.BinaryFormula.LHS->FormulaUnion.Atom));
-                                TokenError(Stream,ErrorMessage);
+                                CodingError(ErrorMessage);
                                 return(NULL);
                             }
                         }

@@ -1,17 +1,12 @@
 tff(4,axiom,
-    $ite(
       $let(c: $int,
         c:= 0,
-        $true),
-      $true,
-      $false) ).
+        $true) ).
 
 tff(5,axiom,
-    $ite($true,
       $let(c: $int,
         c:= 0,
-        $true),
-      $false) ).
+        $true) ).
 
 % tff(aaa,type,thing : $tType).
 % tff(bbb,type,f : $o > thing).
