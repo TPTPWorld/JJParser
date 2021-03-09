@@ -644,8 +644,8 @@ int VariablesMustBeQuantified) {
     Term = NewTerm();
     TypeIfInfix = nonterm;
 
-printf("ParseTerm with token %s\n",CurrentToken(Stream)->NameToken);
-printf("Hoping for a %s\n",TermTypeToString(DesiredType));
+//DEBUG printf("ParseTerm with token %s\n",CurrentToken(Stream)->NameToken);
+//DEBUG printf("Hoping for a %s\n",TermTypeToString(DesiredType));
 //----Record token type to check if brackets are legal later
     FunctorType = CurrentToken(Stream)->KindToken;
 
@@ -672,7 +672,7 @@ printf("Hoping for a %s\n",TermTypeToString(DesiredType));
                 TypeIfInfix = nonterm;
             } else {
                 TypeIfInfix = KnownTermTypeOrError(Stream,Language);
-printf("%s could be a %s\n",CurrentToken(Stream)->NameToken,TermTypeToString(TypeIfInfix));
+//DEBUG printf("%s could be a %s\n",CurrentToken(Stream)->NameToken,TermTypeToString(TypeIfInfix));
             }
             break;
         case non_logical_data:
@@ -1239,70 +1239,53 @@ FORMULA DuplicateFormula(FORMULA Original,ContextType Context,int ForceNewVariab
 
         switch (Formula->Type) {
             case tuple:
-                Formula->FormulaUnion.TupleFormula.Elements = 
-DuplicateTupleFormulae(
+                Formula->FormulaUnion.TupleFormula.Elements = DuplicateTupleFormulae(
 Original->FormulaUnion.TupleFormula.NumberOfElements,
-Original->FormulaUnion.TupleFormula.Elements,Context,
-ForceNewVariables);
+Original->FormulaUnion.TupleFormula.Elements,Context,ForceNewVariables);
                 break;
             case sequent:
-                Formula->FormulaUnion.SequentFormula.LHS = 
-DuplicateTupleFormulae(
+                Formula->FormulaUnion.SequentFormula.LHS = DuplicateTupleFormulae(
 Original->FormulaUnion.SequentFormula.NumberOfLHSElements,
-Original->FormulaUnion.SequentFormula.LHS,Context,
-ForceNewVariables);
-                Formula->FormulaUnion.SequentFormula.RHS = 
-DuplicateTupleFormulae(
+Original->FormulaUnion.SequentFormula.LHS,Context,ForceNewVariables);
+                Formula->FormulaUnion.SequentFormula.RHS = DuplicateTupleFormulae(
 Original->FormulaUnion.SequentFormula.NumberOfRHSElements,
-Original->FormulaUnion.SequentFormula.RHS,Context,
-ForceNewVariables);
+Original->FormulaUnion.SequentFormula.RHS,Context,ForceNewVariables);
                 break;
             case quantified:
-                Formula->FormulaUnion.QuantifiedFormula.Variable =
-DuplicateTerm(Original->FormulaUnion.QuantifiedFormula.Variable,Context,1);
-                Formula->FormulaUnion.QuantifiedFormula.VariableType =
-DuplicateFormula(Original->FormulaUnion.QuantifiedFormula.VariableType,
-Context,ForceNewVariables);
-                Formula->FormulaUnion.QuantifiedFormula.Formula =
-DuplicateFormula(Original->FormulaUnion.QuantifiedFormula.Formula,Context,
-ForceNewVariables);
+                Formula->FormulaUnion.QuantifiedFormula.Variable = DuplicateTerm(
+Original->FormulaUnion.QuantifiedFormula.Variable,Context,1);
+                Formula->FormulaUnion.QuantifiedFormula.VariableType = DuplicateFormula(
+Original->FormulaUnion.QuantifiedFormula.VariableType,Context,ForceNewVariables);
+                Formula->FormulaUnion.QuantifiedFormula.Formula = DuplicateFormula(
+Original->FormulaUnion.QuantifiedFormula.Formula,Context,ForceNewVariables);
                 break;
             case binary:
-                Formula->FormulaUnion.BinaryFormula.LHS =
-DuplicateFormula(Original->FormulaUnion.BinaryFormula.LHS,Context,
-ForceNewVariables);
-                Formula->FormulaUnion.BinaryFormula.RHS =
-DuplicateFormula(Original->FormulaUnion.BinaryFormula.RHS,Context,
-ForceNewVariables);
+                Formula->FormulaUnion.BinaryFormula.LHS = DuplicateFormula(
+Original->FormulaUnion.BinaryFormula.LHS,Context,ForceNewVariables);
+                Formula->FormulaUnion.BinaryFormula.RHS = DuplicateFormula(
+Original->FormulaUnion.BinaryFormula.RHS,Context,ForceNewVariables);
                 break;
             case unary:
-                Formula->FormulaUnion.UnaryFormula.Formula =
-DuplicateFormula(Original->FormulaUnion.UnaryFormula.Formula,Context,
-ForceNewVariables);
+                Formula->FormulaUnion.UnaryFormula.Formula = DuplicateFormula(
+Original->FormulaUnion.UnaryFormula.Formula,Context,ForceNewVariables);
                 break; 
             case atom:
-                Formula->FormulaUnion.Atom =
-DuplicateTerm(Original->FormulaUnion.Atom,Context,
+                Formula->FormulaUnion.Atom = DuplicateTerm(Original->FormulaUnion.Atom,Context,
 ForceNewVariables);
                 break;
             case ite_formula:
-                Formula->FormulaUnion.ConditionalFormula.Condition =
-DuplicateFormula(Original->FormulaUnion.ConditionalFormula.Condition,Context,
-ForceNewVariables);
-                Formula->FormulaUnion.ConditionalFormula.FormulaIfTrue =
-DuplicateFormula(Original->FormulaUnion.ConditionalFormula.FormulaIfTrue,
-Context,ForceNewVariables);
-                Formula->FormulaUnion.ConditionalFormula.FormulaIfFalse =
-DuplicateFormula(Original->FormulaUnion.ConditionalFormula.FormulaIfFalse,
-Context,ForceNewVariables);
+                Formula->FormulaUnion.ConditionalFormula.Condition = DuplicateFormula(
+Original->FormulaUnion.ConditionalFormula.Condition,Context,ForceNewVariables);
+                Formula->FormulaUnion.ConditionalFormula.FormulaIfTrue = DuplicateFormula(
+Original->FormulaUnion.ConditionalFormula.FormulaIfTrue, Context,ForceNewVariables);
+                Formula->FormulaUnion.ConditionalFormula.FormulaIfFalse = DuplicateFormula(
+Original->FormulaUnion.ConditionalFormula.FormulaIfFalse,Context,ForceNewVariables);
                 break;
             case let_formula:
-                Formula->FormulaUnion.LetFormula.LetDefn =
-DuplicateFormula(Original->FormulaUnion.LetFormula.LetDefn,Context,
-ForceNewVariables);
-                Formula->FormulaUnion.LetFormula.LetBody =
-DuplicateFormula(Original->FormulaUnion.LetFormula.LetBody,
-Context,ForceNewVariables);
+                Formula->FormulaUnion.LetFormula.LetDefn = DuplicateFormula(
+Original->FormulaUnion.LetFormula.LetDefn,Context,ForceNewVariables);
+                Formula->FormulaUnion.LetFormula.LetBody = DuplicateFormula(
+Original->FormulaUnion.LetFormula.LetBody,Context,ForceNewVariables);
                 break;
             default:
                 CodingError("Formula type unknown for duplication");
