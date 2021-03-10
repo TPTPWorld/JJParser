@@ -239,8 +239,7 @@ SYMBOLNODE IsSymbolInSignatureList(SYMBOLNODE List,char * Name,int Arity) {
 (Arity == -1 || GetSignatureArity(List) == Arity))) {
         return(List);
     } else if (strcmp(Name,GetSignatureSymbol(List)) < 0 ||
-(strcmp(Name,GetSignatureSymbol(List)) == 0 &&
- Arity < GetSignatureArity(List))) {
+(strcmp(Name,GetSignatureSymbol(List)) == 0 && Arity < GetSignatureArity(List))) {
         return(IsSymbolInSignatureList(List->LastSymbol,Name,Arity));
     } else {
         return(IsSymbolInSignatureList(List->NextSymbol,Name,Arity));
@@ -269,7 +268,7 @@ SYMBOLNODE InsertIntoSignatureList(SYMBOLNODE * List,char * Name,int Arity,READF
     SuperString DuplicateArity;
     SYMBOLNODE * Current = List;
 
-//DEBUG printf("Inserting %s %d into sig\n",Name,Arity);
+printf("Inserting %s %d into sig\n",Name,Arity);
 //DEBUG PrintSignatureTree(*List);
     while (*Current != NULL) {
 //----Same name
@@ -367,7 +366,7 @@ READFILE Stream) {
     SYMBOLNODE NodePointer;
 
     if ((NodePointerPointer = IsSymbolInSignatureListPointer(FromList,Name,Arity)) != NULL) {
-        NodePointer =  RemoveSignatureNodeFromTree(NodePointerPointer);
+        NodePointer = RemoveSignatureNodeFromTree(NodePointerPointer);
         return(InsertNodeIntoSignatureList(ToList,NodePointer,Stream));
     } else {
         return(NULL);

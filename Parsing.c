@@ -1330,6 +1330,7 @@ ConnectiveType LastConnective) {
     FORMULA InfixFormula = NULL;
     ConnectiveType NextConnective;
     String ErrorMessage;
+    SYMBOLNODE * MightHaveToDelete;
 
 //DEBUG printf("ParseFormula with token %s, allow binary %d\n",CurrentToken(Stream)->NameToken,AllowBinary);
     switch (CurrentToken(Stream)->KindToken) {
@@ -1435,26 +1436,34 @@ GetSymbol(BinaryFormula->FormulaUnion.BinaryFormula.LHS->FormulaUnion.Atom));
                             return(NULL);
                         }
                     } else {
-//----Fix the arity of the declared symbol
-                        BinaryFormula->FormulaUnion.BinaryFormula.LHS->FormulaUnion.Atom->
-TheSymbol.NonVariable->Arity = GetArityFromTyping(Stream,BinaryFormula->
-FormulaUnion.BinaryFormula.RHS);
-//----If not of type $o, move the symbol to functions (unless it was known to be a function in
-//----an earlier $let (yeaaragh)).
-                        if ((GetResultFromTyping(Stream,BinaryFormula->
-FormulaUnion.BinaryFormula.RHS)->Type != atom || strcmp("$o",GetSymbol(GetResultFromTyping(
-Stream,BinaryFormula->FormulaUnion.BinaryFormula.RHS)->FormulaUnion.Atom))) && 
-IsSymbolInSignatureList(Context.Signature->Predicates,
+                        if (Language == tptp_tff) {
+//----if function exists with old arity, then decrement count (should delete if zero)
+                            if ((MightHaveToDelete = IsSymbolInSignatureListPointer(
+&(Context.Signature->Functions),
 GetSymbol(BinaryFormula->FormulaUnion.BinaryFormula.LHS->FormulaUnion.Atom),
-GetArity(BinaryFormula->FormulaUnion.BinaryFormula.LHS->FormulaUnion.Atom))) {
-                            if (MoveSignatureNode(&(Context.Signature->Predicates),
-&(Context.Signature->Functions),GetSymbol(BinaryFormula->FormulaUnion.BinaryFormula.LHS->
-FormulaUnion.Atom),GetArity(BinaryFormula->FormulaUnion.BinaryFormula.LHS->FormulaUnion.Atom),
-Stream) == NULL) {
-                                sprintf(ErrorMessage,"Could not move %s to functions",
-GetSymbol(BinaryFormula->FormulaUnion.BinaryFormula.LHS->FormulaUnion.Atom));
-                                CodingError(ErrorMessage);
-                                return(NULL);
+GetArity(BinaryFormula->FormulaUnion.BinaryFormula.LHS->FormulaUnion.Atom))) != NULL) {
+                                IncreaseSymbolUseCount(*MightHaveToDelete,-1);
+//----else if predicate exists with old arity decrement count (should delete if zero)
+                            } else if ((MightHaveToDelete = IsSymbolInSignatureListPointer(
+&(Context.Signature->Predicates),
+GetSymbol(BinaryFormula->FormulaUnion.BinaryFormula.LHS->FormulaUnion.Atom),
+GetArity(BinaryFormula->FormulaUnion.BinaryFormula.LHS->FormulaUnion.Atom))) != NULL) {
+//----Decrement use with old arity in either list, if zero then remove node
+                                IncreaseSymbolUseCount(*MightHaveToDelete,-1);
+                            }
+//----If needs to be a function (might have been inserted as predicate in TFF)
+                            if (
+GetResultFromTyping(Stream,BinaryFormula->FormulaUnion.BinaryFormula.RHS)->Type != atom || 
+ strcmp("$o",GetSymbol(GetResultFromTyping(Stream,BinaryFormula->FormulaUnion.BinaryFormula.RHS)->
+FormulaUnion.Atom))) {
+//----Insert into functions
+                                InsertIntoSignatureList(&(Context.Signature->Functions),
+GetSymbol(BinaryFormula->FormulaUnion.BinaryFormula.LHS->FormulaUnion.Atom),
+GetArityFromTyping(Stream,BinaryFormula->FormulaUnion.BinaryFormula.RHS),Stream);
+                            } else {
+                                InsertIntoSignatureList(&(Context.Signature->Predicates),
+GetSymbol(BinaryFormula->FormulaUnion.BinaryFormula.LHS->FormulaUnion.Atom),
+GetArityFromTyping(Stream,BinaryFormula->FormulaUnion.BinaryFormula.RHS),Stream);
                             }
                         }
                     }

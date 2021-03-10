@@ -540,7 +540,7 @@ int TSTPSyntaxFlag) {
 
     PFprintf(Stream,"[");
     if (NumberOfElements > 0) {
-        PFprintf(Stream," ");
+//        PFprintf(Stream," ");
         PrintFileTSTPFormula(Stream,Language,TupleFormulae[0],Indent+2,Pretty,outermost,
 TSTPSyntaxFlag);
         for (ElementNumber=1;ElementNumber < NumberOfElements;ElementNumber++) {
@@ -553,7 +553,7 @@ TSTPSyntaxFlag);
 outermost,TSTPSyntaxFlag);
         }
     }
-    PFprintf(Stream," ]");
+    PFprintf(Stream,"]");
 }
 //-------------------------------------------------------------------------------------------------
 void PrintFileTSTPFormula(PRINTFILE Stream,SyntaxType Language,FORMULA Formula,int Indent,
