@@ -7,6 +7,7 @@ SIGNATURE NewSignature(void);
 SIGNATURE NewSignatureWithTypes(void);
 SIGNATURE DuplicateSignature(SIGNATURE Original);
 void FreeSignature(SIGNATURE * Signature);
+SYMBOLNODE RemoveSignatureNodeFromTree(SYMBOLNODE * OneToDeletePtr);
 int RemovedUnusedSymbolsFromList(SYMBOLNODE * Symbols);
 int RemovedUnusedSymbols(SIGNATURE Signature);
 char * GetSignatureSymbol(SYMBOLNODE SymbolNode);

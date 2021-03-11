@@ -37,14 +37,27 @@ int GetWarnings(void) {
     return(Warnings);
 }
 //-------------------------------------------------------------------------------------------------
-void SetWarnings(int GiveWarnings) {
+int SetWarnings(int GiveWarnings) {
 
+    int OldWarnings;
+
+    OldWarnings = Warnings;
     Warnings = GiveWarnings;
+    return(OldWarnings);
 }
 //-------------------------------------------------------------------------------------------------
 int GetStreamWarnings(READFILE Stream) {
 
     return(Stream->Warnings);
+}
+//-------------------------------------------------------------------------------------------------
+int SetStreamWarnings(READFILE Stream,int GiveWarnings) {
+
+    int OldWarnings;
+
+    OldWarnings = Stream->Warnings;
+    Stream->Warnings = GiveWarnings;
+    return(OldWarnings);
 }
 //-------------------------------------------------------------------------------------------------
 int EndFile(TOKEN CurrentToken) {
@@ -635,6 +648,9 @@ char * ConnectiveToString(ConnectiveType Connective) {
             break;
         case gentzenarrow:
             return("-->");
+            break;
+        case none:
+            return("none");
             break;
         default:
             CodingError("Not a connective to make into a string");

@@ -1,7 +1,13 @@
-tff(f,type,f: [$int] > [$int]).
-tff(p,type,p: [$int] > $o).
+thf(p_type,type,p : $o).
+thf(an,axiom,! [X: $int] : ((X = Y) | p)).
 
-tff(1,axiom,p(f([1]))).
+% tff(f_def,type,f: [$int] > [$int]).
+% tff(p_def,type,p: [$int] > $o).
+% tff(1,axiom,p(f([1]))).
+
+% thf(f_def,type,f: [$int] > [$int]).
+% thf(p_def,type,p: [$int] > $o).
+% thf(1,axiom,p @ ( f @ [1])).
 
 % tff(aaa,type,thing : $tType).
 % tff(bbb,type,f : $o > thing).

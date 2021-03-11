@@ -268,8 +268,6 @@ SYMBOLNODE InsertIntoSignatureList(SYMBOLNODE * List,char * Name,int Arity,READF
     SuperString DuplicateArity;
     SYMBOLNODE * Current = List;
 
-printf("Inserting %s %d into sig\n",Name,Arity);
-//DEBUG PrintSignatureTree(*List);
     while (*Current != NULL) {
 //----Same name
         if (!strcmp(GetSignatureSymbol(*Current),Name)) {
@@ -278,7 +276,7 @@ printf("Inserting %s %d into sig\n",Name,Arity);
                 IncreaseSymbolUseCount(*Current,1);
                 return(*Current);
             } else {
-                if (Stream != NULL && GetStreamWarnings(Stream)) {
+                if (Stream != NULL && (*Current)->NumberOfUses > 0 && GetStreamWarnings(Stream)) {
 //----Warning if symbol overloading is not allowed
                     sprintf(DuplicateArity,"Multiple arity symbol %s, arity %d and now %d",
 Name,GetSignatureArity(*Current),Arity);
@@ -288,7 +286,7 @@ Name,GetSignatureArity(*Current),Arity);
         }
 
         if (strcmp(Name,GetSignatureSymbol(*Current)) < 0 ||
-(strcmp(Name,GetSignatureSymbol(*Current)) == 0 && Arity < GetSignatureArity(*Current))) {
+(!strcmp(Name,GetSignatureSymbol(*Current)) && Arity < GetSignatureArity(*Current))) {
             Current = &((*Current)->LastSymbol);
         } else {
             Current = &((*Current)->NextSymbol);
@@ -333,7 +331,7 @@ READFILE Stream) {
 
     String ErrorMessage;
 
-//DEBUG printf("Insert %s/%d\n",Name,Arity);
+//DEBUG printf("Insert %s/%d into %s\n",Name,Arity,TermTypeToString(Type));
     switch (Type) {
         case variable:
             return(InsertIntoSignatureList(&(Signature->Variables),Name,Arity,Stream));

@@ -640,6 +640,8 @@ int VariablesMustBeQuantified) {
     TermType InfixRHSType;
     int DoInfixProcessing;
     char * InfixToken;
+    int SearchNumberOfArguments;
+    SYMBOLNODE FoundSymbol;
 
     Term = NewTerm();
     TypeIfInfix = nonterm;
@@ -844,28 +846,30 @@ Term->Type == nested_fof || Term->Type == nested_cnf || Term->Type == nested_fot
 //----Do nothing
     } else {
 //----Need to note connectives used as terms in THF
+        SearchNumberOfArguments = (Language == tptp_thf ? -1 : NumberOfArguments);
+//DEBUG printf("See if type is known for %s/%d (search %d) currently %s\n",PrefixSymbol,NumberOfArguments,SearchNumberOfArguments,TermTypeToString(Term->Type));
         if (FunctorType == unary_connective || FunctorType == binary_connective ||
 (FunctorType == lower_word && !strcmp(PrefixSymbol,"="))) {
             Term->Type = connective;
-        }
-//----If is known to be a type from type declaration, fix this term type
-        if (Term->Type == predicate && IsSymbolInSignatureList(Context.Signature->Types,
-PrefixSymbol,NumberOfArguments) != NULL) {
-            Term->Type = a_type;
-        }
-//----If is known to be a function from type declaration, fix this term type
-        if (Term->Type == predicate && IsSymbolInSignatureList(Context.Signature->Functions,
-PrefixSymbol,NumberOfArguments) != NULL) {
-            Term->Type = function;
-        }
-//----If is known to be a predicate from type declaration, fix this term type
-        if (Term->Type == function && IsSymbolInSignatureList(Context.Signature->Predicates,
-PrefixSymbol,NumberOfArguments) != NULL) {
-            Term->Type = predicate;
-        }
 //----Numbers and distinct objects are known to be functions
-        if (FunctorType == number || FunctorType == distinct_object) {
+        } else if (FunctorType == number || FunctorType == distinct_object) {
             Term->Type = function;
+//----If is known to be a type from type declaration, fix this term type
+        } else if (IsSymbolInSignatureList(Context.Signature->Types,PrefixSymbol,0) != NULL) {
+            Term->Type = a_type;
+//----If is known to be a function from type declaration, fix this term type
+//----If type is known to be a predicate from type declaration, fix this term type and arity 
+//----(the search might have been done for THF with -1 as "don't care")
+        } else if ((FoundSymbol = IsSymbolInSignatureList(Context.Signature->Functions,PrefixSymbol,
+SearchNumberOfArguments)) != NULL) {
+            Term->Type = function;
+            NumberOfArguments = FoundSymbol->Arity;
+//DEBUG printf("Yes, known function, convert %s to function arity %d\n",PrefixSymbol,NumberOfArguments);
+        } else if ((FoundSymbol = IsSymbolInSignatureList(Context.Signature->Predicates,
+PrefixSymbol,SearchNumberOfArguments)) != NULL) {
+            Term->Type = predicate;
+            NumberOfArguments = FoundSymbol->Arity;
+//DEBUG printf("Yes, known predicate, convert %s to predicate arity %d\n",PrefixSymbol,NumberOfArguments);
         }
 //----Some functions and types might get inserted as predicates here when they appear on the LHS
 //----of a type declaration, but that gets fixed later when the parsing of the declaration is
@@ -1330,9 +1334,12 @@ ConnectiveType LastConnective) {
     FORMULA InfixFormula = NULL;
     ConnectiveType NextConnective;
     String ErrorMessage;
-    SYMBOLNODE * MightHaveToDelete;
+    TermType NewTermType;
+    SYMBOLNODE * ToDeletePtr;
+    char * LHSSymbol;
+    int LHSSymbolArity;
 
-//DEBUG printf("ParseFormula with token %s, allow binary %d\n",CurrentToken(Stream)->NameToken,AllowBinary);
+printf("ParseFormula with token %s, allow binary %d, last connective %s\n",CurrentToken(Stream)->NameToken,AllowBinary,ConnectiveToString(LastConnective));
     switch (CurrentToken(Stream)->KindToken) {
 //----Two types of punctuation - ( for ()ed, [ for tuple
         case punctuation:
@@ -1378,6 +1385,9 @@ VariablesMustBeQuantified);
 //DEBUG printf("check infix with token %s and allow is %d\n",CurrentToken(Stream)->NameToken,AllowBinary);
     if (
 //----THF and TFX allow formulae as arguments of equality 
+// Problem in TFF and THF is that equations between formulae are allowed, so
+// X = Y p(a) is ambiguous. See foo2.p, from DAT013=1.p. How did THF survive?
+// Look for THF example.
 ( AllowInfixEquality &&
   ( Language == tptp_thf || Language == tptp_tff ) && 
   ( CheckToken(Stream,lower_word,"=") || CheckToken(Stream,lower_word,"!=")
@@ -1391,8 +1401,8 @@ VariablesMustBeQuantified);
     )
   ) 
 )  ) {
-//DEBUG printf("do infix because it is %s\n",CurrentToken(Stream)->NameToken);
         NextConnective = StringToConnective(CurrentToken(Stream)->NameToken);
+printf("do infix because connective is %s (last was %s)\n",ConnectiveToString(NextConnective),ConnectiveToString(LastConnective));
 //----If doing an (in)equation, no last connective for associativity
         if (NextConnective == equation || NextConnective == negequation) {
             LastConnective = none;
@@ -1416,56 +1426,52 @@ NextConnective == maparrow) {
                 BinaryFormula->FormulaUnion.BinaryFormula.RHS = ParseFormula(Stream,Language,
 Context,EndOfScope,AllowBinary,1,VariablesMustBeQuantified,NextConnective);
                 if (BinaryFormula->Type == type_declaration) {
-//----If a declaration of a type, move the LHS to Types in signature
+                    LHSSymbol = GetSymbol(BinaryFormula->FormulaUnion.BinaryFormula.LHS->
+FormulaUnion.Atom);
+                    LHSSymbolArity = GetArity(BinaryFormula->FormulaUnion.BinaryFormula.LHS->
+FormulaUnion.Atom);
+//----If a declaration of a type in THF or TFF, move the LHS to Types in signature
                     if (BinaryFormula->FormulaUnion.BinaryFormula.RHS->Type == atom &&
 BinaryFormula->FormulaUnion.BinaryFormula.RHS->FormulaUnion.Atom->Type == a_type &&
 !strcmp("$tType",GetSymbol(BinaryFormula->FormulaUnion.BinaryFormula.RHS->FormulaUnion.Atom))) {
-                        if (IsSymbolInSignatureList(Context.Signature->Types,GetSymbol(
-BinaryFormula->FormulaUnion.BinaryFormula.LHS->FormulaUnion.Atom),0)) {
-                            sprintf(ErrorMessage,"Duplicate type declaration for %s",
-GetSymbol(BinaryFormula->FormulaUnion.BinaryFormula.LHS->FormulaUnion.Atom));
+                        if (IsSymbolInSignatureList(Context.Signature->Types,LHSSymbol,0)) {
+                            sprintf(ErrorMessage,"Duplicate type declaration for %s",LHSSymbol);
                             TokenError(Stream,ErrorMessage);
                             return(NULL);
                         }
                         if (MoveSignatureNode(&(Context.Signature->Predicates),
-&(Context.Signature->Types),GetSymbol(BinaryFormula->FormulaUnion.BinaryFormula.LHS->
-FormulaUnion.Atom),0,Stream) == NULL) {
-                            sprintf(ErrorMessage,"Could not move %s to types",
-GetSymbol(BinaryFormula->FormulaUnion.BinaryFormula.LHS->FormulaUnion.Atom));
+&(Context.Signature->Types),LHSSymbol,0,Stream) == NULL) {
+                            sprintf(ErrorMessage,"Could not move %s to types",LHSSymbol);
                             TokenError(Stream,ErrorMessage);
                             return(NULL);
                         }
+//----In TFF a declared function might have been put in predicates, in both arity might be wrong
                     } else {
-                        if (Language == tptp_tff) {
-//----if function exists with old arity, then decrement count (should delete if zero)
-                            if ((MightHaveToDelete = IsSymbolInSignatureListPointer(
-&(Context.Signature->Functions),
-GetSymbol(BinaryFormula->FormulaUnion.BinaryFormula.LHS->FormulaUnion.Atom),
-GetArity(BinaryFormula->FormulaUnion.BinaryFormula.LHS->FormulaUnion.Atom))) != NULL) {
-                                IncreaseSymbolUseCount(*MightHaveToDelete,-1);
-//----else if predicate exists with old arity decrement count (should delete if zero)
-                            } else if ((MightHaveToDelete = IsSymbolInSignatureListPointer(
-&(Context.Signature->Predicates),
-GetSymbol(BinaryFormula->FormulaUnion.BinaryFormula.LHS->FormulaUnion.Atom),
-GetArity(BinaryFormula->FormulaUnion.BinaryFormula.LHS->FormulaUnion.Atom))) != NULL) {
-//----Decrement use with old arity in either list, if zero then remove node
-                                IncreaseSymbolUseCount(*MightHaveToDelete,-1);
-                            }
-//----If needs to be a function (might have been inserted as predicate in TFF)
-                            if (
-GetResultFromTyping(Stream,BinaryFormula->FormulaUnion.BinaryFormula.RHS)->Type != atom || 
- strcmp("$o",GetSymbol(GetResultFromTyping(Stream,BinaryFormula->FormulaUnion.BinaryFormula.RHS)->
-FormulaUnion.Atom))) {
-//----Insert into functions
-                                InsertIntoSignatureList(&(Context.Signature->Functions),
-GetSymbol(BinaryFormula->FormulaUnion.BinaryFormula.LHS->FormulaUnion.Atom),
-GetArityFromTyping(Stream,BinaryFormula->FormulaUnion.BinaryFormula.RHS),Stream);
+//----Decrement count of old version that might be in the wrong place with the wrong arity
+                        IncreaseSymbolUseCount(BinaryFormula->FormulaUnion.BinaryFormula.LHS->
+FormulaUnion.Atom->TheSymbol.NonVariable,-1);
+                        if (BinaryFormula->FormulaUnion.BinaryFormula.LHS->
+FormulaUnion.Atom->TheSymbol.NonVariable->NumberOfUses == 0) {
+                            if ((ToDeletePtr = IsSymbolInSignatureListPointer(
+&(Context.Signature->Functions),LHSSymbol,LHSSymbolArity)) != NULL ||
+(ToDeletePtr = IsSymbolInSignatureListPointer(&(Context.Signature->Predicates),
+LHSSymbol,LHSSymbolArity)) != NULL) {
+                                RemoveSignatureNodeFromTree(ToDeletePtr);
                             } else {
-                                InsertIntoSignatureList(&(Context.Signature->Predicates),
-GetSymbol(BinaryFormula->FormulaUnion.BinaryFormula.LHS->FormulaUnion.Atom),
-GetArityFromTyping(Stream,BinaryFormula->FormulaUnion.BinaryFormula.RHS),Stream);
+                                sprintf(ErrorMessage,
+"Could not find %s/%d in function or predicates",LHSSymbol,LHSSymbolArity);
+                                CodingError(ErrorMessage);
+                                return(NULL);
                             }
                         }
+                        NewTermType = (GetResultFromTyping(Stream,BinaryFormula->
+FormulaUnion.BinaryFormula.RHS)->Type != atom || strcmp("$o",GetSymbol(GetResultFromTyping(
+Stream,BinaryFormula->FormulaUnion.BinaryFormula.RHS)->FormulaUnion.Atom))) ? function : predicate;
+//----Insert and assign correct version
+//DEBUG printf("Fix %s to be a %s of arity %d\n",LHSSymbol,TermTypeToString(NewTermType),GetArityFromTyping(Stream,BinaryFormula->FormulaUnion.BinaryFormula.RHS));
+                        BinaryFormula->FormulaUnion.BinaryFormula.LHS->FormulaUnion.Atom->
+TheSymbol.NonVariable = InsertIntoSignature(Context.Signature,NewTermType,LHSSymbol,
+GetArityFromTyping(Stream,BinaryFormula->FormulaUnion.BinaryFormula.RHS),Stream);
                     }
                 }
 //----Hack to fix negated infix equality

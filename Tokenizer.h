@@ -15,8 +15,9 @@ int GetNeedForNonLogicTokens(void);
 void SetNeedForNonLogicTokens(int OnOff);
 int GetStreamNeedForNonLogicTokens(READFILE Stream);
 int GetWarnings(void);
-void SetWarnings(int GiveWarnings);
+int SetWarnings(int GiveWarnings);
 int GetStreamWarnings(READFILE Stream);
+int SetStreamWarnings(READFILE Stream,int GiveWarnings);
 int EndFile(TOKEN CurrentToken);
 
 int Character(READFILE CurrentFile,int Operation);
