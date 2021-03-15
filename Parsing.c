@@ -817,7 +817,7 @@ printf("SHOULD NOT GET HERE UNLESS IN NON-LOGICAL DATA\n");
             VariableQuantifier = free_variable;
         }
     } else {
-//DEBUG printf("Not doing infix now, after %s\n",CurrentToken(Stream)->NameToken);
+//DEBUG printf("Not doing infix now, at %s\n",CurrentToken(Stream)->NameToken);
         InfixRHSType = nonterm;
 //----Cannot have a variable if a predicate was expected, unless in a typed
 //----language, where variables can be types in polymorphic cases.
@@ -1332,14 +1332,14 @@ ConnectiveType LastConnective) {
     FORMULA Formula = NULL;
     FORMULA BinaryFormula = NULL;
     FORMULA InfixFormula = NULL;
-    ConnectiveType NextConnective;
+    ConnectiveType ThisConnective;
     String ErrorMessage;
     TermType NewTermType;
     SYMBOLNODE * ToDeletePtr;
     char * LHSSymbol;
     int LHSSymbolArity;
 
-printf("ParseFormula with token %s, allow binary %d, last connective %s\n",CurrentToken(Stream)->NameToken,AllowBinary,ConnectiveToString(LastConnective));
+//DEBUG printf("ParseFormula with token %s, allow binary %d, last connective %s\n",CurrentToken(Stream)->NameToken,AllowBinary,ConnectiveToString(LastConnective));
     switch (CurrentToken(Stream)->KindToken) {
 //----Two types of punctuation - ( for ()ed, [ for tuple
         case punctuation:
@@ -1381,50 +1381,60 @@ VariablesMustBeQuantified);
             break;
     }
 
+//----Check for an equality
+//DEBUG printf("check equality with token %s and allow is %d\n",CurrentToken(Stream)->NameToken,AllowInfixEquality);
+    if (AllowInfixEquality && ( Language == tptp_thf || Language == tptp_tff ) && 
+(CheckToken(Stream,lower_word,"=") || CheckToken(Stream,lower_word,"!="))) {
+        BinaryFormula = NewFormula();
+        BinaryFormula->Type = binary;
+        BinaryFormula->FormulaUnion.BinaryFormula.LHS = Formula;
+        ThisConnective = StringToConnective(CurrentToken(Stream)->NameToken);
+        BinaryFormula->FormulaUnion.BinaryFormula.Connective = ThisConnective;
+        NextToken(Stream);
+        BinaryFormula->FormulaUnion.BinaryFormula.RHS = ParseFormula(Stream,Language,
+Context,EndOfScope,0,0,VariablesMustBeQuantified,ThisConnective);
+//----Hack to fix negated infix equality
+        if (ThisConnective == negequation) {
+            InfixFormula = NewFormula();
+            InfixFormula->Type = unary;
+            InfixFormula->FormulaUnion.UnaryFormula.Connective = negation;
+            BinaryFormula->FormulaUnion.BinaryFormula.Connective = equation;
+            InfixFormula->FormulaUnion.UnaryFormula.Formula = BinaryFormula;
+            BinaryFormula = InfixFormula;
+        }
+        Formula = BinaryFormula;
+    }
+
 //----Check for a binary formula
 //DEBUG printf("check infix with token %s and allow is %d\n",CurrentToken(Stream)->NameToken,AllowBinary);
     if (
 //----THF and TFX allow formulae as arguments of equality 
-// Problem in TFF and THF is that equations between formulae are allowed, so
-// X = Y p(a) is ambiguous. See foo2.p, from DAT013=1.p. How did THF survive?
-// Look for THF example.
-( AllowInfixEquality &&
-  ( Language == tptp_thf || Language == tptp_tff ) && 
-  ( CheckToken(Stream,lower_word,"=") || CheckToken(Stream,lower_word,"!=")
-  )
-) ||
-( AllowBinary &&
-  ( CheckTokenType(Stream,binary_connective) ||
+AllowBinary &&
+( CheckTokenType(Stream,binary_connective) ||
 //----THF and TFF have types. Should this be allowed independent of AllowBinary?
-    ( ( Language == tptp_thf || Language == tptp_tff  || Language == tptp_tcf ) &&
-      CheckToken(Stream,punctuation,":")
-    )
-  ) 
-)  ) {
-        NextConnective = StringToConnective(CurrentToken(Stream)->NameToken);
-printf("do infix because connective is %s (last was %s)\n",ConnectiveToString(NextConnective),ConnectiveToString(LastConnective));
-//----If doing an (in)equation, no last connective for associativity
-        if (NextConnective == equation || NextConnective == negequation) {
-            LastConnective = none;
-        }
-        if (LastConnective == none || (Associative(NextConnective) &&
-LastConnective == NextConnective)) {
-            if ((LastConnective == none && !LeftAssociative(NextConnective)) || 
-RightAssociative(NextConnective)) {
+  ( ( Language == tptp_thf || Language == tptp_tff  || Language == tptp_tcf ) &&
+    CheckToken(Stream,punctuation,":")
+  ) ) ) {
+        ThisConnective = StringToConnective(CurrentToken(Stream)->NameToken);
+//DEBUG printf("do infix because connective is %s (last was %s)\n",ConnectiveToString(ThisConnective),ConnectiveToString(LastConnective));
+        if (LastConnective == none || (Associative(ThisConnective) &&
+LastConnective == ThisConnective)) {
+            if ((LastConnective == none && !LeftAssociative(ThisConnective)) || 
+RightAssociative(ThisConnective)) {
                 BinaryFormula = NewFormula();
-                BinaryFormula->Type = NextConnective == assignmentsym ?  assignment : 
-NextConnective == typecolon ? type_declaration : binary;
+                BinaryFormula->Type = ThisConnective == assignmentsym ?  assignment : 
+ThisConnective == typecolon ? type_declaration : binary;
                 BinaryFormula->FormulaUnion.BinaryFormula.LHS = Formula;
-                BinaryFormula->FormulaUnion.BinaryFormula.Connective = NextConnective;
+                BinaryFormula->FormulaUnion.BinaryFormula.Connective = ThisConnective;
 //----For some things set the connective to "none" because ()s are not needed.
-                if (NextConnective == subtype || NextConnective == typecolon || 
-NextConnective == maparrow) {
-                    NextConnective = none;
+                if (ThisConnective == subtype || ThisConnective == typecolon || 
+ThisConnective == maparrow) {
+                    ThisConnective = none;
                 }
 //----There are many different connectives here, so cannot "AcceptToken"
                 NextToken(Stream);
                 BinaryFormula->FormulaUnion.BinaryFormula.RHS = ParseFormula(Stream,Language,
-Context,EndOfScope,AllowBinary,1,VariablesMustBeQuantified,NextConnective);
+Context,EndOfScope,AllowBinary,1,VariablesMustBeQuantified,ThisConnective);
                 if (BinaryFormula->Type == type_declaration) {
                     LHSSymbol = GetSymbol(BinaryFormula->FormulaUnion.BinaryFormula.LHS->
 FormulaUnion.Atom);
@@ -1474,44 +1484,34 @@ TheSymbol.NonVariable = InsertIntoSignature(Context.Signature,NewTermType,LHSSym
 GetArityFromTyping(Stream,BinaryFormula->FormulaUnion.BinaryFormula.RHS),Stream);
                     }
                 }
-//----Hack to fix negated infix equality
-                if (BinaryFormula->FormulaUnion.BinaryFormula.Connective == negequation) {
-                    InfixFormula = NewFormula();
-                    InfixFormula->Type = unary;
-                    InfixFormula->FormulaUnion.UnaryFormula.Connective = negation;
-                    BinaryFormula->FormulaUnion.BinaryFormula.Connective = equation;
-                    InfixFormula->FormulaUnion.UnaryFormula.Formula = BinaryFormula;
-                    BinaryFormula = InfixFormula;
-                }
 //----If finished a binary, still need to allow another binary of low 
 //----precedence, right now that's :=
                 return(ParseLowPrecedenceBinary(Stream,Language,Context,
 EndOfScope,1,AllowInfixEquality,VariablesMustBeQuantified,BinaryFormula));
-            } else if (LeftAssociative(NextConnective)) {
-                while (LastConnective == none || LastConnective == NextConnective) {
+            } else if (LeftAssociative(ThisConnective)) {
+                while (LastConnective == none || LastConnective == ThisConnective) {
                     BinaryFormula = NewFormula();
-                    BinaryFormula->Type = NextConnective == assignmentsym ? assignment : binary;
+                    BinaryFormula->Type = ThisConnective == assignmentsym ? assignment : binary;
                     BinaryFormula->FormulaUnion.BinaryFormula.LHS = Formula;
-                    BinaryFormula->FormulaUnion.BinaryFormula.Connective = NextConnective;
+                    BinaryFormula->FormulaUnion.BinaryFormula.Connective = ThisConnective;
 //----Only binary connectives are left associative, so I can "AcceptToken"
                     AcceptTokenType(Stream,binary_connective);
                     BinaryFormula->FormulaUnion.BinaryFormula.RHS = ParseFormula(Stream,Language,
-Context,EndOfScope,0,1,VariablesMustBeQuantified,NextConnective);
+Context,EndOfScope,0,1,VariablesMustBeQuantified,ThisConnective);
                     Formula = BinaryFormula;
-                    LastConnective = NextConnective;
+                    LastConnective = ThisConnective;
 //----Check if we should continue a stream of binary. If a binary connective
 //----then keep it and the while loop will check, else nope.
                     if (CheckTokenType(Stream,binary_connective)) {
-                        NextConnective = StringToConnective(
-CurrentToken(Stream)->NameToken);
+                        ThisConnective = StringToConnective(CurrentToken(Stream)->NameToken);
                     } else {
-                        NextConnective = none;
+                        ThisConnective = none;
                     }
                 }
 //----If finished a binary, still need to allow another binary of low 
 //----precedence, right now that's :=
-                return(ParseLowPrecedenceBinary(Stream,Language,Context,
-EndOfScope,1,AllowInfixEquality,VariablesMustBeQuantified,BinaryFormula));
+                return(ParseLowPrecedenceBinary(Stream,Language,Context,EndOfScope,1,
+AllowInfixEquality,VariablesMustBeQuantified,BinaryFormula));
             } else if (LastConnective != none) {
                 CodingError("Association neither left nor right");
                 return(NULL);

@@ -649,6 +649,9 @@ char * ConnectiveToString(ConnectiveType Connective) {
         case gentzenarrow:
             return("-->");
             break;
+        case brackets:
+            return("()");
+            break;
         case none:
             return("none");
             break;

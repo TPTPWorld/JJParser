@@ -169,20 +169,6 @@ void PrintSpaces(PRINTFILE Stream,int Spaces) {
     }
 }
 //-------------------------------------------------------------------------------------------------
-int PositiveEquality(TERM Atom) {
-
-    return(!strcmp(GetSymbol(Atom),"=") && GetArity(Atom) == 2);
-}
-//-------------------------------------------------------------------------------------------------
-int NegatedEquality(FORMULA Formula) {
-
-    return(Formula->Type == unary && 
-Formula->FormulaUnion.UnaryFormula.Connective == negation &&
-Formula->FormulaUnion.UnaryFormula.Formula->Type == atom &&
-PositiveEquality(Formula->FormulaUnion.UnaryFormula.Formula->
-FormulaUnion.Atom));
-}
-//-------------------------------------------------------------------------------------------------
 void PrintFileTSTPTerm(PRINTFILE Stream,SyntaxType Language,TERM Term,int Indent,
 int TSTPSyntaxFlag) {
 
@@ -193,7 +179,7 @@ int TSTPSyntaxFlag) {
 
 //----All THF and TFF (because of TFX) terms are formulae
     if ((Language == tptp_thf || Language == tptp_tff) && Term->Type == formula) {
-        PrintFileTSTPFormula(Stream,tptp_thf,Term->TheSymbol.Formula,0,0,outermost,1);
+        PrintFileTSTPFormula(Stream,tptp_thf,Term->TheSymbol.Formula,0,1,outermost,1);
 //----Check if a nested formula - no symbol
     } else if (Term->Type == nested_thf) {
         PFprintf(Stream,"$thf(");
@@ -377,20 +363,30 @@ int LiteralFormula(FORMULA Formula) {
  LiteralFormula(Formula->FormulaUnion.UnaryFormula.Formula)));
 }
 //-------------------------------------------------------------------------------------------------
+int PositiveEquality(TERM Atom) {
+
+    return(!strcmp(GetSymbol(Atom),"=") && GetArity(Atom) == 2);
+}
+//-------------------------------------------------------------------------------------------------
+int NegatedEquality(FORMULA Formula) {
+
+    return(Formula->Type == unary && 
+Formula->FormulaUnion.UnaryFormula.Connective == negation &&
+Formula->FormulaUnion.UnaryFormula.Formula->Type == atom &&
+PositiveEquality(Formula->FormulaUnion.UnaryFormula.Formula->FormulaUnion.Atom));
+}
+//-------------------------------------------------------------------------------------------------
 int NegatedEquation(FORMULA Formula,FORMULA * LHS,FORMULA * RHS) {
 
     if (Formula->Type == unary && 
 Formula->FormulaUnion.UnaryFormula.Connective == negation && 
 Formula->FormulaUnion.UnaryFormula.Formula->Type == binary && 
-Formula->FormulaUnion.UnaryFormula.Formula->
-FormulaUnion.BinaryFormula.Connective == equation) {
+Formula->FormulaUnion.UnaryFormula.Formula->FormulaUnion.BinaryFormula.Connective == equation) {
         if (LHS != NULL) {
-            *LHS = Formula->FormulaUnion.UnaryFormula.Formula->
-FormulaUnion.BinaryFormula.LHS;
+            *LHS = Formula->FormulaUnion.UnaryFormula.Formula->FormulaUnion.BinaryFormula.LHS;
         }
         if (RHS != NULL) {
-            *RHS = Formula->FormulaUnion.UnaryFormula.Formula->
-FormulaUnion.BinaryFormula.RHS;
+            *RHS = Formula->FormulaUnion.UnaryFormula.Formula->FormulaUnion.BinaryFormula.RHS;
         }
         return(1);
     } else {
@@ -400,8 +396,7 @@ FormulaUnion.BinaryFormula.RHS;
 //-------------------------------------------------------------------------------------------------
 int Equation(FORMULA Formula,FORMULA * LHS,FORMULA * RHS) {
 
-    if (Formula->Type == binary &&
-Formula->FormulaUnion.BinaryFormula.Connective == equation) {
+    if (Formula->Type == binary && Formula->FormulaUnion.BinaryFormula.Connective == equation) {
         if (LHS != NULL) {
             *LHS = Formula->FormulaUnion.BinaryFormula.LHS;
         }
@@ -654,8 +649,8 @@ FormulaUnion.QuantifiedFormula.Formula,Indent,Pretty,none,TSTPSyntaxFlag);
             case type_declaration:
                 Connective = Formula->FormulaUnion.BinaryFormula.Connective;
 //----No brackets for sequences of associative formulae and top level
-                if (LastConnective == outermost ||
-(Connective == LastConnective && Associative(Connective))) {
+                if (LastConnective == outermost || Connective == equation || 
+Connective == negequation || (Connective == LastConnective && Associative(Connective))) {
                     NeedBrackets = 0;
                     ConnectiveIndent = Indent - strlen(ConnectiveToString(Connective)) - 1;
                 } else {
@@ -676,8 +671,7 @@ FormulaUnion.QuantifiedFormula.Formula,Indent,Pretty,none,TSTPSyntaxFlag);
 !FullyAssociative(Connective) && SideFormula->Type == binary &&
 RightAssociative(SideFormula->FormulaUnion.BinaryFormula.Connective)) ||
 //----And for non-simple equations
-((Connective == equation || Connective == negequation) && 
-!SymbolFormula(SideFormula))) {
+((Connective == equation || Connective == negequation) && !SymbolFormula(SideFormula))) {
 //----tptp2X needs them for literals too (sad - the BNF does not)
 //    !LiteralFormula(SideFormula))) {
                     FakeConnective = brackets;
@@ -737,9 +731,11 @@ TSTPSyntaxFlag);
                     PrintFileTSTPFormula(Stream,Language,Formula->FormulaUnion.UnaryFormula.Formula,
 Indent,Pretty,LastConnective,TSTPSyntaxFlag);
                 } else {
-                    if (Equation(Formula->FormulaUnion.UnaryFormula.Formula,
-NULL,NULL) || NegatedEquation(Formula->FormulaUnion.UnaryFormula.Formula,
-NULL,NULL) || NegatedEquality(Formula->FormulaUnion.UnaryFormula.Formula)) {
+                    if (
+!SymbolFormula(Formula->FormulaUnion.UnaryFormula.Formula) ||
+Equation(Formula->FormulaUnion.UnaryFormula.Formula,NULL,NULL) || 
+NegatedEquation(Formula->FormulaUnion.UnaryFormula.Formula,NULL,NULL) || 
+NegatedEquality(Formula->FormulaUnion.UnaryFormula.Formula)) {
                         FakeConnective = brackets;
                     } else {
                         FakeConnective = none;
@@ -759,15 +755,13 @@ Formula->FormulaUnion.UnaryFormula.Connective)));
                     }
                     Indent += 2;
 //----If not pretty add extra ()s around negated formula
-                    if (!SymbolFormula(Formula->FormulaUnion.UnaryFormula.Formula) && 
-(!Pretty || FakeConnective == brackets)) {
+                    if (!Pretty || FakeConnective == brackets) {
                         PFprintf(Stream,"( ");
                         Indent +=2;
                     }
-                    PrintFileTSTPFormula(Stream,Language,Formula->
-FormulaUnion.UnaryFormula.Formula,Indent,Pretty,none,TSTPSyntaxFlag);
-                    if (!SymbolFormula(Formula->FormulaUnion.UnaryFormula.Formula) && 
-(!Pretty || FakeConnective == brackets)) {
+                    PrintFileTSTPFormula(Stream,Language,Formula->FormulaUnion.UnaryFormula.Formula,
+Indent,Pretty,none,TSTPSyntaxFlag);
+                    if (!Pretty || FakeConnective == brackets) {
                         PFprintf(Stream," )");
                     }
                     if (LastConnective == brackets) {

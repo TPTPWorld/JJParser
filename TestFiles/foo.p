@@ -1,5 +1,5 @@
-thf(p_type,type,p : $o).
-thf(an,axiom,! [X: $int] : ((X = Y) | p)).
+tff(p_type,type,p : $o).
+tff(an,axiom,! [X: $int,Y: $int] : (X = (Y => Y) | p)).
 
 % tff(f_def,type,f: [$int] > [$int]).
 % tff(p_def,type,p: [$int] > $o).
