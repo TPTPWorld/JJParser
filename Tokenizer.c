@@ -652,6 +652,9 @@ char * ConnectiveToString(ConnectiveType Connective) {
         case brackets:
             return("()");
             break;
+        case outermost:
+            return("outermost");
+            break;
         case none:
             return("none");
             break;

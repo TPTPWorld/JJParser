@@ -1,5 +1,17 @@
-tff(p_type,type,p : $o).
-tff(an,axiom,! [X: $int,Y: $int] : (X = (Y => Y) | p)).
+tff(12,axiom,(
+    q($true | $false) )).
+
+% tff(cA,type,(
+%     cA: $o )).
+% 
+% tff(cC,type,(
+%     cC: $o > $o )).
+% 
+% tff(cEXT2,conjecture,
+%    ~ ~ cA ).
+
+% tff(p_type,type,p : $o).
+% tff(an,axiom,! [X: $int,Y: $int] : (X = (Y => Y) | p)).
 
 % tff(f_def,type,f: [$int] > [$int]).
 % tff(p_def,type,p: [$int] > $o).
