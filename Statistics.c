@@ -111,80 +111,50 @@ void InitializeStatistics(StatisticsType * Statistics) {
 void AddOnConnectiveStatistics(ConnectiveStatisticsType *
 ConnectiveStatistics,ConnectiveStatisticsType MoreConnectiveStatistics) {
 
-    ConnectiveStatistics->NumberOfConnectives += 
-MoreConnectiveStatistics.NumberOfConnectives;
+    ConnectiveStatistics->NumberOfConnectives += MoreConnectiveStatistics.NumberOfConnectives;
     ConnectiveStatistics->NumberOfTypeConnectives += 
 MoreConnectiveStatistics.NumberOfTypeConnectives;
 
 //----Only THF connectives
-    ConnectiveStatistics->NumberOfPis += 
-MoreConnectiveStatistics.NumberOfPis;
-    ConnectiveStatistics->NumberOfSigmas += 
-MoreConnectiveStatistics.NumberOfSigmas;
-    ConnectiveStatistics->NumberOfChoices += 
-MoreConnectiveStatistics.NumberOfChoices;
-    ConnectiveStatistics->NumberOfDescriptions += 
-MoreConnectiveStatistics.NumberOfDescriptions;
-    ConnectiveStatistics->NumberOfApplications += 
-MoreConnectiveStatistics.NumberOfApplications;
-    ConnectiveStatistics->NumberOfEquations += 
-MoreConnectiveStatistics.NumberOfEquations;
-    ConnectiveStatistics->NumberOfTypedEquations += 
-MoreConnectiveStatistics.NumberOfTypedEquations;
-    ConnectiveStatistics->NumberOfMaparrows += 
-MoreConnectiveStatistics.NumberOfMaparrows;
-    ConnectiveStatistics->NumberOfXprods += 
-MoreConnectiveStatistics.NumberOfXprods;
-    ConnectiveStatistics->NumberOfUnions += 
-MoreConnectiveStatistics.NumberOfUnions;
-    ConnectiveStatistics->NumberOfLambdas += 
-MoreConnectiveStatistics.NumberOfLambdas;
+    ConnectiveStatistics->NumberOfPis += MoreConnectiveStatistics.NumberOfPis;
+    ConnectiveStatistics->NumberOfSigmas += MoreConnectiveStatistics.NumberOfSigmas;
+    ConnectiveStatistics->NumberOfChoices += MoreConnectiveStatistics.NumberOfChoices;
+    ConnectiveStatistics->NumberOfDescriptions += MoreConnectiveStatistics.NumberOfDescriptions;
+    ConnectiveStatistics->NumberOfApplications += MoreConnectiveStatistics.NumberOfApplications;
+    ConnectiveStatistics->NumberOfEquations += MoreConnectiveStatistics.NumberOfEquations;
+    ConnectiveStatistics->NumberOfTypedEquations += MoreConnectiveStatistics.NumberOfTypedEquations;
+    ConnectiveStatistics->NumberOfMaparrows += MoreConnectiveStatistics.NumberOfMaparrows;
+    ConnectiveStatistics->NumberOfXprods += MoreConnectiveStatistics.NumberOfXprods;
+    ConnectiveStatistics->NumberOfUnions += MoreConnectiveStatistics.NumberOfUnions;
+    ConnectiveStatistics->NumberOfLambdas += MoreConnectiveStatistics.NumberOfLambdas;
 
 //----Only TFF
-    ConnectiveStatistics->NumberOfSubtypes += 
-MoreConnectiveStatistics.NumberOfSubtypes;
+    ConnectiveStatistics->NumberOfSubtypes += MoreConnectiveStatistics.NumberOfSubtypes;
 
 //----Not for CNF
-    ConnectiveStatistics->NumberOfNegations += 
-MoreConnectiveStatistics.NumberOfNegations;
-    ConnectiveStatistics->NumberOfDisjunctions += 
-MoreConnectiveStatistics.NumberOfDisjunctions;
-    ConnectiveStatistics->NumberOfConjunctions += 
-MoreConnectiveStatistics.NumberOfConjunctions;
-    ConnectiveStatistics->NumberOfEquivalences += 
-MoreConnectiveStatistics.NumberOfEquivalences;
-    ConnectiveStatistics->NumberOfImplications += 
-MoreConnectiveStatistics.NumberOfImplications;
+    ConnectiveStatistics->NumberOfNegations += MoreConnectiveStatistics.NumberOfNegations;
+    ConnectiveStatistics->NumberOfDisjunctions += MoreConnectiveStatistics.NumberOfDisjunctions;
+    ConnectiveStatistics->NumberOfConjunctions += MoreConnectiveStatistics.NumberOfConjunctions;
+    ConnectiveStatistics->NumberOfEquivalences += MoreConnectiveStatistics.NumberOfEquivalences;
+    ConnectiveStatistics->NumberOfImplications += MoreConnectiveStatistics.NumberOfImplications;
     ConnectiveStatistics->NumberOfReverseImplications += 
 MoreConnectiveStatistics.NumberOfReverseImplications;
-    ConnectiveStatistics->NumberOfXors += 
-MoreConnectiveStatistics.NumberOfXors;
-    ConnectiveStatistics->NumberOfNors += 
-MoreConnectiveStatistics.NumberOfNors;
-    ConnectiveStatistics->NumberOfNands += 
-MoreConnectiveStatistics.NumberOfNands;
-    ConnectiveStatistics->NumberOfUniversals += 
-MoreConnectiveStatistics.NumberOfUniversals;
-    ConnectiveStatistics->NumberOfExistentials += 
-MoreConnectiveStatistics.NumberOfExistentials;
-    ConnectiveStatistics->NumberOfPiBinders +=
-MoreConnectiveStatistics.NumberOfPiBinders;
-    ConnectiveStatistics->NumberOfSigmaBinders +=
-MoreConnectiveStatistics.NumberOfSigmaBinders;
+    ConnectiveStatistics->NumberOfXors += MoreConnectiveStatistics.NumberOfXors;
+    ConnectiveStatistics->NumberOfNors += MoreConnectiveStatistics.NumberOfNors;
+    ConnectiveStatistics->NumberOfNands += MoreConnectiveStatistics.NumberOfNands;
+    ConnectiveStatistics->NumberOfUniversals += MoreConnectiveStatistics.NumberOfUniversals;
+    ConnectiveStatistics->NumberOfExistentials += MoreConnectiveStatistics.NumberOfExistentials;
+    ConnectiveStatistics->NumberOfPiBinders += MoreConnectiveStatistics.NumberOfPiBinders;
+    ConnectiveStatistics->NumberOfSigmaBinders += MoreConnectiveStatistics.NumberOfSigmaBinders;
     ConnectiveStatistics->NumberOfDescriptionBinders +=
 MoreConnectiveStatistics.NumberOfDescriptionBinders;
-    ConnectiveStatistics->NumberOfChoiceBinders +=
-MoreConnectiveStatistics.NumberOfChoiceBinders;
+    ConnectiveStatistics->NumberOfChoiceBinders += MoreConnectiveStatistics.NumberOfChoiceBinders;
 
-    ConnectiveStatistics->NumberOfTypedVariables +=
-MoreConnectiveStatistics.NumberOfTypedVariables;
+    ConnectiveStatistics->NumberOfTypedVariables += MoreConnectiveStatistics.NumberOfTypedVariables;
     ConnectiveStatistics->NumberOfDefinedVariables +=
 MoreConnectiveStatistics.NumberOfDefinedVariables;
-    ConnectiveStatistics->NumberOfMathVariables +=
-MoreConnectiveStatistics.NumberOfMathVariables;
-    ConnectiveStatistics->NumberOfGlobalTypeDecs +=
-MoreConnectiveStatistics.NumberOfGlobalTypeDecs;
-    ConnectiveStatistics->NumberOfGlobalDefns +=
-MoreConnectiveStatistics.NumberOfGlobalDefns;
+    ConnectiveStatistics->NumberOfMathVariables += MoreConnectiveStatistics.NumberOfMathVariables;
+    ConnectiveStatistics->NumberOfGlobalTypeDecs += MoreConnectiveStatistics.NumberOfGlobalTypeDecs;
+    ConnectiveStatistics->NumberOfGlobalDefns += MoreConnectiveStatistics.NumberOfGlobalDefns;
 }
 //-------------------------------------------------------------------------------------------------

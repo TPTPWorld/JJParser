@@ -1031,9 +1031,9 @@ EndOfScope,0,0,VariablesMustBeQuantified,none);
     return(Formula);
 }
 //-------------------------------------------------------------------------------------------------
-void ParseQuantifiedVariable(READFILE Stream,SyntaxType Language,
-ContextType Context,VARIABLENODE * EndOfScope,ConnectiveType Quantifier,
-int VariablesMustBeQuantified,QuantifiedFormulaType * QuantifiedFormula) {
+void ParseQuantifiedVariable(READFILE Stream,SyntaxType Language,ContextType Context,
+VARIABLENODE * EndOfScope,ConnectiveType Quantifier,int VariablesMustBeQuantified,
+QuantifiedFormulaType * QuantifiedFormula) {
 
     if (QuantifiedFormula->Quantifier == existential && CheckTokenType(Stream,number)) {
         QuantifiedFormula->ExistentialCount = atoi(CurrentToken(Stream)->NameToken);
@@ -1046,12 +1046,12 @@ int VariablesMustBeQuantified,QuantifiedFormulaType * QuantifiedFormula) {
 //----Get the variable. The EndOfScope is extended to include this variable.
     QuantifiedFormula->Variable =
 ParseTerm(Stream,Language,Context,EndOfScope,new_variable,Quantifier,NULL,0);
-//----Variable type
-//----For THF0 require type, TFF optional type
-    if (Language == tptp_thf || Language == tptp_tff) {
+//----THF requires type
+    if (Language == tptp_thf) {
         AcceptToken(Stream,punctuation,":");
         QuantifiedFormula->VariableType = ParseFormula(Stream,Language,Context,EndOfScope,-1,1,
 VariablesMustBeQuantified,none);
+//----TFF optional type
     } else if ((Language == tptp_tff || Language == tptp_tcf) && 
 CheckToken(Stream,punctuation,":")) {
         AcceptToken(Stream,punctuation,":");

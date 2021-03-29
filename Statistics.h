@@ -12,32 +12,39 @@ typedef enum {
     cnf_nodes,
     leaves,
 //----For CNF problems
-    count_horn_clauses,
-    count_rr_clauses,
+    horn_clauses,
+    rr_clauses,
 
 //----General
+//----Whole annotated formulae
     unit_formulae,
     type_formulae,
     defn_formulae,
     sequent_formulae,
+//----Within formulae
     atoms,
     equality_atoms,
     variable_atoms,
     literal_count,
     terms,
-    count_variables,
-    count_singletons,
+    tuples,
+    variables,
+    singletons,
     // count_math_variables,
-    count_formula_depth,
-    count_term_depth,
+    ite_formulae,
+    let_formulae,
+    boolean_terms, //----Not including boolean variables
+    boolean_variables,
+    formula_depth,
+    term_depth,
     count_nothing
 } CountType;
 
 typedef enum {
     depth,
     literals,
-    term_depth,
-    formula_depth,
+    max_term_depth,
+    max_formula_depth,
     maximize_nothing
 } MaximizeType;
 
@@ -141,8 +148,7 @@ typedef struct {
 void InitializeStatistics(StatisticsType * Statistics);
 void InitializeFormulaStatistics(FormulaStatisticsType * FormulaStatistics);
 void InitializeSymbolStatistics(SymbolStatisticsType * SymbolStatistics);
-void InitializeConnectiveStatistics(ConnectiveStatisticsType * 
-ConnectiveStatistics);
+void InitializeConnectiveStatistics(ConnectiveStatisticsType * ConnectiveStatistics);
 void AddOnConnectiveStatistics(ConnectiveStatisticsType * ConnectiveStatistics,
 ConnectiveStatisticsType MoreConnectiveStatistics);
 //-------------------------------------------------------------------------------------------------
