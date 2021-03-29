@@ -5,13 +5,13 @@
 //----Types for file and token handling
 typedef enum {
     punctuation,
+    quantifier,
+    unary_connective,
+    binary_connective,
     number,
     distinct_object,
     lower_word,
     upper_word,
-    quantifier,
-    unary_connective,
-    binary_connective,
 //----Token groups
     predicate_symbol,
     functor,
@@ -152,8 +152,6 @@ typedef enum {
     function,
     a_type,
     variable,
-//    ite_term,
-//    let_term,
     nested_thf,
     nested_tff,
     nested_tcf,
@@ -169,18 +167,6 @@ typedef enum {
     nonterm
 } TermType;
 
-typedef struct {
-    struct FormulaTypetag * Condition;
-    struct TermNodeTag * TermIfTrue;
-    struct TermNodeTag * TermIfFalse;
-} ConditionalTermType;
-
-typedef struct {
-    struct FormulaTypetag * LetTypes;
-    struct FormulaTypetag * LetDefn;
-    struct TermNodeTag * LetBody;
-} LetTermType;
-
 typedef union {
     SYMBOLNODE NonVariable;
     VARIABLENODE Variable;
@@ -188,8 +174,6 @@ typedef union {
     struct TermWithVariablesTag * NestedTerm;
 //----For nested THF and TFX formulae
     struct FormulaTypetag * Formula;
-    ConditionalTermType ConditionalTerm;
-    LetTermType LetTerm;
 } TERMNODE;
 
 typedef struct TermNodeTag {
@@ -269,9 +253,9 @@ typedef union {
     QuantifiedFormulaType QuantifiedFormula;
     BinaryFormulaType BinaryFormula;
     UnaryFormulaType UnaryFormula;
-    TERM Atom;
     ConditionalFormulaType ConditionalFormula;
     LetFormulaType LetFormula;
+    TERM Atom;
 } FormulaUnionType;
 
 typedef struct FormulaTypetag {
