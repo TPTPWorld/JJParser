@@ -80,10 +80,10 @@ AnnotatedFormula,"");
             case terms:
                 Counter = CountAnnotatedFormulaTerms(Tree->AnnotatedFormula);
                 break;
-            case count_formula_depth:
+            case formula_depth:
                 Counter = AnnotatedFormulaDepth(Tree->AnnotatedFormula);
                 break;
-            case count_term_depth:
+            case term_depth:
                 Counter = SumAnnotatedFormulaTermDepth(Tree->AnnotatedFormula);
                 break;
             default:
@@ -141,10 +141,10 @@ double TreeMaximal(TREENODE Tree,MaximizeType WhatToMaximize) {
                 Maximal = CountAnnotatedFormulaAtomsByPredicate(
 Tree->AnnotatedFormula,"");
                 break;
-            case term_depth:
+            case max_term_depth:
                 Maximal = MaxAnnotatedFormulaTermDepth(Tree->AnnotatedFormula);
                 break;
-            case formula_depth:
+            case max_formula_depth:
                 Maximal = AnnotatedFormulaDepth(Tree->AnnotatedFormula);
                 break;
             default:
@@ -165,9 +165,9 @@ Tree->AnnotatedFormula,"");
                 break;
             case literals:
                 break;
-            case term_depth:
+            case max_term_depth:
                 break;
-            case formula_depth:
+            case max_formula_depth:
                 break;
             default:
                 CodingError("Unknown thing to maximize in tree");
@@ -256,13 +256,11 @@ TreeStatisticsRecordType * Statistics) {
     Statistics->TreeDepth = RootListMaximal(RootListHead,depth);
     Statistics->NumberOfAtoms = RootListCount(RootListHead,atoms,0);
     Statistics->NumberOfAtomsExpanded = RootListCount(RootListHead,atoms,1);
-    Statistics->NumberOfEqualityAtoms = RootListCount(RootListHead,
-equality_atoms,0);
-    Statistics->NumberOfEqualityAtomsExpanded = RootListCount(RootListHead,
-equality_atoms,1);
-    Statistics->MaxFormulaDepth = RootListMaximal(RootListHead,formula_depth);
+    Statistics->NumberOfEqualityAtoms = RootListCount(RootListHead,equality_atoms,0);
+    Statistics->NumberOfEqualityAtomsExpanded = RootListCount(RootListHead,equality_atoms,1);
+    Statistics->MaxFormulaDepth = RootListMaximal(RootListHead,max_formula_depth);
     Statistics->AverageFormulaDepth = RootListCount(RootListHead,
-count_formula_depth,0) / Statistics->NumberOfFormulae;
+formula_depth,0) / Statistics->NumberOfFormulae;
 
     Statistics->NumberOfTHF = RootListCount(RootListHead,thf_nodes,0);
     Statistics->NumberOfTFF = RootListCount(RootListHead,tff_nodes,0);
@@ -284,9 +282,9 @@ cnf_nodes,1);
 (Statistics->NumberOfCNF + Statistics->NumberOfTCF);
     }
 
-    Statistics->MaxTermDepth = RootListMaximal(RootListHead,term_depth);
-    Statistics->AverageTermDepth = RootListCount(RootListHead,
-count_term_depth,0) / RootListCount(RootListHead,terms,0);
+    Statistics->MaxTermDepth = RootListMaximal(RootListHead,max_term_depth);
+    Statistics->AverageTermDepth = RootListCount(RootListHead,term_depth,0) / 
+RootListCount(RootListHead,terms,0);
 
     return(Statistics);
 }

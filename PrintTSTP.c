@@ -214,25 +214,6 @@ outermost,1);
         PFprintf(Stream,"$fot(");
         PrintFileTSTPTerm(Stream,Language,Term->TheSymbol.NestedTerm->Term,Indent,TSTPSyntaxFlag);
         PFprintf(Stream,")");
-//     } else if (Term->Type == ite_term) {
-//         PFprintf(Stream,"$ite(");
-//         PrintFileTSTPFormula(Stream,tptp_tff,Term->TheSymbol.ConditionalTerm.Condition,0,0,
-// outermost,1);
-//         PFprintf(Stream,", ");
-//         PrintFileTSTPTerm(Stream,Language,Term->TheSymbol.ConditionalTerm.TermIfTrue,Indent,
-// TSTPSyntaxFlag);
-//         PFprintf(Stream,", ");
-//         PrintFileTSTPTerm(Stream,Language,Term->TheSymbol.ConditionalTerm.TermIfFalse,Indent,
-// TSTPSyntaxFlag);
-//         PFprintf(Stream,")");
-//     } else if (Term->Type == let_term) {
-//         PFprintf(Stream,"$let(");
-//         PrintFileTSTPFormula(Stream,tptp_tff,Term->TheSymbol.LetTerm.LetTypes,0,0,outermost,1);
-//         PFprintf(Stream,", ");
-//         PrintFileTSTPFormula(Stream,tptp_tff,Term->TheSymbol.LetTerm.LetDefn,0,0,outermost,1);
-//         PFprintf(Stream,", ");
-//         PrintFileTSTPTerm(Stream,Language,Term->TheSymbol.LetTerm.LetBody,Indent,TSTPSyntaxFlag);
-//         PFprintf(Stream,")");
 //----Check if infix - or : (see also TSTPTermToString in Examine.c)
     } else if (!strcmp(GetSymbol(Term),"-") || !strcmp(GetSymbol(Term),":")) {
         PrintFileTSTPTerm(Stream,Language,Term->Arguments[0],Indent,TSTPSyntaxFlag);
