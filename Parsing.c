@@ -480,19 +480,16 @@ TERM DuplicateTerm(TERM Original,ContextType Context,int ForceNewVariables) {
             if (Variable == NULL) {
                 CodingError("Cannot find variable for copy of original");
             }
-//----Check if it has been quantified, if not use original unless new is
-//----forced
+//----Check if it has been quantified, if not use original unless new is forced
             if (Variable->NumberOfUses > 0 || ForceNewVariables) {
                 Term->TheSymbol.Variable = Variable;
             } else {
-//----Use of the original is for the case of duplication of subformulae
-//----within a formula.
+//----Use of the original is for the case of duplication of subformulae within a formula.
                 Term->TheSymbol.Variable = Original->TheSymbol.Variable;
             }
             IncreaseVariableUseCount(Term->TheSymbol.Variable,1);
-        } else if (Term->Type == nested_thf || 
-Term->Type == nested_tff || Term->Type == nested_tcf ||
-Term->Type == nested_fof || Term->Type == nested_cnf) {
+        } else if (Term->Type == nested_thf || Term->Type == nested_tff || 
+Term->Type == nested_tcf || Term->Type == nested_fof || Term->Type == nested_cnf) {
 //----For CNF the variables are implicitly universally quantified, and must
 //----be new variables. For FOF we use the originals (can't recall why)
 //----But later I decided that nested formulae are special, and should always
@@ -500,8 +497,8 @@ Term->Type == nested_fof || Term->Type == nested_cnf) {
             Term->TheSymbol.NestedFormula = DuplicateFormulaWithVariables(
 Original->TheSymbol.NestedFormula,Context.Signature,1);
         } else if (Term->Type == nested_fot) {
-            Term->TheSymbol.NestedTerm = DuplicateTermWithVariables(Original->
-TheSymbol.NestedTerm,Context.Signature,0);
+            Term->TheSymbol.NestedTerm = DuplicateTermWithVariables(Original->TheSymbol.NestedTerm,
+Context.Signature,0);
         } else {
             Term->TheSymbol.NonVariable = InsertIntoSignature(Context.Signature,Term->Type,
 Original->TheSymbol.NonVariable->NameSymbol,Original->TheSymbol.NonVariable->Arity,NULL);
@@ -1212,10 +1209,6 @@ Original->FormulaUnion.BinaryFormula.RHS,Context,ForceNewVariables);
                 Formula->FormulaUnion.UnaryFormula.Formula = DuplicateFormula(
 Original->FormulaUnion.UnaryFormula.Formula,Context,ForceNewVariables);
                 break; 
-            case atom:
-                Formula->FormulaUnion.Atom = DuplicateTerm(Original->FormulaUnion.Atom,Context,
-ForceNewVariables);
-                break;
             case ite_formula:
                 Formula->FormulaUnion.ConditionalFormula.Condition = DuplicateFormula(
 Original->FormulaUnion.ConditionalFormula.Condition,Context,ForceNewVariables);
@@ -1229,6 +1222,10 @@ Original->FormulaUnion.ConditionalFormula.FormulaIfFalse,Context,ForceNewVariabl
 Original->FormulaUnion.LetFormula.LetDefn,Context,ForceNewVariables);
                 Formula->FormulaUnion.LetFormula.LetBody = DuplicateFormula(
 Original->FormulaUnion.LetFormula.LetBody,Context,ForceNewVariables);
+                break;
+            case atom:
+                Formula->FormulaUnion.Atom = DuplicateTerm(Original->FormulaUnion.Atom,Context,
+ForceNewVariables);
                 break;
             default:
                 CodingError("Formula type unknown for duplication");
@@ -1290,16 +1287,16 @@ VariablesMustBeQuantified,none);
             Formula = ParseQuantifiedFormula(Stream,Language,Context,EndOfScope,
 VariablesMustBeQuantified);
             break;
-        case unary_connective:
-            Formula = ParseUnaryFormula(Stream,Language,Context,EndOfScope,
-VariablesMustBeQuantified);
-            break;
 //----Binary connective as a term in THF
         case binary_connective:
             Formula = NewFormula();
             Formula->Type = atom;
             Formula->FormulaUnion.Atom = ParseTerm(Stream,Language,Context,
 EndOfScope,predicate,none,NULL,VariablesMustBeQuantified);
+            break;
+        case unary_connective:
+            Formula = ParseUnaryFormula(Stream,Language,Context,EndOfScope,
+VariablesMustBeQuantified);
             break;
         default:
             if (!strcmp(CurrentToken(Stream)->NameToken,"$ite")) {
