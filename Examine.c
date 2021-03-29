@@ -188,8 +188,7 @@ int LooksLikeARational(char * RationalString) {
     strcpy(CopyOfRationalString,RationalString);
     if ((Slash = strchr(CopyOfRationalString,'/')) != NULL) {
         *Slash = '\0';
-        return(LooksLikeAnInteger(CopyOfRationalString) &&
-LooksLikeAnUnsignedInteger(Slash+1));
+        return(LooksLikeAnInteger(CopyOfRationalString) && LooksLikeAnUnsignedInteger(Slash+1));
     } else {
         return(0);
     }
@@ -197,8 +196,8 @@ LooksLikeAnUnsignedInteger(Slash+1));
 //-------------------------------------------------------------------------------------------------
 int LooksLikeANumber(char * NumberString) {
 
-    return(LooksLikeAnInteger(NumberString) || 
-LooksLikeARational(NumberString) || LooksLikeAReal(NumberString));
+    return(LooksLikeAnInteger(NumberString) || LooksLikeARational(NumberString) || 
+LooksLikeAReal(NumberString));
 }
 //-------------------------------------------------------------------------------------------------
 int LooksLikeAList(TERM Term,int MinElements,int MaxElements) {
@@ -395,15 +394,6 @@ int CountVariableUsageInTerm(TERM Term,VARIABLENODE Variable) {
             return(CountVariableUsageInArguments(Term->Arguments,
 Term->TheSymbol.NonVariable->Arity,Variable));
             break;
-//         case ite_term:
-//             return(
-// CountVariableUsageInTerm(Term->TheSymbol.ConditionalTerm.TermIfTrue,Variable) +
-// CountVariableUsageInTerm(Term->TheSymbol.ConditionalTerm.TermIfFalse,Variable));
-//             break;
-//         case let_term:
-//             return(
-// CountVariableUsageInTerm(Term->TheSymbol.LetTerm.LetBody,Variable));
-//             break;
         default:
             CodingError("Bad term type for counting variable occurences");
             return(0);
@@ -557,38 +547,13 @@ void CollectVariablesInAtom(TERM Term,char ** Collector,int * CollectorLength) {
 
     SuperString Variable;
     int index;
-//     char * PredicateCollector;
-//     char * FunctorCollector;
-//     int PredicateCollectorLength;
-//     int FunctorCollectorLength;
 
     if (Term->Type == variable) {
-        sprintf(Variable,"%s/0/1\n",
-Term->TheSymbol.Variable->VariableName->NameSymbol);
+        sprintf(Variable,"%s/0/1\n",Term->TheSymbol.Variable->VariableName->NameSymbol);
         ExtendString(Collector,Variable,CollectorLength);
-//     } else if (Term->Type == ite_term) {
-//         PredicateCollector = (char *)Malloc(sizeof(String));
-//         strcpy(PredicateCollector,"");
-//         PredicateCollectorLength = STRINGLENGTH;
-//         FunctorCollector = (char *)Malloc(sizeof(String));
-//         strcpy(FunctorCollector,"");
-//         FunctorCollectorLength = STRINGLENGTH;
-//         CollectSymbolsInFormula(Term->TheSymbol.ConditionalTerm.Condition,
-// &PredicateCollector,&PredicateCollectorLength,&FunctorCollector,
-// &FunctorCollectorLength,Collector,CollectorLength);
-//         CollectVariablesInAtom(Term->TheSymbol.ConditionalTerm.TermIfTrue,
-// Collector,CollectorLength);
-//         CollectVariablesInAtom(Term->TheSymbol.ConditionalTerm.TermIfFalse,
-// Collector,CollectorLength);
-//         Free((void **)&PredicateCollector);
-//         Free((void **)&FunctorCollector);
-//     } else if (Term->Type == let_term) {
-//         CollectVariablesInAtom(Term->TheSymbol.LetTerm.LetBody,Collector,
-// CollectorLength);
     } else if (Term->Type == predicate || Term->Type == function) {
         for (index = 0; index < GetArity(Term); index++) {
-            CollectVariablesInAtom(Term->Arguments[index],Collector,
-CollectorLength);
+            CollectVariablesInAtom(Term->Arguments[index],Collector,CollectorLength);
         }
     }
 }
@@ -597,10 +562,6 @@ void CollectFunctorsInAtom(TERM Term,char ** Collector,int * CollectorLength) {
 
     SuperString FunctorAndArity;
     int index;
-//     char * PredicateCollector;
-//     char * VariableCollector;
-//     int PredicateCollectorLength;
-//     int VariableCollectorLength;
 
     if (Term->Type == predicate || Term->Type == function) {
         if (Term->Type == function) {
@@ -612,42 +573,11 @@ Term->TheSymbol.NonVariable->NameSymbol,Term->TheSymbol.NonVariable->Arity);
             CollectFunctorsInAtom(Term->Arguments[index],Collector,
 CollectorLength);
         }
-//     } else if (Term->Type == ite_term) {
-//         PredicateCollector = (char *)Malloc(sizeof(String));
-//         strcpy(PredicateCollector,"");
-//         PredicateCollectorLength = STRINGLENGTH;
-//         VariableCollector = (char *)Malloc(sizeof(String));
-//         strcpy(VariableCollector,"");
-//         VariableCollectorLength = STRINGLENGTH;
-//         CollectSymbolsInFormula(Term->TheSymbol.ConditionalTerm.Condition,
-// &PredicateCollector,&PredicateCollectorLength,Collector,CollectorLength,
-// &VariableCollector,&VariableCollectorLength);
-//         CollectFunctorsInAtom(Term->TheSymbol.ConditionalTerm.TermIfTrue,
-// Collector,CollectorLength);
-//         CollectFunctorsInAtom(Term->TheSymbol.ConditionalTerm.TermIfFalse,
-// Collector,CollectorLength);
-//         Free((void **)&PredicateCollector);
-//         Free((void **)&VariableCollector);
-//     } else if (Term->Type == let_term) {
-//         PredicateCollector = (char *)Malloc(sizeof(String));
-//         strcpy(PredicateCollector,"");
-//         PredicateCollectorLength = STRINGLENGTH;
-//         VariableCollector = (char *)Malloc(sizeof(String));
-//         strcpy(VariableCollector,"");
-//         VariableCollectorLength = STRINGLENGTH;
-//         CollectSymbolsInFormula(Term->TheSymbol.LetTerm.LetDefn,
-// &PredicateCollector,&PredicateCollectorLength,Collector,CollectorLength,
-// &VariableCollector,&VariableCollectorLength);
-//         CollectFunctorsInAtom(Term->TheSymbol.LetTerm.LetBody,
-// Collector,CollectorLength);
-//         Free((void **)&PredicateCollector);
-//         Free((void **)&VariableCollector);
     }
 }
 //-------------------------------------------------------------------------------------------------
 //----PutUsageHere must be address of a malloced String
-char * GetLiteralSymbolUsage(FORMULA Literal,char ** PutUsageHere,
-char ** VariablesStartHere) {
+char * GetLiteralSymbolUsage(FORMULA Literal,char ** PutUsageHere,char ** VariablesStartHere) {
 
     char Sign;
     char * Collector;
@@ -674,8 +604,7 @@ Literal->FormulaUnion.Atom->TheSymbol.NonVariable->Arity);
     Collector = (char *)Malloc(sizeof(String));
     CollectorLength = STRINGLENGTH;
     strcpy(Collector,"");
-    CollectFunctorsInAtom(Literal->FormulaUnion.Atom,&Collector,
-&CollectorLength);
+    CollectFunctorsInAtom(Literal->FormulaUnion.Atom,&Collector,&CollectorLength);
     NormalizeSymbolUsage(Collector);
     ExtendString(PutUsageHere,Collector,&UsageLength);
     Free((void **)&Collector);
@@ -685,8 +614,7 @@ Literal->FormulaUnion.Atom->TheSymbol.NonVariable->Arity);
         Collector = (char *)Malloc(sizeof(String));
         CollectorLength = STRINGLENGTH;
         strcpy(Collector,"");
-        CollectVariablesInAtom(Literal->FormulaUnion.Atom,&Collector,
-&CollectorLength);
+        CollectVariablesInAtom(Literal->FormulaUnion.Atom,&Collector,&CollectorLength);
         *VariablesStartHere = &((*PutUsageHere)[strlen(*PutUsageHere)]);
         NormalizeSymbolUsage(Collector);
         ExtendString(PutUsageHere,Collector,&UsageLength);
@@ -850,9 +778,8 @@ char ** FunctorUsageStartsHere,char ** VariableUsageStartsHere) {
     strcpy(FunctorCollector,"");
     VariableCollector = (char *)Malloc(sizeof(String));
     strcpy(VariableCollector,"");
-    CollectSymbolsInFormula(Formula,
-&PredicateCollector,&PredicateCollectorLength,&FunctorCollector,
-&FunctorCollectorLength,&VariableCollector,&VariableCollectorLength);
+    CollectSymbolsInFormula(Formula,&PredicateCollector,&PredicateCollectorLength,
+&FunctorCollector,&FunctorCollectorLength,&VariableCollector,&VariableCollectorLength);
 //DEBUG printf("Predicates:%s\n",PredicateCollector);
 //DEBUG printf("Functors  :%s\n",FunctorCollector);
 //DEBUG printf("Variables :%s\n",VariableCollector);
@@ -932,11 +859,9 @@ char ** PutUsageHere,char ** FunctorUsageStartsHere) {
         strcpy(OneUsage,"");
         if (GetAnnotatedFormulaSymbolUsage(ListNode->AnnotatedFormula,
 &OneUsage,&FunctorsStart) != NULL) {
-            ExtendString(&FunctorCollector,FunctorsStart,
-&FunctorCollectorLength);
+            ExtendString(&FunctorCollector,FunctorsStart,&FunctorCollectorLength);
             *FunctorsStart = '\0';
-            ExtendString(&PredicateCollector,OneUsage,
-&PredicateCollectorLength);
+            ExtendString(&PredicateCollector,OneUsage,&PredicateCollectorLength);
         }
         Free((void **)&OneUsage);
         ListNode = ListNode->Next;
@@ -1267,8 +1192,7 @@ FORMULAArray TupleFormulae,char * Predicate) {
 
     TotalAtoms = 0;
     for (ElementNumber = 0;ElementNumber < NumberOfElements;ElementNumber++) {
-        TotalAtoms += CountFormulaAtomsByPredicate(
-TupleFormulae[ElementNumber],Predicate);
+        TotalAtoms += CountFormulaAtomsByPredicate(TupleFormulae[ElementNumber],Predicate);
     }
     return(TotalAtoms);
 }
@@ -1288,8 +1212,7 @@ Formula->FormulaUnion.SequentFormula.NumberOfRHSElements,
 Formula->FormulaUnion.SequentFormula.RHS,Predicate));
             break;
         case assignment:
-            return(CountFormulaAtomsByPredicate(
-Formula->FormulaUnion.BinaryFormula.RHS,Predicate));
+            return(CountFormulaAtomsByPredicate(Formula->FormulaUnion.BinaryFormula.RHS,Predicate));
             break;
         case quantified:
 //----Add in RHS of : variables
@@ -1297,8 +1220,8 @@ Formula->FormulaUnion.BinaryFormula.RHS,Predicate));
 //                Count += CountFormulaAtomsByPredicate(
 //Formula->FormulaUnion.QuantifiedFormula.VariableType,Predicate);
 //            }
-            Count += CountFormulaAtomsByPredicate(
-Formula->FormulaUnion.QuantifiedFormula.Formula,Predicate);
+            Count += CountFormulaAtomsByPredicate(Formula->FormulaUnion.QuantifiedFormula.Formula,
+Predicate);
             return(Count);
             break;
         case binary:
@@ -1317,20 +1240,16 @@ Predicate);
             return(Count);
             break;
         case unary:
-            return(CountFormulaAtomsByPredicate(
-Formula->FormulaUnion.UnaryFormula.Formula,Predicate));
+            return(CountFormulaAtomsByPredicate(Formula->FormulaUnion.UnaryFormula.Formula,
+Predicate));
             break;
         case atom:
-//----What the fuck was this for?
+//----If nothing requested, take everything
             if (strlen(Predicate) == 0 || 
 //----It's the predicate I want
 !strcmp(Predicate,GetSymbol(Formula->FormulaUnion.Atom)) ||
-//----Nasty legacy use of equal/2
-(!strcmp(Predicate,"=") && 
- !strcmp(GetSymbol(Formula->FormulaUnion.Atom),"equal")) ||
 //----A variable in THF
-(!strcmp(Predicate,"VARIABLE") && Formula->FormulaUnion.Atom->Type == 
-variable)) {
+(!strcmp(Predicate,"VARIABLE") && Formula->FormulaUnion.Atom->Type == variable)) {
 //DEBUG printf("--%s-- matches --%s--\n",GetSymbol(Formula->FormulaUnion.Atom),Predicate);
                 return(1);
             } else {
@@ -1365,13 +1284,11 @@ Formula->FormulaUnion.LetFormula.LetBody,Predicate);
     }
 }
 //-------------------------------------------------------------------------------------------------
-int CountAnnotatedFormulaAtomsByPredicate(ANNOTATEDFORMULA AnnotatedFormula,
-char * Predicate) {
+int CountAnnotatedFormulaAtomsByPredicate(ANNOTATEDFORMULA AnnotatedFormula,char * Predicate) {
 
     if (LogicalAnnotatedFormula(AnnotatedFormula)) {
         return(CountFormulaAtomsByPredicate(AnnotatedFormula->
-AnnotatedFormulaUnion.AnnotatedTSTPFormula.FormulaWithVariables->Formula,
-Predicate));
+AnnotatedFormulaUnion.AnnotatedTSTPFormula.FormulaWithVariables->Formula,Predicate));
     } else {
         return(-1);
     }
@@ -1693,21 +1610,11 @@ int MaxTermDepth(TERM Term) {
     int MaxDepth;
     int Index;
 
-//     if (Term->Type == ite_term) {
-//         return(
-// MaximumOfInt(MaxFormulaTermDepth(Term->TheSymbol.ConditionalTerm.Condition),
-// MaximumOfInt(MaxTermDepth(Term->TheSymbol.ConditionalTerm.TermIfTrue),
-// MaxTermDepth(Term->TheSymbol.ConditionalTerm.TermIfFalse))));
-//     } else if (Term->Type == let_term) {
-//         return(MaxTermDepth(Term->TheSymbol.LetTerm.LetBody));
-//     } else {
-        MaxDepth = 0;
-        for (Index = 0; Index < GetArity(Term); Index++) {
-            MaxDepth = MaximumOfInt(MaxDepth,MaxTermDepth(
-Term->Arguments[Index]));
-        }
-        return(1 + MaxDepth);
-//    }
+    MaxDepth = 0;
+    for (Index = 0; Index < GetArity(Term); Index++) {
+        MaxDepth = MaximumOfInt(MaxDepth,MaxTermDepth(Term->Arguments[Index]));
+    }
+    return(1 + MaxDepth);
 }
 //-------------------------------------------------------------------------------------------------
 int MaxTupleFormulaeTermDepth(int NumberOfElements,FORMULAArray TupleFormulae) {
