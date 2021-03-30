@@ -177,10 +177,16 @@ int TSTPSyntaxFlag) {
     char OpeningBracket,ClosingBracket;
     char * StartOfSymbol;
 
-//DEBUG printf("Printing term %s indent %d\n",TermTypeToString(Term->Type),Indent);
+ZZZZZZz
+printf("Printing term %s indent %d\n",TermTypeToString(Term->Type),Indent);
 //----All THF and TFF (because of TFX) terms are formulae
     if ((Language == tptp_thf || Language == tptp_tff) && Term->Type == formula) {
-        PrintFileTSTPFormula(Stream,tptp_thf,Term->TheSymbol.Formula,Indent,1,outermost,1);
+//----For non-atoms, newline and indent
+        if (Term->TheSymbol.Formula->Type != atom) {
+            PFprintf(Stream,"\n");
+            PrintSpaces(Stream,Indent-2);
+        }
+        PrintFileTSTPFormula(Stream,Language,Term->TheSymbol.Formula,Indent,1,outermost,1);
 //----Check if a nested formula - no symbol
     } else if (Term->Type == nested_thf) {
         PFprintf(Stream,"$thf(");
@@ -596,27 +602,25 @@ Formula->FormulaUnion.QuantifiedFormula.Quantifier));
 Formula->FormulaUnion.QuantifiedFormula.Quantifier)));
                 PFprintf(Stream,"[");
                 VariableIndent = Indent + 3;
-                PrintQuantifiedVariable(Stream,Language,Formula->
-FormulaUnion.QuantifiedFormula,Indent+4,Pretty,TSTPSyntaxFlag);
+                PrintQuantifiedVariable(Stream,Language,
+Formula->FormulaUnion.QuantifiedFormula,Indent+4,Pretty,TSTPSyntaxFlag);
                 while (Pretty && 
 //----Sequence of nested quantified formulae
 Formula->FormulaUnion.QuantifiedFormula.Formula->Type == quantified &&
 //----With the same quantifier
 Formula->FormulaUnion.QuantifiedFormula.Quantifier ==
-Formula->FormulaUnion.QuantifiedFormula.Formula->FormulaUnion.
-QuantifiedFormula.Quantifier) {
+Formula->FormulaUnion.QuantifiedFormula.Formula->FormulaUnion.QuantifiedFormula.Quantifier) {
                     PFprintf(Stream,",");
 //----If current and next are flat stay on this line
-                    if (!FlatQuantifiedVariable(Formula->
-FormulaUnion.QuantifiedFormula) || !FlatQuantifiedVariable(
-Formula->FormulaUnion.QuantifiedFormula.Formula->
+                    if (!FlatQuantifiedVariable(Formula->FormulaUnion.QuantifiedFormula) || 
+!FlatQuantifiedVariable(Formula->FormulaUnion.QuantifiedFormula.Formula->
 FormulaUnion.QuantifiedFormula)) {
                         PFprintf(Stream,"\n");
                         PrintSpaces(Stream,VariableIndent);
                     }
                     Formula = Formula->FormulaUnion.QuantifiedFormula.Formula;
-                    PrintQuantifiedVariable(Stream,Language,Formula->
-FormulaUnion.QuantifiedFormula,Indent+4,Pretty,TSTPSyntaxFlag);
+                    PrintQuantifiedVariable(Stream,Language,Formula->FormulaUnion.QuantifiedFormula,
+Indent+4,Pretty,TSTPSyntaxFlag);
                 }
                 PFprintf(Stream,"] :");
 //----If not pretty, or unary and atom, or atom, do on same line
@@ -624,8 +628,8 @@ FormulaUnion.QuantifiedFormula,Indent+4,Pretty,TSTPSyntaxFlag);
 LiteralFormula(Formula->FormulaUnion.QuantifiedFormula.Formula) ||
 FlatEquation(Formula->FormulaUnion.QuantifiedFormula.Formula)) {
                     PFprintf(Stream," ");
-                    PrintFileTSTPFormula(Stream,Language,Formula->
-FormulaUnion.QuantifiedFormula.Formula,0,Pretty,none,TSTPSyntaxFlag);
+                    PrintFileTSTPFormula(Stream,Language,
+Formula->FormulaUnion.QuantifiedFormula.Formula,0,Pretty,none,TSTPSyntaxFlag);
                 } else {
 //----Otherwise on the next line
                     PFprintf(Stream,"\n");
@@ -634,8 +638,8 @@ FormulaUnion.QuantifiedFormula.Formula,0,Pretty,none,TSTPSyntaxFlag);
                         Indent += 2;
                     }
                     PrintSpaces(Stream,Indent);
-                    PrintFileTSTPFormula(Stream,Language,Formula->
-FormulaUnion.QuantifiedFormula.Formula,Indent,Pretty,none,TSTPSyntaxFlag);
+                    PrintFileTSTPFormula(Stream,Language,
+Formula->FormulaUnion.QuantifiedFormula.Formula,Indent,Pretty,none,TSTPSyntaxFlag);
                 }
                 if (LastConnective == brackets) {
                     PFprintf(Stream," )");
@@ -943,8 +947,7 @@ AnnotatedTSTPFormula.FormulaWithVariables->Formula,0,Pretty,outermost,1);
         PrintFileTSTPTerm(Stream,Language,AnnotatedTSTPFormula.Source,4,1);
         if (AnnotatedTSTPFormula.UsefulInfo != NULL) {
             PFprintf(Stream,",%s",(Pretty?"\n    ":""));
-            PrintFileTSTPTerm(Stream,Language,AnnotatedTSTPFormula.UsefulInfo,
--1,1);
+            PrintFileTSTPTerm(Stream,Language,AnnotatedTSTPFormula.UsefulInfo,-1,1);
         }
     }
     PFprintf(Stream,").\n");
@@ -957,8 +960,7 @@ int Pretty) {
     PRINTFILE LocalStream;
                 
     if ((LocalStream = OpenFILEPrintFile(Stream,NULL)) != NULL) {
-        PrintFileAnnotatedTSTPFormula(LocalStream,Language,AnnotatedTSTPFormula,
-Format,Pretty);
+        PrintFileAnnotatedTSTPFormula(LocalStream,Language,AnnotatedTSTPFormula,Format,Pretty);
         ClosePrintFile(LocalStream);
     }
 }           
@@ -986,8 +988,7 @@ Formula->FormulaUnion.QuantifiedFormula.Quantifier == universal) {
 //----Print nothing for an empty clause
             if (strcmp(GetSymbol(Formula->FormulaUnion.Atom),"$false")) {
                 PFprintf(Stream,"++");
-                PrintFileTSTPTerm(Stream,Language,Formula->FormulaUnion.Atom,
--1,0);
+                PrintFileTSTPTerm(Stream,Language,Formula->FormulaUnion.Atom,-1,0);
             }
             break;
         case unary:
@@ -1021,8 +1022,7 @@ int Indent,int AlreadyIndented,int NeedCommaNewline) {
     PRINTFILE LocalStream;
 
     if ((LocalStream = OpenFILEPrintFile(Stream,NULL)) != NULL) {
-        PrintFileTPTPClause(LocalStream,Language,Formula,Indent,AlreadyIndented,
-NeedCommaNewline);
+        PrintFileTPTPClause(LocalStream,Language,Formula,Indent,AlreadyIndented,NeedCommaNewline);
         ClosePrintFile(LocalStream);
     }
 }
@@ -1046,14 +1046,14 @@ StatusToString(AnnotatedTSTPFormula.Status),(Pretty?"\n":""));
     switch (Language) {
         case tptp_fof:
             PFprintf(Stream,"    (");
-            PrintFileTSTPFormula(Stream,tptp_fof,AnnotatedTSTPFormula.
-FormulaWithVariables->Formula,6,Pretty,outermost,0);
+            PrintFileTSTPFormula(Stream,tptp_fof,
+AnnotatedTSTPFormula. FormulaWithVariables->Formula,6,Pretty,outermost,0);
             PFprintf(Stream," )");
             break;
         case tptp_cnf:
             PFprintf(Stream,"    [");
-            PrintFileTPTPClause(Stream,Language,AnnotatedTSTPFormula.
-FormulaWithVariables->Formula,5,5,0);
+            PrintFileTPTPClause(Stream,Language,
+AnnotatedTSTPFormula.FormulaWithVariables->Formula,5,5,0);
             PFprintf(Stream,"]");
             break;
         default:
@@ -1069,14 +1069,13 @@ AnnotatedTSTPFormulaType AnnotatedTSTPFormula,int Pretty) {
     PRINTFILE LocalStream;
 
     if ((LocalStream = OpenFILEPrintFile(Stream,NULL)) != NULL) {
-        PrintFileAnnotatedTPTPFormula(LocalStream,Language,AnnotatedTSTPFormula,
-Pretty);
+        PrintFileAnnotatedTPTPFormula(LocalStream,Language,AnnotatedTSTPFormula,Pretty);
         ClosePrintFile(LocalStream);
     }
 }
 //-------------------------------------------------------------------------------------------------
-void PrintFileAnnotatedTSTPNode(PRINTFILE Stream,
-ANNOTATEDFORMULA AnnotatedFormula,PrintFormatType Format,int Pretty) {
+void PrintFileAnnotatedTSTPNode(PRINTFILE Stream,ANNOTATEDFORMULA AnnotatedFormula,
+PrintFormatType Format,int Pretty) {
 
     if (AnnotatedFormula != NULL) {
         switch (AnnotatedFormula->Syntax) {
@@ -1086,8 +1085,7 @@ AnnotatedFormula->AnnotatedFormulaUnion.Include,-1,0);
                 PFprintf(Stream,".\n");
                 break;
             case comment:
-                PFprintf(Stream,"%s\n",
-AnnotatedFormula->AnnotatedFormulaUnion.Comment);
+                PFprintf(Stream,"%s\n",AnnotatedFormula->AnnotatedFormulaUnion.Comment);
                 break;
             case blank_line:
                 PFprintf(Stream,"\n");
@@ -1101,13 +1099,11 @@ AnnotatedFormula->AnnotatedFormulaUnion.Comment);
                 switch (Format) {
                     case tptp:
                     case tptp_short:
-                        PrintFileAnnotatedTSTPFormula(Stream,
-AnnotatedFormula->Syntax,
+                        PrintFileAnnotatedTSTPFormula(Stream,AnnotatedFormula->Syntax,
 AnnotatedFormula->AnnotatedFormulaUnion.AnnotatedTSTPFormula,Format,Pretty);
                         break;
                     case oldtptp:
-                        PrintFileAnnotatedTPTPFormula(Stream,
-AnnotatedFormula->Syntax,
+                        PrintFileAnnotatedTPTPFormula(Stream,AnnotatedFormula->Syntax,
 AnnotatedFormula->AnnotatedFormulaUnion.AnnotatedTSTPFormula,Pretty);
                         break;
                     default:

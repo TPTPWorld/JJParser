@@ -733,7 +733,7 @@ Context.Signature,0);
     if (!strcmp(PrefixSymbol,"[")) {
 //----Need an extra byte :-)
         Free((void **)&PrefixSymbol);
-printf("SHOULD NOT GET HERE UNLESS IN NON-LOGICAL DATA\n");
+//DEBUG printf("SHOULD NOT GET HERE UNLESS IN NON-LOGICAL DATA\n");
         PrefixSymbol = CopyHeapString("[]");
         Term->FlexibleArity = NumberOfArguments;
         NumberOfArguments = -1;
@@ -1336,7 +1336,7 @@ Context,EndOfScope,0,0,VariablesMustBeQuantified,ThisConnective);
     }
 
 //----Check for a binary formula
-//DEBUG printf("check infix with token %s and allow is %d\n",CurrentToken(Stream)->NameToken,AllowBinary);
+//DEBUG printf("check infix with token %s and allow is %d and type is %s\n",CurrentToken(Stream)->NameToken,AllowBinary,TokenTypeToString(CurrentToken(Stream)->KindToken));
     if (
 //----THF and TFX allow formulae as arguments of equality 
 AllowBinary &&

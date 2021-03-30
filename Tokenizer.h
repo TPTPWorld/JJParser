@@ -27,6 +27,7 @@ char * StatusToString(StatusType Status);
 ConnectiveType StringToConnective(char * String);
 char * ConnectiveToString(ConnectiveType Connective);
 SyntaxType StringToSyntax(char * String);
+char * TokenTypeToString(TokenType Type);
 char * SyntaxToString(SyntaxType Syntax);
 char * TermTypeToString(TermType Type);
 char * FormulaTypeToString(FormulaTypeType Type);

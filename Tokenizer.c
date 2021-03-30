@@ -692,6 +692,61 @@ SyntaxType StringToSyntax(char * String) {
     return(nontype);
 }
 //-------------------------------------------------------------------------------------------------
+char * TokenTypeToString(TokenType Type) {
+
+    switch (Type) {
+        case punctuation:
+            return("punctuation");
+            break;
+        case quantifier:
+            return("quantifier");
+            break;
+        case unary_connective:
+            return("unary_connective");
+            break;
+        case binary_connective:
+            return("binary_connective");
+            break;
+        case number:
+            return("number");
+            break;
+        case distinct_object:
+            return("distinct_object");
+            break;
+        case lower_word:
+            return("lower_word");
+            break;
+        case upper_word:
+            return("upper_word");
+            break;
+        case predicate_symbol:
+            return("predicate_symbol");
+            break;
+        case functor:
+            return("functor");
+            break;
+        case name:
+            return("name");
+            break;
+        case comment_token:
+            return("comment_token");
+            break;
+        case blank_line_token:
+            return("blank_line_token");
+            break;
+        case error:
+            return("error");
+            break;
+        case endeof:
+            return("endeof");
+            break;
+        default:
+            CodingError("Not a token type to make into a string");
+            return(NULL);
+            break;
+    }
+}
+//-------------------------------------------------------------------------------------------------
 char * SyntaxToString(SyntaxType Syntax) {
 
     switch (Syntax) {

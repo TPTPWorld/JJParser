@@ -1,35 +1,35 @@
-tff(12,axiom,(
-    q($true | $false) )).
+tff(ww,type,ww: $o > $o ).
+tff(c,type,c: $o).
+tff(ee,type,ee: ($o * $o) > $o).
+tff(qq,type,qq: $o > $o).
 
-% tff(cA,type,(
-%     cA: $o )).
-% 
-% tff(cC,type,(
-%     cC: $o > $o )).
-% 
-% tff(cEXT2,conjecture,
-%    ~ ~ cA ).
+tff(large,axiom,
+    ! [X: $o] : 
+      ( qq( 
+          ! [Z: $o] : 
+            ee( ( Z 
+                & ( ( X = ww(Z) ) 
+                  | c ) )
+              , $false) )
+      | X 
+      | ( X = 
+          ? [Y: $o] : 
+            ( Y = ww(Y) ) ) ) ).
 
-% tff(p_type,type,p : $o).
-% tff(an,axiom,! [X: $int,Y: $int] : (X = (Y => Y) | p)).
+tff(large,axiom,(
+    ! [X: $o] :
+      ( qq(
+          ! [Z: $o] : ee(
+  Z
+  & ( X = ww(Z)
+    | c ),$false))
+      | X
+      | X
 
-% tff(f_def,type,f: [$int] > [$int]).
-% tff(p_def,type,p: [$int] > $o).
-% tff(1,axiom,p(f([1]))).
+tff(aaa,type,thing : $tType).
+tff(bbb,type,f : $o > thing).
+tff(eee,type,g : thing).
+tff(ccc,type,p : (thing * $o) > $o).
+tff(ddd,type,q : $o).
+tff(afs,axiom,p(f(? [Y: $int] : (( q & q) => q )),! [X:$int] : (q => p(g,$true)) )).
 
-% thf(f_def,type,f: [$int] > [$int]).
-% thf(p_def,type,p: [$int] > $o).
-% thf(1,axiom,p @ ( f @ [1])).
-
-% tff(aaa,type,thing : $tType).
-% tff(bbb,type,f : $o > thing).
-% tff(eee,type,g : thing).
-% tff(ccc,type,p : (thing * $o) > $o).
-% tff(ddd,type,q : $o).
-% tff(afs,axiom,p(f(? [Y: $int] : (( q & q) => q )),! [X:$int] : (q => p(g,$true)) )).
-
-% tff(ddd,type,r : $o > $o).
-% tff(an,axiom,r($ite(q,r & f,r & g))).
-%tff(aa,type,a: $i).
-%tff(af,type,f: $i > $i).
-%tff(ap,type,p: $i > $o).
