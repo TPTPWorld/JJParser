@@ -261,10 +261,8 @@ int CopiedAnnotatedFormula(ANNOTATEDFORMULA AnnotatedFormula) {
 //----Has a source
 AnnotatedFormula->AnnotatedFormulaUnion.AnnotatedTSTPFormula.Source != NULL && 
 //----Source is a single word, not "unknown", i.e., a node name
-GetArity(AnnotatedFormula->AnnotatedFormulaUnion.AnnotatedTSTPFormula.Source) 
-== 0 &&
-strcmp(GetSymbol(AnnotatedFormula->AnnotatedFormulaUnion.AnnotatedTSTPFormula.
-Source),"unknown"));
+GetArity(AnnotatedFormula->AnnotatedFormulaUnion.AnnotatedTSTPFormula.Source) == 0 &&
+strcmp(GetSymbol(AnnotatedFormula->AnnotatedFormulaUnion.AnnotatedTSTPFormula.Source),"unknown"));
 }
 //-------------------------------------------------------------------------------------------------
 int InferredAnnotatedFormula(ANNOTATEDFORMULA AnnotatedFormula) {
@@ -395,7 +393,7 @@ int CountVariableUsageInTerm(TERM Term,VARIABLENODE Variable) {
 Term->TheSymbol.NonVariable->Arity,Variable));
             break;
         default:
-            CodingError("Bad term type for counting variable occurences");
+            CodingError("Bad term type for counting variable occurrences");
             return(0);
             break;
     }
@@ -403,86 +401,86 @@ Term->TheSymbol.NonVariable->Arity,Variable));
 }
 //-------------------------------------------------------------------------------------------------
 int CountVariableUsageInTupleFormulae(int NumberOfElements,FORMULAArray TupleFormulae,
-VARIABLENODE Variable,int * QuantifiedOccurences) {
+VARIABLENODE Variable,int * QuantifiedOccurrences) {
 
     int ElementNumber;
     int TotalUsage;
     int LocalQuantifiedUsage;
 
-    *QuantifiedOccurences = 0;
+    *QuantifiedOccurrences = 0;
     TotalUsage = 0;
     LocalQuantifiedUsage = 0;
     for (ElementNumber = 0;ElementNumber < NumberOfElements;ElementNumber++) {
         TotalUsage += CountVariableUsageInFormula(TupleFormulae[ElementNumber],Variable,
 &LocalQuantifiedUsage);
-        *QuantifiedOccurences += LocalQuantifiedUsage;
+        *QuantifiedOccurrences += LocalQuantifiedUsage;
     }
     return(TotalUsage);
 }
 //-------------------------------------------------------------------------------------------------
 int CountVariableUsageInFormula(FORMULA Formula,VARIABLENODE Variable,
-int * QuantifiedOccurences) {
+int * QuantifiedOccurrences) {
 
-    int LocalQuantifiedOccurences;
-    int LocalQuantifiedOccurences2;
+    int LocalQuantifiedOccurrences;
+    int LocalQuantifiedOccurrences2;
     int LocalCount;
 
-    LocalQuantifiedOccurences = 0;
-    LocalQuantifiedOccurences2 = 0;
+    LocalQuantifiedOccurrences = 0;
+    LocalQuantifiedOccurrences2 = 0;
 
     switch (Formula->Type) {
         case sequent:
             LocalCount = CountVariableUsageInTupleFormulae(
 Formula->FormulaUnion.SequentFormula.NumberOfLHSElements,Formula->FormulaUnion.SequentFormula.LHS,
-Variable,&LocalQuantifiedOccurences);
+Variable,&LocalQuantifiedOccurrences);
             LocalCount += CountVariableUsageInTupleFormulae(
 Formula->FormulaUnion.SequentFormula.NumberOfRHSElements,Formula->FormulaUnion.SequentFormula.RHS,
-Variable,&LocalQuantifiedOccurences2);
-            LocalQuantifiedOccurences += LocalQuantifiedOccurences2;
+Variable,&LocalQuantifiedOccurrences2);
+            LocalQuantifiedOccurrences += LocalQuantifiedOccurrences2;
             break;
         case quantified:
             LocalCount = CountVariableUsageInFormula(
-Formula->FormulaUnion.QuantifiedFormula.Formula,Variable,&LocalQuantifiedOccurences);
+Formula->FormulaUnion.QuantifiedFormula.Formula,Variable,&LocalQuantifiedOccurrences);
             if (Formula->FormulaUnion.QuantifiedFormula.Variable->TheSymbol.Variable == Variable) {
-                LocalQuantifiedOccurences++;
+                LocalQuantifiedOccurrences++;
             }
             break;
         case binary:
             LocalCount = CountVariableUsageInFormula(
-Formula->FormulaUnion.BinaryFormula.LHS,Variable,&LocalQuantifiedOccurences);
+Formula->FormulaUnion.BinaryFormula.LHS,Variable,&LocalQuantifiedOccurrences);
             LocalCount += CountVariableUsageInFormula(
-Formula->FormulaUnion.BinaryFormula.RHS,Variable,&LocalQuantifiedOccurences2);
-            LocalQuantifiedOccurences += LocalQuantifiedOccurences2;
+Formula->FormulaUnion.BinaryFormula.RHS,Variable,&LocalQuantifiedOccurrences2);
+            LocalQuantifiedOccurrences += LocalQuantifiedOccurrences2;
             break;
         case unary:
             LocalCount = CountVariableUsageInFormula(
-Formula->FormulaUnion.UnaryFormula.Formula,Variable,&LocalQuantifiedOccurences);
+Formula->FormulaUnion.UnaryFormula.Formula,Variable,&LocalQuantifiedOccurrences);
             break;
         case atom:
             LocalCount = CountVariableUsageInTerm(Formula->FormulaUnion.Atom,Variable);
             break;
         case ite_formula:
             LocalCount = CountVariableUsageInFormula(Formula->FormulaUnion.
-ConditionalFormula.Condition,Variable,&LocalQuantifiedOccurences);
+ConditionalFormula.Condition,Variable,&LocalQuantifiedOccurrences);
             LocalCount += CountVariableUsageInFormula(Formula->FormulaUnion.
-ConditionalFormula.FormulaIfTrue,Variable,&LocalQuantifiedOccurences);
+ConditionalFormula.FormulaIfTrue,Variable,&LocalQuantifiedOccurrences);
             LocalCount += CountVariableUsageInFormula(Formula->FormulaUnion.
-ConditionalFormula.FormulaIfFalse,Variable,&LocalQuantifiedOccurences);
+ConditionalFormula.FormulaIfFalse,Variable,&LocalQuantifiedOccurrences);
             break;
         case let_formula:
             LocalCount = CountVariableUsageInFormula(Formula->FormulaUnion.
-LetFormula.LetBody,Variable,&LocalQuantifiedOccurences);
+LetFormula.LetBody,Variable,&LocalQuantifiedOccurrences);
             break;
         default:
             LocalCount = 0;
             CodingError("Unknown formula type in count variables usage");
             break;
     }
-    if (LocalQuantifiedOccurences > 1) {
+    if (LocalQuantifiedOccurrences > 1) {
         CodingError("Multiply quantified variable");
     }
-    if (QuantifiedOccurences != NULL) {
-        *QuantifiedOccurences = LocalQuantifiedOccurences;
+    if (QuantifiedOccurrences != NULL) {
+        *QuantifiedOccurrences = LocalQuantifiedOccurrences;
     }
 
     return(LocalCount);
@@ -1200,6 +1198,7 @@ FORMULAArray TupleFormulae,char * Predicate) {
 int CountFormulaAtomsByPredicate(FORMULA Formula,char * Predicate) {
 
     int Count;
+    String ErrorMessage;
 
     Count = 0;
     switch(Formula->Type) {
@@ -1278,7 +1277,9 @@ Formula->FormulaUnion.LetFormula.LetBody,Predicate);
             return(Count);
             break;
         default:
-            CodingError("Invalid formula type for counting atoms");
+            sprintf(ErrorMessage,"Invalid formula type %s for counting atoms",
+FormulaTypeToString(Formula->Type));
+            CodingError("ErrorMessage");
             return(0);
             break;
     }
@@ -2425,8 +2426,7 @@ AnnotatedFormulaUnion.AnnotatedTSTPFormula.Source;
     }
 }
 //-------------------------------------------------------------------------------------------------
-TERM GetUsefulInfoTERM(ANNOTATEDFORMULA AnnotatedFormula,char * Symbol,
-int OccurenceNumber) {
+TERM GetUsefulInfoTERM(ANNOTATEDFORMULA AnnotatedFormula,char * Symbol,int OccurrenceNumber) {
 
     TERM UsefulInfo;
     int Index;
@@ -2438,30 +2438,26 @@ int OccurenceNumber) {
 //----It has useful info
     if (AnnotatedFormula->
 AnnotatedFormulaUnion.AnnotatedTSTPFormula.UsefulInfo != NULL) {
-        UsefulInfo = AnnotatedFormula->
-AnnotatedFormulaUnion.AnnotatedTSTPFormula.UsefulInfo;
+        UsefulInfo = AnnotatedFormula->AnnotatedFormulaUnion.AnnotatedTSTPFormula.UsefulInfo;
         for (Index = 0; Index < UsefulInfo->FlexibleArity; Index++) {
-            if (!strcmp(Symbol,UsefulInfo->Arguments[Index]->
-TheSymbol.NonVariable->NameSymbol) && 
-(OccurenceNumber < 0 || --OccurenceNumber == 0)) {
+            if (!strcmp(Symbol,UsefulInfo->Arguments[Index]->TheSymbol.NonVariable->NameSymbol) &&
+(OccurrenceNumber < 0 || --OccurrenceNumber == 0)) {
                 return(UsefulInfo->Arguments[Index]);
             }
         }
     }
     return(NULL);
-
 }
 //-------------------------------------------------------------------------------------------------
 //----Gets a term from the useful info global to a CNF/FOF node
 //----Calling routine must provide enough space for info, or send NULL and
 //----take responsibility for the malloced memory.
-char * GetUsefulInfoTerm(ANNOTATEDFORMULA AnnotatedFormula,char * Symbol,
-int OccurenceNumber,char * PutInfoHere) {
+char * GetUsefulInfoTerm(ANNOTATEDFORMULA AnnotatedFormula,char * Symbol,int OccurrenceNumber,
+char * PutInfoHere) {
 
     TERM UsefulTerm;
 
-    if ((UsefulTerm = GetUsefulInfoTERM(AnnotatedFormula,Symbol,
-OccurenceNumber)) != NULL) {
+    if ((UsefulTerm = GetUsefulInfoTERM(AnnotatedFormula,Symbol,OccurrenceNumber)) != NULL) {
         return(TSTPTermToString(UsefulTerm,PutInfoHere));
     } else {
         return(NULL);
