@@ -177,8 +177,8 @@ int TSTPSyntaxFlag) {
     char OpeningBracket,ClosingBracket;
     char * StartOfSymbol;
 
-ZZZZZZz
-printf("Printing term %s indent %d\n",TermTypeToString(Term->Type),Indent);
+// ZZZZZZz
+//DEBUG printf("Printing term %s indent %d\n",TermTypeToString(Term->Type),Indent);
 //----All THF and TFF (because of TFX) terms are formulae
     if ((Language == tptp_thf || Language == tptp_tff) && Term->Type == formula) {
 //----For non-atoms, newline and indent

@@ -80,8 +80,12 @@ int main(int argc, char *argv[]) {
     PrintListOfAnnotatedTSTPNodes(stdout,Signature,Head,tptp,1);
     RemovedUnusedSymbols(Signature);
     PrintSignature(Signature);
+    ListStatistics = GetListStatistics(Head,Signature);
+    PrintListStatistics(stdout,ListStatistics);
     FreeListOfAnnotatedFormulae(&Head);
+    assert(Head == NULL);
     FreeSignature(&Signature);
+    assert(Signature == NULL);
     return(EXIT_SUCCESS);
 
 //-------------------------------------------------------------------------------------------------
