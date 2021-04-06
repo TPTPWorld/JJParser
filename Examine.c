@@ -1130,32 +1130,32 @@ int CountFormulaTerms(FORMULA Formula) {
             return(CountTupleFormulaeTerms(
 Formula->FormulaUnion.SequentFormula.NumberOfLHSElements,
 Formula->FormulaUnion.SequentFormula.LHS) + 
-CountTupleFormulaeTerms(
-Formula->FormulaUnion.SequentFormula.NumberOfRHSElements,
+CountTupleFormulaeTerms(Formula->FormulaUnion.SequentFormula.NumberOfRHSElements,
 Formula->FormulaUnion.SequentFormula.RHS));
             break;
         case assignment:
+//TODO - should I count the LHS?
             return(CountFormulaTerms(Formula->FormulaUnion.BinaryFormula.RHS));
             break;
+        case type_declaration:
+            return(0);
+            break;
         case quantified:
-            return(
-CountFormulaTerms(Formula->FormulaUnion.QuantifiedFormula.Formula));
+            return(CountFormulaTerms(Formula->FormulaUnion.QuantifiedFormula.Formula));
             break;
         case binary:
-            return(
-CountFormulaTerms(Formula->FormulaUnion.BinaryFormula.LHS) + 
+            return(CountFormulaTerms(Formula->FormulaUnion.BinaryFormula.LHS) + 
 CountFormulaTerms(Formula->FormulaUnion.BinaryFormula.RHS));
             break;
         case unary:
-            return(CountFormulaTerms(
-Formula->FormulaUnion.UnaryFormula.Formula));
+            return(CountFormulaTerms(Formula->FormulaUnion.UnaryFormula.Formula));
             break;
         case atom:
+//TODO - What does this mean for TFX and THF?
             return(GetArity(Formula->FormulaUnion.Atom));
             break;
         case tuple:
-            return(CountTupleFormulaeTerms(
-Formula->FormulaUnion.TupleFormula.NumberOfElements,
+            return(CountTupleFormulaeTerms(Formula->FormulaUnion.TupleFormula.NumberOfElements,
 Formula->FormulaUnion.TupleFormula.Elements));
             break;
         case ite_formula:
@@ -1211,7 +1211,11 @@ Formula->FormulaUnion.SequentFormula.NumberOfRHSElements,
 Formula->FormulaUnion.SequentFormula.RHS,Predicate));
             break;
         case assignment:
+//TODO - should I count the LHS?
             return(CountFormulaAtomsByPredicate(Formula->FormulaUnion.BinaryFormula.RHS,Predicate));
+            break;
+        case type_declaration:
+            return(0);
             break;
         case quantified:
 //----Add in RHS of : variables
@@ -1224,18 +1228,15 @@ Predicate);
             return(Count);
             break;
         case binary:
-//----Do unless : or :=
-            if (Formula->FormulaUnion.BinaryFormula.Connective != typecolon ) {
-                Count += CountFormulaAtomsByPredicate(Formula->FormulaUnion.BinaryFormula.LHS,
+            Count += CountFormulaAtomsByPredicate(Formula->FormulaUnion.BinaryFormula.LHS,
 Predicate);
-                Count += CountFormulaAtomsByPredicate( Formula->FormulaUnion.BinaryFormula.RHS,
+            Count += CountFormulaAtomsByPredicate( Formula->FormulaUnion.BinaryFormula.RHS,
 Predicate);
 //----Equality counts as an atom
-                if (Formula->FormulaUnion.BinaryFormula.Connective == equation && 
+            if (Formula->FormulaUnion.BinaryFormula.Connective == equation && 
 (strlen(Predicate) == 0 || !strcmp(Predicate,"="))) {
-                    Count++;
-                }
-            } 
+                Count++;
+            }
             return(Count);
             break;
         case unary:
@@ -1243,6 +1244,7 @@ Predicate);
 Predicate));
             break;
         case atom:
+//TODO - Do nested for TFX
 //----If nothing requested, take everything
             if (strlen(Predicate) == 0 || 
 //----It's the predicate I want
@@ -1279,7 +1281,7 @@ Formula->FormulaUnion.LetFormula.LetBody,Predicate);
         default:
             sprintf(ErrorMessage,"Invalid formula type %s for counting atoms",
 FormulaTypeToString(Formula->Type));
-            CodingError("ErrorMessage");
+            CodingError(ErrorMessage);
             return(0);
             break;
     }
@@ -1342,6 +1344,9 @@ Formula->FormulaUnion.BinaryFormula.RHS);
             AddOnConnectiveStatistics(&ConnectiveStatistics,
 MoreConnectiveStatistics);
             ConnectiveStatistics.NumberOfGlobalDefns++;
+            break;
+        case type_declaration:
+            ConnectiveStatistics.NumberOfGlobalTypeDecs++;
             break;
         case quantified:
 //----For typed variables
@@ -1451,9 +1456,6 @@ Formula->FormulaUnion.BinaryFormula.RHS);
                     ConnectiveStatistics.NumberOfUnions++;
                     ConnectiveStatistics.NumberOfTypeConnectives++;
                     break;
-                case typecolon:
-                    ConnectiveStatistics.NumberOfGlobalTypeDecs++;
-                    break;
                 case equation:
                     break;
                 default:
@@ -1500,30 +1502,25 @@ Formula->FormulaUnion.UnaryFormula.Formula);
             break;
         case tuple:
             ConnectiveStatistics = GetTupleFormulaeConnectiveUsage(
-Formula->FormulaUnion.TupleFormula.NumberOfElements,
-Formula->FormulaUnion.TupleFormula.Elements);
+Formula->FormulaUnion.TupleFormula.NumberOfElements,Formula->FormulaUnion.TupleFormula.Elements);
             break;
         case ite_formula:
             ConnectiveStatistics = GetFormulaConnectiveUsage(
 Formula->FormulaUnion.ConditionalFormula.Condition);
             MoreConnectiveStatistics = GetFormulaConnectiveUsage(
 Formula->FormulaUnion.ConditionalFormula.FormulaIfTrue);
-            AddOnConnectiveStatistics(&ConnectiveStatistics,
-MoreConnectiveStatistics);
+            AddOnConnectiveStatistics(&ConnectiveStatistics,MoreConnectiveStatistics);
             MoreConnectiveStatistics = GetFormulaConnectiveUsage(
 Formula->FormulaUnion.ConditionalFormula.FormulaIfFalse);
-            AddOnConnectiveStatistics(&ConnectiveStatistics,
-MoreConnectiveStatistics);
+            AddOnConnectiveStatistics(&ConnectiveStatistics,MoreConnectiveStatistics);
             break;
         case let_formula:
             ConnectiveStatistics = GetFormulaConnectiveUsage(
 Formula->FormulaUnion.LetFormula.LetDefn);
-            AddOnConnectiveStatistics(&ConnectiveStatistics,
-MoreConnectiveStatistics);
+            AddOnConnectiveStatistics(&ConnectiveStatistics,MoreConnectiveStatistics);
             MoreConnectiveStatistics = GetFormulaConnectiveUsage(
 Formula->FormulaUnion.LetFormula.LetBody);
-            AddOnConnectiveStatistics(&ConnectiveStatistics,
-MoreConnectiveStatistics);
+            AddOnConnectiveStatistics(&ConnectiveStatistics,MoreConnectiveStatistics);
             break;
         default:
             CodingError("Invalid formula type for counting connectives");
@@ -1550,18 +1547,18 @@ int FormulaDepth(FORMULA Formula) {
     switch(Formula->Type) {
         case sequent:
             return(MaximumOfInt(TupleFormulaeDepth(
-Formula->FormulaUnion.SequentFormula.NumberOfLHSElements,
-Formula->FormulaUnion.SequentFormula.LHS),
-TupleFormulaeDepth(
-Formula->FormulaUnion.SequentFormula.NumberOfRHSElements,
+Formula->FormulaUnion.SequentFormula.NumberOfLHSElements,Formula->FormulaUnion.SequentFormula.LHS),
+TupleFormulaeDepth(Formula->FormulaUnion.SequentFormula.NumberOfRHSElements,
 Formula->FormulaUnion.SequentFormula.RHS)));
             break;
         case assignment:
             return(FormulaDepth(Formula->FormulaUnion.BinaryFormula.RHS));
             break;
+        case type_declaration:
+            return(0);
+            break;
         case quantified:
-            return(1 + FormulaDepth(
-Formula->FormulaUnion.QuantifiedFormula.Formula));
+            return(1 + FormulaDepth(Formula->FormulaUnion.QuantifiedFormula.Formula));
             break;
         case binary:
             return(1 + 
@@ -1569,15 +1566,13 @@ MaximumOfInt(FormulaDepth(Formula->FormulaUnion.BinaryFormula.LHS),
 FormulaDepth(Formula->FormulaUnion.BinaryFormula.RHS)));
             break;
         case unary:
-            return(1 + FormulaDepth(
-Formula->FormulaUnion.UnaryFormula.Formula));
+            return(1 + FormulaDepth(Formula->FormulaUnion.UnaryFormula.Formula));
             break;
         case atom:
             return(1);
             break;
         case tuple:
-            return(TupleFormulaeDepth(
-Formula->FormulaUnion.TupleFormula.NumberOfElements,
+            return(TupleFormulaeDepth(Formula->FormulaUnion.TupleFormula.NumberOfElements,
 Formula->FormulaUnion.TupleFormula.Elements));
             break;
         case ite_formula:
@@ -1636,19 +1631,18 @@ int MaxFormulaTermDepth(FORMULA Formula) {
     switch(Formula->Type) {
         case sequent:
             return(MaximumOfInt(MaxTupleFormulaeTermDepth(
-Formula->FormulaUnion.SequentFormula.NumberOfLHSElements,
-Formula->FormulaUnion.SequentFormula.LHS),
-MaxTupleFormulaeTermDepth(
-Formula->FormulaUnion.SequentFormula.NumberOfRHSElements,
+Formula->FormulaUnion.SequentFormula.NumberOfLHSElements,Formula->FormulaUnion.SequentFormula.LHS),
+MaxTupleFormulaeTermDepth(Formula->FormulaUnion.SequentFormula.NumberOfRHSElements,
 Formula->FormulaUnion.SequentFormula.RHS)));
             break;
         case assignment:
-            return(MaxFormulaTermDepth(
-Formula->FormulaUnion.BinaryFormula.RHS));
+            return(MaxFormulaTermDepth(Formula->FormulaUnion.BinaryFormula.RHS));
+            break;
+        case type_declaration:
+            return(0);
             break;
         case quantified:
-            return(MaxFormulaTermDepth(
-Formula->FormulaUnion.QuantifiedFormula.Formula));
+            return(MaxFormulaTermDepth(Formula->FormulaUnion.QuantifiedFormula.Formula));
             break;
         case binary:
             return(MaximumOfInt(
@@ -1656,28 +1650,24 @@ MaxFormulaTermDepth(Formula->FormulaUnion.BinaryFormula.LHS),
 MaxFormulaTermDepth(Formula->FormulaUnion.BinaryFormula.RHS)));
             break;
         case unary:
-            return(MaxFormulaTermDepth(
-Formula->FormulaUnion.UnaryFormula.Formula));
+            return(MaxFormulaTermDepth(Formula->FormulaUnion.UnaryFormula.Formula));
             break;
         case atom:
             return(MaxTermDepth(Formula->FormulaUnion.Atom)-1);
 //----Minus 1 because the predicate doesn't count
             break;
         case tuple:
-            return(MaxTupleFormulaeTermDepth(
-Formula->FormulaUnion.TupleFormula.NumberOfElements,
+            return(MaxTupleFormulaeTermDepth(Formula->FormulaUnion.TupleFormula.NumberOfElements,
 Formula->FormulaUnion.TupleFormula.Elements));
             break;
         case ite_formula:
             return(MaximumOfInt(
 MaxFormulaTermDepth(Formula->FormulaUnion.ConditionalFormula.Condition),
-MaximumOfInt(
-MaxFormulaTermDepth(Formula->FormulaUnion.ConditionalFormula.FormulaIfTrue),
+MaximumOfInt(MaxFormulaTermDepth(Formula->FormulaUnion.ConditionalFormula.FormulaIfTrue),
 MaxFormulaTermDepth(Formula->FormulaUnion.ConditionalFormula.FormulaIfFalse))));
             break;
         case let_formula:
-            return(
-MaxFormulaTermDepth(Formula->FormulaUnion.LetFormula.LetBody));
+            return(MaxFormulaTermDepth(Formula->FormulaUnion.LetFormula.LetBody));
             break;
         default:
             CodingError("Invalid formula type for max term depth\n");

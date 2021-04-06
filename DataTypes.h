@@ -191,7 +191,6 @@ typedef TERM * TERMArray;
 //-------------------------------------------------------------------------------------------------
 //----Formula types
 typedef enum {
-    tuple,
     sequent,
     assignment,
     type_declaration,
@@ -199,6 +198,7 @@ typedef enum {
     binary,
     unary,
     atom,
+    tuple,
     ite_formula,
     let_formula,
     nonformulatype
