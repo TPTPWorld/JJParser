@@ -1065,12 +1065,13 @@ int NonHornClause(ANNOTATEDFORMULA AnnotatedFormula) {
 Positive > 1);
 }
 //-------------------------------------------------------------------------------------------------
-int CountAnnotatedFormulaUniqueVariablesByUse(ANNOTATEDFORMULA 
-AnnotatedFormula,int MinUse,int MaxUse,ConnectiveType Quantification) {
+int CountAnnotatedFormulaUniqueVariablesByUse(ANNOTATEDFORMULA AnnotatedFormula,int MinUse,
+int MaxUse,ConnectiveType Quantification) {
 
     int Counter;
     VARIABLENODE VariableNode;
 
+    NEED BETTER ASSESSMENT OF VARIABLES. ALSO GO INTO ARGUEMENTS FOR TFX AND THF
     if (LogicalAnnotatedFormula(AnnotatedFormula)) {
         Counter = 0;
         VariableNode = AnnotatedFormula->
@@ -1095,14 +1096,12 @@ VariableNode->NumberOfUses <= MaxUse)) &&
 //-------------------------------------------------------------------------------------------------
 int CountAnnotatedFormulaSingletons(ANNOTATEDFORMULA AnnotatedFormula) {
 
-    return(CountAnnotatedFormulaUniqueVariablesByUse(AnnotatedFormula,1,1,
-none));
+    return(CountAnnotatedFormulaUniqueVariablesByUse(AnnotatedFormula,1,1,none));
 }
 //-------------------------------------------------------------------------------------------------
 int CountAnnotatedFormulaUniqueVariables(ANNOTATEDFORMULA AnnotatedFormula) {
 
-    return(CountAnnotatedFormulaUniqueVariablesByUse(AnnotatedFormula,-1,-1,
-none));
+    return(CountAnnotatedFormulaUniqueVariablesByUse(AnnotatedFormula,-1,-1,none));
 }
 //-------------------------------------------------------------------------------------------------
 int CountTupleFormulaeTerms(int NumberOfElements,FORMULAArray TupleFormulae) {
@@ -1257,17 +1256,12 @@ Formula->FormulaUnion.TupleFormula.NumberOfElements,
 Formula->FormulaUnion.TupleFormula.Elements,Predicate));
             break;
         case ite_formula:
-            Count += CountFormulaAtomsByPredicate(
-Formula->FormulaUnion.ConditionalFormula.Condition,Predicate);
-            Count += CountFormulaAtomsByPredicate(
-Formula->FormulaUnion.ConditionalFormula.FormulaIfTrue,Predicate);
-            Count += CountFormulaAtomsByPredicate(
-Formula->FormulaUnion.ConditionalFormula.FormulaIfFalse,Predicate);
+            Count += MaximumOfInt(CountFormulaAtomsByPredicate(
+Formula->FormulaUnion.ConditionalFormula.FormulaIfTrue,Predicate),
+CountFormulaAtomsByPredicate(Formula->FormulaUnion.ConditionalFormula.FormulaIfFalse,Predicate));
             return(Count);
             break;
         case let_formula:
-            Count += CountFormulaAtomsByPredicate(
-Formula->FormulaUnion.LetFormula.LetDefn,Predicate);
             Count += CountFormulaAtomsByPredicate(
 Formula->FormulaUnion.LetFormula.LetBody,Predicate);
             return(Count);
@@ -1575,8 +1569,7 @@ Formula->FormulaUnion.ConditionalFormula.FormulaIfTrue),
 FormulaDepth(Formula->FormulaUnion.ConditionalFormula.FormulaIfFalse)));
             break;
         case let_formula:
-            return(1 + FormulaDepth(
-Formula->FormulaUnion.LetFormula.LetBody));
+            return(1 + FormulaDepth(Formula->FormulaUnion.LetFormula.LetBody));
             break;
         default:
             CodingError("Invalid formula type for measuring depth");

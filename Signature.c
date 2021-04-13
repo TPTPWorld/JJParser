@@ -246,6 +246,11 @@ SYMBOLNODE IsSymbolInSignatureList(SYMBOLNODE List,char * Name,int Arity) {
     }
 }
 //-------------------------------------------------------------------------------------------------
+int DefinedSymbol(SYMBOLNODE Symbol) {
+
+    return(GetSignatureSymbol(Symbol)[0] == '$');
+}
+//-------------------------------------------------------------------------------------------------
 SYMBOLNODE * IsSymbolInSignatureListPointer(SYMBOLNODE * List,char * Name,int Arity) {
 
     if (*List == NULL) {
@@ -543,7 +548,7 @@ double * NumberOfSymbolsArity0,double * MinSymbolArity,double * MaxSymbolArity) 
 
     if (SignatureNode != NULL) {
 //DEBUG printf("Symbol is %s\n",SignatureNode->NameSymbol);
-        if (GetSignatureUses(SignatureNode) > 0) {
+        if (GetSignatureUses(SignatureNode) > 0 && !DefinedSymbol(SignatureNode)) {
 //DEBUG printf("    and it is used\n");
             (*NumberOfSymbols)++;
             if (SignatureNode->Arity == 0) {
