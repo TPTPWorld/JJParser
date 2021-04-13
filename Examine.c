@@ -638,41 +638,42 @@ FunctorCollectorLength,VariableCollector,VariableCollectorLength);
 }
 //-------------------------------------------------------------------------------------------------
 void CollectSymbolsInFormula(FORMULA Formula,char ** PredicateCollector,
-int * PredicateCollectorLength,char ** FunctorCollector,
-int * FunctorCollectorLength,char ** VariableCollector,int * VariableCollectorLength) {
+int * PredicateCollectorLength,char ** FunctorCollector,int * FunctorCollectorLength,
+char ** VariableCollector,int * VariableCollectorLength) {
 
     char * PredicateAndArity;
+    String ErrorMessage;
 
     switch (Formula->Type) {
         case sequent:
 //DEBUG printf("CollectSymbolsInFormula: sequent");
             CollectSymbolsInTupleFormulae(
-Formula->FormulaUnion.SequentFormula.NumberOfLHSElements,
-Formula->FormulaUnion.SequentFormula.LHS,
-PredicateCollector,PredicateCollectorLength,FunctorCollector,
-FunctorCollectorLength,VariableCollector,VariableCollectorLength);
+Formula->FormulaUnion.SequentFormula.NumberOfLHSElements,Formula->FormulaUnion.SequentFormula.LHS,
+PredicateCollector,PredicateCollectorLength,FunctorCollector,FunctorCollectorLength,
+VariableCollector,VariableCollectorLength);
             CollectSymbolsInTupleFormulae(
-Formula->FormulaUnion.SequentFormula.NumberOfRHSElements,
-Formula->FormulaUnion.SequentFormula.RHS,
-PredicateCollector,PredicateCollectorLength,FunctorCollector,
-FunctorCollectorLength,VariableCollector,VariableCollectorLength);
+Formula->FormulaUnion.SequentFormula.NumberOfRHSElements,Formula->FormulaUnion.SequentFormula.RHS,
+PredicateCollector,PredicateCollectorLength,FunctorCollector,FunctorCollectorLength,
+VariableCollector,VariableCollectorLength);
             break;
         case assignment:
-            CollectSymbolsInFormula(Formula->FormulaUnion.BinaryFormula.RHS,
-PredicateCollector,PredicateCollectorLength,FunctorCollector,
-FunctorCollectorLength,VariableCollector,VariableCollectorLength);
+            CollectSymbolsInFormula(Formula->FormulaUnion.BinaryFormula.RHS,PredicateCollector,
+PredicateCollectorLength,FunctorCollector,FunctorCollectorLength,VariableCollector,
+VariableCollectorLength);
+            break;
+        case type_declaration:
             break;
         case quantified:
 //DEBUG printf("CollectSymbolsInFormula: quantified");
 //----Add in RHS of : and := variables
             if (Formula->FormulaUnion.QuantifiedFormula.VariableType != NULL) {
-                CollectSymbolsInFormula(Formula->FormulaUnion.QuantifiedFormula.
-VariableType,PredicateCollector,PredicateCollectorLength,FunctorCollector,
-FunctorCollectorLength,VariableCollector,VariableCollectorLength);
+                CollectSymbolsInFormula(Formula->FormulaUnion.QuantifiedFormula.VariableType,
+PredicateCollector,PredicateCollectorLength,FunctorCollector,FunctorCollectorLength,
+VariableCollector,VariableCollectorLength);
             }
-            CollectSymbolsInFormula(Formula->FormulaUnion.QuantifiedFormula.
-Formula,PredicateCollector,PredicateCollectorLength,FunctorCollector,
-FunctorCollectorLength,VariableCollector,VariableCollectorLength);
+            CollectSymbolsInFormula(Formula->FormulaUnion.QuantifiedFormula.Formula,
+PredicateCollector,PredicateCollectorLength,FunctorCollector,FunctorCollectorLength,
+VariableCollector,VariableCollectorLength);
             break;
         case binary:
 //DEBUG printf("CollectSymbolsInFormula: binary");
@@ -685,16 +686,15 @@ VariableCollectorLength);
             }
 //----Don't do <<
             if (Formula->FormulaUnion.BinaryFormula.Connective != subtype) {
-                CollectSymbolsInFormula(Formula->FormulaUnion.BinaryFormula.RHS,
-PredicateCollector,PredicateCollectorLength,FunctorCollector,
-FunctorCollectorLength,VariableCollector,VariableCollectorLength);
+                CollectSymbolsInFormula(Formula->FormulaUnion.BinaryFormula.RHS,PredicateCollector,
+PredicateCollectorLength,FunctorCollector,FunctorCollectorLength,VariableCollector,
+VariableCollectorLength);
             }
             break;
         case unary:
 //DEBUG printf("CollectSymbolsInFormula: unary");
-            CollectSymbolsInFormula(Formula->
-FormulaUnion.UnaryFormula.Formula,PredicateCollector,PredicateCollectorLength,
-FunctorCollector,FunctorCollectorLength,VariableCollector,
+            CollectSymbolsInFormula(Formula->FormulaUnion.UnaryFormula.Formula,PredicateCollector,
+PredicateCollectorLength,FunctorCollector,FunctorCollectorLength,VariableCollector,
 VariableCollectorLength);
             break;
         case atom:
@@ -705,52 +705,46 @@ VariableCollectorLength);
 //----Variables in THF are not symbols
             if (Formula->FormulaUnion.Atom->Type != variable) {
                 PredicateAndArity = (char *)Malloc(sizeof(SuperString));
-                sprintf(PredicateAndArity,"%s/%d/1\n",GetSymbol(Formula->
-FormulaUnion.Atom),GetArity(Formula->FormulaUnion.Atom));
-                ExtendString(PredicateCollector,PredicateAndArity,
-PredicateCollectorLength);
+                sprintf(PredicateAndArity,"%s/%d/1\n",GetSymbol(Formula->FormulaUnion.Atom),
+GetArity(Formula->FormulaUnion.Atom));
+                ExtendString(PredicateCollector,PredicateAndArity,PredicateCollectorLength);
                 Free((void **)&PredicateAndArity);
-                CollectFunctorsInAtom(Formula->FormulaUnion.Atom,
-FunctorCollector,FunctorCollectorLength);
-                CollectVariablesInAtom(Formula->FormulaUnion.Atom,
-VariableCollector,VariableCollectorLength);
+                CollectFunctorsInAtom(Formula->FormulaUnion.Atom,FunctorCollector,
+FunctorCollectorLength);
+                CollectVariablesInAtom(Formula->FormulaUnion.Atom,VariableCollector,
+VariableCollectorLength);
             }
             break;
         case tuple:
-            CollectSymbolsInTupleFormulae(
-Formula->FormulaUnion.TupleFormula.NumberOfElements,
-Formula->FormulaUnion.TupleFormula.Elements,PredicateCollector,
-PredicateCollectorLength,FunctorCollector,FunctorCollectorLength,
-VariableCollector,VariableCollectorLength);
+            CollectSymbolsInTupleFormulae(Formula->FormulaUnion.TupleFormula.NumberOfElements,
+Formula->FormulaUnion.TupleFormula.Elements,PredicateCollector,PredicateCollectorLength,
+FunctorCollector,FunctorCollectorLength,VariableCollector,VariableCollectorLength);
             break;
         case ite_formula:
 //DEBUG printf("CollectSymbolsInFormula: ite_formula");
-            CollectSymbolsInFormula(
-Formula->FormulaUnion.ConditionalFormula.Condition,PredicateCollector,
-PredicateCollectorLength,FunctorCollector,FunctorCollectorLength,
+            CollectSymbolsInFormula(Formula->FormulaUnion.ConditionalFormula.Condition,
+PredicateCollector,PredicateCollectorLength,FunctorCollector,FunctorCollectorLength,
 VariableCollector,VariableCollectorLength);
-            CollectSymbolsInFormula(
-Formula->FormulaUnion.ConditionalFormula.FormulaIfTrue,PredicateCollector,
-PredicateCollectorLength,FunctorCollector,FunctorCollectorLength,
+            CollectSymbolsInFormula(Formula->FormulaUnion.ConditionalFormula.FormulaIfTrue,
+PredicateCollector,PredicateCollectorLength,FunctorCollector,FunctorCollectorLength,
 VariableCollector,VariableCollectorLength);
-            CollectSymbolsInFormula(
-Formula->FormulaUnion.ConditionalFormula.FormulaIfFalse,PredicateCollector,
-PredicateCollectorLength,FunctorCollector,FunctorCollectorLength,
+            CollectSymbolsInFormula(Formula->FormulaUnion.ConditionalFormula.FormulaIfFalse,
+PredicateCollector,PredicateCollectorLength,FunctorCollector,FunctorCollectorLength,
 VariableCollector,VariableCollectorLength);
             break;
         case let_formula:
 //DEBUG printf("CollectSymbolsInFormula: let_formula");
-            CollectSymbolsInFormula(
-Formula->FormulaUnion.LetFormula.LetDefn,PredicateCollector,
-PredicateCollectorLength,FunctorCollector,FunctorCollectorLength,
-VariableCollector,VariableCollectorLength);
-            CollectSymbolsInFormula(
-Formula->FormulaUnion.LetFormula.LetBody,PredicateCollector,
-PredicateCollectorLength,FunctorCollector,FunctorCollectorLength,
-VariableCollector,VariableCollectorLength);
+            CollectSymbolsInFormula(Formula->FormulaUnion.LetFormula.LetDefn,PredicateCollector,
+PredicateCollectorLength,FunctorCollector,FunctorCollectorLength,VariableCollector,
+VariableCollectorLength);
+            CollectSymbolsInFormula(Formula->FormulaUnion.LetFormula.LetBody,PredicateCollector,
+PredicateCollectorLength,FunctorCollector,FunctorCollectorLength,VariableCollector,
+VariableCollectorLength);
             break;
         default:
-            CodingError("Not a known formula type in collect predicates");
+            sprintf(ErrorMessage,"Invalid formula type %s for counting atoms",
+FormulaTypeToString(Formula->Type));
+            CodingError(ErrorMessage);
             break;
     }
 }
@@ -1717,6 +1711,8 @@ int SumTupleFormulaeTermDepth(int NumberOfElements,FORMULAArray TupleFormulae) {
 //-------------------------------------------------------------------------------------------------
 int SumFormulaTermDepth(FORMULA Formula) {
 
+    String ErrorMessage;
+
     switch(Formula->Type) {
         case sequent:
             return(SumTupleFormulaeTermDepth(
@@ -1725,6 +1721,12 @@ Formula->FormulaUnion.SequentFormula.LHS) +
 SumTupleFormulaeTermDepth(
 Formula->FormulaUnion.SequentFormula.NumberOfRHSElements,
 Formula->FormulaUnion.SequentFormula.RHS));
+        case assignment:
+            return(SumFormulaTermDepth(Formula->FormulaUnion.BinaryFormula.RHS));
+            break;
+        case type_declaration:
+            return(0);
+            break;
         case quantified:
             return(SumFormulaTermDepth(
 Formula->FormulaUnion.QuantifiedFormula.Formula));
@@ -1735,15 +1737,13 @@ SumFormulaTermDepth(Formula->FormulaUnion.BinaryFormula.LHS) +
 SumFormulaTermDepth(Formula->FormulaUnion.BinaryFormula.RHS));
             break;
         case unary:
-            return(SumFormulaTermDepth(
-Formula->FormulaUnion.UnaryFormula.Formula));
+            return(SumFormulaTermDepth(Formula->FormulaUnion.UnaryFormula.Formula));
             break;
         case atom:
             return(SumTermDepth(Formula->FormulaUnion.Atom));
             break;
         case tuple:
-            return(SumTupleFormulaeTermDepth(
-Formula->FormulaUnion.TupleFormula.NumberOfElements,
+            return(SumTupleFormulaeTermDepth(Formula->FormulaUnion.TupleFormula.NumberOfElements,
 Formula->FormulaUnion.TupleFormula.Elements));
             break;
         case ite_formula:
@@ -1753,11 +1753,12 @@ SumFormulaTermDepth(Formula->FormulaUnion.ConditionalFormula.FormulaIfTrue) +
 SumFormulaTermDepth(Formula->FormulaUnion.ConditionalFormula.FormulaIfFalse));
             break;
         case let_formula:
-            return(
-SumFormulaTermDepth(Formula->FormulaUnion.LetFormula.LetBody));
+            return(SumFormulaTermDepth(Formula->FormulaUnion.LetFormula.LetBody));
             break;
         default:
-            CodingError("Invalid formula type for max term depth");
+            sprintf(ErrorMessage,"Invalid formula type %s for sum formula term depth",
+FormulaTypeToString(Formula->Type));
+            CodingError(ErrorMessage);
             return(0);
             break;
     }
