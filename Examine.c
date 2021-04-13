@@ -36,7 +36,7 @@ int GetArity(TERM Term) {
     }
 
     if (Term->Type == variable) {
-        return(GetSignatureArity(Term->TheSymbol.Variable->VariableName));
+        return (GetSignatureArity(Term->TheSymbol.Variable->VariableName));
 //----Lists have flexible arity (signature arity should be -1)
     } else if (!strcmp(GetSymbol(Term),"[]")) {
         return(Term->FlexibleArity);
@@ -1606,11 +1606,15 @@ int MaxTermDepth(TERM Term) {
     int MaxDepth;
     int Index;
 
-    MaxDepth = 0;
-    for (Index = 0; Index < GetArity(Term); Index++) {
-        MaxDepth = MaximumOfInt(MaxDepth,MaxTermDepth(Term->Arguments[Index]));
+    if (Term->Type == formula) {
+        return(MaxFormulaTermDepth(Term->TheSymbol.Formula));
+    } else {
+        MaxDepth = 0;
+        for (Index = 0; Index < GetArity(Term); Index++) {
+            MaxDepth = MaximumOfInt(MaxDepth, MaxTermDepth(Term->Arguments[Index]));
+        }
+        return (1 + MaxDepth);
     }
-    return(1 + MaxDepth);
 }
 //-------------------------------------------------------------------------------------------------
 int MaxTupleFormulaeTermDepth(int NumberOfElements,FORMULAArray TupleFormulae) {
