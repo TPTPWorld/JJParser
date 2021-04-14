@@ -27,13 +27,13 @@ typedef enum {
     variable_atoms,
     literal_count,
     terms,
-    tuples,
     variables,
     singletons,
     // count_math_variables,
-    ite_formulae,
-    let_formulae,
-    boolean_terms, //----Not including boolean variables
+    tuples,
+    ite_forms,
+    let_forms,
+    nested_formulae, //----Not including boolean variables
     boolean_variables,
     formula_depth,
     term_depth,
@@ -63,6 +63,7 @@ typedef struct {
     double NumberOfAtoms;  //----Doubles as NumberOfLiterals;
     double NumberOfEqualityAtoms;  //----Doubles as NumberOfEqualityLiterals
     double NumberOfVariableAtoms;
+    double NumberOfNestedFormulae;
     double NumberOfLiterals;
 
     double MaxFormulaDepth;
@@ -88,6 +89,10 @@ typedef struct {
     double MaxFunctorArity;
     double NumberOfVariables;
     double NumberOfSingletons;
+    double NumberTuples;
+    double NumberOfITEs;
+    double NumberOfLets;
+    double NumberBooleanVariables;
     double NumberOfMathPredicates;
     double NumberOfMathFunctions;
     double NumberOfNumbers;

@@ -109,6 +109,21 @@ FormulaWithVariables->Formula->Type == sequent) {
                 case singletons:
                     Counter += CountAnnotatedFormulaSingletons(List->AnnotatedFormula);
                     break;
+                case tuples:
+                    Counter += CountAnnotatedFormulaTuples(List->AnnotatedFormula);
+                    break;
+                case ite_forms:
+                    Counter += CountAnnotatedFormulaAtomsByPredicate(List->AnnotatedFormula,"$ite");
+                    break;
+                case let_forms:
+                    Counter += CountAnnotatedFormulaAtomsByPredicate(List->AnnotatedFormula,"$let");
+                    break;
+                case nested_formulae:
+//TODO
+                    break;
+                case boolean_variables:
+//TODO
+                    break;
                 case formula_depth:
                     Counter += AnnotatedFormulaDepth(List->AnnotatedFormula);
                     break;
@@ -682,6 +697,10 @@ Statistics.FormulaStatistics.NumberOfCNF > 0 ||
 Statistics.FormulaStatistics.NumberOfTFF > 0) {
         fprintf(Stream,"%%            Maximal term depth    : %4.0f (%4.0f average)\n",
 Statistics.FormulaStatistics.MaxTermDepth,Statistics.FormulaStatistics.AverageTermDepth);
+    }
+
+//----TFX symbols
+    if (0) {
     }
 
 //----Mathematics

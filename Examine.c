@@ -392,6 +392,9 @@ int CountVariableUsageInTerm(TERM Term,VARIABLENODE Variable) {
             return(CountVariableUsageInArguments(Term->Arguments,
 Term->TheSymbol.NonVariable->Arity,Variable));
             break;
+        case formula:
+//TODO
+            break;
         default:
             CodingError("Bad term type for counting variable occurrences");
             return(0);
@@ -699,7 +702,6 @@ VariableCollectorLength);
             break;
         case atom:
 //DEBUG printf("CollectSymbolsInFormula: atom\n");
-//----$true and $false are exempt NOT ANY MORE - WHO DOES THIS AFFECT :-(
 //            if (strcmp(GetSymbol(Formula->FormulaUnion.Atom),"$true") &&
 //strcmp(GetSymbol(Formula->FormulaUnion.Atom),"$false")) {
 //----Variables in THF are not symbols
@@ -900,16 +902,14 @@ PutNegativesHere,NegativesLength);
         case unary:
         case atom:
             LiteralSymbols = (char *)Malloc(sizeof(String));
-            if (GetLiteralSymbolUsage(DisjunctionOrLiteral,&LiteralSymbols,
-&LiteralVariables) != NULL) {
+            if (GetLiteralSymbolUsage(DisjunctionOrLiteral,&LiteralSymbols,&LiteralVariables) != 
+NULL) {
 //DEBUG printf("Literal symbols are \n%s\n",LiteralSymbols);
 //DEBUG printf("Literal variables are \n%s\n",LiteralVariables);
                 if (DisjunctionOrLiteral->Type == unary) {
-                    ExtendString(PutNegativesHere,LiteralVariables,
-NegativesLength);
+                    ExtendString(PutNegativesHere,LiteralVariables,NegativesLength);
                 } else {
-                    ExtendString(PutPositivesHere,LiteralVariables,
-PositivesLength);
+                    ExtendString(PutPositivesHere,LiteralVariables,PositivesLength);
                 }
             } else {
                 CodingError("Cannot get literal symbol usage");
@@ -985,10 +985,8 @@ int CountFormulaLiteralsOfPolarity(FORMULA DisjunctionOrLiteral,int Sign) {
     switch (DisjunctionOrLiteral->Type) {
         case binary:
             return(
-CountFormulaLiteralsOfPolarity(DisjunctionOrLiteral->
-FormulaUnion.BinaryFormula.LHS,Sign) +
-CountFormulaLiteralsOfPolarity(DisjunctionOrLiteral->
-FormulaUnion.BinaryFormula.RHS,Sign));
+CountFormulaLiteralsOfPolarity(DisjunctionOrLiteral->FormulaUnion.BinaryFormula.LHS,Sign) +
+CountFormulaLiteralsOfPolarity(DisjunctionOrLiteral->FormulaUnion.BinaryFormula.RHS,Sign));
             break;
         case unary:
             if (Sign == -1) {
@@ -1053,16 +1051,14 @@ int HornClause(ANNOTATEDFORMULA AnnotatedFormula) {
 
     int Positive,Negative;
 
-    return(CountLiteralsOfPolarity(AnnotatedFormula,&Positive,&Negative) &&
-Positive <= 1);
+    return(CountLiteralsOfPolarity(AnnotatedFormula,&Positive,&Negative) && Positive <= 1);
 }
 //-------------------------------------------------------------------------------------------------
 int NonHornClause(ANNOTATEDFORMULA AnnotatedFormula) {
 
     int Positive,Negative;
 
-    return(CountLiteralsOfPolarity(AnnotatedFormula,&Positive,&Negative) &&
-Positive > 1);
+    return(CountLiteralsOfPolarity(AnnotatedFormula,&Positive,&Negative) && Positive > 1);
 }
 //-------------------------------------------------------------------------------------------------
 int CountAnnotatedFormulaUniqueVariablesByUse(ANNOTATEDFORMULA AnnotatedFormula,int MinUse,
@@ -1071,7 +1067,7 @@ int MaxUse,ConnectiveType Quantification) {
     int Counter;
     VARIABLENODE VariableNode;
 
-    NEED BETTER ASSESSMENT OF VARIABLES. ALSO GO INTO ARGUEMENTS FOR TFX AND THF
+//TODO    NEED BETTER ASSESSMENT OF VARIABLES. ALSO GO INTO ARGUEMENTS FOR TFX AND THF
     if (LogicalAnnotatedFormula(AnnotatedFormula)) {
         Counter = 0;
         VariableNode = AnnotatedFormula->
@@ -1102,6 +1098,12 @@ int CountAnnotatedFormulaSingletons(ANNOTATEDFORMULA AnnotatedFormula) {
 int CountAnnotatedFormulaUniqueVariables(ANNOTATEDFORMULA AnnotatedFormula) {
 
     return(CountAnnotatedFormulaUniqueVariablesByUse(AnnotatedFormula,-1,-1,none));
+}
+//-------------------------------------------------------------------------------------------------
+int CountAnnotatedFormulaTuples(ANNOTATEDFORMULA AnnotatedFormula) {
+
+//TODO
+    return(0);
 }
 //-------------------------------------------------------------------------------------------------
 int CountTupleFormulaeTerms(int NumberOfElements,FORMULAArray TupleFormulae) {
@@ -1175,8 +1177,8 @@ int CountAnnotatedFormulaTerms(ANNOTATEDFORMULA AnnotatedFormula) {
 AnnotatedTSTPFormula.FormulaWithVariables->Formula));
 }
 //-------------------------------------------------------------------------------------------------
-int CountTupleFormulaeAtomsByPredicate(int NumberOfElements,
-FORMULAArray TupleFormulae,char * Predicate) {
+int CountTupleFormulaeAtomsByPredicate(int NumberOfElements,FORMULAArray TupleFormulae,
+char * Predicate) {
 
     int ElementNumber;
     int TotalAtoms;
@@ -1186,6 +1188,21 @@ FORMULAArray TupleFormulae,char * Predicate) {
         TotalAtoms += CountFormulaAtomsByPredicate(TupleFormulae[ElementNumber],Predicate);
     }
     return(TotalAtoms);
+}
+//-------------------------------------------------------------------------------------------------
+int CountNestedFormulaAtomsByPredicate(TERM Atom,char * Predicate) {
+
+    int Index;
+    int Count;
+
+    Count = 0;
+    for (Index = 0; Index < GetArity(Atom); Index++) {
+        if (Atom->Arguments[Index]->Type == formula) {
+            Count += CountFormulaAtomsByPredicate(Atom->Arguments[Index]->TheSymbol.Formula,
+Predicate);
+        }
+    }
+    return (Count);
 }
 //-------------------------------------------------------------------------------------------------
 int CountFormulaAtomsByPredicate(FORMULA Formula,char * Predicate) {
@@ -1237,7 +1254,8 @@ Predicate);
 Predicate));
             break;
         case atom:
-//TODO - Do nested for TFX
+//----Do nested for TFX (and first-order style THF, if it's ever used)
+            Count = CountNestedFormulaAtomsByPredicate(Formula->FormulaUnion.Atom,Predicate);
 //----If nothing requested, take everything
             if (strlen(Predicate) == 0 || 
 //----It's the predicate I want
@@ -1245,9 +1263,9 @@ Predicate));
 //----A variable in THF
 (!strcmp(Predicate,"VARIABLE") && Formula->FormulaUnion.Atom->Type == variable)) {
 //DEBUG printf("--%s-- matches --%s--\n",GetSymbol(Formula->FormulaUnion.Atom),Predicate);
-                return(1);
+                return(Count+ 1);
             } else {
-                return(0);
+                return(Count + 0);
             }
             break;
         case tuple:
@@ -1524,8 +1542,7 @@ int TupleFormulaeDepth(int NumberOfElements,FORMULAArray TupleFormulae) {
 
     MaximalDepth = 0;
     for (ElementNumber = 0;ElementNumber < NumberOfElements;ElementNumber++) {
-        MaximalDepth = MaximumOfInt(MaximalDepth,
-FormulaDepth(TupleFormulae[ElementNumber]));
+        MaximalDepth = MaximumOfInt(MaximalDepth,FormulaDepth(TupleFormulae[ElementNumber]));
     }
     return(MaximalDepth);
 }
@@ -1598,7 +1615,7 @@ int MaxTermDepth(TERM Term) {
     } else {
         MaxDepth = 0;
         for (Index = 0; Index < GetArity(Term); Index++) {
-            MaxDepth = MaximumOfInt(MaxDepth, MaxTermDepth(Term->Arguments[Index]));
+            MaxDepth = MaximumOfInt(MaxDepth,MaxTermDepth(Term->Arguments[Index]));
         }
         return (1 + MaxDepth);
     }

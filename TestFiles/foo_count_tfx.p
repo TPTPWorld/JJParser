@@ -15,4 +15,4 @@ tff(let_i,axiom,q($let(f: $int,
 tff(s_type,type,s: $o > $o).
 tff(nested,axiom,s(! [X:$int] : q(X))).
 tff(boolean,axiom,! [X:$o] : s(X)).
-                    
+tff(nested_equality,axiom,s(1 = 0)).
