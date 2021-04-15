@@ -39,10 +39,10 @@ SIGNATURE NewSignatureWithTypes(void) {
     IncreaseSymbolUseCount(InsertIntoSignature(Signature,predicate,"$false",0,NULL),-1);
     IncreaseSymbolUseCount(InsertIntoSignature(Signature,predicate,"$is_int",1,NULL),-1);
     IncreaseSymbolUseCount(InsertIntoSignature(Signature,predicate,"$is_rat",1,NULL),-1);
-    IncreaseSymbolUseCount(InsertIntoSignature(Signature,function,"$less",2,NULL),-1);
-    IncreaseSymbolUseCount(InsertIntoSignature(Signature,function,"$lesseq",2,NULL),-1);
-    IncreaseSymbolUseCount(InsertIntoSignature(Signature,function,"$greater",2,NULL),-1);
-    IncreaseSymbolUseCount(InsertIntoSignature(Signature,function,"$greatereq",2,NULL),-1);
+    IncreaseSymbolUseCount(InsertIntoSignature(Signature,predicate,"$less",2,NULL),-1);
+    IncreaseSymbolUseCount(InsertIntoSignature(Signature,predicate,"$lesseq",2,NULL),-1);
+    IncreaseSymbolUseCount(InsertIntoSignature(Signature,predicate,"$greater",2,NULL),-1);
+    IncreaseSymbolUseCount(InsertIntoSignature(Signature,predicate,"$greatereq",2,NULL),-1);
     IncreaseSymbolUseCount(InsertIntoSignature(Signature,function,"$uminus",1,NULL),-1);
     IncreaseSymbolUseCount(InsertIntoSignature(Signature,function,"$sum",2,NULL),-1);
     IncreaseSymbolUseCount(InsertIntoSignature(Signature,function,"$difference",2,NULL),-1);

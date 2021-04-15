@@ -251,7 +251,7 @@ typedef union {
     TupleFormulaType TupleFormula;
     SequentFormulaType SequentFormula;
     QuantifiedFormulaType QuantifiedFormula;
-    BinaryFormulaType BinaryFormula;
+    BinaryFormulaType BinaryFormula;  //----Includes type declarations and assignments
     UnaryFormulaType UnaryFormula;
     ConditionalFormulaType ConditionalFormula;
     LetFormulaType LetFormula;

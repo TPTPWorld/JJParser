@@ -89,7 +89,7 @@ typedef struct {
     double MaxFunctorArity;
     double NumberOfVariables;
     double NumberOfSingletons;
-    double NumberTuples;
+    double NumberOfTuples;
     double NumberOfITEs;
     double NumberOfLets;
     double NumberBooleanVariables;

@@ -58,7 +58,8 @@ int ListCount(LISTNODE List,CountType WhatToCount) {
                     break;
 //----Unit annotated fomula has just one atom
                 case unit_formulae:
-                    if (CountAnnotatedFormulaAtomsByPredicate(List->AnnotatedFormula,"") == 1) {
+                    if (CountFormulaAtomsByPredicate(List->AnnotatedFormula->
+AnnotatedFormulaUnion.AnnotatedTSTPFormula.FormulaWithVariables->Formula,"") == 1) {
                         Counter += 1;
                     }
                     break;
@@ -85,23 +86,28 @@ FormulaWithVariables->Formula->Type == sequent) {
                     }
                     break;
                 case atoms:
-                    Counter += CountAnnotatedFormulaAtomsByPredicate(List->AnnotatedFormula,"");
+                    Counter += CountFormulaAtomsByPredicate(List->AnnotatedFormula->
+AnnotatedFormulaUnion.AnnotatedTSTPFormula.FormulaWithVariables->Formula,"");
                     break;
                 case equality_atoms:
-                    Counter += CountAnnotatedFormulaAtomsByPredicate(List->AnnotatedFormula,"=");
-                    Counter += CountAnnotatedFormulaAtomsByPredicate(List->AnnotatedFormula,"@=");
+                    Counter += CountFormulaAtomsByPredicate(List->AnnotatedFormula->
+AnnotatedFormulaUnion.AnnotatedTSTPFormula.FormulaWithVariables->Formula,"=");
+                    Counter += CountFormulaAtomsByPredicate(List->AnnotatedFormula->
+AnnotatedFormulaUnion.AnnotatedTSTPFormula.FormulaWithVariables->Formula,"@=");
                     break;
                 case variable_atoms:
-                    Counter += CountAnnotatedFormulaAtomsByPredicate(List->AnnotatedFormula,
-"VARIABLE");
+                    Counter += CountFormulaAtomsByPredicate(List->AnnotatedFormula->
+AnnotatedFormulaUnion.AnnotatedTSTPFormula.FormulaWithVariables->Formula,"VARIABLE");
                     break;
                 case literal_count:
                     if (GetSyntax(List->AnnotatedFormula) == tptp_cnf) {
-                        Counter += CountAnnotatedFormulaAtomsByPredicate(List->AnnotatedFormula,"");
+                        Counter += CountFormulaAtomsByPredicate(List->AnnotatedFormula->
+AnnotatedFormulaUnion.AnnotatedTSTPFormula.FormulaWithVariables->Formula,"");
                     }
                     break;
                 case terms:
-                    Counter += CountAnnotatedFormulaTerms(List->AnnotatedFormula);
+                    Counter += CountFormulaTerms(List->AnnotatedFormula->
+AnnotatedFormulaUnion.AnnotatedTSTPFormula.FormulaWithVariables->Formula);
                     break;
                 case variables:
                     Counter += CountAnnotatedFormulaUniqueVariables(List->AnnotatedFormula);
@@ -110,25 +116,31 @@ FormulaWithVariables->Formula->Type == sequent) {
                     Counter += CountAnnotatedFormulaSingletons(List->AnnotatedFormula);
                     break;
                 case tuples:
-                    Counter += CountAnnotatedFormulaTuples(List->AnnotatedFormula);
+                    Counter += CountFormulaTuples(List->AnnotatedFormula->
+AnnotatedFormulaUnion.AnnotatedTSTPFormula.FormulaWithVariables->Formula);
                     break;
                 case ite_forms:
-                    Counter += CountAnnotatedFormulaAtomsByPredicate(List->AnnotatedFormula,"$ite");
+                    Counter += CountFormulaAtomsByPredicate(List->AnnotatedFormula->
+AnnotatedFormulaUnion.AnnotatedTSTPFormula.FormulaWithVariables->Formula,"$ite");
                     break;
                 case let_forms:
-                    Counter += CountAnnotatedFormulaAtomsByPredicate(List->AnnotatedFormula,"$let");
+                    Counter += CountFormulaAtomsByPredicate(List->AnnotatedFormula->
+AnnotatedFormulaUnion.AnnotatedTSTPFormula.FormulaWithVariables->Formula,"$let");
                     break;
                 case nested_formulae:
 //TODO
                     break;
                 case boolean_variables:
-//TODO
+                    Counter += CountFormulaBooleanVariables(List->AnnotatedFormula->
+AnnotatedFormulaUnion.AnnotatedTSTPFormula.FormulaWithVariables->Formula);
                     break;
                 case formula_depth:
-                    Counter += AnnotatedFormulaDepth(List->AnnotatedFormula);
+                    Counter += FormulaDepth(List->AnnotatedFormula->
+AnnotatedFormulaUnion.AnnotatedTSTPFormula.FormulaWithVariables->Formula);
                     break;
                 case term_depth:
-                    Counter += SumAnnotatedFormulaTermDepth(List->AnnotatedFormula);
+                    Counter += SumFormulaTermDepth(List->AnnotatedFormula->
+AnnotatedFormulaUnion.AnnotatedTSTPFormula.FormulaWithVariables->Formula);
                     break;
                 default:
                     CodingError("Don't know what to count in list");
@@ -167,14 +179,16 @@ int ListMaximal(LISTNODE List,MaximizeType WhatToMaximize) {
             switch (WhatToMaximize) {
                 case literals:
                     Maximal = MaximumOfInt(Maximal,
-CountAnnotatedFormulaAtomsByPredicate(List->AnnotatedFormula,""));
+CountFormulaAtomsByPredicate(List->AnnotatedFormula->
+AnnotatedFormulaUnion.AnnotatedTSTPFormula.FormulaWithVariables->Formula,""));
                     break;
                 case max_term_depth:
-                    Maximal = MaximumOfInt(Maximal,
-MaxAnnotatedFormulaTermDepth(List->AnnotatedFormula));
+                    Maximal = MaximumOfInt(Maximal,MaxFormulaTermDepth(List->AnnotatedFormula->
+AnnotatedFormulaUnion.AnnotatedTSTPFormula.FormulaWithVariables->Formula));
                     break;
                 case max_formula_depth:
-                    Maximal = MaximumOfInt(Maximal,AnnotatedFormulaDepth(List->AnnotatedFormula));
+                    Maximal = MaximumOfInt(Maximal,FormulaDepth(List->AnnotatedFormula->
+AnnotatedFormulaUnion.AnnotatedTSTPFormula.FormulaWithVariables->Formula));
                     break;
                 default:
                     CodingError("Unknown thing to maximize in list");
@@ -538,8 +552,6 @@ Statistics.FormulaStatistics.NumberOfFormulae,Statistics.FormulaStatistics.Numbe
         if (Statistics.FormulaStatistics.NumberOfTHF > 0 || 
 Statistics.FormulaStatistics.NumberOfTFF) {
             fprintf(Stream,";%4.0f type",Statistics.FormulaStatistics.NumberOfTypeFormulae);
-        }
-        if (Statistics.FormulaStatistics.NumberOfTHF > 0) {
             fprintf(Stream,";%4.0f defn",Statistics.FormulaStatistics.NumberOfDefnFormulae);
         }
     fprintf(Stream,")\n");
@@ -617,10 +629,12 @@ Statistics.ConnectiveStatistics.NumberOfSubtypes);
 
 //----Symbols
     if (Statistics.FormulaStatistics.NumberOfTHF > 0) {
-        fprintf(Stream,"%%            Number of symbols     : %4.0f (%4.0f   :;%4.0f   =",
-Statistics.SymbolStatistics.NumberOfPredicates,
-Statistics.ConnectiveStatistics.NumberOfGlobalTypeDecs,
-Statistics.ConnectiveStatistics.NumberOfEquations);
+        fprintf(Stream,"%%            Number of symbols     : %4.0f (%4.0f constant; ",
+Statistics.SymbolStatistics.NumberOfPredicates,Statistics.SymbolStatistics.NumberOfPropositions);
+        PrintMinMaxArity(Stream,Statistics.SymbolStatistics.MinPredicateArity);
+        fprintf(Stream,"-");
+        PrintMinMaxArity(Stream,Statistics.SymbolStatistics.MaxPredicateArity);
+        fprintf(Stream," arity)\n");
 //----For TF1 print uses of @= and others as terms
         if (Statistics.ConnectiveStatistics.NumberOfPiBinders > 0 ||
 Statistics.ConnectiveStatistics.NumberOfTypedEquations > 0 ||
@@ -700,7 +714,14 @@ Statistics.FormulaStatistics.MaxTermDepth,Statistics.FormulaStatistics.AverageTe
     }
 
 //----TFX symbols
-    if (0) {
+    if (Statistics.FormulaStatistics.NumberOfNestedFormulae > 0 ||
+Statistics.SymbolStatistics.NumberBooleanVariables > 0) {
+        fprintf(Stream,
+"%%            Boolean terms         : %4.0f (%4.0f formulae;%4.0f variables)\n",
+Statistics.FormulaStatistics.NumberOfNestedFormulae +
+Statistics.SymbolStatistics.NumberBooleanVariables,
+Statistics.FormulaStatistics.NumberOfNestedFormulae,
+Statistics.SymbolStatistics.NumberBooleanVariables);
     }
 
 //----Mathematics

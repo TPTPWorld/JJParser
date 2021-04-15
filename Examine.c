@@ -400,7 +400,7 @@ Term->TheSymbol.NonVariable->Arity,Variable));
             return(0);
             break;
     }
-
+    return(0);
 }
 //-------------------------------------------------------------------------------------------------
 int CountVariableUsageInTupleFormulae(int NumberOfElements,FORMULAArray TupleFormulae,
@@ -471,8 +471,8 @@ ConditionalFormula.FormulaIfTrue,Variable,&LocalQuantifiedOccurrences);
 ConditionalFormula.FormulaIfFalse,Variable,&LocalQuantifiedOccurrences);
             break;
         case let_formula:
-            LocalCount = CountVariableUsageInFormula(Formula->FormulaUnion.
-LetFormula.LetBody,Variable,&LocalQuantifiedOccurrences);
+            LocalCount = CountVariableUsageInFormula(Formula->FormulaUnion.LetFormula.LetBody,
+Variable,&LocalQuantifiedOccurrences);
             break;
         default:
             LocalCount = 0;
@@ -1067,7 +1067,7 @@ int MaxUse,ConnectiveType Quantification) {
     int Counter;
     VARIABLENODE VariableNode;
 
-//TODO    NEED BETTER ASSESSMENT OF VARIABLES. ALSO GO INTO ARGUEMENTS FOR TFX AND THF
+//TODO    NEED BETTER ASSESSMENT OF VARIABLES. ALSO GO INTO ARGUMENTS FOR TFX AND THF (sort of)
     if (LogicalAnnotatedFormula(AnnotatedFormula)) {
         Counter = 0;
         VariableNode = AnnotatedFormula->
@@ -1100,7 +1100,13 @@ int CountAnnotatedFormulaUniqueVariables(ANNOTATEDFORMULA AnnotatedFormula) {
     return(CountAnnotatedFormulaUniqueVariablesByUse(AnnotatedFormula,-1,-1,none));
 }
 //-------------------------------------------------------------------------------------------------
-int CountAnnotatedFormulaTuples(ANNOTATEDFORMULA AnnotatedFormula) {
+int CountFormulaBooleanVariables(FORMULA Formula) {
+
+   return(0);
+
+}
+//-------------------------------------------------------------------------------------------------
+int CountFormulaTuples(FORMULA Formula) {
 
 //TODO
     return(0);
@@ -1171,11 +1177,11 @@ CountFormulaTerms(Formula->FormulaUnion.LetFormula.LetBody));
     }
 }
 //-------------------------------------------------------------------------------------------------
-int CountAnnotatedFormulaTerms(ANNOTATEDFORMULA AnnotatedFormula) {
-
-    return(CountFormulaTerms(AnnotatedFormula->AnnotatedFormulaUnion.
-AnnotatedTSTPFormula.FormulaWithVariables->Formula));
-}
+//int CountAnnotatedFormulaTerms(ANNOTATEDFORMULA AnnotatedFormula) {
+//
+//    return(CountFormulaTerms(AnnotatedFormula->AnnotatedFormulaUnion.
+//AnnotatedTSTPFormula.FormulaWithVariables->Formula));
+//}
 //-------------------------------------------------------------------------------------------------
 int CountTupleFormulaeAtomsByPredicate(int NumberOfElements,FORMULAArray TupleFormulae,
 char * Predicate) {
@@ -1270,8 +1276,8 @@ Predicate));
             break;
         case tuple:
             return(CountTupleFormulaeAtomsByPredicate(
-Formula->FormulaUnion.TupleFormula.NumberOfElements,
-Formula->FormulaUnion.TupleFormula.Elements,Predicate));
+Formula->FormulaUnion.TupleFormula.NumberOfElements,Formula->FormulaUnion.TupleFormula.Elements,
+Predicate));
             break;
         case ite_formula:
             Count += MaximumOfInt(CountFormulaAtomsByPredicate(
@@ -1293,17 +1299,16 @@ FormulaTypeToString(Formula->Type));
     }
 }
 //-------------------------------------------------------------------------------------------------
-int CountAnnotatedFormulaAtomsByPredicate(ANNOTATEDFORMULA AnnotatedFormula,char * Predicate) {
-
-    if (LogicalAnnotatedFormula(AnnotatedFormula)) {
-        return(CountFormulaAtomsByPredicate(AnnotatedFormula->
-AnnotatedFormulaUnion.AnnotatedTSTPFormula.FormulaWithVariables->Formula,Predicate));
-    } else {
-        return(-1);
-    }
-}
+//int CountAnnotatedFormulaAtomsByPredicate(ANNOTATEDFORMULA AnnotatedFormula,char * Predicate) {
+//
+//    if (LogicalAnnotatedFormula(AnnotatedFormula)) {
+//        return(CountFormulaAtomsByPredicate(AnnotatedFormula->
+//AnnotatedFormulaUnion.AnnotatedTSTPFormula.FormulaWithVariables->Formula,Predicate));
+//    } else {
+//        return(-1);
+//    }
+//}
 //-------------------------------------------------------------------------------------------------
-//----All the counters have to be previously initialized to 0
 ConnectiveStatisticsType GetTupleFormulaeConnectiveUsage(int NumberOfElements,
 FORMULAArray TupleFormulae) {
 
@@ -1595,15 +1600,15 @@ FormulaDepth(Formula->FormulaUnion.ConditionalFormula.FormulaIfFalse)));
     }
 }
 //-------------------------------------------------------------------------------------------------
-int AnnotatedFormulaDepth(ANNOTATEDFORMULA AnnotatedFormula) {
-
-    if (LogicalAnnotatedFormula(AnnotatedFormula)) {
-        return(FormulaDepth(AnnotatedFormula->AnnotatedFormulaUnion.
-AnnotatedTSTPFormula.FormulaWithVariables->Formula));
-    } else {
-        return(-1);
-    }
-}
+//int AnnotatedFormulaDepth(ANNOTATEDFORMULA AnnotatedFormula) {
+//
+//    if (LogicalAnnotatedFormula(AnnotatedFormula)) {
+//        return(FormulaDepth(AnnotatedFormula->AnnotatedFormulaUnion.
+//AnnotatedTSTPFormula.FormulaWithVariables->Formula));
+//    } else {
+//        return(-1);
+//    }
+//}
 //-------------------------------------------------------------------------------------------------
 int MaxTermDepth(TERM Term) {
 
@@ -1670,9 +1675,8 @@ Formula->FormulaUnion.TupleFormula.Elements));
             break;
         case ite_formula:
             return(MaximumOfInt(
-MaxFormulaTermDepth(Formula->FormulaUnion.ConditionalFormula.Condition),
-MaximumOfInt(MaxFormulaTermDepth(Formula->FormulaUnion.ConditionalFormula.FormulaIfTrue),
-MaxFormulaTermDepth(Formula->FormulaUnion.ConditionalFormula.FormulaIfFalse))));
+MaxFormulaTermDepth(Formula->FormulaUnion.ConditionalFormula.FormulaIfTrue),
+MaxFormulaTermDepth(Formula->FormulaUnion.ConditionalFormula.FormulaIfFalse)));
             break;
         case let_formula:
             return(MaxFormulaTermDepth(Formula->FormulaUnion.LetFormula.LetBody));
@@ -1684,15 +1688,15 @@ MaxFormulaTermDepth(Formula->FormulaUnion.ConditionalFormula.FormulaIfFalse))));
     }
 }
 //-------------------------------------------------------------------------------------------------
-int MaxAnnotatedFormulaTermDepth(ANNOTATEDFORMULA AnnotatedFormula) {
-
-    if (LogicalAnnotatedFormula(AnnotatedFormula)) {
-        return(MaxFormulaTermDepth(AnnotatedFormula->AnnotatedFormulaUnion.
-AnnotatedTSTPFormula.FormulaWithVariables->Formula));
-    } else {
-        return(-1);
-    }
-}
+//int MaxAnnotatedFormulaTermDepth(ANNOTATEDFORMULA AnnotatedFormula) {
+//
+//    if (LogicalAnnotatedFormula(AnnotatedFormula)) {
+//        return(MaxFormulaTermDepth(AnnotatedFormula->AnnotatedFormulaUnion.
+//AnnotatedTSTPFormula.FormulaWithVariables->Formula));
+//    } else {
+//        return(-1);
+//    }
+//}
 //-------------------------------------------------------------------------------------------------
 int SumTermDepth(TERM Atom) {
 
@@ -1728,8 +1732,7 @@ int SumFormulaTermDepth(FORMULA Formula) {
             return(SumTupleFormulaeTermDepth(
 Formula->FormulaUnion.SequentFormula.NumberOfLHSElements,
 Formula->FormulaUnion.SequentFormula.LHS) +
-SumTupleFormulaeTermDepth(
-Formula->FormulaUnion.SequentFormula.NumberOfRHSElements,
+SumTupleFormulaeTermDepth(Formula->FormulaUnion.SequentFormula.NumberOfRHSElements,
 Formula->FormulaUnion.SequentFormula.RHS));
         case assignment:
             return(SumFormulaTermDepth(Formula->FormulaUnion.BinaryFormula.RHS));
@@ -1738,8 +1741,7 @@ Formula->FormulaUnion.SequentFormula.RHS));
             return(0);
             break;
         case quantified:
-            return(SumFormulaTermDepth(
-Formula->FormulaUnion.QuantifiedFormula.Formula));
+            return(SumFormulaTermDepth(Formula->FormulaUnion.QuantifiedFormula.Formula));
             break;
         case binary:
             return(
@@ -1758,7 +1760,6 @@ Formula->FormulaUnion.TupleFormula.Elements));
             break;
         case ite_formula:
             return(
-SumFormulaTermDepth(Formula->FormulaUnion.ConditionalFormula.Condition) + 
 SumFormulaTermDepth(Formula->FormulaUnion.ConditionalFormula.FormulaIfTrue) + 
 SumFormulaTermDepth(Formula->FormulaUnion.ConditionalFormula.FormulaIfFalse));
             break;
@@ -1774,15 +1775,15 @@ FormulaTypeToString(Formula->Type));
     }
 }
 //-------------------------------------------------------------------------------------------------
-int SumAnnotatedFormulaTermDepth(ANNOTATEDFORMULA AnnotatedFormula) {
-
-    if (LogicalAnnotatedFormula(AnnotatedFormula)) {
-        return(SumFormulaTermDepth(AnnotatedFormula->AnnotatedFormulaUnion.
-AnnotatedTSTPFormula.FormulaWithVariables->Formula));
-    } else {
-        return(-1);
-    }
-}
+//int SumAnnotatedFormulaTermDepth(ANNOTATEDFORMULA AnnotatedFormula) {
+//
+//    if (LogicalAnnotatedFormula(AnnotatedFormula)) {
+//        return(SumFormulaTermDepth(AnnotatedFormula->AnnotatedFormulaUnion.
+//AnnotatedTSTPFormula.FormulaWithVariables->Formula));
+//    } else {
+//        return(-1);
+//    }
+//}
 //-------------------------------------------------------------------------------------------------
 SyntaxType GetSyntax(ANNOTATEDFORMULA AnnotatedFormula) {
 

@@ -22,8 +22,7 @@ int DerivedAnnotatedFormula(ANNOTATEDFORMULA AnnotatedFormula);
 int LooksLikeANumber(char * NumberString);
 int LooksLikeAList(TERM Term,int MinElements,int MaxElements);
 int CheckRole(StatusType Role,StatusType DesiredRole);
-int CheckAnnotatedFormulaRole(ANNOTATEDFORMULA AnnotatedFormula,
-StatusType DesiredRole);
+int CheckAnnotatedFormulaRole(ANNOTATEDFORMULA AnnotatedFormula,StatusType DesiredRole);
 
 int ExtractTermArguments(String Term);
 char * TSTPTermToString(TERM Term,String PutTermHere);
@@ -46,20 +45,17 @@ int HornClause(ANNOTATEDFORMULA AnnotatedFormula);
 int NonHornClause(ANNOTATEDFORMULA AnnotatedFormula);
 int CountAnnotatedFormulaUniqueVariablesByUse(ANNOTATEDFORMULA AnnotatedFormula,int MinUse,
 int MaxUse,ConnectiveType Quantification);
+int CountFormulaBooleanVariables(FORMULA Formula);
 int CountFormulaTerms(FORMULA Formula);
 int CountAnnotatedFormulaSingletons(ANNOTATEDFORMULA AnnotatedFormula);
 int CountAnnotatedFormulaUniqueVariables(ANNOTATEDFORMULA AnnotatedFormula);
-int CountAnnotatedFormulaTuples(ANNOTATEDFORMULA AnnotatedFormula);
+int CountFormulaTuples(FORMULA Formula);
 int CountAnnotatedFormulaTerms(ANNOTATEDFORMULA AnnotatedFormula);
 int CountFormulaAtomsByPredicate(FORMULA Formula,char * Predicate);
-int CountAnnotatedFormulaAtomsByPredicate(ANNOTATEDFORMULA AnnotatedFormula,char * Predicate);
 ConnectiveStatisticsType GetFormulaConnectiveUsage(FORMULA Formula);
 int FormulaDepth(FORMULA Formula);
 int MaxFormulaTermDepth(FORMULA Formula);
-int AnnotatedFormulaDepth(ANNOTATEDFORMULA AnnotatedFormula);
-int MaxAnnotatedFormulaTermDepth(ANNOTATEDFORMULA AnnotatedFormula);
 int SumFormulaTermDepth(FORMULA Formula);
-int SumAnnotatedFormulaTermDepth(ANNOTATEDFORMULA AnnotatedFormula);
 
 SyntaxType GetSyntax(ANNOTATEDFORMULA AnnotatedFormula);
 SyntaxType GetListSyntax(LISTNODE Head);

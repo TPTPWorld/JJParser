@@ -6,8 +6,7 @@
 
 #include "Statistics.h"
 //-------------------------------------------------------------------------------------------------
-void InitializeFormulaStatistics(FormulaStatisticsType * 
-FormulaStatistics) {
+void InitializeFormulaStatistics(FormulaStatisticsType * FormulaStatistics) {
 
     FormulaStatistics->NumberOfFormulae = 0;
     FormulaStatistics->NumberOfTHF = 0;
@@ -22,6 +21,7 @@ FormulaStatistics) {
     FormulaStatistics->NumberOfAtoms = 0;
     FormulaStatistics->NumberOfEqualityAtoms = 0;
     FormulaStatistics->NumberOfVariableAtoms = 0;
+    FormulaStatistics->NumberOfNestedFormulae = 0;
     FormulaStatistics->NumberOfLiterals = 0;
 
     FormulaStatistics->MaxFormulaDepth = 0;
@@ -35,8 +35,7 @@ FormulaStatistics) {
     FormulaStatistics->AverageClauseSize = 0;
 }
 //-------------------------------------------------------------------------------------------------
-void InitializeSymbolStatistics(SymbolStatisticsType * 
-SymbolStatistics) {
+void InitializeSymbolStatistics(SymbolStatisticsType * SymbolStatistics) {
 
     SymbolStatistics->NumberOfPredicates = 0;
     SymbolStatistics->NumberOfPropositions = 0;
@@ -48,13 +47,16 @@ SymbolStatistics) {
     SymbolStatistics->MaxFunctorArity = 0;
     SymbolStatistics->NumberOfVariables = 0;
     SymbolStatistics->NumberOfSingletons = 0;
+    SymbolStatistics->NumberOfTuples = 0;
+    SymbolStatistics->NumberOfITEs = 0;
+    SymbolStatistics->NumberOfLets = 0;
+    SymbolStatistics->NumberBooleanVariables = 0;
     SymbolStatistics->NumberOfMathPredicates = 0;
     SymbolStatistics->NumberOfMathFunctions = 0;
     SymbolStatistics->NumberOfNumbers = 0;
 }
 //-------------------------------------------------------------------------------------------------
-void InitializeConnectiveStatistics(ConnectiveStatisticsType * 
-ConnectiveStatistics) {
+void InitializeConnectiveStatistics(ConnectiveStatisticsType * ConnectiveStatistics) {
 
 	ConnectiveStatistics->NumberOfConnectives = 0;
     ConnectiveStatistics->NumberOfTypeConnectives = 0;
