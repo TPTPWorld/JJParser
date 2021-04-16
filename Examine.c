@@ -1092,6 +1092,7 @@ int MaxUse,ConnectiveType Quantification) {
     VARIABLENODE VariableNode;
 
 //TODO    NEED BETTER ASSESSMENT OF VARIABLES. ALSO GO INTO ARGUMENTS FOR TFX AND THF (sort of)
+// Can this be done passing in less?
     if (LogicalAnnotatedFormula(AnnotatedFormula)) {
         Counter = 0;
         VariableNode = AnnotatedFormula->
