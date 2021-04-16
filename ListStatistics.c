@@ -58,8 +58,7 @@ int ListCount(LISTNODE List,CountType WhatToCount) {
                     break;
 //----Unit annotated fomula has just one atom
                 case unit_formulae:
-                    if (CountFormulaAtomsByPredicate(List->AnnotatedFormula->
-AnnotatedFormulaUnion.AnnotatedTSTPFormula.FormulaWithVariables->Formula,"") == 1) {
+                    if (CountFormulaAtomsByPredicate(GetListNodeFormula(List),"") == 1) {
                         Counter += 1;
                     }
                     break;
@@ -75,8 +74,7 @@ AnnotatedFormulaUnion.AnnotatedTSTPFormula.FormulaWithVariables->Formula,"") == 
                     break;
                 case sequent_formulae:
                     if (LogicalAnnotatedFormula(List->AnnotatedFormula) &&
-List->AnnotatedFormula->AnnotatedFormulaUnion.AnnotatedTSTPFormula.
-FormulaWithVariables->Formula->Type == sequent) {
+GetListNodeFormula(List)->Type == sequent) {
                         Counter += 1;
                     }
                     break;
@@ -86,28 +84,22 @@ FormulaWithVariables->Formula->Type == sequent) {
                     }
                     break;
                 case atoms:
-                    Counter += CountFormulaAtomsByPredicate(List->AnnotatedFormula->
-AnnotatedFormulaUnion.AnnotatedTSTPFormula.FormulaWithVariables->Formula,"");
+                    Counter += CountFormulaAtomsByPredicate(GetListNodeFormula(List),"");
                     break;
                 case equality_atoms:
-                    Counter += CountFormulaAtomsByPredicate(List->AnnotatedFormula->
-AnnotatedFormulaUnion.AnnotatedTSTPFormula.FormulaWithVariables->Formula,"=");
-                    Counter += CountFormulaAtomsByPredicate(List->AnnotatedFormula->
-AnnotatedFormulaUnion.AnnotatedTSTPFormula.FormulaWithVariables->Formula,"@=");
+                    Counter += CountFormulaAtomsByPredicate(GetListNodeFormula(List),"=");
+                    Counter += CountFormulaAtomsByPredicate(GetListNodeFormula(List),"@=");
                     break;
                 case variable_atoms:
-                    Counter += CountFormulaAtomsByPredicate(List->AnnotatedFormula->
-AnnotatedFormulaUnion.AnnotatedTSTPFormula.FormulaWithVariables->Formula,"VARIABLE");
+                    Counter += CountFormulaAtomsByPredicate(GetListNodeFormula(List),"VARIABLE");
                     break;
                 case literal_count:
                     if (GetSyntax(List->AnnotatedFormula) == tptp_cnf) {
-                        Counter += CountFormulaAtomsByPredicate(List->AnnotatedFormula->
-AnnotatedFormulaUnion.AnnotatedTSTPFormula.FormulaWithVariables->Formula,"");
+                        Counter += CountFormulaAtomsByPredicate(GetListNodeFormula(List),"");
                     }
                     break;
                 case terms:
-                    Counter += CountFormulaTerms(List->AnnotatedFormula->
-AnnotatedFormulaUnion.AnnotatedTSTPFormula.FormulaWithVariables->Formula);
+                    Counter += CountFormulaTerms(GetListNodeFormula(List));
                     break;
                 case variables:
                     Counter += CountAnnotatedFormulaUniqueVariables(List->AnnotatedFormula);
@@ -116,31 +108,25 @@ AnnotatedFormulaUnion.AnnotatedTSTPFormula.FormulaWithVariables->Formula);
                     Counter += CountAnnotatedFormulaSingletons(List->AnnotatedFormula);
                     break;
                 case tuples:
-                    Counter += CountFormulaTuples(List->AnnotatedFormula->
-AnnotatedFormulaUnion.AnnotatedTSTPFormula.FormulaWithVariables->Formula);
+                    Counter += CountFormulaTuples(GetListNodeFormula(List));
                     break;
                 case ite_forms:
-                    Counter += CountFormulaAtomsByPredicate(List->AnnotatedFormula->
-AnnotatedFormulaUnion.AnnotatedTSTPFormula.FormulaWithVariables->Formula,"$ite");
+                    Counter += CountFormulaAtomsByPredicate(GetListNodeFormula(List),"$ite");
                     break;
                 case let_forms:
-                    Counter += CountFormulaAtomsByPredicate(List->AnnotatedFormula->
-AnnotatedFormulaUnion.AnnotatedTSTPFormula.FormulaWithVariables->Formula,"$let");
+                    Counter += CountFormulaAtomsByPredicate(GetListNodeFormula(List),"$let");
                     break;
                 case nested_formulae:
 //TODO
                     break;
                 case boolean_variables:
-                    Counter += CountFormulaBooleanVariables(List->AnnotatedFormula->
-AnnotatedFormulaUnion.AnnotatedTSTPFormula.FormulaWithVariables->Formula);
+                    Counter += CountFormulaBooleanVariables(GetListNodeFormula(List));
                     break;
                 case formula_depth:
-                    Counter += FormulaDepth(List->AnnotatedFormula->
-AnnotatedFormulaUnion.AnnotatedTSTPFormula.FormulaWithVariables->Formula);
+                    Counter += FormulaDepth(GetListNodeFormula(List));
                     break;
                 case term_depth:
-                    Counter += SumFormulaTermDepth(List->AnnotatedFormula->
-AnnotatedFormulaUnion.AnnotatedTSTPFormula.FormulaWithVariables->Formula);
+                    Counter += SumFormulaTermDepth(GetListNodeFormula(List));
                     break;
                 default:
                     CodingError("Don't know what to count in list");
@@ -179,16 +165,13 @@ int ListMaximal(LISTNODE List,MaximizeType WhatToMaximize) {
             switch (WhatToMaximize) {
                 case literals:
                     Maximal = MaximumOfInt(Maximal,
-CountFormulaAtomsByPredicate(List->AnnotatedFormula->
-AnnotatedFormulaUnion.AnnotatedTSTPFormula.FormulaWithVariables->Formula,""));
+CountFormulaAtomsByPredicate(GetListNodeFormula(List),""));
                     break;
                 case max_term_depth:
-                    Maximal = MaximumOfInt(Maximal,MaxFormulaTermDepth(List->AnnotatedFormula->
-AnnotatedFormulaUnion.AnnotatedTSTPFormula.FormulaWithVariables->Formula));
+                    Maximal = MaximumOfInt(Maximal,MaxFormulaTermDepth(GetListNodeFormula(List)));
                     break;
                 case max_formula_depth:
-                    Maximal = MaximumOfInt(Maximal,FormulaDepth(List->AnnotatedFormula->
-AnnotatedFormulaUnion.AnnotatedTSTPFormula.FormulaWithVariables->Formula));
+                    Maximal = MaximumOfInt(Maximal,FormulaDepth(GetListNodeFormula(List)));
                     break;
                 default:
                     CodingError("Unknown thing to maximize in list");
@@ -316,9 +299,8 @@ ConnectiveStatisticsType GetListConnectiveUsageStatistics(HEADLIST HeadList) {
 //----Ignore comments
             if (LogicalAnnotatedFormula(ListNode->AnnotatedFormula)) {
                 InitializeConnectiveStatistics(&FormulaConnectiveStatistics);
-                FormulaConnectiveStatistics = GetFormulaConnectiveUsage(
-ListNode->AnnotatedFormula->AnnotatedFormulaUnion.AnnotatedTSTPFormula.
-FormulaWithVariables->Formula);
+                FormulaConnectiveStatistics = GetFormulaConnectiveUsage(GetListNodeFormula(
+ListNode));
                 AddOnConnectiveStatistics(&ConnectiveStatistics,FormulaConnectiveStatistics);
             }
             ListNode = ListNode->Next;

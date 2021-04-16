@@ -62,32 +62,27 @@ double TreeCount(TREENODE Tree,CountType WhatToCount,int Expand) {
                 }
                 break;
             case atoms:
-                Counter = CountFormulaAtomsByPredicate(Tree->AnnotatedFormula->
-AnnotatedFormulaUnion.AnnotatedTSTPFormula.FormulaWithVariables->Formula,"");
+                Counter = CountFormulaAtomsByPredicate(GetTreeNodeFormula(Tree),"");
                 break;
             case equality_atoms:
-                Counter = CountFormulaAtomsByPredicate(Tree->AnnotatedFormula->
-AnnotatedFormulaUnion.AnnotatedTSTPFormula.FormulaWithVariables->Formula,"=");
+                Counter = CountFormulaAtomsByPredicate(GetTreeNodeFormula(Tree),"=");
+                Counter += CountFormulaAtomsByPredicate(GetTreeNodeFormula(Tree),"@=");
                 break;
             case literal_count:
                 if (GetSyntax(Tree->AnnotatedFormula) == tptp_cnf) {
-                    Counter = CountFormulaAtomsByPredicate(Tree->AnnotatedFormula->
-AnnotatedFormulaUnion.AnnotatedTSTPFormula.FormulaWithVariables->Formula,"");
+                    Counter = CountFormulaAtomsByPredicate(GetTreeNodeFormula(Tree),"");
                 } else {
                     Counter = 0;
                 }
                 break;
             case terms:
-                Counter = CountFormulaTerms(Tree->AnnotatedFormula->
-AnnotatedFormulaUnion.AnnotatedTSTPFormula.FormulaWithVariables->Formula);
+                Counter = CountFormulaTerms(GetTreeNodeFormula(Tree));
                 break;
             case formula_depth:
-                Counter = FormulaDepth(Tree->AnnotatedFormula->
-AnnotatedFormulaUnion.AnnotatedTSTPFormula.FormulaWithVariables->Formula);
+                Counter = FormulaDepth(GetTreeNodeFormula(Tree));
                 break;
             case term_depth:
-                Counter = SumFormulaTermDepth(Tree->AnnotatedFormula->
-AnnotatedFormulaUnion.AnnotatedTSTPFormula.FormulaWithVariables->Formula);
+                Counter = SumFormulaTermDepth(GetTreeNodeFormula(Tree));
                 break;
             default:
                 CodingError("Don't know what to count in tree");
@@ -141,16 +136,13 @@ double TreeMaximal(TREENODE Tree,MaximizeType WhatToMaximize) {
                 Maximal = 0;
                 break;
             case literals:
-                Maximal = CountFormulaAtomsByPredicate(Tree->AnnotatedFormula->
-AnnotatedFormulaUnion.AnnotatedTSTPFormula.FormulaWithVariables->Formula,"");
+                Maximal = CountFormulaAtomsByPredicate(GetTreeNodeFormula(Tree),"");
                 break;
             case max_term_depth:
-                Maximal = MaxFormulaTermDepth(Tree->AnnotatedFormula->
-AnnotatedFormulaUnion.AnnotatedTSTPFormula.FormulaWithVariables->Formula);
+                Maximal = MaxFormulaTermDepth(GetTreeNodeFormula(Tree));
                 break;
             case max_formula_depth:
-                Maximal = FormulaDepth(Tree->AnnotatedFormula->
-AnnotatedFormulaUnion.AnnotatedTSTPFormula.FormulaWithVariables->Formula);
+                Maximal = FormulaDepth(GetTreeNodeFormula(Tree));
                 break;
             default:
                 CodingError("Unknown thing to maximize in tree");

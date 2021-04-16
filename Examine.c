@@ -105,6 +105,30 @@ Side->FormulaUnion.BinaryFormula.Connective == maparrow) {
     }
 }
 //-------------------------------------------------------------------------------------------------
+FORMULA GetListNodeFormula(LISTNODE List) {
+
+    return(List->AnnotatedFormula->AnnotatedFormulaUnion.AnnotatedTSTPFormula.
+FormulaWithVariables->Formula);
+}
+//-------------------------------------------------------------------------------------------------
+VARIABLENODE GetListNodeVariables(LISTNODE List) {
+
+    return(List->AnnotatedFormula->AnnotatedFormulaUnion.AnnotatedTSTPFormula.
+FormulaWithVariables->Variables);
+}
+//-------------------------------------------------------------------------------------------------
+FORMULA GetTreeNodeFormula(TREENODE Tree) {
+
+    return(Tree->AnnotatedFormula->AnnotatedFormulaUnion.AnnotatedTSTPFormula.
+FormulaWithVariables->Formula);
+}
+//-------------------------------------------------------------------------------------------------
+VARIABLENODE GetTreeNodeVariables(TREENODE Tree) {
+
+    return(Tree->AnnotatedFormula->AnnotatedFormulaUnion.AnnotatedTSTPFormula.
+FormulaWithVariables->Variables);
+}
+//-------------------------------------------------------------------------------------------------
 int LooksLikeAReal(char * RealString) {
 
     int NumberScanned;

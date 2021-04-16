@@ -10,6 +10,10 @@ char * GetSymbol(TERM Term);
 int GetArity(TERM Term);
 FORMULA GetResultFromTyping(READFILE Stream,FORMULA TypeFormula);
 int GetArityFromTyping(READFILE Stream,FORMULA TypeFormula);
+FORMULA GetListNodeFormula(LISTNODE List);
+VARIABLENODE GetListNodeVariables(LISTNODE List);
+FORMULA GetTreeNodeFormula(TREENODE Tree);
+VARIABLENODE GetTreeNodeVariables(TREENODE Tree);
 
 int CheckAnnotatedFormula(ANNOTATEDFORMULA AnnotatedFormula,
 SyntaxType ExpectedSyntax);
