@@ -49,6 +49,7 @@ int HornClause(ANNOTATEDFORMULA AnnotatedFormula);
 int NonHornClause(ANNOTATEDFORMULA AnnotatedFormula);
 int CountAnnotatedFormulaUniqueVariablesByUse(ANNOTATEDFORMULA AnnotatedFormula,int MinUse,
 int MaxUse,ConnectiveType Quantification);
+int CountNestedFormulae(FORMULA Formula,int NestedYet);
 int CountFormulaBooleanVariables(FORMULA Formula);
 int CountFormulaTerms(FORMULA Formula);
 int CountAnnotatedFormulaSingletons(ANNOTATEDFORMULA AnnotatedFormula);

@@ -117,7 +117,7 @@ GetListNodeFormula(List)->Type == sequent) {
                     Counter += CountFormulaAtomsByPredicate(GetListNodeFormula(List),"$let");
                     break;
                 case nested_formulae:
-//TODO
+                    Counter += CountNestedFormulae(GetListNodeFormula(List),0);
                     break;
                 case boolean_variables:
                     Counter += CountFormulaBooleanVariables(GetListNodeFormula(List));
@@ -135,7 +135,6 @@ GetListNodeFormula(List)->Type == sequent) {
         }
         List = List->Next;
     }
-    
     return(Counter);
 }
 //-------------------------------------------------------------------------------------------------
