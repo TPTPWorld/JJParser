@@ -120,7 +120,7 @@ GetListNodeFormula(List)->Type == sequent) {
                     Counter += CountNestedFormulae(GetListNodeFormula(List),0);
                     break;
                 case boolean_variables:
-                    Counter += CountFormulaBooleanVariables(GetListNodeFormula(List));
+                    Counter += CountBooleanVariablesInFormula(GetListNodeFormula(List));
                     break;
                 case formula_depth:
                     Counter += FormulaDepth(GetListNodeFormula(List));
@@ -506,6 +506,12 @@ NumberOfTerms;
         Statistics.FormulaStatistics.AverageTermDepth = 0.0;
     }
 //DEBUG printf("PROGRESS: got term depth\n");
+
+//----Statistics for TFX and THF
+    Statistics.FormulaStatistics.NumberOfNestedFormulae = HeadListCount(&HeadListNode,
+nested_formulae);
+    Statistics.SymbolStatistics.NumberBooleanVariables = HeadListCount(&HeadListNode,
+boolean_variables);
 
 //----Statistics for mathematics. Number of vars collected with connectives.
     GetMathmaticsUsage(ListHead,Signature,&Statistics.SymbolStatistics.NumberOfMathPredicates,
