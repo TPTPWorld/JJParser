@@ -49,99 +49,99 @@ typedef enum {
 } MaximizeType;
 
 typedef struct {
-    double NumberOfFormulae;
-    double NumberOfTHF;
-    double NumberOfTFF;
-    double NumberOfTCF;
-    double NumberOfFOF;
-    double NumberOfCNF;
+    int NumberOfFormulae;
+    int NumberOfTHF;
+    int NumberOfTFF;
+    int NumberOfTCF;
+    int NumberOfFOF;
+    int NumberOfCNF;
 
-    double NumberOfTypeFormulae;
-    double NumberOfDefnFormulae;
-    double NumberOfSequents;
-    double NumberOfUnitFormulae;  //----Doubles as NumberOfUnitClauses;
-    double NumberOfAtoms;  //----Doubles as NumberOfLiterals;
-    double NumberOfEqualityAtoms;  //----Doubles as NumberOfEqualityLiterals
-    double NumberOfVariableAtoms;
-    double NumberOfNestedFormulae;
-    double NumberOfLiterals;
+    int NumberOfTypeFormulae;
+    int NumberOfDefnFormulae;
+    int NumberOfSequents;
+    int NumberOfUnitFormulae;  //----Doubles as NumberOfUnitClauses;
+    int NumberOfAtoms;  //----Doubles as NumberOfLiterals;
+    int NumberOfEqualityAtoms;  //----Doubles as NumberOfEqualityLiterals
+    int NumberOfVariableAtoms;
+    int NumberOfNestedFormulae;
+    int NumberOfLiterals;
 
-    double MaxFormulaDepth;
+    int MaxFormulaDepth;
     double AverageFormulaDepth;
-    double MaxTermDepth;
+    int MaxTermDepth;
     double AverageTermDepth;
 
 //----Only for CNF
-    double NumberOfHornClauses;
-    double NumberOfRRClauses;
-    double MaxClauseSize;
+    int NumberOfHornClauses;
+    int NumberOfRRClauses;
+    int MaxClauseSize;
     double AverageClauseSize;
 } FormulaStatisticsType;
 
 typedef struct {
-    double NumberOfPredicates;  //----Doubles as number of symbols
-    double NumberOfPropositions; 
-    double MinPredicateArity;
-    double MaxPredicateArity;
-    double NumberOfFunctors;
-    double NumberOfConstants;
-    double MinFunctorArity;
-    double MaxFunctorArity;
-    double NumberOfVariables;
-    double NumberOfSingletons;
-    double NumberOfTuples;
-    double NumberOfITEs;
-    double NumberOfLets;
-    double NumberBooleanVariables;
-    double NumberOfMathPredicates;
-    double NumberOfMathFunctions;
-    double NumberOfNumbers;
+    int NumberOfPredicates;  //----Doubles as number of symbols
+    int NumberOfPropositions; 
+    int MinPredicateArity;
+    int MaxPredicateArity;
+    int NumberOfFunctors;
+    int NumberOfConstants;
+    int MinFunctorArity;
+    int MaxFunctorArity;
+    int NumberOfVariables;
+    int NumberOfSingletons;
+    int NumberOfTuples;
+    int NumberOfITEs;
+    int NumberOfLets;
+    int NumberBooleanVariables;
+    int NumberOfMathPredicates;
+    int NumberOfMathFunctions;
+    int NumberOfNumbers;
 } SymbolStatisticsType;
 
 typedef struct {
-    double NumberOfConnectives;
-    double NumberOfTypeConnectives;
+    int NumberOfConnectives;
+    int NumberOfTypeConnectives;
 
 //----Only THF connectives
-    double NumberOfPis;
-    double NumberOfSigmas;
-    double NumberOfChoices;
-    double NumberOfDescriptions;
-    double NumberOfApplications;
-    double NumberOfMaparrows;
-    double NumberOfXprods;
-    double NumberOfUnions;
-    double NumberOfEquations;  //----Use of = as a term
-    double NumberOfTypedEquations;  //----Use of @= as a term
+    int NumberOfPis;
+    int NumberOfSigmas;
+    int NumberOfChoices;
+    int NumberOfDescriptions;
+    int NumberOfApplications;
+    int NumberOfMaparrows;
+    int NumberOfXprods;
+    int NumberOfUnions;
+    int NumberOfEquations;  //----Use of = as a term
+    int NumberOfTypedEquations;  //----Use of @= as a term
 
 //----Only TFF
-    double NumberOfSubtypes;
+    int NumberOfSubtypes;
 
 //----Not for CNF
-    double NumberOfNegations;
-    double NumberOfDisjunctions;
-    double NumberOfConjunctions;
-    double NumberOfEquivalences;
-    double NumberOfImplications;
-    double NumberOfReverseImplications;
-    double NumberOfXors;
-    double NumberOfNors;
-    double NumberOfNands;
+    int NumberOfNegations;
+    int NumberOfDisjunctions;
+    int NumberOfConjunctions;
+    int NumberOfEquivalences;
+    int NumberOfImplications;
+    int NumberOfReverseImplications;
+    int NumberOfXors;
+    int NumberOfNors;
+    int NumberOfNands;
 
 //----Variable binders
-    double NumberOfUniversals;
-    double NumberOfExistentials;
-    double NumberOfLambdas;
-    double NumberOfPiBinders;
-    double NumberOfSigmaBinders;
-    double NumberOfChoiceBinders;
-    double NumberOfDescriptionBinders;
+    int NumberOfUniversals;
+    int NumberOfExistentials;
+    int NumberOfLambdas;
+    int NumberOfPiBinders;
+    int NumberOfSigmaBinders;
+    int NumberOfChoiceBinders;
+    int NumberOfDescriptionBinders;
 
-    double NumberOfTypedVariables;  //----Not a symbol, but counted by :s
-    double NumberOfDefinedVariables; //----Not a symbol, but counted by :=s
-    double NumberOfMathVariables;  //----Not a symbol, but counted by :s
-    double NumberOfGlobalTypeDecs; //----Not a symbol, but counted by :s
-    double NumberOfGlobalDefns; //----Not a symbol, but counted by :=s
+    int NumberOfTypedVariables;  //----Not a symbol, but counted by :s
+    int NumberOfDefinedVariables; //----Not a symbol, but counted by :=s
+    int NumberOfMathVariables;  //----Not a symbol, but counted by :s
+    int NumberOfGlobalTypeDecs; //----Not a symbol, but counted by :s
+    int NumberOfGlobalDefns; //----Not a symbol, but counted by :=s
 } ConnectiveStatisticsType;
 
 typedef struct {

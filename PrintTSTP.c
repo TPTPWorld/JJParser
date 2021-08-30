@@ -169,24 +169,21 @@ void PrintSpaces(PRINTFILE Stream,int Spaces) {
     }
 }
 //-------------------------------------------------------------------------------------------------
-void PrintFileTSTPTerm(PRINTFILE Stream,SyntaxType Language,TERM Term,int Indent,
-int TSTPSyntaxFlag) {
+void PrintFileTSTPTerm(PRINTFILE Stream,SyntaxType Language,TERM Term,int Indent,int Pretty,
+ConnectiveType LastConnective,int TSTPSyntaxFlag) {
 
-    int Index;
-    int Arity;
     char OpeningBracket,ClosingBracket;
     char * StartOfSymbol;
 
-// ZZZZZZz
 //DEBUG printf("Printing term %s indent %d\n",TermTypeToString(Term->Type),Indent);
 //----All THF and TFF (because of TFX) terms are formulae
     if ((Language == tptp_thf || Language == tptp_tff) && Term->Type == formula) {
 //----For non-atoms, newline and indent
-        if (Term->TheSymbol.Formula->Type != atom) {
+        if (Term->TheSymbol.Formula->Type != atom && Term->TheSymbol.Formula->Type != tuple) {
             PFprintf(Stream,"\n");
             PrintSpaces(Stream,Indent-2);
         }
-        PrintFileTSTPFormula(Stream,Language,Term->TheSymbol.Formula,Indent,1,outermost,1);
+        PrintFileTSTPFormula(Stream,Language,Term->TheSymbol.Formula,Indent,1,LastConnective,1);
 //----Check if a nested formula - no symbol
     } else if (Term->Type == nested_thf) {
         PFprintf(Stream,"$thf(");
@@ -194,46 +191,49 @@ int TSTPSyntaxFlag) {
 //----out on one line), which means sequences of quantifiers are not listed
 //----together. I'll live with it.
         PrintFileTSTPFormula(Stream,tptp_thf,Term->TheSymbol.NestedFormula->
-Formula,0,0,outermost,1);
+Formula,0,0,LastConnective,1);
         PFprintf(Stream,")");
     } else if (Term->Type == nested_tff) {
         PFprintf(Stream,"$tff(");
         PrintFileTSTPFormula(Stream,tptp_tff,Term->TheSymbol.NestedFormula->Formula,0,0,
-outermost,1);
+LastConnective,1);
         PFprintf(Stream,")");
     } else if (Term->Type == nested_tcf) {
         PFprintf(Stream,"$tcf(");
         PrintFileTSTPFormula(Stream,tptp_tcf,Term->TheSymbol.NestedFormula->Formula,0,0,
-outermost,1);
+LastConnective,1);
         PFprintf(Stream,")");
     } else if (Term->Type == nested_fof) {
         PFprintf(Stream,"$fof(");
         PrintFileTSTPFormula(Stream,tptp_fof,Term->TheSymbol.NestedFormula->Formula,0,0,
-outermost,1);
+LastConnective,1);
         PFprintf(Stream,")");
     } else if (Term->Type == nested_cnf) {
         PFprintf(Stream,"$cnf(");
         PrintFileTSTPFormula(Stream,tptp_cnf,Term->TheSymbol.NestedFormula->Formula,0,0,
-outermost,1);
+LastConnective,1);
         PFprintf(Stream,")");
     } else if (Term->Type == nested_fot) {
         PFprintf(Stream,"$fot(");
-        PrintFileTSTPTerm(Stream,Language,Term->TheSymbol.NestedTerm->Term,Indent,TSTPSyntaxFlag);
+        PrintFileTSTPTerm(Stream,Language,Term->TheSymbol.NestedTerm->Term,Indent,Pretty,
+LastConnective,TSTPSyntaxFlag);
         PFprintf(Stream,")");
 //----Check if infix - or : (see also TSTPTermToString in Examine.c)
     } else if (!strcmp(GetSymbol(Term),"-") || !strcmp(GetSymbol(Term),":")) {
-        PrintFileTSTPTerm(Stream,Language,Term->Arguments[0],Indent,TSTPSyntaxFlag);
+        PrintFileTSTPTerm(Stream,Language,Term->Arguments[0],Indent,Pretty,LastConnective,
+TSTPSyntaxFlag);
         PFprintf(Stream,"%s",GetPrintSymbol(Term));
-        PrintFileTSTPTerm(Stream,Language,Term->Arguments[1],Indent,TSTPSyntaxFlag);
+        PrintFileTSTPTerm(Stream,Language,Term->Arguments[1],Indent,Pretty,LastConnective,
+TSTPSyntaxFlag);
 //----If infix equality or inequality
     } else if (TSTPSyntaxFlag && !strcmp(GetSymbol(Term),"=") && GetArity(Term) == 2) {
-        PrintFileTSTPTerm(Stream,Language,Term->Arguments[0],Indent,1);
+        PrintFileTSTPTerm(Stream,Language,Term->Arguments[0],Pretty,Indent,LastConnective,1);
         PFprintf(Stream," ");
         if (TSTPSyntaxFlag == 2) {
             PFprintf(Stream,"!");
         }
         PFprintf(Stream,"= ");
-        PrintFileTSTPTerm(Stream,Language,Term->Arguments[1],Indent,1);
+        PrintFileTSTPTerm(Stream,Language,Term->Arguments[1],Pretty,Indent,LastConnective,1);
     } else {
 //----Check if a list
         if (GetSymbol(Term)[0] == '[') {
@@ -252,7 +252,7 @@ outermost,1);
 // !strcmp(StartOfSymbol,"=")) {
 //                 StartOfSymbol = "equal";
 //             }
-//----Strip lead + of positive numbers (cannot be a + in any other context)
+//----Strip leading + off positive numbers (cannot be a + in any other context)
             if (*StartOfSymbol == '+') {
                 StartOfSymbol++;
             }
@@ -261,54 +261,29 @@ outermost,1);
             OpeningBracket = '(';
             ClosingBracket = ')';
         }
-        
-//----Need to check the args exist, because for type declarations they don't
-        if (((Arity = GetArity(Term)) > 0  && Term->Arguments != NULL) || OpeningBracket == '[') {
-//----Pretty printing of []ed lists - used for outmost lists, e.g., multiple
-//----inference() terms.
-            PFprintf(Stream,"%c",OpeningBracket);
-            if (OpeningBracket == '[' && Indent > 0 && Arity > 0) {
-                PFprintf(Stream," ");
-            }
-            if (Arity > 0) {
-                PrintFileTSTPTerm(Stream,Language,Term->Arguments[0],
-Language == tptp_tff ? Indent+2 : -1,TSTPSyntaxFlag);
-                for (Index=1;Index < Arity;Index++) {
-                    PFprintf(Stream,",");
-                    if (OpeningBracket == '[' && Indent > 0) {
-                        PFprintf(Stream,"\n");
-                        PrintSpaces(Stream,Indent+2);
-                    }
-                    PrintFileTSTPTerm(Stream,Language,Term->Arguments[Index],
-Language == tptp_tff ? Indent+2 : -1,TSTPSyntaxFlag);
-                }
-            }
-            if (OpeningBracket == '[' && Indent > 0 && Arity > 0) {
-                PFprintf(Stream," ");
-            }
-            PFprintf(Stream,"%c",ClosingBracket);
-        }
+        PrintArgumentList(Stream,Language,Term,Pretty,Indent,OpeningBracket,ClosingBracket,
+TSTPSyntaxFlag);
     }
 }
 //-------------------------------------------------------------------------------------------------
-void PrintStringTSTPTerm(char * PutOutputHere,SyntaxType Language,TERM Term,
+void PrintStringTSTPTerm(char * PutOutputHere,SyntaxType Language,TERM Term,int Pretty,
 int Indent,int TSTPSyntaxFlag) {
 
     PRINTFILE LocalStream;
 
     if ((LocalStream = OpenStringPrintFile(PutOutputHere)) != NULL) {
-        PrintFileTSTPTerm(LocalStream,Language,Term,Indent,TSTPSyntaxFlag);
+        PrintFileTSTPTerm(LocalStream,Language,Term,Pretty,Indent,outermost,TSTPSyntaxFlag);
         ClosePrintFile(LocalStream);
     }
 }
 //-------------------------------------------------------------------------------------------------
-void PrintTSTPTerm(FILE * Stream,SyntaxType Language,TERM Term,int Indent,
+void PrintTSTPTerm(FILE * Stream,SyntaxType Language,TERM Term,int Indent,int Pretty,
 int TSTPSyntaxFlag) {
 
     PRINTFILE LocalStream;
 
     if ((LocalStream = OpenFILEPrintFile(Stream,NULL)) != NULL) {
-        PrintFileTSTPTerm(LocalStream,Language,Term,Indent,TSTPSyntaxFlag);
+        PrintFileTSTPTerm(LocalStream,Language,Term,Pretty,Indent,outermost,TSTPSyntaxFlag);
         ClosePrintFile(LocalStream);
     }
 }
@@ -505,8 +480,7 @@ int FlatQuantifiedVariable(QuantifiedFormulaType QuantifiedFormula) {
 }
 //-------------------------------------------------------------------------------------------------
 void PrintQuantifiedVariable(PRINTFILE Stream,SyntaxType Language,
-QuantifiedFormulaType QuantifiedFormula,int Indent,int Pretty,
-int TSTPSyntaxFlag) {
+QuantifiedFormulaType QuantifiedFormula,int Indent,int Pretty,int TSTPSyntaxFlag) {
 
     ConnectiveType FakeConnective;
 
@@ -531,28 +505,84 @@ FakeConnective,TSTPSyntaxFlag);
     }
 }
 //-------------------------------------------------------------------------------------------------
-void PrintFileTupleFormulae(PRINTFILE Stream,SyntaxType Language,
-int NumberOfElements,FORMULAArray TupleFormulae,int Indent,int Pretty,
-int TSTPSyntaxFlag) {
+void PrintFileTupleFormulae(PRINTFILE Stream,SyntaxType Language,int NumberOfElements,
+FORMULAArray TupleFormulae,int Indent,int Pretty,int TSTPSyntaxFlag) {
 
     int ElementNumber;
+    ConnectiveType LastConnective = none;
 
-    PFprintf(Stream,"[");
+    PFprintf(Stream,"[ ");
     if (NumberOfElements > 0) {
-//        PFprintf(Stream," ");
         PrintFileTSTPFormula(Stream,Language,TupleFormulae[0],Indent+2,Pretty,outermost,
 TSTPSyntaxFlag);
         for (ElementNumber=1;ElementNumber < NumberOfElements;ElementNumber++) {
-            PFprintf(Stream,", ");
-            if (Pretty) {
-                PFprintf(Stream,"\n");
+            if (Pretty && TupleFormulae[ElementNumber]->Type != atom && 
+!FlatTuple(TupleFormulae[ElementNumber])) {
+                PFprintf(Stream,",\n");
                 PrintSpaces(Stream,Indent+2);
+                LastConnective = brackets;
+            } else {
+                PFprintf(Stream,",");
+                if (LastConnective == brackets) {
+                    PFprintf(Stream,"\n");
+                    PrintSpaces(Stream,Indent+2);
+                }
+                LastConnective = outermost;
             }
             PrintFileTSTPFormula(Stream,Language,TupleFormulae[ElementNumber],Indent+2,Pretty,
-outermost,TSTPSyntaxFlag);
+LastConnective,TSTPSyntaxFlag);
         }
     }
-    PFprintf(Stream,"]");
+    PFprintf(Stream," ]");
+}
+//-------------------------------------------------------------------------------------------------
+void PrintArgumentList(PRINTFILE Stream,SyntaxType Language,TERM Term,int Pretty,int Indent,
+char OpeningBracket,char ClosingBracket,int TSTPSyntaxFlag) {
+
+    int Arity,ElementNumber;
+    ConnectiveType LastConnective = none;
+    FormulaTypeType TermFormulaType;
+
+//----Need to check the args exist, because for type declarations they don't
+    if (((Arity = GetArity(Term)) > 0  && Term->Arguments != NULL) || OpeningBracket == '[') {
+//----Pretty printing of []ed lists - used for outmost lists, e.g., multiple
+//----inference() terms.
+        PFprintf(Stream,"%c",OpeningBracket);
+        if (OpeningBracket == '[' && Indent > 0 && Arity > 0) {
+            PFprintf(Stream," ");
+        }
+        if (Arity > 0) {
+            PrintFileTSTPTerm(Stream,Language,Term->Arguments[0],Pretty,
+Language == tptp_tff ? Indent+2 : -1,LastConnective,TSTPSyntaxFlag);
+            for (ElementNumber=1;ElementNumber < Arity;ElementNumber++) {
+                if (Term->Arguments[ElementNumber]->Type == formula) {
+                    TermFormulaType = Term->Arguments[ElementNumber]->TheSymbol.Formula->Type;
+                } else { 
+                    TermFormulaType = nonformulatype;
+                }
+                PFprintf(Stream,",");
+                if (Pretty && TermFormulaType != atom && 
+(!TermFormulaType == tuple || !FlatTuple(Term->Arguments[ElementNumber]->TheSymbol.Formula))) {
+                    PFprintf(Stream,"\n");
+                    Indent += 2;
+                    PrintSpaces(Stream,Indent);
+                    LastConnective = brackets;
+                } else {
+                    if (LastConnective == brackets) {
+                        PFprintf(Stream,"\n");
+                        PrintSpaces(Stream,Indent+2);
+                    }
+                    LastConnective = none;
+                }
+                PrintFileTSTPTerm(Stream,Language,Term->Arguments[ElementNumber],Pretty,
+Language == tptp_tff ? Indent+2 : -1,outermost,TSTPSyntaxFlag);
+            }
+        }
+        if (OpeningBracket == '[' && Indent > 0 && Arity > 0) {
+            PFprintf(Stream," ");
+        }
+        PFprintf(Stream,"%c",ClosingBracket);
+    }
 }
 //-------------------------------------------------------------------------------------------------
 void PrintFileTSTPFormula(PRINTFILE Stream,SyntaxType Language,FORMULA Formula,int Indent,
@@ -787,8 +817,8 @@ LastConnective == brackets;
                         PFprintf(Stream," ");
                     }
                 }
-                PrintFileTSTPTerm(Stream,Language,Formula->FormulaUnion.Atom,Indent+2,
-TSTPSyntaxFlag);
+                PrintFileTSTPTerm(Stream,Language,Formula->FormulaUnion.Atom,Pretty,Indent+2,
+LastConnective,TSTPSyntaxFlag);
                 if (NeedBrackets) {
                     if (LastConnective == brackets) {
                         PFprintf(Stream," ");
@@ -944,18 +974,18 @@ AnnotatedTSTPFormula.FormulaWithVariables->Formula,0,Pretty,outermost,1);
         PFprintf(Stream,",%s",(Pretty?"\n    ":""));
 //----Still need full TSTP mode because formulae might appear in the source
 //----of useful info
-        PrintFileTSTPTerm(Stream,Language,AnnotatedTSTPFormula.Source,4,1);
+        PrintFileTSTPTerm(Stream,Language,AnnotatedTSTPFormula.Source,Pretty,4,outermost,1);
         if (AnnotatedTSTPFormula.UsefulInfo != NULL) {
             PFprintf(Stream,",%s",(Pretty?"\n    ":""));
-            PrintFileTSTPTerm(Stream,Language,AnnotatedTSTPFormula.UsefulInfo,-1,1);
+            PrintFileTSTPTerm(Stream,Language,AnnotatedTSTPFormula.UsefulInfo,Pretty,-1,
+outermost,1);
         }
     }
     PFprintf(Stream,").\n");
 }
 //-------------------------------------------------------------------------------------------------
 void PrintAnnotatedTSTPFormula(FILE * Stream,SyntaxType Language,
-AnnotatedTSTPFormulaType AnnotatedTSTPFormula,PrintFormatType Format,
-int Pretty) {
+AnnotatedTSTPFormulaType AnnotatedTSTPFormula,PrintFormatType Format,int Pretty) {
 
     PRINTFILE LocalStream;
                 
@@ -965,7 +995,7 @@ int Pretty) {
     }
 }           
 //-------------------------------------------------------------------------------------------------
-void PrintFileTPTPClause(PRINTFILE Stream,SyntaxType Language,FORMULA Formula,
+void PrintFileTPTPClause(PRINTFILE Stream,SyntaxType Language,FORMULA Formula,int Pretty,
 int Indent,int AlreadyIndented,int NeedCommaNewline) {
 
 //----Bypass the universal quantifiers (all outermost)
@@ -988,24 +1018,24 @@ Formula->FormulaUnion.QuantifiedFormula.Quantifier == universal) {
 //----Print nothing for an empty clause
             if (strcmp(GetSymbol(Formula->FormulaUnion.Atom),"$false")) {
                 PFprintf(Stream,"++");
-                PrintFileTSTPTerm(Stream,Language,Formula->FormulaUnion.Atom,-1,0);
+                PrintFileTSTPTerm(Stream,Language,Formula->FormulaUnion.Atom,Pretty,-1,outermost,0);
             }
             break;
         case unary:
             if (Formula->FormulaUnion.UnaryFormula.Connective == negation) {
                 PFprintf(Stream,"--");
                 PrintFileTSTPTerm(Stream,Language,
-Formula->FormulaUnion.UnaryFormula.Formula->FormulaUnion.Atom,-1,0);
+Formula->FormulaUnion.UnaryFormula.Formula->FormulaUnion.Atom,Pretty,-1,outermost,0);
             } else {
                 CodingError("Printing a non-clause as a clause");
             }
             break;
         case binary:
             if (Formula->FormulaUnion.BinaryFormula.Connective == disjunction) {
-                PrintFileTPTPClause(Stream,Language,
-Formula->FormulaUnion.BinaryFormula.LHS,Indent,Indent,0);
-                PrintFileTPTPClause(Stream,Language,
-Formula->FormulaUnion.BinaryFormula.RHS,Indent,0,1);
+                PrintFileTPTPClause(Stream,Language,Formula->FormulaUnion.BinaryFormula.LHS,Pretty,
+Indent,Indent,0);
+                PrintFileTPTPClause(Stream,Language,Formula->FormulaUnion.BinaryFormula.RHS,Pretty,
+Indent,0,1);
             } else {
                 CodingError("Printing a non-clause as a clause");
             }
@@ -1016,13 +1046,14 @@ Formula->FormulaUnion.BinaryFormula.RHS,Indent,0,1);
     }
 }
 //-------------------------------------------------------------------------------------------------
-void PrintTPTPClause(FILE * Stream,SyntaxType Language,FORMULA Formula,
+void PrintTPTPClause(FILE * Stream,SyntaxType Language,FORMULA Formula,int Pretty,
 int Indent,int AlreadyIndented,int NeedCommaNewline) {
 
     PRINTFILE LocalStream;
 
     if ((LocalStream = OpenFILEPrintFile(Stream,NULL)) != NULL) {
-        PrintFileTPTPClause(LocalStream,Language,Formula,Indent,AlreadyIndented,NeedCommaNewline);
+        PrintFileTPTPClause(LocalStream,Language,Formula,Pretty,Indent,AlreadyIndented,
+NeedCommaNewline);
         ClosePrintFile(LocalStream);
     }
 }
@@ -1052,8 +1083,8 @@ AnnotatedTSTPFormula. FormulaWithVariables->Formula,6,Pretty,outermost,0);
             break;
         case tptp_cnf:
             PFprintf(Stream,"    [");
-            PrintFileTPTPClause(Stream,Language,
-AnnotatedTSTPFormula.FormulaWithVariables->Formula,5,5,0);
+            PrintFileTPTPClause(Stream,Language,AnnotatedTSTPFormula.FormulaWithVariables->Formula,
+Pretty,5,5,0);
             PFprintf(Stream,"]");
             break;
         default:
@@ -1081,7 +1112,7 @@ PrintFormatType Format,int Pretty) {
         switch (AnnotatedFormula->Syntax) {
             case include:
                 PrintFileTSTPTerm(Stream,AnnotatedFormula->Syntax,
-AnnotatedFormula->AnnotatedFormulaUnion.Include,-1,0);
+AnnotatedFormula->AnnotatedFormulaUnion.Include,Pretty,-1,outermost,0);
                 PFprintf(Stream,".\n");
                 break;
             case comment:

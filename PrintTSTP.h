@@ -22,24 +22,25 @@ char * PrintFormatToString(PrintFormatType Format);
 
 void SetPrintShortSymbols(int Choice);
 void PrintIndent(FILE * Stream,int Indent,int AlreadyIndented,int Pretty);
-void PrintStringTSTPTerm(char * PutOutputHere,SyntaxType Language,TERM Term,
-int Indent,int TSTPSyntaxFlag);
-void PrintTSTPTerm(FILE * Stream,SyntaxType Language,TERM Term,int Indent,
+void PrintStringTSTPTerm(char * PutOutputHere,SyntaxType Language,TERM Term,int Pretty,int Indent,
 int TSTPSyntaxFlag);
-void PrintTSTPFormula(FILE * Stream,SyntaxType Language,FORMULA Formula,
-int Indent,int Pretty,ConnectiveType LastConnective,int TSTPSyntaxFlag);
+void PrintTSTPTerm(FILE * Stream,SyntaxType Language,TERM Term,int Indent,int Pretty,
+int TSTPSyntaxFlag);
+void PrintArgumentList(PRINTFILE Stream,SyntaxType Language,TERM Term,int Pretty,int Indent,
+char OpeningBracket,char ClosingBracket,int TSTPSyntaxFlag);
+void PrintTSTPFormula(FILE * Stream,SyntaxType Language,FORMULA Formula,int Indent,int Pretty,
+ConnectiveType LastConnective,int TSTPSyntaxFlag);
 void PrintAnnotatedTSTPFormula(FILE * Stream,SyntaxType Syntax,
-AnnotatedTSTPFormulaType AnnotatedTSTPFormula,PrintFormatType Format,
-int Pretty);
+AnnotatedTSTPFormulaType AnnotatedTSTPFormula,PrintFormatType Format,int Pretty);
 void PrintStringAnnotatedTSTPNode(char * PutOutputHere,ANNOTATEDFORMULA 
 AnnotatedFormula,PrintFormatType Format,int Pretty);
-void PrintAnnotatedTSTPNode(FILE * Stream,ANNOTATEDFORMULA AnnotatedFormula,
+void PrintAnnotatedTSTPNode(FILE * Stream,ANNOTATEDFORMULA AnnotatedFormula,PrintFormatType Format,
+int Pretty);
+void PrintAnnotatedTSTPNodeWithStatus(FILE * Stream,ANNOTATEDFORMULA AnnotatedFormula,
+PrintFormatType Format,int Pretty,StatusType Status);
+void PrintListOfAnnotatedTSTPNodes(FILE * Stream,SIGNATURE Signature,LISTNODE Head,
 PrintFormatType Format,int Pretty);
-void PrintAnnotatedTSTPNodeWithStatus(FILE * Stream,ANNOTATEDFORMULA
-AnnotatedFormula,PrintFormatType Format,int Pretty,StatusType Status);
-void PrintListOfAnnotatedTSTPNodes(FILE * Stream,SIGNATURE Signature,
-LISTNODE Head,PrintFormatType Format,int Pretty);
-void PrintListOfAnnotatedTSTPNodesWithStatus(FILE * Stream,SIGNATURE Signature,
-LISTNODE Head,PrintFormatType Format,int Pretty,StatusType Status);
+void PrintListOfAnnotatedTSTPNodesWithStatus(FILE * Stream,SIGNATURE Signature,LISTNODE Head,
+PrintFormatType Format,int Pretty,StatusType Status);
 //-------------------------------------------------------------------------------------------------
 #endif

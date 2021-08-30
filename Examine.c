@@ -1030,6 +1030,10 @@ int GetSymbolUses(SIGNATURE Signature,TermType Type,char * Name,int Arity) {
         List = Signature->Predicates;
     } else if (Type == function) {
         List = Signature->Functions;
+    } else if (Type == a_type) {
+        List = Signature->Types;
+    } else if (Type == variable) {
+        List = Signature->Variables;
     } else {
         List = NULL;
         CodingError("Unknown type of symbol for GetSymbolUses");

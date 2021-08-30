@@ -28,8 +28,7 @@ void PrintSignatureTree(SYMBOLNODE SignatureTree);
 void PrintSignature(SIGNATURE Signature);
 char * GetSignatureSymbolUsage(SIGNATURE Signature,char ** PutUsageHere,
 char ** FunctorUsageStartsHere);
-void GetSignatureSymbolUsageStatistics(SYMBOLNODE SignatureNode,
-double * NumberOfSymbols,double * NumberOfSymbolsArity0,
-double * MinSymbolArity,double * MaxSymbolArity);
+void GetSignatureSymbolUsageStatistics(SYMBOLNODE SignatureNode,int * NumberOfSymbols,
+int * NumberOfSymbolsArity0,int * MinSymbolArity,int * MaxSymbolArity);
 //-------------------------------------------------------------------------------------------------
 #endif

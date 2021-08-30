@@ -116,13 +116,13 @@ SymbolIndex);
 //-------------------------------------------------------------------------------------------------
 void ShortenSymbolType(SYMBOLNODE Symbols,char ShortChar) {
 
-    double NumberOfSymbols,NumberOfSymbolsArity0,MinSymbolArity,MaxSymbolArity;
+    int NumberOfSymbols,NumberOfSymbolsArity0,MinSymbolArity,MaxSymbolArity;
     int NumberOfDigits;
     String FormatString;
     long SymbolIndex = 1;
 
-    GetSignatureSymbolUsageStatistics(Symbols,&NumberOfSymbols,
-&NumberOfSymbolsArity0,&MinSymbolArity,&MaxSymbolArity);
+    GetSignatureSymbolUsageStatistics(Symbols,&NumberOfSymbols,&NumberOfSymbolsArity0,
+&MinSymbolArity,&MaxSymbolArity);
     NumberOfDigits = (int)ceil(log10(NumberOfSymbols+1));
     sprintf(FormatString,"%c%%0%dld",ShortChar,NumberOfDigits);
     ShortenSymbols(Symbols,FormatString,NumberOfDigits+2,&SymbolIndex);

@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <ctype.h>
 #include <assert.h>
+#include <limits.h>
 #include "Tokenizer.h"
 #include "Signature.h"
 #include "Utilities.h"
@@ -543,8 +544,8 @@ char ** FunctorUsageStartsHere) {
     return(*PutUsageHere);
 }
 //-------------------------------------------------------------------------------------------------
-void DoGetSignatureSymbolUsageStatistics(SYMBOLNODE SignatureNode,double * NumberOfSymbols,
-double * NumberOfSymbolsArity0,double * MinSymbolArity,double * MaxSymbolArity) {
+void DoGetSignatureSymbolUsageStatistics(SYMBOLNODE SignatureNode,int * NumberOfSymbols,
+int * NumberOfSymbolsArity0,int * MinSymbolArity,int * MaxSymbolArity) {
 
     if (SignatureNode != NULL) {
 //DEBUG printf("Symbol is %s\n",SignatureNode->NameSymbol);
@@ -554,7 +555,7 @@ double * NumberOfSymbolsArity0,double * MinSymbolArity,double * MaxSymbolArity) 
             if (SignatureNode->Arity == 0) {
                 (*NumberOfSymbolsArity0)++;
             }
-            if (*MinSymbolArity == -1 || SignatureNode->Arity < *MinSymbolArity) {
+            if (SignatureNode->Arity < *MinSymbolArity) {
                 *MinSymbolArity = SignatureNode->Arity;
             }
             if (SignatureNode->Arity > *MaxSymbolArity) {
@@ -568,12 +569,12 @@ NumberOfSymbols,NumberOfSymbolsArity0,MinSymbolArity,MaxSymbolArity);
     }
 }
 //-------------------------------------------------------------------------------------------------
-void GetSignatureSymbolUsageStatistics(SYMBOLNODE SignatureNode,double * NumberOfSymbols,
-double * NumberOfSymbolsArity0,double * MinSymbolArity,double * MaxSymbolArity) {
+void GetSignatureSymbolUsageStatistics(SYMBOLNODE SignatureNode,int * NumberOfSymbols,
+int * NumberOfSymbolsArity0,int * MinSymbolArity,int * MaxSymbolArity) {
 
     *NumberOfSymbols = 0;
     *NumberOfSymbolsArity0 = 0;
-    *MinSymbolArity = -1;
+    *MinSymbolArity = INT_MAX;
     *MaxSymbolArity = -1;
     DoGetSignatureSymbolUsageStatistics(SignatureNode,NumberOfSymbols,NumberOfSymbolsArity0,
 MinSymbolArity,MaxSymbolArity);

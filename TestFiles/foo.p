@@ -26,9 +26,15 @@ tff(qq,type,qq: $o > $o).
 %        ? [Y: $o] : 
 %          Y = ww(Y) ).
 
-%----SyntaxBNF likes this but TPTP4X does not (should!)
+%----SyntaxBNF likes this and TPTP4X does too (now - when did I fix it?!?)
 tff(large4,axiom,
     ! [X: $o] : 
-       X = 
+       (X) = 
         ( ? [Y: $o] : 
           Y = ww(Y)  )).
+
+tff(p_type,type,p : ($int * $o * $int) > $o).
+
+tff(b,axiom,p(1,$true,2)).
+
+tff(c,axiom,p(1,[a,c & c,c],[c,c,c])).
