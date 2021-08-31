@@ -260,8 +260,7 @@ NULL)) != NULL) {
     ArrayOfInfoTERMs = GetInferenceInfoTERMs(Head->AnnotatedFormula,"assumptions",
 &NumberOfTerms);
     for (Index = 0; Index < NumberOfTerms; Index++) {
-        PrintTSTPTerm(stdout,Head->AnnotatedFormula->Syntax,
-ArrayOfInfoTERMs[Index],-1,1);
+        PrintTSTPTerm(stdout,Head->AnnotatedFormula->Syntax,ArrayOfInfoTERMs[Index],-1,1,1);
         printf("\n");
     }
     if (ArrayOfInfoTERMs != NULL) {
@@ -614,7 +613,7 @@ NULL);
     ANewTerm = ParseStringTerm("hello(there,my(BIG),friend)",nontype,
 Signature,0);
     printf("The term is ==");
-    PrintTSTPTerm(stdout,tptp_fof,ANewTerm,-1,0);
+    PrintTSTPTerm(stdout,tptp_fof,ANewTerm,-1,1,0);
     printf("==\n");
 
 //----Test getting inference status

@@ -465,10 +465,12 @@ HeadListCount(&HeadListNode,formula_depth) / Statistics.FormulaStatistics.Number
 //DEBUG printf("PROGRESS: counted connectives\n");
 
     Statistics.FormulaStatistics.NumberOfHornClauses = HeadListCount(&HeadListNode,horn_clauses);
-// BUG HERE FOR STICKSEL EXAMPLES
+//DEBUG printf("PROGRESS: counted Horn clauses\n");
     Statistics.FormulaStatistics.NumberOfRRClauses = HeadListCount(&HeadListNode,rr_clauses);
+//DEBUG printf("PROGRESS: counted RR clauses\n");
     Statistics.FormulaStatistics.MaxClauseSize = HeadListMaximal(&HeadListNode,literals);
-    if (Statistics.FormulaStatistics.NumberOfAtoms > 0) {
+//DEBUG printf("PROGRESS: got max clause size\n");
+    if (Statistics.FormulaStatistics.NumberOfCNF > 0) {
         Statistics.FormulaStatistics.AverageClauseSize = 
 Statistics.FormulaStatistics.NumberOfLiterals / Statistics.FormulaStatistics.NumberOfCNF;
     } else {

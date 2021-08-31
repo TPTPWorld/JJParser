@@ -169,7 +169,7 @@ void PrintSpaces(PRINTFILE Stream,int Spaces) {
     }
 }
 //-------------------------------------------------------------------------------------------------
-void PrintFileTSTPTerm(PRINTFILE Stream,SyntaxType Language,TERM Term,int Indent,int Pretty,
+void PrintFileTSTPTerm(PRINTFILE Stream,SyntaxType Language,TERM Term,int Pretty,int Indent,
 ConnectiveType LastConnective,int TSTPSyntaxFlag) {
 
     char OpeningBracket,ClosingBracket;
@@ -178,12 +178,8 @@ ConnectiveType LastConnective,int TSTPSyntaxFlag) {
 //DEBUG printf("Printing term %s indent %d\n",TermTypeToString(Term->Type),Indent);
 //----All THF and TFF (because of TFX) terms are formulae
     if ((Language == tptp_thf || Language == tptp_tff) && Term->Type == formula) {
-//----For non-atoms, newline and indent
-        if (Term->TheSymbol.Formula->Type != atom && Term->TheSymbol.Formula->Type != tuple) {
-            PFprintf(Stream,"\n");
-            PrintSpaces(Stream,Indent-2);
-        }
-        PrintFileTSTPFormula(Stream,Language,Term->TheSymbol.Formula,Indent,1,LastConnective,1);
+        PrintFileTSTPFormula(Stream,Language,Term->TheSymbol.Formula,Indent,Pretty,
+LastConnective,1);
 //----Check if a nested formula - no symbol
     } else if (Term->Type == nested_thf) {
         PFprintf(Stream,"$thf(");
@@ -215,15 +211,15 @@ LastConnective,1);
         PFprintf(Stream,")");
     } else if (Term->Type == nested_fot) {
         PFprintf(Stream,"$fot(");
-        PrintFileTSTPTerm(Stream,Language,Term->TheSymbol.NestedTerm->Term,Indent,Pretty,
+        PrintFileTSTPTerm(Stream,Language,Term->TheSymbol.NestedTerm->Term,Pretty,Indent,
 LastConnective,TSTPSyntaxFlag);
         PFprintf(Stream,")");
 //----Check if infix - or : (see also TSTPTermToString in Examine.c)
     } else if (!strcmp(GetSymbol(Term),"-") || !strcmp(GetSymbol(Term),":")) {
-        PrintFileTSTPTerm(Stream,Language,Term->Arguments[0],Indent,Pretty,LastConnective,
+        PrintFileTSTPTerm(Stream,Language,Term->Arguments[0],Pretty,Indent,LastConnective,
 TSTPSyntaxFlag);
         PFprintf(Stream,"%s",GetPrintSymbol(Term));
-        PrintFileTSTPTerm(Stream,Language,Term->Arguments[1],Indent,Pretty,LastConnective,
+        PrintFileTSTPTerm(Stream,Language,Term->Arguments[1],Pretty,Indent,LastConnective,
 TSTPSyntaxFlag);
 //----If infix equality or inequality
     } else if (TSTPSyntaxFlag && !strcmp(GetSymbol(Term),"=") && GetArity(Term) == 2) {
@@ -261,7 +257,7 @@ TSTPSyntaxFlag);
             OpeningBracket = '(';
             ClosingBracket = ')';
         }
-        PrintArgumentList(Stream,Language,Term,Pretty,Indent,OpeningBracket,ClosingBracket,
+        PrintFileTermList(Stream,Language,Term,Pretty,Indent,OpeningBracket,ClosingBracket,
 TSTPSyntaxFlag);
     }
 }
@@ -443,19 +439,22 @@ int FlatTypeOrDefnFormula(FORMULA Formula) {
     return(FlatTypeFormula(Formula) || FlatDefnFormula(Formula));
 }
 //-------------------------------------------------------------------------------------------------
-int FlatTuple(FORMULA Formula) {
+int FlatTupleElements(int NumberOfElements,FORMULAArray Elements) {
 
-    int index;
+    int ElementNumber;
 
-    if (Formula->Type != tuple) {
-        return(0);
-    }
-    for (index = 0; index < Formula->FormulaUnion.TupleFormula.NumberOfElements; index++) {
-        if (!FlatFormula(Formula->FormulaUnion.TupleFormula.Elements[index])) {
+    for (ElementNumber = 0; ElementNumber < NumberOfElements; ElementNumber++) {
+        if (!FlatFormula(Elements[ElementNumber])) {
             return(0);
         }
     }
     return(1);
+}
+//-------------------------------------------------------------------------------------------------
+int FlatTuple(FORMULA Formula) {
+
+    return(Formula->Type == tuple && FlatTupleElements(
+Formula->FormulaUnion.TupleFormula.NumberOfElements,Formula->FormulaUnion.TupleFormula.Elements));
 }
 //-------------------------------------------------------------------------------------------------
 int ApplicationFormula(FORMULA Formula) {
@@ -480,7 +479,7 @@ int FlatQuantifiedVariable(QuantifiedFormulaType QuantifiedFormula) {
 }
 //-------------------------------------------------------------------------------------------------
 void PrintQuantifiedVariable(PRINTFILE Stream,SyntaxType Language,
-QuantifiedFormulaType QuantifiedFormula,int Indent,int Pretty,int TSTPSyntaxFlag) {
+QuantifiedFormulaType QuantifiedFormula,int Pretty,int Indent,int TSTPSyntaxFlag) {
 
     ConnectiveType FakeConnective;
 
@@ -505,81 +504,73 @@ FakeConnective,TSTPSyntaxFlag);
     }
 }
 //-------------------------------------------------------------------------------------------------
-void PrintFileTupleFormulae(PRINTFILE Stream,SyntaxType Language,int NumberOfElements,
-FORMULAArray TupleFormulae,int Indent,int Pretty,int TSTPSyntaxFlag) {
+void PrintFileFormulaeTuple(PRINTFILE Stream,SyntaxType Language,int NumberOfElements,
+FORMULAArray FormulaTuple,int Pretty,int Indent,int TSTPSyntaxFlag) {
 
     int ElementNumber;
+    int NeedSpace;
     ConnectiveType LastConnective = none;
 
-    PFprintf(Stream,"[ ");
-    if (NumberOfElements > 0) {
-        PrintFileTSTPFormula(Stream,Language,TupleFormulae[0],Indent+2,Pretty,outermost,
-TSTPSyntaxFlag);
-        for (ElementNumber=1;ElementNumber < NumberOfElements;ElementNumber++) {
-            if (Pretty && TupleFormulae[ElementNumber]->Type != atom && 
-!FlatTuple(TupleFormulae[ElementNumber])) {
-                PFprintf(Stream,",\n");
-                PrintSpaces(Stream,Indent+2);
-                LastConnective = brackets;
-            } else {
-                PFprintf(Stream,",");
-                if (LastConnective == brackets) {
-                    PFprintf(Stream,"\n");
-                    PrintSpaces(Stream,Indent+2);
-                }
-                LastConnective = outermost;
-            }
-            PrintFileTSTPFormula(Stream,Language,TupleFormulae[ElementNumber],Indent+2,Pretty,
-LastConnective,TSTPSyntaxFlag);
-        }
+    PFprintf(Stream,"[");
+    if ((NeedSpace = !FlatTupleElements(NumberOfElements,FormulaTuple))) {
+        PFprintf(Stream," ");
     }
-    PFprintf(Stream," ]");
+    PrintFileTSTPFormula(Stream,Language,FormulaTuple[0],Indent+2,Pretty,outermost,
+TSTPSyntaxFlag);
+    for (ElementNumber=1;ElementNumber < NumberOfElements;ElementNumber++) {
+        PFprintf(Stream,",");
+        if (Pretty && FormulaTuple[ElementNumber]->Type != atom && 
+!FlatTuple(FormulaTuple[ElementNumber])) {
+            PFprintf(Stream,"\n");
+            PrintSpaces(Stream,Indent+2);
+            LastConnective = brackets;
+        } else {
+            if (LastConnective == brackets) {
+                PFprintf(Stream,"\n");
+                PrintSpaces(Stream,Indent+2);
+            }
+            LastConnective = outermost;
+        }
+        PrintFileTSTPFormula(Stream,Language,FormulaTuple[ElementNumber],Indent+2,Pretty,
+LastConnective,TSTPSyntaxFlag);
+    }
+    if (NeedSpace) {
+        PFprintf(Stream," ");
+    }
+    PFprintf(Stream,"]");
 }
 //-------------------------------------------------------------------------------------------------
-void PrintArgumentList(PRINTFILE Stream,SyntaxType Language,TERM Term,int Pretty,int Indent,
+void PrintFileTermList(PRINTFILE Stream,SyntaxType Language,TERM Term,int Pretty,int Indent,
 char OpeningBracket,char ClosingBracket,int TSTPSyntaxFlag) {
 
     int Arity,ElementNumber;
     ConnectiveType LastConnective = none;
-    FormulaTypeType TermFormulaType;
 
 //----Need to check the args exist, because for type declarations they don't
     if (((Arity = GetArity(Term)) > 0  && Term->Arguments != NULL) || OpeningBracket == '[') {
 //----Pretty printing of []ed lists - used for outmost lists, e.g., multiple
 //----inference() terms.
         PFprintf(Stream,"%c",OpeningBracket);
-        if (OpeningBracket == '[' && Indent > 0 && Arity > 0) {
-            PFprintf(Stream," ");
-        }
-        if (Arity > 0) {
-            PrintFileTSTPTerm(Stream,Language,Term->Arguments[0],Pretty,
-Language == tptp_tff ? Indent+2 : -1,LastConnective,TSTPSyntaxFlag);
-            for (ElementNumber=1;ElementNumber < Arity;ElementNumber++) {
-                if (Term->Arguments[ElementNumber]->Type == formula) {
-                    TermFormulaType = Term->Arguments[ElementNumber]->TheSymbol.Formula->Type;
-                } else { 
-                    TermFormulaType = nonformulatype;
-                }
+        for (ElementNumber=0;ElementNumber < Arity;ElementNumber++) {
+            if (ElementNumber > 0) {
                 PFprintf(Stream,",");
-                if (Pretty && TermFormulaType != atom && 
-(!TermFormulaType == tuple || !FlatTuple(Term->Arguments[ElementNumber]->TheSymbol.Formula))) {
-                    PFprintf(Stream,"\n");
-                    Indent += 2;
-                    PrintSpaces(Stream,Indent);
-                    LastConnective = brackets;
-                } else {
-                    if (LastConnective == brackets) {
-                        PFprintf(Stream,"\n");
-                        PrintSpaces(Stream,Indent+2);
-                    }
-                    LastConnective = none;
-                }
-                PrintFileTSTPTerm(Stream,Language,Term->Arguments[ElementNumber],Pretty,
-Language == tptp_tff ? Indent+2 : -1,outermost,TSTPSyntaxFlag);
             }
-        }
-        if (OpeningBracket == '[' && Indent > 0 && Arity > 0) {
-            PFprintf(Stream," ");
+            if (Pretty && Term->Arguments[ElementNumber]->Type == formula &&
+Term->Arguments[ElementNumber]->TheSymbol.Formula->Type != atom &&
+!(Term->Arguments[ElementNumber]->TheSymbol.Formula->Type == tuple &&
+  FlatTuple(Term->Arguments[ElementNumber]->TheSymbol.Formula))) {
+                PFprintf(Stream,"\n");
+                PrintSpaces(Stream,Indent);
+                LastConnective = brackets;
+            } else {
+                if (LastConnective == brackets) {
+                    PFprintf(Stream,"\n");
+                    PrintSpaces(Stream,Indent);
+                }
+                LastConnective = none;
+            }
+            PrintFileTSTPTerm(Stream,Language,Term->Arguments[ElementNumber],Pretty,Indent,
+LastConnective,TSTPSyntaxFlag);
         }
         PFprintf(Stream,"%c",ClosingBracket);
     }
@@ -603,23 +594,23 @@ int Pretty,ConnectiveType LastConnective,int TSTPSyntaxFlag) {
     } else {
         switch (Formula->Type) {
             case tuple:
-                PrintFileTupleFormulae(Stream,Language,
+                PrintFileFormulaeTuple(Stream,Language,
 Formula->FormulaUnion.TupleFormula.NumberOfElements,
-Formula->FormulaUnion.TupleFormula.Elements,Indent,Pretty,TSTPSyntaxFlag);
+Formula->FormulaUnion.TupleFormula.Elements,Pretty,Indent,TSTPSyntaxFlag);
                 break;
             case sequent:
-                PrintFileTupleFormulae(Stream,Language,
+                PrintFileFormulaeTuple(Stream,Language,
 Formula->FormulaUnion.SequentFormula.NumberOfLHSElements,
-Formula->FormulaUnion.SequentFormula.LHS,Indent,Pretty,TSTPSyntaxFlag);
+Formula->FormulaUnion.SequentFormula.LHS,Pretty,Indent,TSTPSyntaxFlag);
                 if (Pretty) {
                     PFprintf(Stream,"\n");
                     PrintSpaces(Stream,Indent - 1 - 
 strlen(ConnectiveToString(gentzenarrow)));
                 }
                 PFprintf(Stream,"%s ",ConnectiveToString(gentzenarrow));
-                PrintFileTupleFormulae(Stream,Language,
+                PrintFileFormulaeTuple(Stream,Language,
 Formula->FormulaUnion.SequentFormula.NumberOfRHSElements,
-Formula->FormulaUnion.SequentFormula.RHS,Indent,Pretty,TSTPSyntaxFlag);
+Formula->FormulaUnion.SequentFormula.RHS,Pretty,Indent,TSTPSyntaxFlag);
                 break;
             case quantified:
                 if (LastConnective == brackets) {
@@ -632,8 +623,8 @@ Formula->FormulaUnion.QuantifiedFormula.Quantifier));
 Formula->FormulaUnion.QuantifiedFormula.Quantifier)));
                 PFprintf(Stream,"[");
                 VariableIndent = Indent + 3;
-                PrintQuantifiedVariable(Stream,Language,
-Formula->FormulaUnion.QuantifiedFormula,Indent+4,Pretty,TSTPSyntaxFlag);
+                PrintQuantifiedVariable(Stream,Language,Formula->FormulaUnion.QuantifiedFormula,
+Pretty,Indent+4,TSTPSyntaxFlag);
                 while (Pretty && 
 //----Sequence of nested quantified formulae
 Formula->FormulaUnion.QuantifiedFormula.Formula->Type == quantified &&
@@ -650,7 +641,7 @@ FormulaUnion.QuantifiedFormula)) {
                     }
                     Formula = Formula->FormulaUnion.QuantifiedFormula.Formula;
                     PrintQuantifiedVariable(Stream,Language,Formula->FormulaUnion.QuantifiedFormula,
-Indent+4,Pretty,TSTPSyntaxFlag);
+Pretty,Indent+4,TSTPSyntaxFlag);
                 }
                 PFprintf(Stream,"] :");
 //----If not pretty, or unary and atom, or atom, do on same line

@@ -170,7 +170,7 @@ Formula->FormulaUnion.UnaryFormula.Connective,none);
             } else if (!strcmp(GetSymbol(Formula->FormulaUnion.Atom),"$false")) {
                 fprintf(Stream,"$F");
             } else {
-                PrintTSTPTerm(Stream,Language,Formula->FormulaUnion.Atom,-1,0);
+                PrintTSTPTerm(Stream,Language,Formula->FormulaUnion.Atom,-1,1,0);
             }
             break;
 

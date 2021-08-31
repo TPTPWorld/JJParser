@@ -1,7 +1,7 @@
-tff(ww,type,ww: $o > $o ).
-tff(c,type,c: $o).
-tff(ee,type,ee: ($o * $o) > $o).
-tff(qq,type,qq: $o > $o).
+% tff(ww,type,ww: $o > $o ).
+% tff(c,type,c: $o).
+% tff(ee,type,ee: ($o * $o) > $o).
+% tff(qq,type,qq: $o > $o).
 
 %----TPTP4X and SyntaxBNF like this. The (X) is a <tff_logic_formula> within
 %----<tff_unitary_term>. If the ()s are left off (X) then the X is a <variable>
@@ -27,14 +27,14 @@ tff(qq,type,qq: $o > $o).
 %          Y = ww(Y) ).
 
 %----SyntaxBNF likes this and TPTP4X does too (now - when did I fix it?!?)
-tff(large4,axiom,
-    ! [X: $o] : 
-       (X) = 
-        ( ? [Y: $o] : 
-          Y = ww(Y)  )).
+% tff(large4,axiom,
+%     ! [X: $o] : 
+%        (X) = 
+%         ( ? [Y: $o] : 
+%           Y = ww(Y)  )).
 
 tff(p_type,type,p : ($int * $o * $int) > $o).
 
-tff(b,axiom,p(1,$true,2)).
+% tff(b,axiom,p(1,$true,2)).
 
-tff(c,axiom,p(1,[a,c & c,c],[c,c,c])).
+tff(c,axiom,p(1,a,4)).
