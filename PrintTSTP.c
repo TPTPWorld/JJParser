@@ -314,17 +314,20 @@ int SymbolFormula(FORMULA Formula) {
 
 //----Atoms and FOL predicates are "symbols". Thus $ite() and $let() are in 
 //----this category. Note tuples have arity -1 and are not "symbols".
-    return(
-(Formula->Type == atom && GetArity(Formula->FormulaUnion.Atom) >= 0));
-//NOT MORE FOR FOOL Formula->Type == ite_formula || Formula->Type == let_formula);
+    return(Formula->Type == atom || Formula->Type == ite_formula || Formula->Type == let_formula);
 }
 //-------------------------------------------------------------------------------------------------
 int LiteralFormula(FORMULA Formula) {
 
     return(SymbolFormula(Formula) ||
-(Formula->Type == unary &&
- Formula->FormulaUnion.UnaryFormula.Connective == negation &&
- LiteralFormula(Formula->FormulaUnion.UnaryFormula.Formula)));
+(UnaryFormula(Formula) && Formula->FormulaUnion.UnaryFormula.Connective == negation &&
+ SymbolFormula(Formula->FormulaUnion.UnaryFormula.Formula)));
+}
+//-------------------------------------------------------------------------------------------------
+int FlatLiteralFormula(FORMULA Formula) {
+
+ZZZZZZZZZ
+
 }
 //-------------------------------------------------------------------------------------------------
 int UnitaryFormula(FORMULA Formula) {
@@ -345,8 +348,7 @@ int PositiveEquality(TERM Atom) {
 //-------------------------------------------------------------------------------------------------
 int NegatedEquality(FORMULA Formula) {
 
-    return(Formula->Type == unary && 
-Formula->FormulaUnion.UnaryFormula.Connective == negation &&
+    return(UnitaryFormula(Formula) && Formula->FormulaUnion.UnaryFormula.Connective == negation &&
 Formula->FormulaUnion.UnaryFormula.Formula->Type == atom &&
 PositiveEquality(Formula->FormulaUnion.UnaryFormula.Formula->FormulaUnion.Atom));
 }
@@ -561,9 +563,13 @@ Term->Arguments[ElementNumber]->TheSymbol.Formula->Type != atom &&
   FlatTuple(Term->Arguments[ElementNumber]->TheSymbol.Formula))) {
                 PFprintf(Stream,"\n");
                 PrintSpaces(Stream,Indent);
-                LastConnective = brackets;
+                if (Term->Arguments[ElementNumber]->TheSymbol.Formula->Type == quantified) {
+                    LastConnective = outermost;
+                } else {
+                    LastConnective = brackets;
+                }
             } else {
-                if (LastConnective == brackets) {
+                if (LastConnective == brackets || LastConnective == outermost) {
                     PFprintf(Stream,"\n");
                     PrintSpaces(Stream,Indent);
                 }
@@ -922,8 +928,8 @@ AnnotatedTSTPFormulaType AnnotatedTSTPFormula,PrintFormatType Format,int Pretty)
     PFprintf(Stream,",");
 
     if (Language == tptp_tpi) {
-        PrintFileTSTPFormula(Stream,Language,
-AnnotatedTSTPFormula.FormulaWithVariables->Formula,0,0,outermost,1);
+        PrintFileTSTPFormula(Stream,Language,AnnotatedTSTPFormula.FormulaWithVariables->Formula,
+0,0,outermost,1);
     } else {
         if (Pretty) {
 //----Things that start on a new line alone
@@ -935,9 +941,6 @@ AnnotatedTSTPFormula.FormulaWithVariables->Formula->Type == unary ||
 // AnnotatedTSTPFormula.FormulaWithVariables->Formula->Type == tuple ||
 TypeOrDefnFormula(AnnotatedTSTPFormula.FormulaWithVariables->Formula) ||
 LiteralFormula(AnnotatedTSTPFormula.FormulaWithVariables->Formula) ||
-//----$let and $ite are no longer LiteralFormula (why??), add here explicitly
-AnnotatedTSTPFormula.FormulaWithVariables->Formula->Type == ite_formula ||
-AnnotatedTSTPFormula.FormulaWithVariables->Formula->Type == let_formula ||
 FlatEquation(AnnotatedTSTPFormula.FormulaWithVariables->Formula) ||
 FlatBinaryFormula(AnnotatedTSTPFormula.FormulaWithVariables->Formula))) {
                 PFprintf(Stream,"(\n");

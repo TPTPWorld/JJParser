@@ -632,7 +632,7 @@ int VariablesMustBeQuantified) {
         case predicate:
 //----Can't check it's a predicate because it might be infix with var first
 //----      EnsureTokenType(Stream,predicate_symbol);
-//DEBUG printf("Found a predicate with symbol %s %d (want %d)\n",CurrentToken(Stream)->NameToken,CurrentToken(Stream)->KindToken,lower_word);
+//DEBUG printf("Found a predicate with symbol %s %s (want %s)\n",CurrentToken(Stream)->NameToken,TokenTypeToString(CurrentToken(Stream)->KindToken),TokenTypeToString(lower_word));
 //----Guess that it's a variable or function for infix predicate
             if (IsSymbolInSignatureList(Context.Signature->Types,CurrentToken(Stream)->NameToken,
 0) != NULL) {
@@ -661,8 +661,8 @@ int VariablesMustBeQuantified) {
             } else {
                 TypeIfInfix = non_logical_data;
 //----Make sure it's something that looks like a term
-                if (!CheckTokenType(Stream,functor) && !CheckToken(Stream,
-punctuation,"[") && !CheckTokenType(Stream,upper_word)) {
+                if (!CheckTokenType(Stream,functor) && !CheckToken(Stream,punctuation,"[") && 
+!CheckTokenType(Stream,upper_word)) {
                     TokenError(Stream,"Invalid term term");
                 }
             }
@@ -672,10 +672,10 @@ punctuation,"[") && !CheckTokenType(Stream,upper_word)) {
             break;
     }
     Term->Type = DesiredType;
+//DEBUG printf("Set type of %s to %s\n",CurrentToken(Stream)->NameToken,TermTypeToString(DesiredType));
 
 //----Save the symbol for inserting in signature later
     PrefixSymbol = CopyHeapString(CurrentToken(Stream)->NameToken);
-//DEBUG printf("Found a type %d term %s\n",Type,PrefixSymbol);
 //----Move on if not a list 
     if (strcmp(PrefixSymbol,"[") && strcmp(PrefixSymbol,"(")) {
         NextToken(Stream);
@@ -699,11 +699,11 @@ punctuation,"[") && !CheckTokenType(Stream,upper_word)) {
         }
         AcceptTokenType(Stream,punctuation);
         Term->Arguments = ParseArguments(Stream,Language,Context,EndOfScope,&NumberOfArguments,
-DesiredType,MatchingBracket,VariablesMustBeQuantified);
+function,MatchingBracket,VariablesMustBeQuantified);
         AcceptToken(Stream,punctuation,MatchingBracket);
 //----Is it a nested formula?
     } else if (DesiredType == nested_thf || DesiredType == nested_tff ||
-    DesiredType == nested_tcf || DesiredType == nested_fof || DesiredType == nested_cnf) {
+DesiredType == nested_tcf || DesiredType == nested_fof || DesiredType == nested_cnf) {
         NumberOfArguments = 0;
         Term->Arguments = NULL;
         AcceptToken(Stream,punctuation,"(");
@@ -753,8 +753,8 @@ Context.Signature,0);
         InfixRHSType = nonterm;
 //----Cannot have a variable if a predicate was expected, unless in a typed
 //----language, where variables can be types in polymorphic cases.
-        if (Language != tptp_thf && Language != tptp_tff &&
-DesiredType == predicate && TypeIfInfix == variable) {
+        if (Language != tptp_thf && Language != tptp_tff && DesiredType == predicate && 
+TypeIfInfix == variable) {
             TokenError(Stream,"Variables cannot be used as predicates except in THF and TFX");
         }
     }
@@ -975,8 +975,8 @@ QuantifiedFormulaType * QuantifiedFormula) {
     }
 
 //----Get the variable. The EndOfScope is extended to include this variable.
-    QuantifiedFormula->Variable =
-ParseTerm(Stream,Language,Context,EndOfScope,new_variable,Quantifier,NULL,0);
+    QuantifiedFormula->Variable = ParseTerm(Stream,Language,Context,EndOfScope,new_variable,
+Quantifier,NULL,0);
 //----THF requires type
     if (Language == tptp_thf) {
         AcceptToken(Stream,punctuation,":");
@@ -1291,8 +1291,8 @@ VariablesMustBeQuantified);
         case binary_connective:
             Formula = NewFormula();
             Formula->Type = atom;
-            Formula->FormulaUnion.Atom = ParseTerm(Stream,Language,Context,
-EndOfScope,predicate,none,NULL,VariablesMustBeQuantified);
+            Formula->FormulaUnion.Atom = ParseTerm(Stream,Language,Context,EndOfScope,predicate,
+none,NULL,VariablesMustBeQuantified);
             break;
         case unary_connective:
             Formula = ParseUnaryFormula(Stream,Language,Context,EndOfScope,
@@ -1565,16 +1565,15 @@ ANNOTATEDFORMULA ParseInclude(READFILE Stream,SIGNATURE Signature) {
     AnnotatedFormula = NewAnnotatedFormula(include);
     Context.Variables = NULL;
     Context.Signature = Signature;
-    AnnotatedFormula->AnnotatedFormulaUnion.Include = ParseTerm(Stream,
-nontype,Context,NULL,non_logical_data,none,NULL,0);
+    AnnotatedFormula->AnnotatedFormulaUnion.Include = ParseTerm(Stream,nontype,Context,NULL,
+non_logical_data,none,NULL,0);
 //DEBUG printf("file\n%s\n",AnnotatedFormula->AnnotatedFormulaUnion.Include->Arguments[0]->TheSymbol.NonVariable->NameSymbol);
     TakeToken(Stream,punctuation,".");
 
 //----Check it looks like an include
-    if (strcmp(GetSymbol(AnnotatedFormula->AnnotatedFormulaUnion.Include),
-"include") || (((Arity = GetArity(AnnotatedFormula->
-AnnotatedFormulaUnion.Include)) != 1) && Arity != 2) || (Arity == 1 &&
-GetArity(AnnotatedFormula->AnnotatedFormulaUnion.Include->Arguments[0]) != 0) ||
+    if (strcmp(GetSymbol(AnnotatedFormula->AnnotatedFormulaUnion.Include),"include") || 
+(((Arity = GetArity(AnnotatedFormula-> AnnotatedFormulaUnion.Include)) != 1) && Arity != 2) || 
+(Arity == 1 && GetArity(AnnotatedFormula->AnnotatedFormulaUnion.Include->Arguments[0]) != 0) ||
 (Arity == 2 && strcmp(GetSymbol(AnnotatedFormula->AnnotatedFormulaUnion.Include->Arguments[1]),
 "[]"))) {
         TokenError(Stream,"Ill-formed include directive");
