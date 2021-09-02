@@ -126,22 +126,6 @@ typedef enum {
 //----For parsing when coming from outermost (why did I not reuse outermost?)
     none
 } ConnectiveType;
-
-//----Types for variable instance lists
-typedef struct VariableTag {
-    int NumberOfUses;
-    ConnectiveType Quantification;
-    struct TermNodeTag * Instantiation;
-    SYMBOLNODE VariableName;
-    struct VariableTag * NextVariable;
-} VariableNodeType;
-
-typedef VariableNodeType * VARIABLENODE;
-
-typedef struct {
-    VARIABLENODE * Variables;
-    SIGNATURE Signature;
-} ContextType;
 //-------------------------------------------------------------------------------------------------
 //----Terms
 typedef enum {
@@ -166,6 +150,17 @@ typedef enum {
     non_logical_data,  
     nonterm
 } TermType;
+
+typedef struct VariableTag {
+    int NumberOfUses;
+    ConnectiveType Quantification;
+    TermType Type;
+    struct TermNodeTag * Instantiation;
+    SYMBOLNODE VariableName;
+    struct VariableTag * NextVariable;
+} VariableNodeType;
+
+typedef VariableNodeType * VARIABLENODE;
 
 typedef union {
     SYMBOLNODE NonVariable;
@@ -282,6 +277,11 @@ typedef struct TermWithVariablesTag {
 } TermWithVariablesType;
 
 typedef TermWithVariablesType * TERMWITHVARIABLES;
+
+typedef struct {
+    VARIABLENODE * Variables;
+    SIGNATURE Signature;
+} ContextType;
 //-------------------------------------------------------------------------------------------------
 //----Annotated records
 typedef enum {

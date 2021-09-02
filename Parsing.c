@@ -982,18 +982,17 @@ Quantifier,NULL,0);
         AcceptToken(Stream,punctuation,":");
         QuantifiedFormula->VariableType = ParseFormula(Stream,Language,Context,EndOfScope,-1,1,
 VariablesMustBeQuantified,none);
+        QuantifiedFormula->Variable->Type = term; ZZZZZZZ
 //----TFF optional type
     } else if ((Language == tptp_tff || Language == tptp_tcf) && 
 CheckToken(Stream,punctuation,":")) {
         AcceptToken(Stream,punctuation,":");
         QuantifiedFormula->VariableType = ParseAtom(Stream,Language,Context,EndOfScope,
 VariablesMustBeQuantified);
-//----Check that it's a constant - nope, TFF1 allows type constructors
-//        if (GetArity(QuantifiedFormula->VariableType->FormulaUnion.Atom) != 0) {
-//            TokenError(Stream);
-//        }
+        QuantifiedFormula->Variable->Type = term; ZZZZZZZ
     } else {
         QuantifiedFormula->VariableType = NULL;
+        QuantifiedFormula->Variable->Type = term;
     }
 }
 //-------------------------------------------------------------------------------------------------

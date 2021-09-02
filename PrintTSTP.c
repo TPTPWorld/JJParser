@@ -169,6 +169,251 @@ void PrintSpaces(PRINTFILE Stream,int Spaces) {
     }
 }
 //-------------------------------------------------------------------------------------------------
+//----Local mutual recursion
+int FlatFormula(FORMULA Formula);
+int FlatTerm(TERM Term);
+//-------------------------------------------------------------------------------------------------
+int TypeConnective(ConnectiveType Connective) {
+
+    return(Connective == typecolon || Connective == subtype);
+}
+//-------------------------------------------------------------------------------------------------
+int DefnConnective(ConnectiveType Connective) {
+
+    return(Connective == assignmentsym);
+}
+//-------------------------------------------------------------------------------------------------
+int TypeOrDefnConnective(ConnectiveType Connective) {
+
+    return(TypeConnective(Connective) || DefnConnective(Connective));
+}
+//-------------------------------------------------------------------------------------------------
+int FlatBinaryConnective(ConnectiveType Connective) {
+
+    return(Connective == application || Connective == maparrow ||
+Connective == xprodtype || Connective == uniontype);
+}
+//-------------------------------------------------------------------------------------------------
+int FlatTermList(int NumberOfElements,TERMArray Elements) {
+
+    int ElementNumber;
+
+    for (ElementNumber = 0; ElementNumber < NumberOfElements; ElementNumber++) {
+        if (!FlatTerm(Elements[ElementNumber])) {
+            return(0);
+        }
+    }
+    return(1);
+}
+//-------------------------------------------------------------------------------------------------
+int FlatTerm(TERM Term) {
+
+    switch (Term->Type) {
+        case connective:
+            break;
+        case predicate:
+        case function:
+            return(FlatTermList(GetArity(Term),Term->Arguments));
+            break;
+        case a_type:
+        case variable:
+            return(1);
+            break;
+        case formula:
+            return(FlatFormula(Term->TheSymbol.Formula));
+            break;
+        default:
+            return(0);
+            break;
+    }
+    return(0);
+}
+//-------------------------------------------------------------------------------------------------
+int SymbolFormula(FORMULA Formula) {
+
+//----Atoms and FOL predicates are "symbols". Thus $ite() and $let() are in 
+//----this category. Note tuples have arity -1 and are not "symbols".
+    return(Formula->Type == atom || Formula->Type == ite_formula || Formula->Type == let_formula);
+}
+//-------------------------------------------------------------------------------------------------
+int FlatSymbolFormula(FORMULA Formula) {
+
+    return(Formula->Type == atom && FlatTermList(GetArity(Formula->FormulaUnion.Atom),
+Formula->FormulaUnion.Atom->Arguments));
+}
+//-------------------------------------------------------------------------------------------------
+int UnaryFormula(FORMULA Formula) {
+
+    return(Formula->Type == unary);
+}
+//-------------------------------------------------------------------------------------------------
+int UnarySymbolFormula(FORMULA Formula) {
+
+    return(UnaryFormula(Formula) && SymbolFormula(Formula->FormulaUnion.UnaryFormula.Formula));
+}
+//-------------------------------------------------------------------------------------------------
+int FlatUnarySymbolFormula(FORMULA Formula) {
+
+    return(UnaryFormula(Formula) && FlatSymbolFormula(Formula->FormulaUnion.UnaryFormula.Formula));
+}
+//-------------------------------------------------------------------------------------------------
+int LiteralFormula(FORMULA Formula) {
+
+    return(SymbolFormula(Formula) ||
+(UnarySymbolFormula(Formula) && Formula->FormulaUnion.UnaryFormula.Connective == negation));
+}
+//-------------------------------------------------------------------------------------------------
+int FlatSymbolOrUnaryFormula(FORMULA Formula) {
+
+    return(FlatSymbolFormula(Formula) || FlatUnarySymbolFormula(Formula));
+}
+//-------------------------------------------------------------------------------------------------
+int UnitaryFormula(FORMULA Formula) {
+
+    return(SymbolFormula(Formula) || Formula->Type == quantified);
+}
+//-------------------------------------------------------------------------------------------------
+int PreUnitFormula(FORMULA Formula) {
+
+    return(Formula->Type == unary || UnitaryFormula(Formula));
+}
+//-------------------------------------------------------------------------------------------------
+int PositiveEquality(TERM Atom) {
+
+    return(!strcmp(GetSymbol(Atom),"=") && GetArity(Atom) == 2);
+}
+//-------------------------------------------------------------------------------------------------
+int NegatedEquality(FORMULA Formula) {
+
+    return(UnitaryFormula(Formula) && Formula->FormulaUnion.UnaryFormula.Connective == negation &&
+Formula->FormulaUnion.UnaryFormula.Formula->Type == atom &&
+PositiveEquality(Formula->FormulaUnion.UnaryFormula.Formula->FormulaUnion.Atom));
+}
+//-------------------------------------------------------------------------------------------------
+int NegatedEquation(FORMULA Formula,FORMULA * LHS,FORMULA * RHS) {
+
+    if (Formula->Type == unary && 
+Formula->FormulaUnion.UnaryFormula.Connective == negation && 
+Formula->FormulaUnion.UnaryFormula.Formula->Type == binary && 
+Formula->FormulaUnion.UnaryFormula.Formula->FormulaUnion.BinaryFormula.Connective == equation) {
+        if (LHS != NULL) {
+            *LHS = Formula->FormulaUnion.UnaryFormula.Formula->FormulaUnion.BinaryFormula.LHS;
+        }
+        if (RHS != NULL) {
+            *RHS = Formula->FormulaUnion.UnaryFormula.Formula->FormulaUnion.BinaryFormula.RHS;
+        }
+        return(1);
+    } else {
+        return(0);
+    }
+}
+//-------------------------------------------------------------------------------------------------
+int Equation(FORMULA Formula,FORMULA * LHS,FORMULA * RHS) {
+
+    if (Formula->Type == binary && Formula->FormulaUnion.BinaryFormula.Connective == equation) {
+        if (LHS != NULL) {
+            *LHS = Formula->FormulaUnion.BinaryFormula.LHS;
+        }
+        if (RHS != NULL) {
+            *RHS = Formula->FormulaUnion.BinaryFormula.RHS;
+        }
+        return(1);
+    } else {
+        return(NegatedEquation(Formula,LHS,RHS));
+    }
+}
+//-------------------------------------------------------------------------------------------------
+int FlatEquation(FORMULA Formula) {
+    
+    FORMULA LHS;
+    FORMULA RHS;
+
+    return(Equation(Formula,&LHS,&RHS) && FlatSymbolFormula(LHS) && FlatSymbolFormula(RHS));
+}
+//-------------------------------------------------------------------------------------------------
+int TypeFormula(FORMULA Formula) {
+
+    return(Formula->Type == type_declaration && 
+TypeConnective(Formula->FormulaUnion.BinaryFormula.Connective));
+}
+//-------------------------------------------------------------------------------------------------
+int FlatTypeFormula(FORMULA Formula) {
+
+    return(TypeFormula(Formula) &&
+SymbolFormula(Formula->FormulaUnion.BinaryFormula.LHS) &&
+FlatFormula(Formula->FormulaUnion.BinaryFormula.RHS));
+}
+//-------------------------------------------------------------------------------------------------
+int DefnFormula(FORMULA Formula) {
+
+    return(Formula->Type == assignment && 
+DefnConnective(Formula->FormulaUnion.BinaryFormula.Connective));
+}
+//-------------------------------------------------------------------------------------------------
+int FlatDefnFormula(FORMULA Formula) {
+
+    return(DefnFormula(Formula) &&
+SymbolFormula(Formula->FormulaUnion.BinaryFormula.LHS) &&
+FlatFormula(Formula->FormulaUnion.BinaryFormula.RHS));
+}
+//-------------------------------------------------------------------------------------------------
+int TypeOrDefnFormula(FORMULA Formula) {
+
+    return(TypeFormula(Formula) || DefnFormula(Formula));
+}
+//-------------------------------------------------------------------------------------------------
+int FlatTypeOrDefnFormula(FORMULA Formula) {
+
+    return(FlatTypeFormula(Formula) || FlatDefnFormula(Formula));
+}
+//-------------------------------------------------------------------------------------------------
+int ApplicationFormula(FORMULA Formula) {
+
+    return(Formula->Type == binary && 
+Formula->FormulaUnion.BinaryFormula.Connective == application);
+}
+//-------------------------------------------------------------------------------------------------
+int FlatFormulaList(int NumberOfElements,FORMULAArray Elements) {
+
+    int ElementNumber;
+
+    for (ElementNumber = 0; ElementNumber < NumberOfElements; ElementNumber++) {
+        if (!FlatFormula(Elements[ElementNumber])) {
+            return(0);
+        }
+    }
+    return(1);
+}
+//-------------------------------------------------------------------------------------------------
+int FlatTuple(FORMULA Formula) {
+
+    return(Formula->Type == tuple && FlatFormulaList(
+Formula->FormulaUnion.TupleFormula.NumberOfElements,Formula->FormulaUnion.TupleFormula.Elements));
+}
+//-------------------------------------------------------------------------------------------------
+int FlatBinaryFormula(FORMULA Formula) {
+
+    return(Formula->Type == binary &&
+FlatBinaryConnective(Formula->FormulaUnion.BinaryFormula.Connective) &&
+FlatFormula(Formula->FormulaUnion.BinaryFormula.LHS) &&
+FlatFormula(Formula->FormulaUnion.BinaryFormula.RHS));
+}
+//-------------------------------------------------------------------------------------------------
+int FlatQuantifiedVariable(QuantifiedFormulaType QuantifiedFormula) {
+
+    if (QuantifiedFormula.VariableType == NULL) {
+        return(1);
+    } else {
+        return(FlatFormula(QuantifiedFormula.VariableType));
+    }
+}
+//-------------------------------------------------------------------------------------------------
+int FlatFormula(FORMULA Formula) {
+
+    return(LiteralFormula(Formula) || FlatEquation(Formula) || 
+FlatBinaryFormula(Formula) || FlatTypeOrDefnFormula(Formula) || FlatTuple(Formula));
+}
+//-------------------------------------------------------------------------------------------------
 void PrintFileTSTPTerm(PRINTFILE Stream,SyntaxType Language,TERM Term,int Pretty,int Indent,
 ConnectiveType LastConnective,int TSTPSyntaxFlag) {
 
@@ -284,225 +529,44 @@ int TSTPSyntaxFlag) {
     }
 }
 //-------------------------------------------------------------------------------------------------
-int TypeConnective(ConnectiveType Connective) {
+void PrintFileTermList(PRINTFILE Stream,SyntaxType Language,TERM Term,int Pretty,int Indent,
+char OpeningBracket,char ClosingBracket,int TSTPSyntaxFlag) {
 
-    return(Connective == typecolon || Connective == subtype);
-}
-//-------------------------------------------------------------------------------------------------
-int DefnConnective(ConnectiveType Connective) {
+    int Arity,ElementNumber;
+    ConnectiveType LastConnective = none;
 
-    return(Connective == assignmentsym);
-}
-//-------------------------------------------------------------------------------------------------
-int TypeOrDefnConnective(ConnectiveType Connective) {
-
-    return(TypeConnective(Connective) || DefnConnective(Connective));
-}
-//-------------------------------------------------------------------------------------------------
-int FlatBinaryConnective(ConnectiveType Connective) {
-
-    return(Connective == application || Connective == maparrow ||
-Connective == xprodtype || Connective == uniontype);
-}
-//-------------------------------------------------------------------------------------------------
-int UnaryFormula(FORMULA Formula) {
-
-    return(Formula->Type == unary);
-}
-//-------------------------------------------------------------------------------------------------
-int SymbolFormula(FORMULA Formula) {
-
-//----Atoms and FOL predicates are "symbols". Thus $ite() and $let() are in 
-//----this category. Note tuples have arity -1 and are not "symbols".
-    return(Formula->Type == atom || Formula->Type == ite_formula || Formula->Type == let_formula);
-}
-//-------------------------------------------------------------------------------------------------
-int LiteralFormula(FORMULA Formula) {
-
-    return(SymbolFormula(Formula) ||
-(UnaryFormula(Formula) && Formula->FormulaUnion.UnaryFormula.Connective == negation &&
- SymbolFormula(Formula->FormulaUnion.UnaryFormula.Formula)));
-}
-//-------------------------------------------------------------------------------------------------
-int FlatLiteralFormula(FORMULA Formula) {
-
-ZZZZZZZZZ
-
-}
-//-------------------------------------------------------------------------------------------------
-int UnitaryFormula(FORMULA Formula) {
-
-    return(SymbolFormula(Formula) || Formula->Type == quantified);
-}
-//-------------------------------------------------------------------------------------------------
-int PreUnitFormula(FORMULA Formula) {
-
-    return(Formula->Type == unary || UnitaryFormula(Formula));
-
-}
-//-------------------------------------------------------------------------------------------------
-int PositiveEquality(TERM Atom) {
-
-    return(!strcmp(GetSymbol(Atom),"=") && GetArity(Atom) == 2);
-}
-//-------------------------------------------------------------------------------------------------
-int NegatedEquality(FORMULA Formula) {
-
-    return(UnitaryFormula(Formula) && Formula->FormulaUnion.UnaryFormula.Connective == negation &&
-Formula->FormulaUnion.UnaryFormula.Formula->Type == atom &&
-PositiveEquality(Formula->FormulaUnion.UnaryFormula.Formula->FormulaUnion.Atom));
-}
-//-------------------------------------------------------------------------------------------------
-int NegatedEquation(FORMULA Formula,FORMULA * LHS,FORMULA * RHS) {
-
-    if (Formula->Type == unary && 
-Formula->FormulaUnion.UnaryFormula.Connective == negation && 
-Formula->FormulaUnion.UnaryFormula.Formula->Type == binary && 
-Formula->FormulaUnion.UnaryFormula.Formula->FormulaUnion.BinaryFormula.Connective == equation) {
-        if (LHS != NULL) {
-            *LHS = Formula->FormulaUnion.UnaryFormula.Formula->FormulaUnion.BinaryFormula.LHS;
+//----Need to check the args exist, because for type declarations they don't
+    if (((Arity = GetArity(Term)) > 0  && Term->Arguments != NULL) || OpeningBracket == '[') {
+//----Pretty printing of []ed lists - used for outmost lists, e.g., multiple
+//----inference() terms.
+        PFprintf(Stream,"%c",OpeningBracket);
+        for (ElementNumber=0;ElementNumber < Arity;ElementNumber++) {
+            if (ElementNumber > 0) {
+                PFprintf(Stream,",");
+            }
+//----Only some formula arguments stay on the same line
+            if (Pretty && Term->Arguments[ElementNumber]->Type == formula &&
+!FlatSymbolOrUnaryFormula(Term->Arguments[ElementNumber]->TheSymbol.Formula) &&
+!FlatTuple(Term->Arguments[ElementNumber]->TheSymbol.Formula) &&
+!FlatEquation(Term->Arguments[ElementNumber]->TheSymbol.Formula)) {
+                PFprintf(Stream,"\n");
+                PrintSpaces(Stream,Indent);
+                if (Term->Arguments[ElementNumber]->TheSymbol.Formula->Type == quantified) {
+                    LastConnective = outermost;
+                } else {
+                    LastConnective = brackets;
+                }
+            } else {
+                if (LastConnective == brackets || LastConnective == outermost) {
+                    PFprintf(Stream,"\n");
+                    PrintSpaces(Stream,Indent);
+                }
+                LastConnective = none;
+            }
+            PrintFileTSTPTerm(Stream,Language,Term->Arguments[ElementNumber],Pretty,Indent,
+LastConnective,TSTPSyntaxFlag);
         }
-        if (RHS != NULL) {
-            *RHS = Formula->FormulaUnion.UnaryFormula.Formula->FormulaUnion.BinaryFormula.RHS;
-        }
-        return(1);
-    } else {
-        return(0);
-    }
-}
-//-------------------------------------------------------------------------------------------------
-int Equation(FORMULA Formula,FORMULA * LHS,FORMULA * RHS) {
-
-    if (Formula->Type == binary && Formula->FormulaUnion.BinaryFormula.Connective == equation) {
-        if (LHS != NULL) {
-            *LHS = Formula->FormulaUnion.BinaryFormula.LHS;
-        }
-        if (RHS != NULL) {
-            *RHS = Formula->FormulaUnion.BinaryFormula.RHS;
-        }
-        return(1);
-    } else {
-        return(NegatedEquation(Formula,LHS,RHS));
-    }
-}
-//-------------------------------------------------------------------------------------------------
-int TypeFormula(FORMULA Formula) {
-
-    return(Formula->Type == type_declaration && 
-TypeConnective(Formula->FormulaUnion.BinaryFormula.Connective));
-}
-//-------------------------------------------------------------------------------------------------
-int DefnFormula(FORMULA Formula) {
-
-    return(Formula->Type == assignment && 
-DefnConnective(Formula->FormulaUnion.BinaryFormula.Connective));
-}
-//-------------------------------------------------------------------------------------------------
-int TypeOrDefnFormula(FORMULA Formula) {
-
-    return(TypeFormula(Formula) || DefnFormula(Formula));
-}
-//-------------------------------------------------------------------------------------------------
-int FlatEquation(FORMULA Formula) {
-    
-    FORMULA LHS;
-    FORMULA RHS;
-
-    return(Equation(Formula,&LHS,&RHS) && LiteralFormula(LHS) && LiteralFormula(RHS));
-}
-//-------------------------------------------------------------------------------------------------
-//----Local mutual recursion
-int FlatFormula(FORMULA Formula);
-//-------------------------------------------------------------------------------------------------
-int FlatBinaryFormula(FORMULA Formula) {
-
-    return(Formula->Type == binary &&
-FlatBinaryConnective(Formula->FormulaUnion.BinaryFormula.Connective) &&
-FlatFormula(Formula->FormulaUnion.BinaryFormula.LHS) &&
-FlatFormula(Formula->FormulaUnion.BinaryFormula.RHS));
-}
-//-------------------------------------------------------------------------------------------------
-int FlatTypeFormula(FORMULA Formula) {
-
-    return(TypeFormula(Formula) &&
-SymbolFormula(Formula->FormulaUnion.BinaryFormula.LHS) &&
-FlatFormula(Formula->FormulaUnion.BinaryFormula.RHS));
-}
-//-------------------------------------------------------------------------------------------------
-int FlatDefnFormula(FORMULA Formula) {
-
-    return(DefnFormula(Formula) &&
-SymbolFormula(Formula->FormulaUnion.BinaryFormula.LHS) &&
-FlatFormula(Formula->FormulaUnion.BinaryFormula.RHS));
-}
-//-------------------------------------------------------------------------------------------------
-int FlatTypeOrDefnFormula(FORMULA Formula) {
-
-    return(FlatTypeFormula(Formula) || FlatDefnFormula(Formula));
-}
-//-------------------------------------------------------------------------------------------------
-int FlatTupleElements(int NumberOfElements,FORMULAArray Elements) {
-
-    int ElementNumber;
-
-    for (ElementNumber = 0; ElementNumber < NumberOfElements; ElementNumber++) {
-        if (!FlatFormula(Elements[ElementNumber])) {
-            return(0);
-        }
-    }
-    return(1);
-}
-//-------------------------------------------------------------------------------------------------
-int FlatTuple(FORMULA Formula) {
-
-    return(Formula->Type == tuple && FlatTupleElements(
-Formula->FormulaUnion.TupleFormula.NumberOfElements,Formula->FormulaUnion.TupleFormula.Elements));
-}
-//-------------------------------------------------------------------------------------------------
-int ApplicationFormula(FORMULA Formula) {
-
-    return(Formula->Type == binary && 
-Formula->FormulaUnion.BinaryFormula.Connective == application);
-}
-//-------------------------------------------------------------------------------------------------
-int FlatFormula(FORMULA Formula) {
-
-    return(LiteralFormula(Formula) || FlatEquation(Formula) || 
-FlatBinaryFormula(Formula) || FlatTypeOrDefnFormula(Formula) || FlatTuple(Formula));
-}
-//-------------------------------------------------------------------------------------------------
-int FlatQuantifiedVariable(QuantifiedFormulaType QuantifiedFormula) {
-
-    if (QuantifiedFormula.VariableType == NULL) {
-        return(1);
-    } else {
-        return(FlatFormula(QuantifiedFormula.VariableType));
-    }
-}
-//-------------------------------------------------------------------------------------------------
-void PrintQuantifiedVariable(PRINTFILE Stream,SyntaxType Language,
-QuantifiedFormulaType QuantifiedFormula,int Pretty,int Indent,int TSTPSyntaxFlag) {
-
-    ConnectiveType FakeConnective;
-
-//----Print existential count if there is one
-    if (QuantifiedFormula.Quantifier == existential && 
-QuantifiedFormula.ExistentialCount >= 0) {
-        PFprintf(Stream,"%d:",QuantifiedFormula.ExistentialCount);
-    }
-    PFprintf(Stream,"%s",GetPrintSymbol(QuantifiedFormula.Variable));
-    Indent += 2;
-//----Here's where types are printed
-    if (QuantifiedFormula.VariableType != NULL) {
-        PFprintf(Stream,": ");
-        if (LiteralFormula(QuantifiedFormula.VariableType) ||
-FlatBinaryFormula(QuantifiedFormula.VariableType)) {
-            FakeConnective = outermost;
-        } else {
-            FakeConnective = none;
-        }
-        PrintFileTSTPFormula(Stream,Language,QuantifiedFormula.VariableType,Indent,Pretty,
-FakeConnective,TSTPSyntaxFlag);
+        PFprintf(Stream,"%c",ClosingBracket);
     }
 }
 //-------------------------------------------------------------------------------------------------
@@ -514,7 +578,7 @@ FORMULAArray FormulaTuple,int Pretty,int Indent,int TSTPSyntaxFlag) {
     ConnectiveType LastConnective = none;
 
     PFprintf(Stream,"[");
-    if ((NeedSpace = !FlatTupleElements(NumberOfElements,FormulaTuple))) {
+    if ((NeedSpace = !FlatFormulaList(NumberOfElements,FormulaTuple))) {
         PFprintf(Stream," ");
     }
     PrintFileTSTPFormula(Stream,Language,FormulaTuple[0],Indent+2,Pretty,outermost,
@@ -542,43 +606,29 @@ LastConnective,TSTPSyntaxFlag);
     PFprintf(Stream,"]");
 }
 //-------------------------------------------------------------------------------------------------
-void PrintFileTermList(PRINTFILE Stream,SyntaxType Language,TERM Term,int Pretty,int Indent,
-char OpeningBracket,char ClosingBracket,int TSTPSyntaxFlag) {
+void PrintFileQuantifiedVariable(PRINTFILE Stream,SyntaxType Language,
+QuantifiedFormulaType QuantifiedFormula,int Pretty,int Indent,int TSTPSyntaxFlag) {
 
-    int Arity,ElementNumber;
-    ConnectiveType LastConnective = none;
+    ConnectiveType FakeConnective;
 
-//----Need to check the args exist, because for type declarations they don't
-    if (((Arity = GetArity(Term)) > 0  && Term->Arguments != NULL) || OpeningBracket == '[') {
-//----Pretty printing of []ed lists - used for outmost lists, e.g., multiple
-//----inference() terms.
-        PFprintf(Stream,"%c",OpeningBracket);
-        for (ElementNumber=0;ElementNumber < Arity;ElementNumber++) {
-            if (ElementNumber > 0) {
-                PFprintf(Stream,",");
-            }
-            if (Pretty && Term->Arguments[ElementNumber]->Type == formula &&
-Term->Arguments[ElementNumber]->TheSymbol.Formula->Type != atom &&
-!(Term->Arguments[ElementNumber]->TheSymbol.Formula->Type == tuple &&
-  FlatTuple(Term->Arguments[ElementNumber]->TheSymbol.Formula))) {
-                PFprintf(Stream,"\n");
-                PrintSpaces(Stream,Indent);
-                if (Term->Arguments[ElementNumber]->TheSymbol.Formula->Type == quantified) {
-                    LastConnective = outermost;
-                } else {
-                    LastConnective = brackets;
-                }
-            } else {
-                if (LastConnective == brackets || LastConnective == outermost) {
-                    PFprintf(Stream,"\n");
-                    PrintSpaces(Stream,Indent);
-                }
-                LastConnective = none;
-            }
-            PrintFileTSTPTerm(Stream,Language,Term->Arguments[ElementNumber],Pretty,Indent,
-LastConnective,TSTPSyntaxFlag);
+//----Print existential count if there is one
+    if (QuantifiedFormula.Quantifier == existential && 
+QuantifiedFormula.ExistentialCount >= 0) {
+        PFprintf(Stream,"%d:",QuantifiedFormula.ExistentialCount);
+    }
+    PFprintf(Stream,"%s",GetPrintSymbol(QuantifiedFormula.Variable));
+    Indent += 2;
+//----Here's where types are printed
+    if (QuantifiedFormula.VariableType != NULL) {
+        PFprintf(Stream,": ");
+        if (LiteralFormula(QuantifiedFormula.VariableType) ||
+FlatBinaryFormula(QuantifiedFormula.VariableType)) {
+            FakeConnective = outermost;
+        } else {
+            FakeConnective = none;
         }
-        PFprintf(Stream,"%c",ClosingBracket);
+        PrintFileTSTPFormula(Stream,Language,QuantifiedFormula.VariableType,Indent,Pretty,
+FakeConnective,TSTPSyntaxFlag);
     }
 }
 //-------------------------------------------------------------------------------------------------
@@ -629,8 +679,8 @@ Formula->FormulaUnion.QuantifiedFormula.Quantifier));
 Formula->FormulaUnion.QuantifiedFormula.Quantifier)));
                 PFprintf(Stream,"[");
                 VariableIndent = Indent + 3;
-                PrintQuantifiedVariable(Stream,Language,Formula->FormulaUnion.QuantifiedFormula,
-Pretty,Indent+4,TSTPSyntaxFlag);
+                PrintFileQuantifiedVariable(Stream,Language,
+Formula->FormulaUnion.QuantifiedFormula,Pretty,Indent+4,TSTPSyntaxFlag);
                 while (Pretty && 
 //----Sequence of nested quantified formulae
 Formula->FormulaUnion.QuantifiedFormula.Formula->Type == quantified &&
@@ -646,13 +696,13 @@ FormulaUnion.QuantifiedFormula)) {
                         PrintSpaces(Stream,VariableIndent);
                     }
                     Formula = Formula->FormulaUnion.QuantifiedFormula.Formula;
-                    PrintQuantifiedVariable(Stream,Language,Formula->FormulaUnion.QuantifiedFormula,
-Pretty,Indent+4,TSTPSyntaxFlag);
+                    PrintFileQuantifiedVariable(Stream,Language,
+Formula->FormulaUnion.QuantifiedFormula,Pretty,Indent+4,TSTPSyntaxFlag);
                 }
                 PFprintf(Stream,"] :");
 //----If not pretty, or unary and atom, or atom, do on same line
                 if (!Pretty || 
-LiteralFormula(Formula->FormulaUnion.QuantifiedFormula.Formula) ||
+FlatSymbolOrUnaryFormula(Formula->FormulaUnion.QuantifiedFormula.Formula) ||
 FlatEquation(Formula->FormulaUnion.QuantifiedFormula.Formula)) {
                     PFprintf(Stream," ");
                     PrintFileTSTPFormula(Stream,Language,
@@ -1138,7 +1188,6 @@ AnnotatedFormula->AnnotatedFormulaUnion.AnnotatedTSTPFormula,Pretty);
                 break;
             default:
                 CodingError("Annotated formula syntax unknown for printing");
-                exit(EXIT_FAILURE);
                 break;
         }
     }
