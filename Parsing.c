@@ -982,17 +982,24 @@ Quantifier,NULL,0);
         AcceptToken(Stream,punctuation,":");
         QuantifiedFormula->VariableType = ParseFormula(Stream,Language,Context,EndOfScope,-1,1,
 VariablesMustBeQuantified,none);
-        QuantifiedFormula->Variable->Type = term; ZZZZZZZ
+//----If not $o it's a term variable, else a boolean variable
+        QuantifiedFormula->Variable->TheSymbol.Variable->Type = 
+(GetResultFromTyping(Stream,QuantifiedFormula->VariableType)->Type != atom || strcmp("$o",
+GetSymbol(GetResultFromTyping(Stream,QuantifiedFormula->VariableType)->FormulaUnion.Atom))) ? 
+term : formula;
 //----TFF optional type
     } else if ((Language == tptp_tff || Language == tptp_tcf) && 
 CheckToken(Stream,punctuation,":")) {
         AcceptToken(Stream,punctuation,":");
         QuantifiedFormula->VariableType = ParseAtom(Stream,Language,Context,EndOfScope,
 VariablesMustBeQuantified);
-        QuantifiedFormula->Variable->Type = term; ZZZZZZZ
+//----If $o then it's a boolean variable, else other
+        QuantifiedFormula->Variable->TheSymbol.Variable->Type = strcmp("$o",
+GetSymbol(GetResultFromTyping(Stream,QuantifiedFormula->VariableType)->FormulaUnion.Atom)) ? 
+term : formula;
     } else {
         QuantifiedFormula->VariableType = NULL;
-        QuantifiedFormula->Variable->Type = term;
+        QuantifiedFormula->Variable->TheSymbol.Variable->Type = term;
     }
 }
 //-------------------------------------------------------------------------------------------------
@@ -1403,6 +1410,7 @@ LHSSymbol,LHSSymbolArity)) != NULL) {
                                 return(NULL);
                             }
                         }
+//----If not just $o type, then it's a function (I hope!)
                         NewTermType = (GetResultFromTyping(Stream,BinaryFormula->
 FormulaUnion.BinaryFormula.RHS)->Type != atom || strcmp("$o",GetSymbol(GetResultFromTyping(
 Stream,BinaryFormula->FormulaUnion.BinaryFormula.RHS)->FormulaUnion.Atom))) ? function : predicate;

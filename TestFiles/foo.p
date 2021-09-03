@@ -1,3 +1,7 @@
-tff(s_type,type,s: $o > $o).
-tff(boolean,axiom,! [X:$o] : s(X)).
-tff(nested_equality,axiom,s(1 = 0)).
+tff(ww,type,ww: $o > $o ).
+
+tff(large1,axiom,
+    ! [X: $o] : 
+      (X) = 
+        ( ? [Y: $o] : 
+          Y = ww(Y) )).

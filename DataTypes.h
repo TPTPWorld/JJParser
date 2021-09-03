@@ -169,11 +169,11 @@ typedef union {
     struct TermWithVariablesTag * NestedTerm;
 //----For nested THF and TFX formulae
     struct FormulaTypetag * Formula;
-} TERMNODE;
+} TermUnionType;
 
 typedef struct TermNodeTag {
     TermType Type;
-    TERMNODE TheSymbol;
+    TermUnionType TheSymbol;
 //----Used for lists (they can be extended). Symbol arity is set to -1
     int FlexibleArity;
     struct TermNodeTag ** Arguments;
