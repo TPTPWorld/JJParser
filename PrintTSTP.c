@@ -419,7 +419,7 @@ ConnectiveType LastConnective,int TSTPSyntaxFlag) {
     char OpeningBracket,ClosingBracket;
     char * StartOfSymbol;
 
-//DEBUG printf("Printing term %s indent %d\n",TermTypeToString(Term->Type),Indent);
+//DEBUG printf("Printing term of type %s indent %d\n",TermTypeToString(Term->Type),Indent);
 //----All THF and TFF (because of TFX) terms are formulae
     if ((Language == tptp_thf || Language == tptp_tff) && Term->Type == formula) {
         PrintFileTSTPFormula(Stream,Language,Term->TheSymbol.Formula,Indent,Pretty,
@@ -482,6 +482,7 @@ TSTPSyntaxFlag);
 //----Otherwise assume an atom
         } else {
             StartOfSymbol = GetPrintSymbol(Term);
+//DEBUG printf("Print atomic, symbol %s arity %d\n",StartOfSymbol,GetArity(Term));
 //----Skip past the $ if not in full TSTP mode, e.g., oldtptp
             if (!TSTPSyntaxFlag && *StartOfSymbol == '$') {
                 StartOfSymbol++;

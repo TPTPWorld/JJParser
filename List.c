@@ -101,8 +101,8 @@ LISTNODE DuplicateListOfAnnotatedFormulae(LISTNODE Head,SIGNATURE Signature) {
     DuplicateList = NULL;
     Current = &DuplicateList;
     while (Head != NULL) {
-        AddListNode(Current,NULL,DuplicateAnnotatedFormula(
-Head->AnnotatedFormula,Signature));
+//DEBUG printf("duplicating %s\n",GetName((Head)->AnnotatedFormula,NULL));
+        AddListNode(Current,NULL,DuplicateAnnotatedFormula(Head->AnnotatedFormula,Signature));
 //DEBUG printf("duplicated %s\n",GetName((*Current)->AnnotatedFormula,NULL));
         Current = &((*Current)->Next);
         Head = Head->Next;

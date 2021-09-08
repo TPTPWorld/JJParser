@@ -72,6 +72,7 @@ int main(int argc, char *argv[]) {
     SetAllowFreeVariables(0);
     SetWarnings(1);
 
+    SetNeedForNonLogicTokens(0);
     if (argc > 1) {
         Head = ParseFileOfFormulae(argv[1],NULL,Signature,1,NULL);
     } else {
@@ -82,6 +83,7 @@ int main(int argc, char *argv[]) {
     PrintSignature(Signature);
     ListStatistics = GetListStatistics(Head,Signature);
     PrintListStatistics(stdout,ListStatistics);
+
     FreeListOfAnnotatedFormulae(&Head);
     assert(Head == NULL);
     FreeSignature(&Signature);
@@ -89,6 +91,14 @@ int main(int argc, char *argv[]) {
     return(EXIT_SUCCESS);
 
 //-------------------------------------------------------------------------------------------------
+//----Test list duplication
+    AnotherHead = DuplicateListOfAnnotatedFormulae(Head,Signature);
+    PrintListOfAnnotatedTSTPNodes(stdout,Signature,AnotherHead,tptp,1);
+    FreeListOfAnnotatedFormulae(&Head);
+    FreeListOfAnnotatedFormulae(&AnotherHead);
+    FreeSignature(&Signature);
+    return(EXIT_SUCCESS);
+
 //----Test stats
     ListStatistics = GetListStatistics(Head,Signature);
     PrintListStatistics(stdout,ListStatistics);
@@ -123,14 +133,6 @@ AnotherAnnotatedFormula,1,1)) {
         }
     }
     FreeListOfAnnotatedFormulae(&Head);
-    FreeSignature(&Signature);
-    return(EXIT_SUCCESS);
-
-//----Test list duplication
-    AnotherHead = DuplicateListOfAnnotatedFormulae(Head,Signature);
-    PrintListOfAnnotatedTSTPNodes(stdout,Signature,AnotherHead,tptp,1);
-    FreeListOfAnnotatedFormulae(&Head);
-    FreeListOfAnnotatedFormulae(&AnotherHead);
     FreeSignature(&Signature);
     return(EXIT_SUCCESS);
 

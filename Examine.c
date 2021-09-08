@@ -49,6 +49,15 @@ int GetArity(TERM Term) {
     }
 }
 //-------------------------------------------------------------------------------------------------
+TERMArray GetArguments(TERM Term) {
+
+    if (Term == NULL) {
+        CodingError("Getting arguments for NULL term");
+    }
+
+    return(Term->Arguments);
+}
+//-------------------------------------------------------------------------------------------------
 FORMULA GetResultFromTyping(READFILE Stream,FORMULA TypeFormula) {
 
     if (TypeFormula->Type == atom) {
@@ -658,9 +667,9 @@ int * VariableCollectorLength) {
     int ElementNumber;
 
     for (ElementNumber = 0;ElementNumber < NumberOfElements;ElementNumber++) {
-        CollectSymbolsInFormula(TupleFormulae[ElementNumber],
-PredicateCollector,PredicateCollectorLength,FunctorCollector,
-FunctorCollectorLength,VariableCollector,VariableCollectorLength);
+        CollectSymbolsInFormula(TupleFormulae[ElementNumber],PredicateCollector,
+PredicateCollectorLength,FunctorCollector,FunctorCollectorLength,VariableCollector,
+VariableCollectorLength);
     }
 }
 //-------------------------------------------------------------------------------------------------
@@ -718,6 +727,7 @@ VariableCollectorLength);
 //            if (strcmp(GetSymbol(Formula->FormulaUnion.Atom),"$true") &&
 //strcmp(GetSymbol(Formula->FormulaUnion.Atom),"$false")) {
 //----Variables in THF are not symbols
+ZZZZZZZZ BROKEN IN HERE
             if (Formula->FormulaUnion.Atom->Type != variable) {
                 PredicateAndArity = (char *)Malloc(sizeof(SuperString));
                 sprintf(PredicateAndArity,"%s/%d/1\n",GetSymbol(Formula->FormulaUnion.Atom),
@@ -786,9 +796,9 @@ char ** FunctorUsageStartsHere,char ** VariableUsageStartsHere) {
     strcpy(VariableCollector,"");
     CollectSymbolsInFormula(Formula,&PredicateCollector,&PredicateCollectorLength,
 &FunctorCollector,&FunctorCollectorLength,&VariableCollector,&VariableCollectorLength);
-//DEBUG printf("Predicates:%s\n",PredicateCollector);
-//DEBUG printf("Functors  :%s\n",FunctorCollector);
-//DEBUG printf("Variables :%s\n",VariableCollector);
+//DEBUG printf("Predicates:\n%s\n",PredicateCollector);
+//DEBUG printf("Functors  :\n%s\n",FunctorCollector);
+//DEBUG printf("Variables :\n%s\n",VariableCollector);
 
     strcpy(*PutUsageHere,"");
     NormalizeSymbolUsage(PredicateCollector);
@@ -812,16 +822,16 @@ char ** FunctorUsageStartsHere,char ** VariableUsageStartsHere) {
 }
 //-------------------------------------------------------------------------------------------------
 //----PutUsageHere must be address of a malloced String
-char * GetAnnotatedFormulaSymbolUsage(ANNOTATEDFORMULA AnnotatedTSTPFormula,
-char ** PutUsageHere,char ** FunctorUsageStartsHere) {
+char * GetAnnotatedFormulaSymbolUsage(ANNOTATEDFORMULA AnnotatedTSTPFormula,char ** PutUsageHere,
+char ** FunctorUsageStartsHere) {
 
     char * VariableUsage;
     char * Result;
 
 //----Ignore comments
     if (LogicalAnnotatedFormula(AnnotatedTSTPFormula)) {
-        if ((Result = GetFormulaSymbolUsage(AnnotatedTSTPFormula->
-AnnotatedFormulaUnion.AnnotatedTSTPFormula.FormulaWithVariables->Formula,
+        if ((Result = GetFormulaSymbolUsage(
+AnnotatedTSTPFormula->AnnotatedFormulaUnion.AnnotatedTSTPFormula.FormulaWithVariables->Formula,
 PutUsageHere,FunctorUsageStartsHere,&VariableUsage)) != NULL) {
 //----Variables not returned at the moment, maybe later
             *VariableUsage = '\0';
@@ -835,8 +845,8 @@ PutUsageHere,FunctorUsageStartsHere,&VariableUsage)) != NULL) {
 }
 //-------------------------------------------------------------------------------------------------
 //----PutUsageHere must be address of a malloced String or pointer to NULL
-char * GetListOfAnnotatedFormulaSymbolUsage(LISTNODE ListNode,
-char ** PutUsageHere,char ** FunctorUsageStartsHere) {
+char * GetListOfAnnotatedFormulaSymbolUsage(LISTNODE ListNode,char ** PutUsageHere,
+char ** FunctorUsageStartsHere) {
 
     char * PredicateCollector;
     char * FunctorCollector;
@@ -863,8 +873,8 @@ char ** PutUsageHere,char ** FunctorUsageStartsHere) {
     while (ListNode != NULL) {
         OneUsage = (char *)Malloc(sizeof(String));
         strcpy(OneUsage,"");
-        if (GetAnnotatedFormulaSymbolUsage(ListNode->AnnotatedFormula,
-&OneUsage,&FunctorsStart) != NULL) {
+        if (GetAnnotatedFormulaSymbolUsage(ListNode->AnnotatedFormula,&OneUsage,&FunctorsStart) != 
+NULL) {
             ExtendString(&FunctorCollector,FunctorsStart,&FunctorCollectorLength);
             *FunctorsStart = '\0';
             ExtendString(&PredicateCollector,OneUsage,&PredicateCollectorLength);
@@ -875,12 +885,16 @@ char ** PutUsageHere,char ** FunctorUsageStartsHere) {
 //DEBUG printf("PROGRESS: Done nodes\n");
 
     strcpy(*PutUsageHere,"");
+//DEBUG printf("Collected predicates\n%s\n",PredicateCollector);
     NormalizeSymbolUsage(PredicateCollector);
+//DEBUG printf("Normalized predicates\n%s\n",PredicateCollector);
     ExtendString(PutUsageHere,PredicateCollector,&UsageLength);
     PredicateCollectorLength = strlen(*PutUsageHere);
     Free((void **)&PredicateCollector);
 //DEBUG printf("PROGRESS: Normalized predicates\n");
+//DEBUG printf("Collected functors\n%s\n",FunctorCollector);
     NormalizeSymbolUsage(FunctorCollector);
+//DEBUG printf("Normalized functors\n%s\n",FunctorCollector);
     ExtendString(PutUsageHere,FunctorCollector,&UsageLength);
     *FunctorUsageStartsHere = (*PutUsageHere) + PredicateCollectorLength;
     Free((void **)&FunctorCollector);
@@ -1998,17 +2012,15 @@ void GetListSyntaxTypes(LISTNODE Head,String SyntaxTypes) {
     }
 }
 //-------------------------------------------------------------------------------------------------
-//----If PutNameHere is NULL, return pointer to original, else copy into
-//----PutNameHere and return pointer to that
+//----If PutNameHere is NULL, return pointer to original, else copy into PutNameHere and return 
+//----pointer to that.
 char * GetName(ANNOTATEDFORMULA AnnotatedFormula,char * PutNameHere) {
 
     if (ReallyAnAnnotatedFormula(AnnotatedFormula)) {
         if (PutNameHere == NULL) {
-            return(AnnotatedFormula->AnnotatedFormulaUnion.
-AnnotatedTSTPFormula.Name);
+            return(AnnotatedFormula->AnnotatedFormulaUnion.AnnotatedTSTPFormula.Name);
         } else {
-            strcpy(PutNameHere,
-AnnotatedFormula->AnnotatedFormulaUnion.AnnotatedTSTPFormula.Name);
+            strcpy(PutNameHere,AnnotatedFormula->AnnotatedFormulaUnion.AnnotatedTSTPFormula.Name);
             return(PutNameHere);
         }
     } else {
@@ -2025,11 +2037,9 @@ StatusType GetRole(ANNOTATEDFORMULA AnnotatedFormula,StatusType * SubStatus) {
     if (ReallyAnAnnotatedFormula(AnnotatedFormula)) {
 //----Return the substatus only if the pointer is non-NULL
         if (SubStatus != NULL) {
-            *SubStatus = AnnotatedFormula->
-AnnotatedFormulaUnion.AnnotatedTSTPFormula.SubStatus;
+            *SubStatus = AnnotatedFormula->AnnotatedFormulaUnion.AnnotatedTSTPFormula.SubStatus;
         }
-        return(AnnotatedFormula->
-AnnotatedFormulaUnion.AnnotatedTSTPFormula.Status);
+        return(AnnotatedFormula->AnnotatedFormulaUnion.AnnotatedTSTPFormula.Status);
     } else {
         return(nonstatus);
     }
@@ -2039,8 +2049,7 @@ FORMULA GetUniversalCoreFormula(FORMULA QuantifiedFormula) {
 
     while (QuantifiedFormula->Type == quantified &&
 QuantifiedFormula->FormulaUnion.QuantifiedFormula.Quantifier == universal) {
-        QuantifiedFormula = QuantifiedFormula->FormulaUnion.QuantifiedFormula.
-Formula;
+        QuantifiedFormula = QuantifiedFormula->FormulaUnion.QuantifiedFormula.Formula;
     }
 
     return(QuantifiedFormula);
@@ -2067,8 +2076,7 @@ FORMULA GetLiteralFromClauseByNumber(FORMULA Clause,int Number) {
         if (Number == 1) {
             return(Clause->FormulaUnion.BinaryFormula.LHS);
         } else {
-            return(GetLiteralFromClauseByNumber(
-Clause->FormulaUnion.BinaryFormula.RHS,Number-1));
+            return(GetLiteralFromClauseByNumber(Clause->FormulaUnion.BinaryFormula.RHS,Number-1));
         }
     } else if ((Clause->Type == unary || Clause->Type == atom) && Number == 1) {
         return(Clause);

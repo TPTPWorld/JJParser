@@ -1,7 +1,4 @@
-tff(ww,type,ww: $o > $o ).
+thf(ww,type,ww: ($o > $o) > $o ).
 
-tff(large1,axiom,
-    ! [X: $o] : 
-      (X) = 
-        ( ? [Y: $o] : 
-          Y = ww(Y) )).
+thf(large1,axiom,
+    ww((&))).

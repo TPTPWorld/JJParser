@@ -388,15 +388,18 @@ TERMArray NewArguments(int NumberOfArguments) {
     return(Arguments);
 }
 //-------------------------------------------------------------------------------------------------
-TERMArray DuplicateArguments(TERMArray Original,ContextType Context,int Arity,
+TERMArray DuplicateArguments(int Arity,TERMArray Original,ContextType Context,
 int ForceNewVariables) {
 
     TERMArray Arguments;
     int ArgumentNumber;
 
-    if (Arity > 0) {
+//----Arguments could be null when duplicating the type declaration of a symbol
+//DEBUG printf("Duplicating arguments length %d, forced new variables %d\n",Arity,ForceNewVariables);
+    if (Arity > 0 && Original != NULL) {
         Arguments = NewArguments(Arity);
         for (ArgumentNumber=0;ArgumentNumber<Arity;ArgumentNumber++) {
+//DEBUG printf("Duplicating arg %d ",ArgumentNumber); PrintTSTPTerm(stdout,tptp_tff,Original[ArgumentNumber],0,1,1);
             Arguments[ArgumentNumber] = DuplicateTerm(Original[ArgumentNumber],Context,
 ForceNewVariables);
         }
@@ -461,16 +464,31 @@ VariablesMustBeQuantified);
 TERM DuplicateTerm(TERM Original,ContextType Context,int ForceNewVariables) {
 
     TERM Term;
-    int NumberOfArguments;
     VARIABLENODE Variable;
+    String ErrorMessage;
 
     if (Original == NULL) {
         return(NULL);
-    } else {
-        Term = NewTerm();
-        *Term = *Original;
+    }
 
-        if (Term->Type == variable) {
+    Term = NewTerm();
+    *Term = *Original;
+
+    switch (Term->Type) {
+        case connective:
+            break;
+        case predicate:
+        case function:
+        case a_type:
+        case non_logical_data:
+//DEBUG printf("Duplicating term with symbol %s, arity %d, arguments are %s \n",GetSymbol(Term),GetArity(Term),Original->Arguments == NULL ? "NULL" : "not NULL");
+            Term->TheSymbol.NonVariable = InsertIntoSignature(Context.Signature,Term->Type,
+Original->TheSymbol.NonVariable->NameSymbol,Original->TheSymbol.NonVariable->Arity,NULL);
+//DEBUG printf("HERE 2 %s %d\n",GetSymbol(Term),GetArity(Term));
+            Term->Arguments = DuplicateArguments(GetArity(Term),Original->Arguments,Context,
+ForceNewVariables);
+            break;
+        case variable:
 //----Look for the corresponding variable in the new variables list
             Variable = *(Context.Variables);
             while (Variable != NULL && Variable->Instantiation !=
@@ -488,31 +506,33 @@ TERM DuplicateTerm(TERM Original,ContextType Context,int ForceNewVariables) {
                 Term->TheSymbol.Variable = Original->TheSymbol.Variable;
             }
             IncreaseVariableUseCount(Term->TheSymbol.Variable,1);
-        } else if (Term->Type == nested_thf || Term->Type == nested_tff || 
-Term->Type == nested_tcf || Term->Type == nested_fof || Term->Type == nested_cnf) {
+            break;
+        case nested_thf:
+        case nested_tff:
+        case nested_tcf:
+        case nested_fof:
+        case nested_cnf:
 //----For CNF the variables are implicitly universally quantified, and must
 //----be new variables. For FOF we use the originals (can't recall why)
 //----But later I decided that nested formulae are special, and should always
 //----use new variables, e.g., for bind/2 terms.
             Term->TheSymbol.NestedFormula = DuplicateFormulaWithVariables(
 Original->TheSymbol.NestedFormula,Context.Signature,1);
-        } else if (Term->Type == nested_fot) {
+            break;
+        case nested_fot:
             Term->TheSymbol.NestedTerm = DuplicateTermWithVariables(Original->TheSymbol.NestedTerm,
 Context.Signature,0);
-        } else {
-            Term->TheSymbol.NonVariable = InsertIntoSignature(Context.Signature,Term->Type,
-Original->TheSymbol.NonVariable->NameSymbol,Original->TheSymbol.NonVariable->Arity,NULL);
-//----Check if a flexible arity case
-            if (Term->TheSymbol.NonVariable->Arity == -1) {
-                NumberOfArguments = Term->FlexibleArity;
-            } else {
-                NumberOfArguments = Term->TheSymbol.NonVariable->Arity;
-            }
-            Term->Arguments = DuplicateArguments(Original->Arguments,Context,NumberOfArguments,
+            break;
+        case formula:
+            Term->TheSymbol.Formula = DuplicateFormula(Original->TheSymbol.Formula,Context,
 ForceNewVariables);
-        }
-        return(Term);
+            break;
+        default:
+            sprintf(ErrorMessage,"Unknown term type %s to duplicate",TermTypeToString(Term->Type));
+            CodingError(ErrorMessage);
+            break;
     }
+    return(Term);
 }
 //-------------------------------------------------------------------------------------------------
 TERMWITHVARIABLES DuplicateTermWithVariables(TERMWITHVARIABLES Original,SIGNATURE Signature,
@@ -608,6 +628,7 @@ int VariablesMustBeQuantified) {
     char * InfixToken;
     int SearchNumberOfArguments;
     SYMBOLNODE FoundSymbol;
+    String ErrorMessage;
 
     Term = NewTerm();
     TypeIfInfix = nonterm;
@@ -688,9 +709,13 @@ int VariablesMustBeQuantified) {
 //----Now we can check that expected predicates look like predicates
 //----Variables, distinct objects and numbers cannot have arguments
 //THF TO FIX - Currently only allows ground predicates with arguments
-        if (FunctorType == upper_word || FunctorType == distinct_object || FunctorType == number ||
-((DesiredType == predicate || DesiredType == function) && FunctorType != lower_word)) {
-            TokenError(Stream,"Invalid form for a principal symbol");
+        if (!CheckToken(Stream,punctuation,"[") &&
+(FunctorType == upper_word || FunctorType == distinct_object || FunctorType == number ||
+((DesiredType == predicate || DesiredType == function) && FunctorType != lower_word))) {
+            sprintf(ErrorMessage,
+"Invalid form \"%s\" for a principal symbol, DesiredType is %s, FunctorType is %s\n",
+CurrentToken(Stream)->NameToken,TermTypeToString(DesiredType),TokenTypeToString(FunctorType));
+            TokenError(Stream,ErrorMessage);
         }
         if (CheckToken(Stream,punctuation,"(")) {
             strcpy(MatchingBracket,")");
@@ -920,6 +945,8 @@ VARIABLENODE * EndOfScope,int VariablesMustBeQuantified) {
     Formula->Type = atom;
     Formula->FormulaUnion.Atom = ParseTerm(Stream,Language,Context,EndOfScope,predicate,none,
 &InfixNegatedAtom,VariablesMustBeQuantified);
+//DEBUG printf("Atom symbol is %s and the arity is %d and the args are %s\n",GetSymbol(Formula->FormulaUnion.Atom),GetArity(Formula->FormulaUnion.Atom),GetArguments(Formula->FormulaUnion.Atom) == NULL ? "NULL" : "not NULL");
+//DEBUG printf("Parsed an atom: ");PrintTSTPTerm(stdout,Language,Formula->FormulaUnion.Atom,0,1,1);printf("\n");
 
 //----Hack to fix negated infix equality
     if (InfixNegatedAtom) {
@@ -1176,6 +1203,7 @@ ContextType Context,VARIABLENODE * EndOfScope,int VariablesMustBeQuantified) {
 FORMULA DuplicateFormula(FORMULA Original,ContextType Context,int ForceNewVariables) {
 
     FORMULA Formula;
+    String ErrorMessage;
 
     if (Original == NULL) {
         return(NULL);
@@ -1184,11 +1212,6 @@ FORMULA DuplicateFormula(FORMULA Original,ContextType Context,int ForceNewVariab
         *Formula = *Original;
 
         switch (Formula->Type) {
-            case tuple:
-                Formula->FormulaUnion.TupleFormula.Elements = DuplicateTupleFormulae(
-Original->FormulaUnion.TupleFormula.NumberOfElements,
-Original->FormulaUnion.TupleFormula.Elements,Context,ForceNewVariables);
-                break;
             case sequent:
                 Formula->FormulaUnion.SequentFormula.LHS = DuplicateTupleFormulae(
 Original->FormulaUnion.SequentFormula.NumberOfLHSElements,
@@ -1205,6 +1228,8 @@ Original->FormulaUnion.QuantifiedFormula.VariableType,Context,ForceNewVariables)
                 Formula->FormulaUnion.QuantifiedFormula.Formula = DuplicateFormula(
 Original->FormulaUnion.QuantifiedFormula.Formula,Context,ForceNewVariables);
                 break;
+            case assignment:
+            case type_declaration:
             case binary:
                 Formula->FormulaUnion.BinaryFormula.LHS = DuplicateFormula(
 Original->FormulaUnion.BinaryFormula.LHS,Context,ForceNewVariables);
@@ -1215,6 +1240,15 @@ Original->FormulaUnion.BinaryFormula.RHS,Context,ForceNewVariables);
                 Formula->FormulaUnion.UnaryFormula.Formula = DuplicateFormula(
 Original->FormulaUnion.UnaryFormula.Formula,Context,ForceNewVariables);
                 break; 
+            case atom:
+                Formula->FormulaUnion.Atom = DuplicateTerm(Original->FormulaUnion.Atom,Context,
+ForceNewVariables);
+                break;
+            case tuple:
+                Formula->FormulaUnion.TupleFormula.Elements = DuplicateTupleFormulae(
+Original->FormulaUnion.TupleFormula.NumberOfElements,
+Original->FormulaUnion.TupleFormula.Elements,Context,ForceNewVariables);
+                break;
             case ite_formula:
                 Formula->FormulaUnion.ConditionalFormula.Condition = DuplicateFormula(
 Original->FormulaUnion.ConditionalFormula.Condition,Context,ForceNewVariables);
@@ -1229,12 +1263,10 @@ Original->FormulaUnion.LetFormula.LetDefn,Context,ForceNewVariables);
                 Formula->FormulaUnion.LetFormula.LetBody = DuplicateFormula(
 Original->FormulaUnion.LetFormula.LetBody,Context,ForceNewVariables);
                 break;
-            case atom:
-                Formula->FormulaUnion.Atom = DuplicateTerm(Original->FormulaUnion.Atom,Context,
-ForceNewVariables);
-                break;
             default:
-                CodingError("Formula type unknown for duplication");
+                sprintf(ErrorMessage,"Formula type %s unknown for duplication",
+FormulaTypeToString(Formula->Type));
+                CodingError(ErrorMessage);
                 break;
         }
     }
@@ -1316,6 +1348,7 @@ VariablesMustBeQuantified);
             }
             break;
     }
+//DEBUG printf("Parsed formula is\n");PrintTSTPFormula(stdout,Language,Formula,0,1,outermost,1);printf("\n");
 
 //----Check for an equality
 //DEBUG printf("check equality with token %s and allow is %d\n",CurrentToken(Stream)->NameToken,AllowInfixEquality);
@@ -1419,6 +1452,7 @@ Stream,BinaryFormula->FormulaUnion.BinaryFormula.RHS)->FormulaUnion.Atom))) ? fu
                         BinaryFormula->FormulaUnion.BinaryFormula.LHS->FormulaUnion.Atom->
 TheSymbol.NonVariable = InsertIntoSignature(Context.Signature,NewTermType,LHSSymbol,
 GetArityFromTyping(Stream,BinaryFormula->FormulaUnion.BinaryFormula.RHS),Stream);
+//DEBUG printf("Fixed atom symbol is %s and the arity is %d and the args are %s\n",GetSymbol(BinaryFormula->FormulaUnion.BinaryFormula.LHS->FormulaUnion.Atom),GetArity(BinaryFormula->FormulaUnion.BinaryFormula.LHS->FormulaUnion.Atom),GetArguments(BinaryFormula->FormulaUnion.BinaryFormula.LHS->FormulaUnion.Atom) == NULL ? "NULL" : "not NULL");
                     }
                 }
 //----If finished a binary, still need to allow another binary of low 
@@ -1466,8 +1500,8 @@ AllowInfixEquality,VariablesMustBeQuantified,BinaryFormula));
     }
 }
 //-------------------------------------------------------------------------------------------------
-FORMULAWITHVARIABLES DuplicateFormulaWithVariables(
-FORMULAWITHVARIABLES Original,SIGNATURE Signature,int ForceNewVariables) {
+FORMULAWITHVARIABLES DuplicateFormulaWithVariables(FORMULAWITHVARIABLES Original,
+SIGNATURE Signature,int ForceNewVariables) {
 
     ContextType Context;
     FORMULAWITHVARIABLES FormulaWithVariables;
@@ -1476,8 +1510,7 @@ FORMULAWITHVARIABLES Original,SIGNATURE Signature,int ForceNewVariables) {
 
 //----Copy the variables list, setting each use to 0, and setting the
 //----instantiation to point to the original (cheating in duplication :-)
-    FormulaWithVariables->Variables = ParallelCopyVariableList(
-Original->Variables);
+    FormulaWithVariables->Variables = ParallelCopyVariableList(Original->Variables);
     
 //----Create a context for the parsing
     Context.Variables = &(FormulaWithVariables->Variables);
@@ -1487,8 +1520,7 @@ Original->Variables);
 //DEBUG PrintVariableList(Original->Variables,NULL);
 //DEBUG printf("parallel copy variables\n");
 //DEBUG PrintVariableList(FormulaWithVariables->Variables,NULL);
-    FormulaWithVariables->Formula = DuplicateFormula(Original->Formula,
-Context,ForceNewVariables);
+    FormulaWithVariables->Formula = DuplicateFormula(Original->Formula,Context,ForceNewVariables);
 //DEBUG printf("after copy variables\n");
 //DEBUG PrintVariableList(FormulaWithVariables->Variables,NULL);
 
@@ -1611,15 +1643,13 @@ ANNOTATEDFORMULA ParseBlankLine(READFILE Stream) {
     return(AnnotatedFormula);
 }
 //-------------------------------------------------------------------------------------------------
-ANNOTATEDFORMULA DuplicateAnnotatedFormula(ANNOTATEDFORMULA Original,
-SIGNATURE Signature) {
+ANNOTATEDFORMULA DuplicateAnnotatedFormula(ANNOTATEDFORMULA Original,SIGNATURE Signature) {
 
     switch (Original->Syntax) {
         case include:
         case blank_line:
         case comment:
-            CodingError(
-"Includes, blank lines, and comments cannot be duplicated\n");
+            CodingError("Includes, blank lines, and comments cannot be duplicated\n");
             break;
 //----For CNF the variables are implicitly universally quantified, and must
 //----be new variables. For FOF we use the originals (can't recall why)

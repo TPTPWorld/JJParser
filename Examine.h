@@ -8,6 +8,7 @@
 //-------------------------------------------------------------------------------------------------
 char * GetSymbol(TERM Term);
 int GetArity(TERM Term);
+TERMArray GetArguments(TERM Term);
 FORMULA GetResultFromTyping(READFILE Stream,FORMULA TypeFormula);
 int GetArityFromTyping(READFILE Stream,FORMULA TypeFormula);
 FORMULA GetListNodeFormula(LISTNODE List);

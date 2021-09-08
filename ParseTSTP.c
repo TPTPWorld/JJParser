@@ -72,10 +72,9 @@ CopyHeapString(Original->AnnotatedFormulaUnion.AnnotatedTSTPFormula.Name);
 Original->AnnotatedFormulaUnion.AnnotatedTSTPFormula.Status;
     AnnotatedFormula->AnnotatedFormulaUnion.AnnotatedTSTPFormula.SubStatus = 
 Original->AnnotatedFormulaUnion.AnnotatedTSTPFormula.SubStatus;
-    AnnotatedFormula->
-AnnotatedFormulaUnion.AnnotatedTSTPFormula.FormulaWithVariables =
-DuplicateFormulaWithVariables(Original->
-AnnotatedFormulaUnion.AnnotatedTSTPFormula.FormulaWithVariables,Signature,
+    AnnotatedFormula->AnnotatedFormulaUnion.AnnotatedTSTPFormula.FormulaWithVariables =
+DuplicateFormulaWithVariables(
+Original->AnnotatedFormulaUnion.AnnotatedTSTPFormula.FormulaWithVariables,Signature,
 ForceNewVariables);
 
 //----Create context for duplicating non-logical stuff

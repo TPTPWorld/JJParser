@@ -210,7 +210,7 @@ typedef struct {
 typedef struct {
     struct FormulaTypetag * LHS;
     ConnectiveType Connective;
-    struct FormulaTypetag * RHS;
+   struct FormulaTypetag * RHS;
 } BinaryFormulaType;
 
 typedef struct {
