@@ -596,6 +596,7 @@ TermType KnownTermTypeOrError(READFILE Stream,SyntaxType Language) {
 int InfixOperatorParsing(READFILE Stream,SyntaxType Language,TermType OriginallyExpectedType,
 TermType * ExpectedRHSTermType) {
 
+//DEBUG printf("Checking for infix, syntax %s, expected %s\n",SyntaxToString(Language),TermTypeToString(OriginallyExpectedType));
 //----For THF equality is dealt with as a binary operator
     if (Language != tptp_thf && Language != tptp_tff && OriginallyExpectedType == predicate && 
 (CheckToken(Stream,lower_word,"=") || CheckToken(Stream,lower_word,"!="))) {
@@ -724,7 +725,8 @@ CurrentToken(Stream)->NameToken,TermTypeToString(DesiredType),TokenTypeToString(
         }
         AcceptTokenType(Stream,punctuation);
         Term->Arguments = ParseArguments(Stream,Language,Context,EndOfScope,&NumberOfArguments,
-function,MatchingBracket,VariablesMustBeQuantified);
+DesiredType == non_logical_data ? non_logical_data : function,MatchingBracket,
+VariablesMustBeQuantified);
         AcceptToken(Stream,punctuation,MatchingBracket);
 //----Is it a nested formula?
     } else if (DesiredType == nested_thf || DesiredType == nested_tff ||

@@ -433,25 +433,25 @@ StatisticsType GetListStatistics(LISTNODE ListHead,SIGNATURE Signature) {
 
     InitializeStatistics(&Statistics);
 
-//DEBUG printf("PROGRESS: starting\n");
+printf("PROGRESS: starting\n");
     Statistics.FormulaStatistics.NumberOfFormulae = HeadListCount(&HeadListNode,nodes);
     Statistics.FormulaStatistics.NumberOfTHF = HeadListCount(&HeadListNode,thf_nodes);
     Statistics.FormulaStatistics.NumberOfTFF = HeadListCount(&HeadListNode,tff_nodes);
     Statistics.FormulaStatistics.NumberOfTCF = HeadListCount(&HeadListNode,tcf_nodes);
     Statistics.FormulaStatistics.NumberOfFOF = HeadListCount(&HeadListNode,fof_nodes);
     Statistics.FormulaStatistics.NumberOfCNF = HeadListCount(&HeadListNode,cnf_nodes);
-//DEBUG printf("PROGRESS: counted nodes of type\n");
+printf("PROGRESS: counted nodes of type\n");
 
     Statistics.FormulaStatistics.NumberOfUnitFormulae = HeadListCount(&HeadListNode,unit_formulae);
     Statistics.FormulaStatistics.NumberOfTypeFormulae = HeadListCount(&HeadListNode,type_formulae);
     Statistics.FormulaStatistics.NumberOfDefnFormulae = HeadListCount(&HeadListNode,defn_formulae);
     Statistics.FormulaStatistics.NumberOfSequents = HeadListCount(&HeadListNode,sequent_formulae);
-//DEBUG printf("PROGRESS: counted formulae of type\n");
+printf("PROGRESS: counted formulae of type\n");
     Statistics.FormulaStatistics.NumberOfAtoms = HeadListCount(&HeadListNode,atoms);
     Statistics.FormulaStatistics.NumberOfEqualityAtoms = HeadListCount(&HeadListNode,equality_atoms);
     Statistics.FormulaStatistics.NumberOfVariableAtoms = HeadListCount(&HeadListNode,variable_atoms);
     Statistics.FormulaStatistics.NumberOfLiterals = HeadListCount(&HeadListNode,literal_count);
-//DEBUG printf("PROGRESS: counted atoms of type\n");
+printf("PROGRESS: counted atoms of type\n");
 
     Statistics.FormulaStatistics.MaxFormulaDepth = HeadListMaximal(&HeadListNode,max_formula_depth);
     if (Statistics.FormulaStatistics.NumberOfFormulae > 0) {
@@ -460,54 +460,55 @@ HeadListCount(&HeadListNode,formula_depth) / Statistics.FormulaStatistics.Number
     } else {
         Statistics.FormulaStatistics.AverageFormulaDepth = 0.0;
     }
-//DEBUG printf("PROGRESS: got formulae depth\n");
+printf("PROGRESS: got formulae depth\n");
     Statistics.ConnectiveStatistics = GetListConnectiveUsageStatistics(&HeadListNode);
-//DEBUG printf("PROGRESS: counted connectives\n");
+printf("PROGRESS: counted connectives\n");
 
     Statistics.FormulaStatistics.NumberOfHornClauses = HeadListCount(&HeadListNode,horn_clauses);
-//DEBUG printf("PROGRESS: counted Horn clauses\n");
+printf("PROGRESS: counted Horn clauses\n");
     Statistics.FormulaStatistics.NumberOfRRClauses = HeadListCount(&HeadListNode,rr_clauses);
-//DEBUG printf("PROGRESS: counted RR clauses\n");
+printf("PROGRESS: counted RR clauses\n");
     Statistics.FormulaStatistics.MaxClauseSize = HeadListMaximal(&HeadListNode,literals);
-//DEBUG printf("PROGRESS: got max clause size\n");
+printf("PROGRESS: got max clause size\n");
     if (Statistics.FormulaStatistics.NumberOfCNF > 0) {
         Statistics.FormulaStatistics.AverageClauseSize = 
 Statistics.FormulaStatistics.NumberOfLiterals / Statistics.FormulaStatistics.NumberOfCNF;
     } else {
         Statistics.FormulaStatistics.AverageClauseSize = 0.0;
     }
-//DEBUG printf("PROGRESS: counted THF and CNF formula types\n");
+printf("PROGRESS: counted THF and CNF formula types\n");
 
     if (Signature != NULL) {
-//DEBUG printf("PROGRESS: Getting predicate symbol statistics from signature\n");
+printf("PROGRESS: Getting predicate symbol statistics from signature\n");
         GetSignatureSymbolUsageStatistics(Signature->Predicates,
 &(Statistics.SymbolStatistics.NumberOfPredicates),
 &(Statistics.SymbolStatistics.NumberOfPropositions),
 &(Statistics.SymbolStatistics.MinPredicateArity),
 &(Statistics.SymbolStatistics.MaxPredicateArity));
-//DEBUG printf("PROGRESS: Getting function symbol statistics from signature\n");
+printf("PROGRESS: Getting function symbol statistics from signature\n");
         GetSignatureSymbolUsageStatistics(Signature->Functions,
 &(Statistics.SymbolStatistics.NumberOfFunctors),
 &(Statistics.SymbolStatistics.NumberOfConstants),
 &(Statistics.SymbolStatistics.MinFunctorArity),
 &(Statistics.SymbolStatistics.MaxFunctorArity));
     } else {
-//DEBUG printf("Getting symbol statistics from formulae\n");
+printf("Getting symbol statistics from formulae\n");
         Statistics.SymbolStatistics = GetListSymbolUsageStatistics(&HeadListNode);
     }
-//DEBUG printf("PROGRESS: counted predicates and functions\n");
+printf("PROGRESS: counted predicates and functions\n");
     Statistics.SymbolStatistics.NumberOfVariables = HeadListCount(&HeadListNode,variables);
     Statistics.SymbolStatistics.NumberOfSingletons = HeadListCount(&HeadListNode,singletons);
-//DEBUG printf("PROGRESS: counted variables\n");
+printf("PROGRESS: counted variables\n");
     Statistics.FormulaStatistics.MaxTermDepth = HeadListMaximal(&HeadListNode,max_term_depth);
-//DEBUG printf("PROGRESS: got max term depth\n");
+printf("PROGRESS: got max term depth\n");
+ZZZZZZZZZ on ../GDVDir/TestFiles/THFFOFMixed.s
     if ((NumberOfTerms = HeadListCount(&HeadListNode,terms)) > 0) {
         Statistics.FormulaStatistics.AverageTermDepth = HeadListCount(&HeadListNode,term_depth) / 
 NumberOfTerms;
     } else {
         Statistics.FormulaStatistics.AverageTermDepth = 0.0;
     }
-//DEBUG printf("PROGRESS: got term depth\n");
+printf("PROGRESS: got term depth\n");
 
 //----Statistics for TFX and THF
     Statistics.FormulaStatistics.NumberOfNestedFormulae = HeadListCount(&HeadListNode,
@@ -518,7 +519,7 @@ boolean_variables);
 //----Statistics for mathematics. Number of vars collected with connectives.
     GetMathmaticsUsage(ListHead,Signature,&Statistics.SymbolStatistics.NumberOfMathPredicates,
 &Statistics.SymbolStatistics.NumberOfMathFunctions, &Statistics.SymbolStatistics.NumberOfNumbers);
-//DEBUG printf("PROGRESS: got mathematics statistics\n");
+printf("PROGRESS: got mathematics statistics\n");
 
     return(Statistics);
 }

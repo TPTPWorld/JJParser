@@ -1,4 +1,3 @@
-thf(ww,type,ww: ($o > $o) > $o ).
-
-thf(large1,axiom,
-    ww((&))).
+fof(c_0_0,axiom,
+    ( ~ $true
+  <=> leoLit(leoTi(false,o)) )).

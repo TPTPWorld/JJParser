@@ -768,8 +768,20 @@ char * SyntaxToString(SyntaxType Syntax) {
         case tptp_cnf:
             return("cnf");
             break;
+        case tptp_mixed:
+            return("mixed");
+            break;
         case include:
             return("include");
+            break;
+        case blank_line:
+            return("blank line");
+            break;
+        case comment:
+            return("comment");
+            break;
+        case nontype:
+            return("nontype");
             break;
         default:
             CodingError("Not a syntax to make into a string");
@@ -839,9 +851,6 @@ char * TermTypeToString(TermType Type) {
 char * FormulaTypeToString(FormulaTypeType Type) {
 
     switch (Type) {
-        case tuple:
-            return("tuple");
-            break;
         case sequent:
             return("sequent");
             break;
@@ -862,6 +871,9 @@ char * FormulaTypeToString(FormulaTypeType Type) {
             break;
         case atom:
             return("atom");
+            break;
+        case tuple:
+            return("tuple");
             break;
         case ite_formula:
             return("ite_formula");

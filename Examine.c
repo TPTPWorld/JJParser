@@ -577,36 +577,61 @@ Head->NumberOfUses);
     }
 }
 //-------------------------------------------------------------------------------------------------
-void CollectVariablesInAtom(TERM Term,char ** Collector,int * CollectorLength) {
+void CollectSymbolsInArguments(int Arity,TERMArray Arguments,char ** PredicateCollector,
+int * PredicateCollectorLength,char ** FunctorCollector,int * FunctorCollectorLength,
+char ** VariableCollector,int * VariableCollectorLength) {
 
-    SuperString Variable;
-    int index;
+    int ArgumentNumber;
 
-    if (Term->Type == variable) {
-        sprintf(Variable,"%s/0/1\n",Term->TheSymbol.Variable->VariableName->NameSymbol);
-        ExtendString(Collector,Variable,CollectorLength);
-    } else if (Term->Type == predicate || Term->Type == function) {
-        for (index = 0; index < GetArity(Term); index++) {
-            CollectVariablesInAtom(Term->Arguments[index],Collector,CollectorLength);
+//----Arguments could be null when duplicating the type declaration of a symbol
+    if (Arity > 0 && Arguments != NULL) {
+        for (ArgumentNumber=0;ArgumentNumber<Arity;ArgumentNumber++) {
+            CollectSymbolsInTerm(Arguments[ArgumentNumber],PredicateCollector,
+PredicateCollectorLength,FunctorCollector,FunctorCollectorLength,VariableCollector,
+VariableCollectorLength);
         }
+//DEBUG printf("args:\nP:%sF:%sV:%s\n",*PredicateCollector,*FunctorCollector,*VariableCollector);
     }
 }
 //-------------------------------------------------------------------------------------------------
-void CollectFunctorsInAtom(TERM Term,char ** Collector,int * CollectorLength) {
+void CollectSymbolsInTerm(TERM Term,char ** PredicateCollector,int * PredicateCollectorLength,
+char ** FunctorCollector,int * FunctorCollectorLength,char ** VariableCollector,
+int * VariableCollectorLength) {
 
-    SuperString FunctorAndArity;
-    int index;
+    SuperString TermData;
+    String ErrorMessage;
 
-    if (Term->Type == predicate || Term->Type == function) {
-        if (Term->Type == function) {
-            sprintf(FunctorAndArity,"%s/%d/1\n",
-Term->TheSymbol.NonVariable->NameSymbol,Term->TheSymbol.NonVariable->Arity);
-            ExtendString(Collector,FunctorAndArity,CollectorLength);
-        }
-        for (index = 0; index < GetArity(Term); index++) {
-            CollectFunctorsInAtom(Term->Arguments[index],Collector,
-CollectorLength);
-        }
+    switch (Term->Type) {
+        case variable:
+            sprintf(TermData,"%s/0/1\n",GetSymbol(Term));
+            ExtendString(VariableCollector,TermData,VariableCollectorLength);
+//DEBUG printf("var:\nP:%sF:%sV:%s\n",*PredicateCollector,*FunctorCollector,*VariableCollector);
+            break;
+        case predicate:
+        case function:
+            sprintf(TermData,"%s/%d/1\n",GetSymbol(Term),GetArity(Term));
+            if (Term->Type == predicate) {
+                ExtendString(PredicateCollector,TermData,PredicateCollectorLength);
+            } else {
+                ExtendString(FunctorCollector,TermData,FunctorCollectorLength);
+            }
+//DEBUG printf("principle:\nP:%sF:%sV:%s\n",*PredicateCollector,*FunctorCollector,*VariableCollector);
+            CollectSymbolsInArguments(GetArity(Term),Term->Arguments,PredicateCollector,
+PredicateCollectorLength,FunctorCollector,FunctorCollectorLength,VariableCollector,
+VariableCollectorLength);
+//DEBUG printf("predfun:\nP:%sF:%sV:%s\n",*PredicateCollector,*FunctorCollector,*VariableCollector);
+            break;
+        case formula:
+            CollectSymbolsInFormula(Term->TheSymbol.Formula,PredicateCollector,
+PredicateCollectorLength,FunctorCollector,FunctorCollectorLength,VariableCollector,
+VariableCollectorLength);
+            break;
+//DEBUG printf("termform:\nP:%sF:%sV:%s\n",*PredicateCollector,*FunctorCollector,*VariableCollector);
+        default:
+            sprintf(ErrorMessage,"Unknown term type %s for collecting symbols",
+TermTypeToString(Term->Type));
+            CodingError(ErrorMessage);
+            break;
     }
 }
 //-------------------------------------------------------------------------------------------------
@@ -614,9 +639,11 @@ CollectorLength);
 char * GetLiteralSymbolUsage(FORMULA Literal,char ** PutUsageHere,char ** VariablesStartHere) {
 
     char Sign;
-    char * Collector;
+    char * FunctorCollector;
+    char * VariableCollector;
     int UsageLength = STRINGLENGTH;
-    int CollectorLength;
+    int FunctorCollectorLength;
+    int VariableCollectorLength;
 
     strcpy(*PutUsageHere,"");
     if (Literal == NULL) {
@@ -631,29 +658,27 @@ Literal->FormulaUnion.UnaryFormula.Connective == negation) {
         return(NULL);
     }
 
-    sprintf(*PutUsageHere,"%c%s/%d/1\n",Sign,
-Literal->FormulaUnion.Atom->TheSymbol.NonVariable->NameSymbol,
-Literal->FormulaUnion.Atom->TheSymbol.NonVariable->Arity);
+    sprintf(*PutUsageHere,"%c",Sign);
 
-    Collector = (char *)Malloc(sizeof(String));
-    CollectorLength = STRINGLENGTH;
-    strcpy(Collector,"");
-    CollectFunctorsInAtom(Literal->FormulaUnion.Atom,&Collector,&CollectorLength);
-    NormalizeSymbolUsage(Collector);
-    ExtendString(PutUsageHere,Collector,&UsageLength);
-    Free((void **)&Collector);
-
+    FunctorCollector = (char *)Malloc(sizeof(String));
+    FunctorCollectorLength = STRINGLENGTH;
+    strcpy(FunctorCollector,"");
+    VariableCollector = (char *)Malloc(sizeof(String));
+    VariableCollectorLength = STRINGLENGTH;
+    strcpy(VariableCollector,"");
+    CollectSymbolsInFormula(Literal,PutUsageHere,&UsageLength,&FunctorCollector,
+&FunctorCollectorLength,&VariableCollector,&VariableCollectorLength);
+    NormalizeSymbolUsage(*PutUsageHere);
+    NormalizeSymbolUsage(FunctorCollector);
+    NormalizeSymbolUsage(VariableCollector);
+    ExtendString(PutUsageHere,FunctorCollector,&UsageLength);
 //----Collect variables if not a NULL start pointer
     if (VariablesStartHere != NULL) {
-        Collector = (char *)Malloc(sizeof(String));
-        CollectorLength = STRINGLENGTH;
-        strcpy(Collector,"");
-        CollectVariablesInAtom(Literal->FormulaUnion.Atom,&Collector,&CollectorLength);
         *VariablesStartHere = &((*PutUsageHere)[strlen(*PutUsageHere)]);
-        NormalizeSymbolUsage(Collector);
-        ExtendString(PutUsageHere,Collector,&UsageLength);
-        Free((void **)&Collector);
+        ExtendString(PutUsageHere,VariableCollector,&UsageLength);
     }
+    Free((void **)&FunctorCollector);
+    Free((void **)&VariableCollector);
 
     return(*PutUsageHere);
 }
@@ -677,7 +702,6 @@ void CollectSymbolsInFormula(FORMULA Formula,char ** PredicateCollector,
 int * PredicateCollectorLength,char ** FunctorCollector,int * FunctorCollectorLength,
 char ** VariableCollector,int * VariableCollectorLength) {
 
-    char * PredicateAndArity;
     String ErrorMessage;
 
     switch (Formula->Type) {
@@ -701,44 +725,40 @@ VariableCollectorLength);
             break;
         case quantified:
 //----Add in RHS of : and := variables
-            if (Formula->FormulaUnion.QuantifiedFormula.VariableType != NULL) {
-                CollectSymbolsInFormula(Formula->FormulaUnion.QuantifiedFormula.VariableType,
-PredicateCollector,PredicateCollectorLength,FunctorCollector,FunctorCollectorLength,
-VariableCollector,VariableCollectorLength);
-            }
+//            if (Formula->FormulaUnion.QuantifiedFormula.VariableType != NULL) {
+//                CollectSymbolsInFormula(Formula->FormulaUnion.QuantifiedFormula.VariableType,
+//PredicateCollector,PredicateCollectorLength,FunctorCollector,FunctorCollectorLength,
+//VariableCollector,VariableCollectorLength);
+//            }
+//printf("types:\nP:%sF:%sV:%s\n",*PredicateCollector,*FunctorCollector,*VariableCollector);
             CollectSymbolsInFormula(Formula->FormulaUnion.QuantifiedFormula.Formula,
 PredicateCollector,PredicateCollectorLength,FunctorCollector,FunctorCollectorLength,
 VariableCollector,VariableCollectorLength);
+//DEBUG printf("quantified:\nP:%sF:%sV:%s\n",*PredicateCollector,*FunctorCollector,*VariableCollector);
             break;
         case binary:
             CollectSymbolsInFormula(Formula->FormulaUnion.BinaryFormula.LHS,PredicateCollector,
 PredicateCollectorLength,FunctorCollector,FunctorCollectorLength,VariableCollector,
 VariableCollectorLength);
+//DEBUG printf("binary LHS:\nP:%sF:%sV:%s\n",*PredicateCollector,*FunctorCollector,*VariableCollector);
             CollectSymbolsInFormula(Formula->FormulaUnion.BinaryFormula.RHS,PredicateCollector,
 PredicateCollectorLength,FunctorCollector,FunctorCollectorLength,VariableCollector,
 VariableCollectorLength);
+//DEBUG printf("binary ALL:\nP:%sF:%sV:%s\n",*PredicateCollector,*FunctorCollector,*VariableCollector);
             break;
         case unary:
             CollectSymbolsInFormula(Formula->FormulaUnion.UnaryFormula.Formula,PredicateCollector,
 PredicateCollectorLength,FunctorCollector,FunctorCollectorLength,VariableCollector,
 VariableCollectorLength);
+//DEBUG printf("unary:\nP:%sF:%sV:%s\n",*PredicateCollector,*FunctorCollector,*VariableCollector);
             break;
         case atom:
 //            if (strcmp(GetSymbol(Formula->FormulaUnion.Atom),"$true") &&
 //strcmp(GetSymbol(Formula->FormulaUnion.Atom),"$false")) {
-//----Variables in THF are not symbols
-ZZZZZZZZ BROKEN IN HERE
-            if (Formula->FormulaUnion.Atom->Type != variable) {
-                PredicateAndArity = (char *)Malloc(sizeof(SuperString));
-                sprintf(PredicateAndArity,"%s/%d/1\n",GetSymbol(Formula->FormulaUnion.Atom),
-GetArity(Formula->FormulaUnion.Atom));
-                ExtendString(PredicateCollector,PredicateAndArity,PredicateCollectorLength);
-                Free((void **)&PredicateAndArity);
-                CollectFunctorsInAtom(Formula->FormulaUnion.Atom,FunctorCollector,
-FunctorCollectorLength);
-                CollectVariablesInAtom(Formula->FormulaUnion.Atom,VariableCollector,
+            CollectSymbolsInTerm(Formula->FormulaUnion.Atom,PredicateCollector,
+PredicateCollectorLength,FunctorCollector,FunctorCollectorLength,VariableCollector,
 VariableCollectorLength);
-            }
+//DEBUG printf("atom:\nP:%sF:%sV:%s\n",*PredicateCollector,*FunctorCollector,*VariableCollector);
             break;
         case tuple:
             CollectSymbolsInTupleFormulae(Formula->FormulaUnion.TupleFormula.NumberOfElements,
@@ -774,8 +794,9 @@ FormulaTypeToString(Formula->Type));
 }
 //-------------------------------------------------------------------------------------------------
 //----PutUsageHere must be address of a malloced String
-char * GetFormulaSymbolUsage(FORMULA Formula,char ** PutUsageHere,
-char ** FunctorUsageStartsHere,char ** VariableUsageStartsHere) {
+char * GetFormulaSymbolUsage(FORMULA Formula,char ** PutUsageHere,char ** FunctorUsageStartsHere,
+char ** VariableUsageStartsHere) {
+//TODO Collect types here too
 
     char * PredicateCollector;
     char * FunctorCollector;
@@ -903,11 +924,9 @@ NULL) {
     return(*PutUsageHere);
 }
 //-------------------------------------------------------------------------------------------------
-//----PutPositivesHere and PutNegativesHere must be addresses of
-//----malloced empty strings
-void CollectVariablesOfPolarity(FORMULA DisjunctionOrLiteral,
-char ** PutPositivesHere,int * PositivesLength,char ** PutNegativesHere,
-int * NegativesLength) {
+//----PutPositivesHere and PutNegativesHere must be addresses of malloced empty strings
+void CollectVariablesOfPolarity(FORMULA DisjunctionOrLiteral,char ** PutPositivesHere,
+int * PositivesLength,char ** PutNegativesHere,int * NegativesLength) {
 
     char * LiteralSymbols;
     char * LiteralVariables;
@@ -918,12 +937,10 @@ int * NegativesLength) {
 
     switch (DisjunctionOrLiteral->Type) {
         case binary:
-            CollectVariablesOfPolarity(DisjunctionOrLiteral->
-FormulaUnion.BinaryFormula.LHS,PutPositivesHere,PositivesLength,
-PutNegativesHere,NegativesLength);
-            CollectVariablesOfPolarity(DisjunctionOrLiteral->
-FormulaUnion.BinaryFormula.RHS,PutPositivesHere,PositivesLength,
-PutNegativesHere,NegativesLength);
+            CollectVariablesOfPolarity(DisjunctionOrLiteral->FormulaUnion.BinaryFormula.LHS,
+PutPositivesHere,PositivesLength,PutNegativesHere,NegativesLength);
+            CollectVariablesOfPolarity(DisjunctionOrLiteral->FormulaUnion.BinaryFormula.RHS,
+PutPositivesHere,PositivesLength,PutNegativesHere,NegativesLength);
             break;
         case unary:
         case atom:
@@ -1148,8 +1165,12 @@ int CountNestedFormulaeInArguments(TERM Atom)  {
     int Count;
 
     Count = 0;
-    for (Index = 0; Index < GetArity(Atom); Index++) {
-        Count += CountNestedFormulae(Atom->Arguments[Index]->TheSymbol.Formula,1);
+    if (GetArity(Atom) > 0 && GetArguments(Atom) != NULL) {
+        for (Index = 0; Index < GetArity(Atom); Index++) {
+            if (Atom->Arguments[Index]->Type == formula) {
+                Count += CountNestedFormulae(Atom->Arguments[Index]->TheSymbol.Formula,1);
+            }
+        }
     }
     return(Count);
 }
@@ -1160,47 +1181,48 @@ int CountNestedFormulae(FORMULA Formula,int NestedYet) {
     
     switch (Formula->Type) {
         case sequent:
-            return(CountNestedFormulaeInTuple(
+            return(NestedYet + CountNestedFormulaeInTuple(
 Formula->FormulaUnion.SequentFormula.NumberOfLHSElements,Formula->FormulaUnion.SequentFormula.LHS,
 NestedYet) + CountNestedFormulaeInTuple(
 Formula->FormulaUnion.SequentFormula.NumberOfRHSElements,Formula->FormulaUnion.SequentFormula.RHS,
 NestedYet));
             break;
         case assignment:
-            return(CountNestedFormulae(Formula->FormulaUnion.BinaryFormula.RHS,NestedYet));
+            return(NestedYet + CountNestedFormulae(Formula->FormulaUnion.BinaryFormula.RHS,
+NestedYet));
             break;
         case type_declaration:
             return(0);
             break;
         case quantified:
-            return(CountNestedFormulae(Formula->FormulaUnion.QuantifiedFormula.Formula,NestedYet));
+            return(NestedYet + CountNestedFormulae(Formula->FormulaUnion.QuantifiedFormula.Formula,
+NestedYet));
             break;
         case binary:
-            return(CountNestedFormulae(Formula->FormulaUnion.BinaryFormula.LHS,NestedYet) +
-CountNestedFormulae(Formula->FormulaUnion.BinaryFormula.RHS,NestedYet));
+            return(NestedYet + CountNestedFormulae(Formula->FormulaUnion.BinaryFormula.LHS,
+NestedYet) + CountNestedFormulae(Formula->FormulaUnion.BinaryFormula.RHS,NestedYet));
             break;
         case unary:
-            return(CountNestedFormulae(Formula->FormulaUnion.UnaryFormula.Formula,NestedYet));
+            return(NestedYet + CountNestedFormulae(Formula->FormulaUnion.UnaryFormula.Formula,
+NestedYet));
             break;
         case atom:
-            if (NestedYet && Formula->FormulaUnion.Atom->Type == variable) {
-                return(1);
-            } else {
-                return(CountNestedFormulaeInArguments(Formula->FormulaUnion.Atom));
-            }
+// CHECK IF A BOOLEAN PREDICATE ZZZZZ
+            return(NestedYet + CountNestedFormulaeInArguments(Formula->FormulaUnion.Atom));
             break;
         case tuple:
             return(CountNestedFormulaeInTuple(Formula->FormulaUnion.TupleFormula.NumberOfElements,
 Formula->FormulaUnion.TupleFormula.Elements,NestedYet));
             break;
         case ite_formula:
-            return(
+            return(NestedYet + 
 CountNestedFormulae(Formula->FormulaUnion.ConditionalFormula.Condition,NestedYet) +
 CountNestedFormulae(Formula->FormulaUnion.ConditionalFormula.FormulaIfTrue,NestedYet) +
 CountNestedFormulae(Formula->FormulaUnion.ConditionalFormula.FormulaIfFalse,NestedYet));
             break;
         case let_formula:
-            return(CountNestedFormulae(Formula->FormulaUnion.LetFormula.LetBody,NestedYet));
+            return(NestedYet + CountNestedFormulae(Formula->FormulaUnion.LetFormula.LetBody,
+NestedYet));
             break;
         default:
             sprintf(ErrorMessage,"Invalid formula type %s for counting nested formulae",
@@ -1229,8 +1251,12 @@ int CountBooleanVariablesInArguments(TERM Atom)  {
     int Count;
 
     Count = 0;
-    for (Index = 0; Index < GetArity(Atom); Index++) {
-        Count += CountNestedFormulae(Atom->Arguments[Index]->TheSymbol.Formula,1);
+    if (GetArity(Atom) > 0 && GetArguments(Atom) != NULL) {
+        for (Index = 0; Index < GetArity(Atom); Index++) {
+            if (Atom->Arguments[Index]->Type == formula) {
+                Count += CountNestedFormulae(Atom->Arguments[Index]->TheSymbol.Formula,1);
+            }
+        }
     }
     return(Count);
 }
@@ -1390,8 +1416,15 @@ int CountNestedFormulaAtomsByPredicate(TERM Atom,char * Predicate) {
     int Count;
 
     Count = 0;
-    for (Index = 0; Index < GetArity(Atom); Index++) {
-        Count += CountFormulaAtomsByPredicate(Atom->Arguments[Index]->TheSymbol.Formula,Predicate);
+    if (GetArity(Atom) > 0 && GetArguments(Atom) != NULL) {
+        for (Index = 0; Index < GetArity(Atom); Index++) {
+//----If nested is possible everything is a formula, so just check first. Otherwise it's a GOF
+//----term that cannot have nested formulae.
+            if (Atom->Arguments[Index]->Type == formula) {
+                Count += CountFormulaAtomsByPredicate(Atom->Arguments[Index]->TheSymbol.Formula,
+Predicate);
+            }
+        }
     }
     return (Count);
 }
@@ -1476,6 +1509,7 @@ Formula->FormulaUnion.LetFormula.LetBody,Predicate);
             return(Count);
             break;
         default:
+printf("HERE %d\n",Formula->Type);
             sprintf(ErrorMessage,"Invalid formula type %s for counting atoms",
 FormulaTypeToString(Formula->Type));
             CodingError(ErrorMessage);
@@ -1797,8 +1831,10 @@ int MaxTermDepth(TERM Term) {
         return(MaxFormulaTermDepth(Term->TheSymbol.Formula));
     } else {
         MaxDepth = 0;
-        for (Index = 0; Index < GetArity(Term); Index++) {
-            MaxDepth = MaximumOfInt(MaxDepth,MaxTermDepth(Term->Arguments[Index]));
+        if (GetArity(Term) > 0 && GetArguments(Term) != NULL) {
+            for (Index = 0; Index < GetArity(Term); Index++) {
+                MaxDepth = MaximumOfInt(MaxDepth,MaxTermDepth(Term->Arguments[Index]));
+            }
         }
         return (1 + MaxDepth);
     }
@@ -1821,30 +1857,30 @@ int MaxFormulaTermDepth(FORMULA Formula) {
 
     switch(Formula->Type) {
         case sequent:
-            return(MaximumOfInt(MaxTupleFormulaeTermDepth(
+            return(1 + MaximumOfInt(MaxTupleFormulaeTermDepth(
 Formula->FormulaUnion.SequentFormula.NumberOfLHSElements,Formula->FormulaUnion.SequentFormula.LHS),
 MaxTupleFormulaeTermDepth(Formula->FormulaUnion.SequentFormula.NumberOfRHSElements,
 Formula->FormulaUnion.SequentFormula.RHS)));
             break;
         case assignment:
-            return(MaxFormulaTermDepth(Formula->FormulaUnion.BinaryFormula.RHS));
+            return(1 + MaxFormulaTermDepth(Formula->FormulaUnion.BinaryFormula.RHS));
             break;
         case type_declaration:
             return(0);
             break;
         case quantified:
-            return(MaxFormulaTermDepth(Formula->FormulaUnion.QuantifiedFormula.Formula));
+            return(1 + MaxFormulaTermDepth(Formula->FormulaUnion.QuantifiedFormula.Formula));
             break;
         case binary:
-            return(MaximumOfInt(
+            return(1 + MaximumOfInt(
 MaxFormulaTermDepth(Formula->FormulaUnion.BinaryFormula.LHS),
 MaxFormulaTermDepth(Formula->FormulaUnion.BinaryFormula.RHS)));
             break;
         case unary:
-            return(MaxFormulaTermDepth(Formula->FormulaUnion.UnaryFormula.Formula));
+            return(1 + MaxFormulaTermDepth(Formula->FormulaUnion.UnaryFormula.Formula));
             break;
         case atom:
-            return(MaxTermDepth(Formula->FormulaUnion.Atom)-1);
+            return(1 + MaxTermDepth(Formula->FormulaUnion.Atom));
 //----Minus 1 because the predicate doesn't count
             break;
         case tuple:
@@ -1852,12 +1888,12 @@ MaxFormulaTermDepth(Formula->FormulaUnion.BinaryFormula.RHS)));
 Formula->FormulaUnion.TupleFormula.Elements));
             break;
         case ite_formula:
-            return(MaximumOfInt(
+            return(1 + MaximumOfInt(
 MaxFormulaTermDepth(Formula->FormulaUnion.ConditionalFormula.FormulaIfTrue),
 MaxFormulaTermDepth(Formula->FormulaUnion.ConditionalFormula.FormulaIfFalse)));
             break;
         case let_formula:
-            return(MaxFormulaTermDepth(Formula->FormulaUnion.LetFormula.LetBody));
+            return(1 + MaxFormulaTermDepth(Formula->FormulaUnion.LetFormula.LetBody));
             break;
         default:
             CodingError("Invalid formula type for max term depth\n");

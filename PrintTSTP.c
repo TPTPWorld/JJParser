@@ -197,9 +197,11 @@ int FlatTermList(int NumberOfElements,TERMArray Elements) {
 
     int ElementNumber;
 
-    for (ElementNumber = 0; ElementNumber < NumberOfElements; ElementNumber++) {
-        if (!FlatTerm(Elements[ElementNumber])) {
-            return(0);
+    if (NumberOfElements > 0 && Elements != NULL) {
+        for (ElementNumber = 0; ElementNumber < NumberOfElements; ElementNumber++) {
+            if (!FlatTerm(Elements[ElementNumber])) {
+                return(0);
+            }
         }
     }
     return(1);

@@ -159,8 +159,7 @@ SZSResultType StringToSZSResult(char * SZSResult) {
 
     int Index;
 
-    for (Index = 0;Index < sizeof(ResultTriples)/sizeof(SZSResultTripleType);
-Index++) {
+    for (Index = 0;Index < sizeof(ResultTriples)/sizeof(SZSResultTripleType);Index++) {
         if (!strcasecmp(SZSResult,ResultTriples[Index].TLAString) ||
 !strcmp(SZSResult,ResultTriples[Index].UserString)) {
             return(ResultTriples[Index].TLA);
@@ -190,8 +189,7 @@ char * SZSResultToString(SZSResultType SZSResult) {
 
     int Index;
 
-    for (Index = 0;Index < sizeof(ResultTriples)/sizeof(SZSResultTripleType);
-Index++) {
+    for (Index = 0;Index < sizeof(ResultTriples)/sizeof(SZSResultTripleType);Index++) {
         if (SZSResult == ResultTriples[Index].TLA) {
             return(ResultTriples[Index].TLAString);
         }
@@ -205,8 +203,7 @@ SZSOutputType StringToSZSOutput(char * SZSOutput) {
 
     int Index;
 
-    for (Index = 0;Index < sizeof(OutputTriples)/sizeof(SZSOutputTripleType);
-Index++) {
+    for (Index = 0;Index < sizeof(OutputTriples)/sizeof(SZSOutputTripleType);Index++) {
         if (!strcasecmp(SZSOutput,OutputTriples[Index].TLAString) ||
 !strcmp(SZSOutput,OutputTriples[Index].UserString)) {
             return(OutputTriples[Index].TLA);
@@ -221,8 +218,7 @@ char * SZSOutputToUserString(SZSOutputType SZSOutput) {
 
     int Index;
 
-    for (Index = 0;Index < sizeof(OutputTriples)/sizeof(SZSOutputTripleType);
-Index++) {
+    for (Index = 0;Index < sizeof(OutputTriples)/sizeof(SZSOutputTripleType);Index++) {
         if (SZSOutput == OutputTriples[Index].TLA) {
             return(OutputTriples[Index].UserString);
         }
@@ -236,8 +232,7 @@ char * SZSOutputToString(SZSOutputType SZSOutput) {
 
     int Index;
 
-    for (Index = 0;Index < sizeof(OutputTriples)/sizeof(SZSOutputTripleType);
-Index++) {
+    for (Index = 0;Index < sizeof(OutputTriples)/sizeof(SZSOutputTripleType);Index++) {
         if (SZSOutput == OutputTriples[Index].TLA) {
             return(OutputTriples[Index].TLAString);
         }
@@ -254,8 +249,7 @@ int SZSIsA(SZSResultType SZSResult,SZSResultType DesiredResult) {
     if (SZSResult == DesiredResult) {
         return(1);
     }
-    for (Index = 0; Index < sizeof(ResultIsaPairs)/(2 * sizeof(SZSResultType));
-Index++) {
+    for (Index = 0; Index < sizeof(ResultIsaPairs)/(2 * sizeof(SZSResultType));Index++) {
         if (ResultIsaPairs[Index][0] == SZSResult && 
 SZSIsA(ResultIsaPairs[Index][1],DesiredResult)) {
             return(1);
@@ -271,8 +265,7 @@ int SZSOutputIsA(SZSOutputType SZSOutput,SZSOutputType DesiredOutput) {
     if (SZSOutput == DesiredOutput) {
         return(1);
     }
-    for (Index = 0; Index < sizeof(OutputIsaPairs)/(2 * sizeof(SZSOutputType));
-Index++) {
+    for (Index = 0; Index < sizeof(OutputIsaPairs)/(2 * sizeof(SZSOutputType));Index++) {
         if (OutputIsaPairs[Index][0] == SZSOutput && 
 SZSOutputIsA(OutputIsaPairs[Index][1],DesiredOutput)) {
             return(1);
@@ -503,19 +496,18 @@ strstr(SystemOutputLine,"% Output     : ") == SystemOutputLine &&
 }
 //-------------------------------------------------------------------------------------------------
 //----1 means positive result, -1 means negative result, 0 means no result
-int SystemOnTPTP(LISTNODE Axioms,ANNOTATEDFORMULA Conjecture,
-char * PositiveChecker,char * PositiveResult,int TestNegative,
-char * NegativeChecker,char * NegativeResult,int TimeLimit,
-char * SystemOutputPrefix,char * OptionalFlags,int KeepOutputFiles,
-char * FilesDirectory,char * UsersOutputFileName,String OutputFileName) {
+int SystemOnTPTP(LISTNODE Axioms,ANNOTATEDFORMULA Conjecture,char * PositiveChecker,
+char * PositiveResult,int TestNegative,char * NegativeChecker,char * NegativeResult,int TimeLimit,
+char * SystemOutputPrefix,char * OptionalFlags,int KeepOutputFiles,char * FilesDirectory,
+char * UsersOutputFileName,String OutputFileName) {
 
     String ProblemFileName;
     String CopyUsersOutputFileName;
     String SystemResult;
     int Correct;
 
-    if (!MakeProblemFile(FilesDirectory,UsersOutputFileName,".p",
-ProblemFileName,Axioms,axiom,Conjecture,conjecture)) {
+    if (!MakeProblemFile(FilesDirectory,UsersOutputFileName,".p",ProblemFileName,Axioms,axiom,
+Conjecture,conjecture)) {
         return(0);
     }
 
@@ -530,10 +522,10 @@ ProblemFileName,Axioms,axiom,Conjecture,conjecture)) {
         strcpy(CopyUsersOutputFileName,UsersOutputFileName);
     }
     if (Correct == 0) {
-        if (SystemOnTPTPGetResult(0,ProblemFileName,PositiveChecker,TimeLimit,
-"",SystemOutputPrefix,OptionalFlags,KeepOutputFiles,FilesDirectory,
-CopyUsersOutputFileName,OutputFileName,SystemResult,NULL)) {
-            if (!strcmp(SystemResult,PositiveResult)) {
+        if (SystemOnTPTPGetResult(0,ProblemFileName,PositiveChecker,TimeLimit,"",
+SystemOutputPrefix,OptionalFlags,KeepOutputFiles,FilesDirectory,CopyUsersOutputFileName,
+OutputFileName,SystemResult,NULL)) {
+            if (SZSIsA(StringToSZSResult(SystemResult),StringToSZSResult(PositiveResult))) {
                 Correct = 1;
 //----Should not trust prover's disproofs
 //            } else if (!strcmp(SystemResult,NegativeResult)) {
@@ -546,10 +538,10 @@ CopyUsersOutputFileName,OutputFileName,SystemResult,NULL)) {
     if (Correct == 0 && TestNegative) {
         PathBasename(OutputFileName,CopyUsersOutputFileName,NULL);
         strcat(CopyUsersOutputFileName,"_not");
-        if (SystemOnTPTPGetResult(0,ProblemFileName,NegativeChecker,TimeLimit,
-"",SystemOutputPrefix,OptionalFlags,KeepOutputFiles,FilesDirectory,
-CopyUsersOutputFileName,OutputFileName,SystemResult,NULL)) {
-            if (!strcmp(SystemResult,NegativeResult)) {
+        if (SystemOnTPTPGetResult(0,ProblemFileName,NegativeChecker,TimeLimit,"",
+SystemOutputPrefix,OptionalFlags,KeepOutputFiles,FilesDirectory,CopyUsersOutputFileName,
+OutputFileName,SystemResult,NULL)) {
+            if (SZSIsA(StringToSZSResult(SystemResult),StringToSZSResult(NegativeResult))) {
                 Correct = -1;
 //----Should not trust disprover's proofs
 //            } else if (!strcmp(SystemResult,PositiveResult)) {
