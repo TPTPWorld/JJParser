@@ -101,7 +101,6 @@ Side->FormulaUnion.BinaryFormula.Connective == maparrow) {
                 Side = Side->FormulaUnion.BinaryFormula.RHS;
             }
             return(Arity);
-//TODO THIS IS ALMOST CERTAINLY WRONG
         } else {
             return(0);
         }
@@ -446,10 +445,12 @@ VARIABLENODE Variable,int * QuantifiedOccurrences) {
     *QuantifiedOccurrences = 0;
     TotalUsage = 0;
     LocalQuantifiedUsage = 0;
-    for (ElementNumber = 0;ElementNumber < NumberOfElements;ElementNumber++) {
-        TotalUsage += CountVariableUsageInFormula(TupleFormulae[ElementNumber],Variable,
+    if (NumberOfElements > 0 && TupleFormulae != NULL) {
+        for (ElementNumber = 0;ElementNumber < NumberOfElements;ElementNumber++) {
+            TotalUsage += CountVariableUsageInFormula(TupleFormulae[ElementNumber],Variable,
 &LocalQuantifiedUsage);
-        *QuantifiedOccurrences += LocalQuantifiedUsage;
+            *QuantifiedOccurrences += LocalQuantifiedUsage;
+        }
     }
     return(TotalUsage);
 }
@@ -579,7 +580,8 @@ Head->NumberOfUses);
 //-------------------------------------------------------------------------------------------------
 void CollectSymbolsInArguments(int Arity,TERMArray Arguments,char ** PredicateCollector,
 int * PredicateCollectorLength,char ** FunctorCollector,int * FunctorCollectorLength,
-char ** VariableCollector,int * VariableCollectorLength) {
+char ** VariableCollector,int * VariableCollectorLength,char ** TypeCollector,
+int * TypeCollectorLength) {
 
     int ArgumentNumber;
 
@@ -588,15 +590,15 @@ char ** VariableCollector,int * VariableCollectorLength) {
         for (ArgumentNumber=0;ArgumentNumber<Arity;ArgumentNumber++) {
             CollectSymbolsInTerm(Arguments[ArgumentNumber],PredicateCollector,
 PredicateCollectorLength,FunctorCollector,FunctorCollectorLength,VariableCollector,
-VariableCollectorLength);
+VariableCollectorLength,TypeCollector,TypeCollectorLength);
         }
-//DEBUG printf("args:\nP:%sF:%sV:%s\n",*PredicateCollector,*FunctorCollector,*VariableCollector);
+//DEBUG printf("args:\nP:%sF:%sV:%sT:%s\n",*PredicateCollector,*FunctorCollector,*VariableCollector,*TypeCollector);
     }
 }
 //-------------------------------------------------------------------------------------------------
 void CollectSymbolsInTerm(TERM Term,char ** PredicateCollector,int * PredicateCollectorLength,
 char ** FunctorCollector,int * FunctorCollectorLength,char ** VariableCollector,
-int * VariableCollectorLength) {
+int * VariableCollectorLength,char ** TypeCollector,int * TypeCollectorLength) {
 
     SuperString TermData;
     String ErrorMessage;
@@ -605,7 +607,7 @@ int * VariableCollectorLength) {
         case variable:
             sprintf(TermData,"%s/0/1\n",GetSymbol(Term));
             ExtendString(VariableCollector,TermData,VariableCollectorLength);
-//DEBUG printf("var:\nP:%sF:%sV:%s\n",*PredicateCollector,*FunctorCollector,*VariableCollector);
+//DEBUG printf("var:\nP:%sF:%sV:%sT:%s\n",*PredicateCollector,*FunctorCollector,*VariableCollector,*TypeCollector);
             break;
         case predicate:
         case function:
@@ -618,15 +620,19 @@ int * VariableCollectorLength) {
 //DEBUG printf("principle:\nP:%sF:%sV:%s\n",*PredicateCollector,*FunctorCollector,*VariableCollector);
             CollectSymbolsInArguments(GetArity(Term),Term->Arguments,PredicateCollector,
 PredicateCollectorLength,FunctorCollector,FunctorCollectorLength,VariableCollector,
-VariableCollectorLength);
-//DEBUG printf("predfun:\nP:%sF:%sV:%s\n",*PredicateCollector,*FunctorCollector,*VariableCollector);
+VariableCollectorLength,TypeCollector,TypeCollectorLength);
+//DEBUG printf("predfun:\nP:%sF:%sV:%sT:%s\n",*PredicateCollector,*FunctorCollector,*VariableCollector,*TypeCollector);
+            break;
+        case a_type:
+            sprintf(TermData,"%s/0/1\n",GetSymbol(Term));
+            ExtendString(TypeCollector,TermData,TypeCollectorLength);
             break;
         case formula:
             CollectSymbolsInFormula(Term->TheSymbol.Formula,PredicateCollector,
 PredicateCollectorLength,FunctorCollector,FunctorCollectorLength,VariableCollector,
-VariableCollectorLength);
+VariableCollectorLength,TypeCollector,TypeCollectorLength);
             break;
-//DEBUG printf("termform:\nP:%sF:%sV:%s\n",*PredicateCollector,*FunctorCollector,*VariableCollector);
+//DEBUG printf("termform:\nP:%sF:%sV:%sT:%s\n",*PredicateCollector,*FunctorCollector,*VariableCollector,TypeCollector);
         default:
             sprintf(ErrorMessage,"Unknown term type %s for collecting symbols",
 TermTypeToString(Term->Type));
@@ -641,9 +647,11 @@ char * GetLiteralSymbolUsage(FORMULA Literal,char ** PutUsageHere,char ** Variab
     char Sign;
     char * FunctorCollector;
     char * VariableCollector;
+    char * TypeCollector;
     int UsageLength = STRINGLENGTH;
     int FunctorCollectorLength;
     int VariableCollectorLength;
+    int TypeCollectorLength;
 
     strcpy(*PutUsageHere,"");
     if (Literal == NULL) {
@@ -666,41 +674,54 @@ Literal->FormulaUnion.UnaryFormula.Connective == negation) {
     VariableCollector = (char *)Malloc(sizeof(String));
     VariableCollectorLength = STRINGLENGTH;
     strcpy(VariableCollector,"");
+    TypeCollector = (char *)Malloc(sizeof(String));
+    TypeCollectorLength = STRINGLENGTH;
+    strcpy(TypeCollector,"");
     CollectSymbolsInFormula(Literal,PutUsageHere,&UsageLength,&FunctorCollector,
-&FunctorCollectorLength,&VariableCollector,&VariableCollectorLength);
+&FunctorCollectorLength,&VariableCollector,&VariableCollectorLength,&TypeCollector,
+&TypeCollectorLength);
     NormalizeSymbolUsage(*PutUsageHere);
     NormalizeSymbolUsage(FunctorCollector);
     NormalizeSymbolUsage(VariableCollector);
+    NormalizeSymbolUsage(TypeCollector);
     ExtendString(PutUsageHere,FunctorCollector,&UsageLength);
 //----Collect variables if not a NULL start pointer
     if (VariablesStartHere != NULL) {
         *VariablesStartHere = &((*PutUsageHere)[strlen(*PutUsageHere)]);
         ExtendString(PutUsageHere,VariableCollector,&UsageLength);
     }
+//----Collect variables if not a NULL start pointer
+    if (TypesStartHere != NULL) {
+        *TypesStartHere = &((*PutUsageHere)[strlen(*PutUsageHere)]);
+        ExtendString(PutUsageHere,TypeCollector,&UsageLength);
+    }
     Free((void **)&FunctorCollector);
     Free((void **)&VariableCollector);
+    Free((void **)&TypeCollector);
 
     return(*PutUsageHere);
 }
 //-------------------------------------------------------------------------------------------------
-void CollectSymbolsInTupleFormulae(int NumberOfElements,
-FORMULAArray TupleFormulae,char ** PredicateCollector,
-int * PredicateCollectorLength,char ** FunctorCollector,
-int * FunctorCollectorLength,char ** VariableCollector,
-int * VariableCollectorLength) {
+void CollectSymbolsInTupleFormulae(int NumberOfElements,FORMULAArray TupleFormulae,
+char ** PredicateCollector, int * PredicateCollectorLength,char ** FunctorCollector,
+int * FunctorCollectorLength,char ** VariableCollector,int * VariableCollectorLength,
+char ** TypeCollector,int * TypeCollectorLength) {
 
     int ElementNumber;
 
-    for (ElementNumber = 0;ElementNumber < NumberOfElements;ElementNumber++) {
-        CollectSymbolsInFormula(TupleFormulae[ElementNumber],PredicateCollector,
+    if (NumberOfElements > 0 && TupleFormulae != NULL) {
+        for (ElementNumber = 0;ElementNumber < NumberOfElements;ElementNumber++) {
+            CollectSymbolsInFormula(TupleFormulae[ElementNumber],PredicateCollector,
 PredicateCollectorLength,FunctorCollector,FunctorCollectorLength,VariableCollector,
-VariableCollectorLength);
+VariableCollectorLength,TypeCollector,TypeCollectorLength);
+        }
     }
 }
 //-------------------------------------------------------------------------------------------------
 void CollectSymbolsInFormula(FORMULA Formula,char ** PredicateCollector,
 int * PredicateCollectorLength,char ** FunctorCollector,int * FunctorCollectorLength,
-char ** VariableCollector,int * VariableCollectorLength) {
+char ** VariableCollector,int * VariableCollectorLength,char ** TypeCollector,
+int * TypeCollectorLength) {
 
     String ErrorMessage;
 
@@ -710,18 +731,19 @@ char ** VariableCollector,int * VariableCollectorLength) {
             CollectSymbolsInTupleFormulae(
 Formula->FormulaUnion.SequentFormula.NumberOfLHSElements,Formula->FormulaUnion.SequentFormula.LHS,
 PredicateCollector,PredicateCollectorLength,FunctorCollector,FunctorCollectorLength,
-VariableCollector,VariableCollectorLength);
+VariableCollector,VariableCollectorLength,TypeCollector,TypeCollectorLength);
             CollectSymbolsInTupleFormulae(
 Formula->FormulaUnion.SequentFormula.NumberOfRHSElements,Formula->FormulaUnion.SequentFormula.RHS,
 PredicateCollector,PredicateCollectorLength,FunctorCollector,FunctorCollectorLength,
-VariableCollector,VariableCollectorLength);
+VariableCollector,VariableCollectorLength,TypeCollector,TypeCollectorLength);
             break;
         case assignment:
             CollectSymbolsInFormula(Formula->FormulaUnion.BinaryFormula.RHS,PredicateCollector,
 PredicateCollectorLength,FunctorCollector,FunctorCollectorLength,VariableCollector,
-VariableCollectorLength);
+VariableCollectorLength,TypeCollector,TypeCollectorLength);
             break;
         case type_declaration:
+//TODO HERE
             break;
         case quantified:
 //----Add in RHS of : and := variables
@@ -733,23 +755,23 @@ VariableCollectorLength);
 //printf("types:\nP:%sF:%sV:%s\n",*PredicateCollector,*FunctorCollector,*VariableCollector);
             CollectSymbolsInFormula(Formula->FormulaUnion.QuantifiedFormula.Formula,
 PredicateCollector,PredicateCollectorLength,FunctorCollector,FunctorCollectorLength,
-VariableCollector,VariableCollectorLength);
-//DEBUG printf("quantified:\nP:%sF:%sV:%s\n",*PredicateCollector,*FunctorCollector,*VariableCollector);
+VariableCollector,VariableCollectorLength,TypeCollector,TypeCollectorLength);
+//DEBUG printf("quantified:\nP:%sF:%sV:%sT%s\n",*PredicateCollector,*FunctorCollector,*VariableCollector,*TypeCollector);
             break;
         case binary:
             CollectSymbolsInFormula(Formula->FormulaUnion.BinaryFormula.LHS,PredicateCollector,
 PredicateCollectorLength,FunctorCollector,FunctorCollectorLength,VariableCollector,
-VariableCollectorLength);
+VariableCollectorLength,TypeCollector,TypeCollectorLength);
 //DEBUG printf("binary LHS:\nP:%sF:%sV:%s\n",*PredicateCollector,*FunctorCollector,*VariableCollector);
             CollectSymbolsInFormula(Formula->FormulaUnion.BinaryFormula.RHS,PredicateCollector,
 PredicateCollectorLength,FunctorCollector,FunctorCollectorLength,VariableCollector,
-VariableCollectorLength);
+VariableCollectorLength,TypeCollector,TypeCollectorLength);
 //DEBUG printf("binary ALL:\nP:%sF:%sV:%s\n",*PredicateCollector,*FunctorCollector,*VariableCollector);
             break;
         case unary:
             CollectSymbolsInFormula(Formula->FormulaUnion.UnaryFormula.Formula,PredicateCollector,
 PredicateCollectorLength,FunctorCollector,FunctorCollectorLength,VariableCollector,
-VariableCollectorLength);
+VariableCollectorLength,TypeCollector,TypeCollectorLength);
 //DEBUG printf("unary:\nP:%sF:%sV:%s\n",*PredicateCollector,*FunctorCollector,*VariableCollector);
             break;
         case atom:
@@ -757,33 +779,34 @@ VariableCollectorLength);
 //strcmp(GetSymbol(Formula->FormulaUnion.Atom),"$false")) {
             CollectSymbolsInTerm(Formula->FormulaUnion.Atom,PredicateCollector,
 PredicateCollectorLength,FunctorCollector,FunctorCollectorLength,VariableCollector,
-VariableCollectorLength);
+VariableCollectorLength,TypeCollector,TypeCollectorLength);
 //DEBUG printf("atom:\nP:%sF:%sV:%s\n",*PredicateCollector,*FunctorCollector,*VariableCollector);
             break;
         case tuple:
             CollectSymbolsInTupleFormulae(Formula->FormulaUnion.TupleFormula.NumberOfElements,
 Formula->FormulaUnion.TupleFormula.Elements,PredicateCollector,PredicateCollectorLength,
-FunctorCollector,FunctorCollectorLength,VariableCollector,VariableCollectorLength);
+FunctorCollector,FunctorCollectorLength,VariableCollector,VariableCollectorLength,TypeCollector,
+TypeCollectorLength);
             break;
         case ite_formula:
 //DEBUG printf("CollectSymbolsInFormula: ite_formula");
             CollectSymbolsInFormula(Formula->FormulaUnion.ConditionalFormula.Condition,
 PredicateCollector,PredicateCollectorLength,FunctorCollector,FunctorCollectorLength,
-VariableCollector,VariableCollectorLength);
+VariableCollector,VariableCollectorLength,TypeCollector,TypeCollectorLength);
             CollectSymbolsInFormula(Formula->FormulaUnion.ConditionalFormula.FormulaIfTrue,
 PredicateCollector,PredicateCollectorLength,FunctorCollector,FunctorCollectorLength,
-VariableCollector,VariableCollectorLength);
+VariableCollector,VariableCollectorLength,TypeCollector,TypeCollectorLength);
             CollectSymbolsInFormula(Formula->FormulaUnion.ConditionalFormula.FormulaIfFalse,
 PredicateCollector,PredicateCollectorLength,FunctorCollector,FunctorCollectorLength,
-VariableCollector,VariableCollectorLength);
+VariableCollector,VariableCollectorLength,TypeCollector,TypeCollectorLength);
             break;
         case let_formula:
             CollectSymbolsInFormula(Formula->FormulaUnion.LetFormula.LetDefn,PredicateCollector,
 PredicateCollectorLength,FunctorCollector,FunctorCollectorLength,VariableCollector,
-VariableCollectorLength);
+VariableCollectorLength,TypeCollector,TypeCollectorLength);
             CollectSymbolsInFormula(Formula->FormulaUnion.LetFormula.LetBody,PredicateCollector,
 PredicateCollectorLength,FunctorCollector,FunctorCollectorLength,VariableCollector,
-VariableCollectorLength);
+VariableCollectorLength,TypeCollector,TypeCollectorLength);
             break;
         default:
             sprintf(ErrorMessage,"Invalid formula type %s for counting atoms",
@@ -795,18 +818,22 @@ FormulaTypeToString(Formula->Type));
 //-------------------------------------------------------------------------------------------------
 //----PutUsageHere must be address of a malloced String
 char * GetFormulaSymbolUsage(FORMULA Formula,char ** PutUsageHere,char ** FunctorUsageStartsHere,
-char ** VariableUsageStartsHere) {
+char ** VariableUsageStartsHere,char **TypeUsageStartsHere
+) {
 //TODO Collect types here too
 
     char * PredicateCollector;
     char * FunctorCollector;
     char * VariableCollector;
+    char * TypeCollector;
     int UsageLength = STRINGLENGTH;
     int PredicateCollectorLength = STRINGLENGTH;
     int FunctorCollectorLength = STRINGLENGTH;
     int VariableCollectorLength = STRINGLENGTH;
+    int TypeCollectorLength = STRINGLENGTH;
     int PredicateLength;
     int FunctorLength;
+    int VariableLength;
 
 //DEBUG printf("PROGRESS: Allocate memory for GetFormulaSymbolUsage\n");
     PredicateCollector = (char *)Malloc(sizeof(String));
@@ -815,11 +842,15 @@ char ** VariableUsageStartsHere) {
     strcpy(FunctorCollector,"");
     VariableCollector = (char *)Malloc(sizeof(String));
     strcpy(VariableCollector,"");
+    TypeCollector = (char *)Malloc(sizeof(String));
+    strcpy(TypeCollector,"");
     CollectSymbolsInFormula(Formula,&PredicateCollector,&PredicateCollectorLength,
-&FunctorCollector,&FunctorCollectorLength,&VariableCollector,&VariableCollectorLength);
+&FunctorCollector,&FunctorCollectorLength,&VariableCollector,&VariableCollectorLength,
+&TypeCollector,&TypeCollectorLength);
 //DEBUG printf("Predicates:\n%s\n",PredicateCollector);
 //DEBUG printf("Functors  :\n%s\n",FunctorCollector);
 //DEBUG printf("Variables :\n%s\n",VariableCollector);
+//DEBUG printf("Types  :\n%s\n",TypeCollector);
 
     strcpy(*PutUsageHere,"");
     NormalizeSymbolUsage(PredicateCollector);
@@ -833,29 +864,32 @@ char ** VariableUsageStartsHere) {
     Free((void **)&FunctorCollector);
 
     NormalizeSymbolUsage(VariableCollector);
+    VariableLength = strlen(VariableCollector);
     ExtendString(PutUsageHere,VariableCollector,&UsageLength);
     Free((void **)&VariableCollector);
 
+    NormalizeSymbolUsage(TypeCollector);
+    ExtendString(PutUsageHere,TypeCollector,&UsageLength);
+    Free((void **)&TypeCollector);
+
     *FunctorUsageStartsHere = *PutUsageHere + PredicateLength;
     *VariableUsageStartsHere = *FunctorUsageStartsHere + FunctorLength;
+    *TypeUsageStartsHere = *VariableUsageStartsHere + VariableLength;
 
     return(*PutUsageHere);
 }
 //-------------------------------------------------------------------------------------------------
 //----PutUsageHere must be address of a malloced String
 char * GetAnnotatedFormulaSymbolUsage(ANNOTATEDFORMULA AnnotatedTSTPFormula,char ** PutUsageHere,
-char ** FunctorUsageStartsHere) {
+char ** FunctorUsageStartsHere,char ** VariableUsageStartsHere,char ** TypeUsageStartsHere) {
 
-    char * VariableUsage;
     char * Result;
 
 //----Ignore comments
     if (LogicalAnnotatedFormula(AnnotatedTSTPFormula)) {
         if ((Result = GetFormulaSymbolUsage(
 AnnotatedTSTPFormula->AnnotatedFormulaUnion.AnnotatedTSTPFormula.FormulaWithVariables->Formula,
-PutUsageHere,FunctorUsageStartsHere,&VariableUsage)) != NULL) {
-//----Variables not returned at the moment, maybe later
-            *VariableUsage = '\0';
+PutUsageHere,FunctorUsageStartsHere,VariableUsageStartsHere,TypeUsageStartsHere)) != NULL) {
             return(Result);
         } else {
             return(NULL);
@@ -867,15 +901,21 @@ PutUsageHere,FunctorUsageStartsHere,&VariableUsage)) != NULL) {
 //-------------------------------------------------------------------------------------------------
 //----PutUsageHere must be address of a malloced String or pointer to NULL
 char * GetListOfAnnotatedFormulaSymbolUsage(LISTNODE ListNode,char ** PutUsageHere,
-char ** FunctorUsageStartsHere) {
+char ** FunctorUsageStartsHere,char ** VariableUsageStartsHere,char ** TypeUsageStartsHere) {
 
     char * PredicateCollector;
     char * FunctorCollector;
+    char * VariableCollector;
+    char * TypeCollector;
     char * OneUsage;
     char * FunctorsStart;
+    char * VariablesStart;
+    char * TypesStart;
     int UsageLength = STRINGLENGTH;
     int PredicateCollectorLength = STRINGLENGTH;
     int FunctorCollectorLength = STRINGLENGTH;
+    int VariableCollectorLength = STRINGLENGTH;
+    int TypeCollectorLength = STRINGLENGTH;
 
 //DEBUG printf("PROGRESS: Allocate memory\n");
 //----Initialize PutUsageHere if not done already
@@ -889,13 +929,21 @@ char ** FunctorUsageStartsHere) {
     strcpy(PredicateCollector,"");
     FunctorCollector = (char *)Malloc(sizeof(String));
     strcpy(FunctorCollector,"");
+    VariableCollector = (char *)Malloc(sizeof(String));
+    strcpy(VariableCollector,"");
+    TypeCollector = (char *)Malloc(sizeof(String));
+    strcpy(TypeCollector,"");
 
 //DEBUG printf("PROGRESS: Allocated memory\n");
     while (ListNode != NULL) {
         OneUsage = (char *)Malloc(sizeof(String));
         strcpy(OneUsage,"");
-        if (GetAnnotatedFormulaSymbolUsage(ListNode->AnnotatedFormula,&OneUsage,&FunctorsStart) != 
-NULL) {
+        if (GetAnnotatedFormulaSymbolUsage(ListNode->AnnotatedFormula,&OneUsage,&FunctorsStart,
+&VariablesStart,&TypesStart) != NULL) {
+            ExtendString(&TypeCollector,TypesStart,&TypeCollectorLength);
+            *TypesStart = '\0';
+            ExtendString(&VariableCollector,VariablesStart,&VariableCollectorLength);
+            *VariablesStart = '\0';
             ExtendString(&FunctorCollector,FunctorsStart,&FunctorCollectorLength);
             *FunctorsStart = '\0';
             ExtendString(&PredicateCollector,OneUsage,&PredicateCollectorLength);
@@ -913,6 +961,7 @@ NULL) {
     PredicateCollectorLength = strlen(*PutUsageHere);
     Free((void **)&PredicateCollector);
 //DEBUG printf("PROGRESS: Normalized predicates\n");
+
 //DEBUG printf("Collected functors\n%s\n",FunctorCollector);
     NormalizeSymbolUsage(FunctorCollector);
 //DEBUG printf("Normalized functors\n%s\n",FunctorCollector);
@@ -920,6 +969,23 @@ NULL) {
     *FunctorUsageStartsHere = (*PutUsageHere) + PredicateCollectorLength;
     Free((void **)&FunctorCollector);
 //DEBUG printf("PROGRESS: Normalized functors\n");
+
+//DEBUG printf("Collected variables\n%s\n",VariableCollector);
+    NormalizeSymbolUsage(VariableCollector);
+//DEBUG printf("Normalized variables\n%s\n",VariableCollector);
+    ExtendString(PutUsageHere,VariableCollector,&UsageLength);
+    *VariableUsageStartsHere = (*PutUsageHere) + PredicateCollectorLength + FunctorCollectorLength;
+    Free((void **)&VariableCollector);
+//DEBUG printf("PROGRESS: Normalized variables\n");
+
+//DEBUG printf("Collected types\n%s\n",TypeCollector);
+    NormalizeSymbolUsage(TypeCollector);
+//DEBUG printf("Normalized functors\n%s\n",FunctorCollector);
+    ExtendString(PutUsageHere,TypeCollector,&UsageLength);
+    *TypeUsageStartsHere = (*PutUsageHere) + PredicateCollectorLength + FunctorCollectorLength +
++ VariableCollectorLength;
+    Free((void **)&TypeCollector);
+//DEBUG printf("PROGRESS: Normalized types\n");
 
     return(*PutUsageHere);
 }
@@ -1153,8 +1219,10 @@ int CountNestedFormulaeInTuple(int NumberOfElements,FORMULAArray TupleFormulae,i
     int Count;
 
     Count = 0;
-    for (ElementNumber = 0;ElementNumber < NumberOfElements;ElementNumber++) {
-        CountNestedFormulae(TupleFormulae[ElementNumber],NestedYet);
+    if (NumberOfElements > 0 && TupleFormulae != NULL) {
+        for (ElementNumber = 0;ElementNumber < NumberOfElements;ElementNumber++) {
+            CountNestedFormulae(TupleFormulae[ElementNumber],NestedYet);
+        }
     }
     return(Count);
 }
@@ -1239,8 +1307,10 @@ int CountBooleanVariablesInTuple(int NumberOfElements,FORMULAArray TupleFormulae
     int Count;
 
     Count = 0;
-    for (ElementNumber = 0;ElementNumber < NumberOfElements;ElementNumber++) {
-        CountBooleanVariablesInFormula(TupleFormulae[ElementNumber]);
+    if (NumberOfElements > 0 && TupleFormulae != NULL) {
+        for (ElementNumber = 0;ElementNumber < NumberOfElements;ElementNumber++) {
+            CountBooleanVariablesInFormula(TupleFormulae[ElementNumber]);
+        }
     }
     return(Count);
 }
@@ -1918,8 +1988,10 @@ int SumTermDepth(TERM Atom) {
     int Index;
     
     SumDepth = 0;
-    for (Index = 0; Index < GetArity(Atom); Index++) {
-        SumDepth += MaxTermDepth(Atom->Arguments[Index]);
+    if (GetArity(Atom) > 0 && GetArguments(Atom) != NULL) {
+        for (Index = 0; Index < GetArity(Atom); Index++) {
+            SumDepth += MaxTermDepth(Atom->Arguments[Index]);
+        }
     }
 
     return(SumDepth);
@@ -1931,8 +2003,10 @@ int SumTupleFormulaeTermDepth(int NumberOfElements,FORMULAArray TupleFormulae) {
     int TotalDepth;
 
     TotalDepth = 0;
-    for (ElementNumber = 0;ElementNumber < NumberOfElements;ElementNumber++) {
-        TotalDepth += SumFormulaTermDepth(TupleFormulae[ElementNumber]);
+    if (NumberOfElements > 0 && TupleFormulae != NULL) {
+        for (ElementNumber = 0;ElementNumber < NumberOfElements;ElementNumber++) {
+            TotalDepth += SumFormulaTermDepth(TupleFormulae[ElementNumber]);
+        }
     }
     return(TotalDepth);
 }

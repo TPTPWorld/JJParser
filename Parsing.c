@@ -1007,7 +1007,9 @@ QuantifiedFormulaType * QuantifiedFormula) {
     QuantifiedFormula->Variable = ParseTerm(Stream,Language,Context,EndOfScope,new_variable,
 Quantifier,NULL,0);
 //----THF requires type
-    if (Language == tptp_thf) {
+    if (Language == tptp_thf ||
+//----TFF optional type
+((Language == tptp_tff || Language == tptp_tcf) && CheckToken(Stream,punctuation,":"))) {
         AcceptToken(Stream,punctuation,":");
         QuantifiedFormula->VariableType = ParseFormula(Stream,Language,Context,EndOfScope,-1,1,
 VariablesMustBeQuantified,none);
@@ -1015,16 +1017,6 @@ VariablesMustBeQuantified,none);
         QuantifiedFormula->Variable->TheSymbol.Variable->Type = 
 (GetResultFromTyping(Stream,QuantifiedFormula->VariableType)->Type != atom || strcmp("$o",
 GetSymbol(GetResultFromTyping(Stream,QuantifiedFormula->VariableType)->FormulaUnion.Atom))) ? 
-term : formula;
-//----TFF optional type
-    } else if ((Language == tptp_tff || Language == tptp_tcf) && 
-CheckToken(Stream,punctuation,":")) {
-        AcceptToken(Stream,punctuation,":");
-        QuantifiedFormula->VariableType = ParseAtom(Stream,Language,Context,EndOfScope,
-VariablesMustBeQuantified);
-//----If $o then it's a boolean variable, else other
-        QuantifiedFormula->Variable->TheSymbol.Variable->Type = strcmp("$o",
-GetSymbol(GetResultFromTyping(Stream,QuantifiedFormula->VariableType)->FormulaUnion.Atom)) ? 
 term : formula;
     } else {
         QuantifiedFormula->VariableType = NULL;

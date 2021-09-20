@@ -34,17 +34,19 @@ char * TSTPTermToString(TERM Term,String PutTermHere);
 
 int CountVariableUsageInFormula(FORMULA Formula,VARIABLENODE Variable,int * QuantifiedOccurences);
 void NormalizeSymbolUsage(char * SymbolUsage);
-char * GetLiteralSymbolUsage(FORMULA Literal,char ** PutUsageHere,char ** VariablesStartHere);
+char * GetLiteralSymbolUsage(FORMULA Literal,char ** PutUsageHere,char ** VariablesStartHere,
+char ** TypesStartHere);
 void CollectSymbolsInTerm(TERM Term,char ** PredicateCollector,int * PredicateCollectorLength,
 char ** FunctorCollector,int * FunctorCollectorLength,char ** VariableCollector,
-int * VariableCollectorLength);
+int * VariableCollectorLength,char ** TypeCollector,int * TypeCollectorLength);
 void CollectSymbolsInFormula(FORMULA Formula,char ** PredicateCollector,
 int * PredicateCollectorLength,char ** FunctorCollector,int * FunctorCollectorLength,
-char ** VariableCollector,int * VariableCollectorLength);
-char * GetAnnotatedFormulaSymbolUsage(ANNOTATEDFORMULA AnnotatedTSTPFormula,
-char ** PutUsageHere,char ** FunctorUsageStartsHere);
+char ** VariableCollector,int * VariableCollectorLength,char ** TypeCollector,
+int * TypeCollectorLength);
+char * GetAnnotatedFormulaSymbolUsage(ANNOTATEDFORMULA AnnotatedTSTPFormula,char ** PutUsageHere,
+char ** FunctorUsageStartsHere,char ** VariableUsageStartsHere,char ** TypeUsageStartsHere);
 char * GetListOfAnnotatedFormulaSymbolUsage(LISTNODE ListNode,char ** PutUsageHere,
-char ** FunctorUsageStartsHere);
+char ** FunctorUsageStartsHere,char ** VariableUsageStartsHere,char ** TypeUsageStartsHere);
 
 int GetSymbolUses(SIGNATURE Signature,TermType Type,char * Name,int Arity);
 int CountLiteralsOfPolarity(ANNOTATEDFORMULA AnnotatedFormula,int * Positive,int * Negative);
