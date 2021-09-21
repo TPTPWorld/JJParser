@@ -117,6 +117,7 @@ int MustBeQuantifiedAlready) {
 
     VARIABLENODE Variable;
     VARIABLENODE FoundVariable;
+    String ErrorMessage;
 
 //DEBUG printf("Variable %s forced = %d allowfree = %d mbqa = %d\n",VariableName,ForceNew,AllowFreeVariables,MustBeQuantifiedAlready);
 //DEBUG PrintVariableList(*Variables,*EndOfScope);
@@ -126,7 +127,8 @@ int MustBeQuantifiedAlready) {
 //----Bail if not quantified
     if (!AllowFreeVariables && MustBeQuantifiedAlready && 
 Quantification == free_variable && FoundVariable == NULL) {
-        TokenError(Stream,"Unquantified variable");
+        sprintf(ErrorMessage,"Unquantified variable %s",VariableName);
+        TokenError(Stream,ErrorMessage);
     }
 
 //----Check if variable exists in the current scope
@@ -239,9 +241,8 @@ void FreeTerm(TERM * Term,VARIABLENODE * Variables) {
             }
         } else if ((*Term)->Type == formula) {
             FreeFormula(&((*Term)->TheSymbol.Formula),Variables);
-        } else if ((*Term)->Type == nested_thf || 
-(*Term)->Type == nested_tff || (*Term)->Type == nested_tcf ||
-(*Term)->Type == nested_fof || (*Term)->Type == nested_cnf) {
+        } else if ((*Term)->Type == nested_thf || (*Term)->Type == nested_tff || 
+(*Term)->Type == nested_tcf || (*Term)->Type == nested_fof || (*Term)->Type == nested_cnf) {
             FreeFormulaWithVariables(&((*Term)->TheSymbol.NestedFormula));
         } else if ((*Term)->Type == nested_fot) {
             FreeTermWithVariables(&((*Term)->TheSymbol.NestedTerm));
@@ -685,7 +686,7 @@ int VariablesMustBeQuantified) {
 //----Make sure it's something that looks like a term
                 if (!CheckTokenType(Stream,functor) && !CheckToken(Stream,punctuation,"[") && 
 !CheckTokenType(Stream,upper_word)) {
-                    TokenError(Stream,"Invalid term term");
+                    TokenError(Stream,"Invalid non-logical data");
                 }
             }
             break;
@@ -1485,7 +1486,7 @@ AllowInfixEquality,VariablesMustBeQuantified,BinaryFormula));
                 return(NULL);
             }
         } else {
-            TokenError(Stream,"Binary TBA");
+            TokenError(Stream,"Binary with ambiguous associativity");
             return(NULL);
         }
     } else {

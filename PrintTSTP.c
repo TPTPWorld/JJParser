@@ -286,14 +286,14 @@ int PositiveEquality(TERM Atom) {
 //-------------------------------------------------------------------------------------------------
 int NegatedEquality(FORMULA Formula) {
 
-    return(UnitaryFormula(Formula) && Formula->FormulaUnion.UnaryFormula.Connective == negation &&
+    return(UnaryFormula(Formula) && Formula->FormulaUnion.UnaryFormula.Connective == negation &&
 Formula->FormulaUnion.UnaryFormula.Formula->Type == atom &&
 PositiveEquality(Formula->FormulaUnion.UnaryFormula.Formula->FormulaUnion.Atom));
 }
 //-------------------------------------------------------------------------------------------------
 int NegatedEquation(FORMULA Formula,FORMULA * LHS,FORMULA * RHS) {
 
-    if (Formula->Type == unary && 
+    if (UnaryFormula(Formula) &&
 Formula->FormulaUnion.UnaryFormula.Connective == negation && 
 Formula->FormulaUnion.UnaryFormula.Formula->Type == binary && 
 Formula->FormulaUnion.UnaryFormula.Formula->FormulaUnion.BinaryFormula.Connective == equation) {
@@ -392,9 +392,14 @@ int FlatTuple(FORMULA Formula) {
 Formula->FormulaUnion.TupleFormula.NumberOfElements,Formula->FormulaUnion.TupleFormula.Elements));
 }
 //-------------------------------------------------------------------------------------------------
+int BinaryFormula(FORMULA Formula) {
+
+    return(Formula->Type == binary);
+}
+//-------------------------------------------------------------------------------------------------
 int FlatBinaryFormula(FORMULA Formula) {
 
-    return(Formula->Type == binary &&
+    return(BinaryFormula(Formula) &&
 FlatBinaryConnective(Formula->FormulaUnion.BinaryFormula.Connective) &&
 FlatFormula(Formula->FormulaUnion.BinaryFormula.LHS) &&
 FlatFormula(Formula->FormulaUnion.BinaryFormula.RHS));
@@ -407,6 +412,11 @@ int FlatQuantifiedVariable(QuantifiedFormulaType QuantifiedFormula) {
     } else {
         return(FlatFormula(QuantifiedFormula.VariableType));
     }
+}
+//-------------------------------------------------------------------------------------------------
+int QuantifiedFormula(FORMULA Formula) {
+
+    return(Formula->Type == quantified);
 }
 //-------------------------------------------------------------------------------------------------
 int FlatFormula(FORMULA Formula) {
@@ -583,8 +593,7 @@ FORMULAArray FormulaTuple,int Pretty,int Indent,int TSTPSyntaxFlag) {
     if ((NeedSpace = !FlatFormulaList(NumberOfElements,FormulaTuple))) {
         PFprintf(Stream," ");
     }
-    PrintFileTSTPFormula(Stream,Language,FormulaTuple[0],Indent+2,Pretty,outermost,
-TSTPSyntaxFlag);
+    PrintFileTSTPFormula(Stream,Language,FormulaTuple[0],Indent+2,Pretty,outermost,TSTPSyntaxFlag);
     for (ElementNumber=1;ElementNumber < NumberOfElements;ElementNumber++) {
         PFprintf(Stream,",");
         if (Pretty && FormulaTuple[ElementNumber]->Type != atom && 
@@ -672,10 +681,10 @@ Formula->FormulaUnion.SequentFormula.NumberOfRHSElements,
 Formula->FormulaUnion.SequentFormula.RHS,Pretty,Indent,TSTPSyntaxFlag);
             break;
         case quantified:
-            if (LastConnective == brackets) {
-                PFprintf(Stream,"( ");
-                Indent += 2;
-            }
+//            if (LastConnective == brackets) {
+//                PFprintf(Stream,"( ");
+//                Indent += 2;
+//            }
             PFprintf(Stream,"%s",ConnectiveToString(
 Formula->FormulaUnion.QuantifiedFormula.Quantifier));
             PrintSpaces(Stream,2 - strlen(ConnectiveToString(
@@ -721,9 +730,9 @@ Formula->FormulaUnion.QuantifiedFormula.Formula,0,Pretty,none,TSTPSyntaxFlag);
                 PrintFileTSTPFormula(Stream,Language,
 Formula->FormulaUnion.QuantifiedFormula.Formula,Indent,Pretty,none,TSTPSyntaxFlag);
             }
-            if (LastConnective == brackets) {
-                PFprintf(Stream," )");
-            }
+//            if (LastConnective == brackets) {
+//                PFprintf(Stream," )");
+//            }
             break;
 
         case binary:
@@ -732,8 +741,7 @@ Formula->FormulaUnion.QuantifiedFormula.Formula,Indent,Pretty,none,TSTPSyntaxFla
             Connective = Formula->FormulaUnion.BinaryFormula.Connective;
 //DEBUG fprintf(stderr,"Printing binary %s with connective %s (last was %s) indent %d\n",FormulaTypeToString(Formula->Type),ConnectiveToString(Connective),ConnectiveToString(LastConnective),Indent);
 //----No brackets for sequences of associative formulae and top level
-            if (LastConnective == outermost || 
-FlatEquation(Formula) || 
+            if (LastConnective == outermost || FlatEquation(Formula) || 
 (Connective == LastConnective && Associative(Connective))) {
                 NeedBrackets = 0;
                 ConnectiveIndent = Indent - strlen(ConnectiveToString(Connective)) - 1;
@@ -759,6 +767,8 @@ RightAssociative(SideFormula->FormulaUnion.BinaryFormula.Connective)) ||
 //----tptp2X needs them for literals too (sad - the BNF does not)
 //    !LiteralFormula(SideFormula))) {
                 FakeConnective = brackets;
+                PFprintf(Stream,"( ");
+                Indent += 2;
             } else if (Formula->Type == assignment) {
                 FakeConnective = outermost;
             } else {
@@ -766,6 +776,9 @@ RightAssociative(SideFormula->FormulaUnion.BinaryFormula.Connective)) ||
             }
             PrintFileTSTPFormula(Stream,Language,SideFormula,Indent,Pretty,FakeConnective,
 TSTPSyntaxFlag);
+            if (FakeConnective == brackets) {
+                PFprintf(Stream," )");
+            }
 //----No new line for sequences of @ and >, and flat equations
             NeedNewLine = !FlatFormula(Formula) && Formula->Type != assignment && 
 Formula->Type != type_declaration && !TypeOrDefnFormula(Formula);
@@ -797,11 +810,16 @@ LeftAssociative(SideFormula->FormulaUnion.BinaryFormula.Connective)) ||
 //----tptp2X needs them for literals too (sad - the BNF does not)
 //    !LiteralFormula(SideFormula))) {
                 FakeConnective = brackets;
+                PFprintf(Stream,"( ");
+                Indent += 2;
             } else {
                 FakeConnective = Connective;
             }
             PrintFileTSTPFormula(Stream,Language,SideFormula,Indent,Pretty,FakeConnective,
 TSTPSyntaxFlag);
+            if (FakeConnective == brackets) {
+                PFprintf(Stream," )");
+            }
             if (NeedBrackets) {
                 PFprintf(Stream," )");
             }
@@ -817,7 +835,9 @@ Indent,Pretty,LastConnective,TSTPSyntaxFlag);
             } else {
                 if (
 (!SymbolFormula(Formula->FormulaUnion.UnaryFormula.Formula) &&
- !UnaryFormula(Formula->FormulaUnion.UnaryFormula.Formula)) ||
+ !UnaryFormula(Formula->FormulaUnion.UnaryFormula.Formula) &&
+ !BinaryFormula(Formula->FormulaUnion.UnaryFormula.Formula) &&
+ !QuantifiedFormula(Formula->FormulaUnion.UnaryFormula.Formula)) ||
 Equation(Formula->FormulaUnion.UnaryFormula.Formula,NULL,NULL) || 
 NegatedEquation(Formula->FormulaUnion.UnaryFormula.Formula,NULL,NULL) || 
 NegatedEquality(Formula->FormulaUnion.UnaryFormula.Formula)) {
@@ -845,7 +865,7 @@ Formula->FormulaUnion.UnaryFormula.Connective)));
                     Indent +=2;
                 }
                 PrintFileTSTPFormula(Stream,Language,Formula->FormulaUnion.UnaryFormula.Formula,
-Indent,Pretty,none,TSTPSyntaxFlag);
+Indent,Pretty,FakeConnective,TSTPSyntaxFlag);
                 if (!Pretty || FakeConnective == brackets) {
                     PFprintf(Stream," )");
                 }
@@ -924,8 +944,8 @@ Pretty,outermost,TSTPSyntaxFlag);
                 PFprintf(Stream,"\n");
                 PrintSpaces(Stream,Indent);
             }
-            PrintFileTSTPFormula(Stream,Language,
-Formula->FormulaUnion.LetFormula.LetBody,Indent,Pretty,none,TSTPSyntaxFlag);
+            PrintFileTSTPFormula(Stream,Language,Formula->FormulaUnion.LetFormula.LetBody,Indent,
+Pretty,none,TSTPSyntaxFlag);
             PFprintf(Stream," )");
             break;
 
@@ -987,8 +1007,8 @@ AnnotatedTSTPFormulaType AnnotatedTSTPFormula,PrintFormatType Format,int Pretty)
 //----Things that start on a new line alone
             if (
 (Language == tptp_thf || Language == tptp_tff || Language == tptp_fof) &&
-(AnnotatedTSTPFormula.FormulaWithVariables->Formula->Type == quantified ||
-AnnotatedTSTPFormula.FormulaWithVariables->Formula->Type == unary ||
+(QuantifiedFormula(AnnotatedTSTPFormula.FormulaWithVariables->Formula) ||
+ UnaryFormula(AnnotatedTSTPFormula.FormulaWithVariables->Formula) ||
 //----No top level tuples
 // AnnotatedTSTPFormula.FormulaWithVariables->Formula->Type == tuple ||
 TypeOrDefnFormula(AnnotatedTSTPFormula.FormulaWithVariables->Formula) ||
@@ -1195,8 +1215,8 @@ AnnotatedFormula->AnnotatedFormulaUnion.AnnotatedTSTPFormula,Pretty);
     }
 }
 //-------------------------------------------------------------------------------------------------
-void PrintStringAnnotatedTSTPNode(char * PutOutputHere,
-ANNOTATEDFORMULA AnnotatedFormula,PrintFormatType Format,int Pretty) {
+void PrintStringAnnotatedTSTPNode(char * PutOutputHere,ANNOTATEDFORMULA AnnotatedFormula,
+PrintFormatType Format,int Pretty) {
 
     PRINTFILE LocalStream;
 
@@ -1217,8 +1237,8 @@ PrintFormatType Format,int Pretty) {
     }
 }
 //-------------------------------------------------------------------------------------------------
-void PrintFileAnnotatedTSTPNodeWithStatus(PRINTFILE Stream,ANNOTATEDFORMULA
-AnnotatedFormula,PrintFormatType Format,int Pretty,StatusType Role) {
+void PrintFileAnnotatedTSTPNodeWithStatus(PRINTFILE Stream,ANNOTATEDFORMULA AnnotatedFormula,
+PrintFormatType Format,int Pretty,StatusType Role) {
 
     StatusType OldRole;
     StatusType OldSubRole;
@@ -1231,36 +1251,33 @@ AnnotatedFormula,PrintFormatType Format,int Pretty,StatusType Role) {
     DesiredRole = Role == axiom ? axiom_like : Role;
     
 //----Only set if not nonstatus, not type (hack), and not what we want
-    if (Role != nonstatus && OldRole != type && 
-!CheckRole(OldRole,DesiredRole)) {
+    if (Role != nonstatus && OldRole != type && !CheckRole(OldRole,DesiredRole)) {
         SetStatus(AnnotatedFormula,Role,nonstatus);
     }
     PrintFileAnnotatedTSTPNode(Stream,AnnotatedFormula,Format,Pretty);
     SetStatus(AnnotatedFormula,OldRole,OldSubRole);
 }
 //-------------------------------------------------------------------------------------------------
-void PrintAnnotatedTSTPNodeWithStatus(FILE * Stream,ANNOTATEDFORMULA
-AnnotatedFormula,PrintFormatType Format,int Pretty,StatusType Status) {
+void PrintAnnotatedTSTPNodeWithStatus(FILE * Stream,ANNOTATEDFORMULA AnnotatedFormula,
+PrintFormatType Format,int Pretty,StatusType Status) {
 
     PRINTFILE LocalStream;
 
     if ((LocalStream = OpenFILEPrintFile(Stream,NULL)) != NULL) {
-        PrintFileAnnotatedTSTPNodeWithStatus(LocalStream,AnnotatedFormula,
-Format,Pretty,Status);
+        PrintFileAnnotatedTSTPNodeWithStatus(LocalStream,AnnotatedFormula,Format,Pretty,Status);
         ClosePrintFile(LocalStream);
     }
 }
 //-------------------------------------------------------------------------------------------------
-void PrintFileListOfAnnotatedTSTPNodes(PRINTFILE Stream,SIGNATURE Signature,
-LISTNODE Head,PrintFormatType Format,int Pretty) {
+void PrintFileListOfAnnotatedTSTPNodes(PRINTFILE Stream,SIGNATURE Signature,LISTNODE Head,
+PrintFormatType Format,int Pretty) {
 
     switch (Format) {
         case tptp:
         case tptp_short:
         case oldtptp:
             while (Head != NULL) {
-                PrintFileAnnotatedTSTPNode(Stream,Head->AnnotatedFormula,Format,
-Pretty);
+                PrintFileAnnotatedTSTPNode(Stream,Head->AnnotatedFormula,Format,Pretty);
 //----Always a blank line after a logical, if pretty
                 if (
 Pretty && 
@@ -1288,12 +1305,10 @@ Pretty &&
             KIFPrintListOfAnnotatedTSTPNodes(Stream->FileHandle,Head);
             break;
         case xml:
-            XMLPrintListOfAnnotatedTSTPNodes(Stream->FileHandle,Head,
-CONTENT_XML,FALSE);
+            XMLPrintListOfAnnotatedTSTPNodes(Stream->FileHandle,Head,CONTENT_XML,FALSE);
             break;
         case xml_short:
-            XMLPrintListOfAnnotatedTSTPNodes(Stream->FileHandle,Head,
-CONTENT_TSTP,FALSE);
+            XMLPrintListOfAnnotatedTSTPNodes(Stream->FileHandle,Head,CONTENT_TSTP,FALSE);
             break;
         case sumo:
             SUMOPrintListOfAnnotatedTSTPNodes(Stream->FileHandle,Head);
@@ -1308,37 +1323,34 @@ CONTENT_TSTP,FALSE);
     }
 }
 //-------------------------------------------------------------------------------------------------
-void PrintListOfAnnotatedTSTPNodes(FILE * Stream,SIGNATURE Signature,
-LISTNODE Head,PrintFormatType Format,int Pretty) {
+void PrintListOfAnnotatedTSTPNodes(FILE * Stream,SIGNATURE Signature,LISTNODE Head,
+PrintFormatType Format,int Pretty) {
 
     PRINTFILE LocalStream;
             
     if ((LocalStream = OpenFILEPrintFile(Stream,NULL)) != NULL) {
-        PrintFileListOfAnnotatedTSTPNodes(LocalStream,Signature,Head,Format,
-Pretty);
+        PrintFileListOfAnnotatedTSTPNodes(LocalStream,Signature,Head,Format,Pretty);
         ClosePrintFile(LocalStream);
     }
 }
 //-------------------------------------------------------------------------------------------------
-void PrintFileListOfAnnotatedTSTPNodesWithStatus(PRINTFILE Stream,
-SIGNATURE Signature,LISTNODE Head,PrintFormatType Format,int Pretty,
-StatusType Status) {
+void PrintFileListOfAnnotatedTSTPNodesWithStatus(PRINTFILE Stream,SIGNATURE Signature,
+LISTNODE Head,PrintFormatType Format,int Pretty,StatusType Status) {
 
     while (Head != NULL) {
-        PrintFileAnnotatedTSTPNodeWithStatus(Stream,Head->AnnotatedFormula,
-Format,Pretty,Status);
+        PrintFileAnnotatedTSTPNodeWithStatus(Stream,Head->AnnotatedFormula,Format,Pretty,Status);
         Head = Head->Next;
     }
 }
 //-------------------------------------------------------------------------------------------------
-void PrintListOfAnnotatedTSTPNodesWithStatus(FILE * Stream,SIGNATURE Signature,
-LISTNODE Head,PrintFormatType Format,int Pretty,StatusType Status) {
+void PrintListOfAnnotatedTSTPNodesWithStatus(FILE * Stream,SIGNATURE Signature,LISTNODE Head,
+PrintFormatType Format,int Pretty,StatusType Status) {
 
     PRINTFILE LocalStream;
 
     if ((LocalStream = OpenFILEPrintFile(Stream,NULL)) != NULL) {
-        PrintFileListOfAnnotatedTSTPNodesWithStatus(LocalStream,Signature,Head,
-Format,Pretty,Status);
+        PrintFileListOfAnnotatedTSTPNodesWithStatus(LocalStream,Signature,Head,Format,Pretty,
+Status);
         ClosePrintFile(LocalStream);
     }
 }

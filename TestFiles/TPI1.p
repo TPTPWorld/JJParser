@@ -9,7 +9,7 @@ fof(another,axiom,q).
 fof(a,conjecture,qq).
 tpi(3,end_group,specifics).
 tpi(4,execute,self).
-tpi(5,clear,specifics).
+tpi(5,delete,specifics).
 fof(yet_another,axiom,r).
 fof(a,conjecture,qq).
 tpi(5,execute,self).
@@ -41,7 +41,7 @@ tpi(4,setenv,'CPU_LIMIT' = 300).
 tpi(5,execute_async,'ASYNC_SZS_STATUS' = '/bin/eprover').
 tpi(6,setenv,'SINE_OUTPUT' = '/tmp/FilteredFormulae').
 tpi(7,execute,'/bin/SInE').
-tpi(8,clear,all_axioms).
+tpi(8,delete,all_axioms).
 tpi(9,input,'/tmp/FilteredFormulae').
 tpi(10,execute,'SZS_STATUS' = '/bin/eprover').
 tpi(11,waitenv,'ASYNC_SZS_STATUS').

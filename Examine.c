@@ -604,10 +604,9 @@ int * VariableCollectorLength,char ** TypeCollector,int * TypeCollectorLength) {
     String ErrorMessage;
 
     switch (Term->Type) {
-        case variable:
+        case connective:
             sprintf(TermData,"%s/0/1\n",GetSymbol(Term));
-            ExtendString(VariableCollector,TermData,VariableCollectorLength);
-//DEBUG printf("var:\nP:%sF:%sV:%sT:%s\n",*PredicateCollector,*FunctorCollector,*VariableCollector,*TypeCollector);
+            ExtendString(PredicateCollector,TermData,PredicateCollectorLength);
             break;
         case predicate:
         case function:
@@ -626,6 +625,11 @@ VariableCollectorLength,TypeCollector,TypeCollectorLength);
         case a_type:
             sprintf(TermData,"%s/0/1\n",GetSymbol(Term));
             ExtendString(TypeCollector,TermData,TypeCollectorLength);
+            break;
+        case variable:
+            sprintf(TermData,"%s/0/1\n",GetSymbol(Term));
+            ExtendString(VariableCollector,TermData,VariableCollectorLength);
+//DEBUG printf("var:\nP:%sF:%sV:%sT:%s\n",*PredicateCollector,*FunctorCollector,*VariableCollector,*TypeCollector);
             break;
         case formula:
             CollectSymbolsInFormula(Term->TheSymbol.Formula,PredicateCollector,
@@ -690,11 +694,7 @@ Literal->FormulaUnion.UnaryFormula.Connective == negation) {
         *VariablesStartHere = &((*PutUsageHere)[strlen(*PutUsageHere)]);
         ExtendString(PutUsageHere,VariableCollector,&UsageLength);
     }
-//----Collect variables if not a NULL start pointer
-    if (TypesStartHere != NULL) {
-        *TypesStartHere = &((*PutUsageHere)[strlen(*PutUsageHere)]);
-        ExtendString(PutUsageHere,TypeCollector,&UsageLength);
-    }
+//----Don't do types for literals
     Free((void **)&FunctorCollector);
     Free((void **)&VariableCollector);
     Free((void **)&TypeCollector);

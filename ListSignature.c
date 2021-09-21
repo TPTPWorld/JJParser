@@ -14,6 +14,7 @@ SIGNATURE NewSignature(void) {
     Signature->Variables = NULL;
     Signature->Functions = NULL;
     Signature->Predicates = NULL;
+    Signature->Types = NULL;
     Signature->NonLogicals = NULL;
 
     return(Signature);
@@ -40,6 +41,8 @@ void FreeSignature(SIGNATURE * Signature) {
     assert((*Signature)->Functions == NULL);
     FreeSignatureList(&((*Signature)->Predicates));
     assert((*Signature)->Predicates == NULL);
+    FreeSignatureList(&((*Signature)->Types));
+    assert((*Signature)->Types == NULL);
     FreeSignatureList(&((*Signature)->NonLogicals));
     assert((*Signature)->NonLogicals == NULL);
 
@@ -75,6 +78,7 @@ int RemovedUnusedSymbols(SIGNATURE Signature) {
     TotalRemoved += RemovedUnusedSymbolsFromList(&(Signature->Variables));
     TotalRemoved += RemovedUnusedSymbolsFromList(&(Signature->Functions));
     TotalRemoved += RemovedUnusedSymbolsFromList(&(Signature->Predicates));
+    TotalRemoved += RemovedUnusedSymbolsFromList(&(Signature->Types));
     TotalRemoved += RemovedUnusedSymbolsFromList(&(Signature->NonLogicals));
 
     return(TotalRemoved);
@@ -148,6 +152,9 @@ void PrintSignature(SIGNATURE Signature) {
     printf("\n");
     printf("Predicates: ");
     PrintSignatureList(Signature->Predicates);
+    printf("\n");
+    printf("Types:  ");
+    PrintSignatureList(Signature->Types);
     printf("\n");
     printf("NonLogical: ");
     PrintSignatureList(Signature->NonLogicals);

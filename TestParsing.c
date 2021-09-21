@@ -38,8 +38,9 @@ int main(int argc, char *argv[]) {
     FORMULA AnotherLiteral;
     String SomeString;
     char * SymbolUsage;
-    char * AnotherSymbolUsage;
-    char * VariablesStartHere;
+    char * FunctorUsage;
+    char * VariableUsage;
+    char * TypeUsage;
     int SymbolUsageLength = STRINGLENGTH;
     int VarCount,QuantCount;
     StatusType SubStatus;
@@ -212,16 +213,14 @@ AnotherAnnotatedFormula,1,1)) {
     AnnotatedFormula = GetAnnotatedFormulaFromListByNumber(Head,1);
     if (AnnotatedFormula != NULL) {
         PrintAnnotatedTSTPNode(stdout,AnnotatedFormula,tptp,1);
-        PrintVariableList(AnnotatedFormula->
-AnnotatedFormulaUnion.AnnotatedTSTPFormula.FormulaWithVariables->Variables,
-NULL);
+        PrintVariableList(
+AnnotatedFormula->AnnotatedFormulaUnion.AnnotatedTSTPFormula.FormulaWithVariables->Variables,NULL);
         PrintSignature(Signature);
-        DuplicatedAnnotatedFormula = DuplicateAnnotatedFormula(AnnotatedFormula,
-Signature);
+        DuplicatedAnnotatedFormula = DuplicateAnnotatedFormula(AnnotatedFormula,Signature);
         PrintAnnotatedTSTPNode(stdout,DuplicatedAnnotatedFormula,tptp,1);
-        PrintVariableList(DuplicatedAnnotatedFormula->
-AnnotatedFormulaUnion.AnnotatedTSTPFormula.FormulaWithVariables->Variables,
-NULL);
+        PrintVariableList(
+DuplicatedAnnotatedFormula->
+AnnotatedFormulaUnion.AnnotatedTSTPFormula.FormulaWithVariables->Variables,NULL);
         PrintSignature(Signature);
     } else {
         printf("Could not get formula dv\n");
@@ -247,8 +246,7 @@ NULL);
         printf("The parents are ==%s==\n",SymbolUsage);
         Free((void **)&SymbolUsage);
     }
-    if ((SymbolUsage = GetSourceInfoTerm(AnnotatedFormula,"introduced","status",
-NULL)) != NULL) {
+    if ((SymbolUsage = GetSourceInfoTerm(AnnotatedFormula,"introduced","status",NULL)) != NULL) {
         printf("The status term is %s\n",SymbolUsage);
         Free((void **)&SymbolUsage);
     }
@@ -275,8 +273,7 @@ NULL)) != NULL) {
     PrintAnnotatedTSTPNode(stdout,AnnotatedFormula,tptp,1);
     if (GetSource(AnnotatedFormula) != NULL) {
         printf("The source is %s\n",SomeString);
-        if ((SymbolUsage = GetFileSourceNameAndNode(AnnotatedFormula,NULL)) != 
-NULL) {
+        if ((SymbolUsage = GetFileSourceNameAndNode(AnnotatedFormula,NULL)) != NULL) {
             printf("The file and node are %s\n",SymbolUsage);
             Free((void **)&SymbolUsage);
         } else {
@@ -292,16 +289,14 @@ NULL) {
 //----Test useful info manipulation
     AnnotatedFormula = GetAnnotatedFormulaFromListByNumber(Head,1);
     PrintAnnotatedTSTPNode(stdout,AnnotatedFormula,tptp,1);
-    AddUsefulInformationToAnnotatedFormula(AnnotatedFormula,Signature,
-"useful(1)");
+    AddUsefulInformationToAnnotatedFormula(AnnotatedFormula,Signature,"useful(1)");
     PrintAnnotatedTSTPNode(stdout,AnnotatedFormula,tptp,1);
     AddUsefulInformationToAnnotatedFormula(AnnotatedFormula,Signature,
 "useful([2,two,2],2-two)");
     AddUsefulInformationToAnnotatedFormula(AnnotatedFormula,Signature,
 "useful(3)");
     PrintAnnotatedTSTPNode(stdout,AnnotatedFormula,tptp,1);
-    if ((SymbolUsage = GetUsefulInfoTerm(AnnotatedFormula,"useful",2,NULL)) != 
-NULL) {
+    if ((SymbolUsage = GetUsefulInfoTerm(AnnotatedFormula,"useful",2,NULL)) != NULL) {
         printf("The second useful term is %s\n",SymbolUsage);
         Free((void **)&SymbolUsage);
     }
@@ -485,10 +480,10 @@ FormulaName));
     AnnotatedFormula = GetAnnotatedFormulaFromListByNumber(Head,1);
     PrintAnnotatedTSTPNode(stdout,AnnotatedFormula,tptp,1);
     SymbolUsage = (char *)Malloc(sizeof(String));
-    if (GetAnnotatedFormulaSymbolUsage(AnnotatedFormula,&SymbolUsage,
-&AnotherSymbolUsage) != NULL) {
-        printf("The total symbol usage is \n%s and the functors are \n%s\n",
-SymbolUsage,AnotherSymbolUsage);
+    if (GetAnnotatedFormulaSymbolUsage(AnnotatedFormula,&SymbolUsage,&FunctorUsage,
+&VariableUsage,&TypeUsage) != NULL) {
+        printf("Total symbol usage\n%s Functor usage\n%sVariable usage\n%sTypeUsage\n%s\n",
+SymbolUsage,FunctorUsage,VariableUsage,FunctorUsage);
     } else {
         printf("No total symbol usage collected\n");
     }
@@ -499,23 +494,19 @@ SymbolUsage,AnotherSymbolUsage);
     AnnotatedFormula = GetAnnotatedFormulaFromListByNumber(Head,1);
     if (AnnotatedFormula != NULL) {
         PrintAnnotatedTSTPNode(stdout,AnnotatedFormula,tptp,1);
-        PrintVariableList(AnnotatedFormula->
-AnnotatedFormulaUnion.AnnotatedTSTPFormula.FormulaWithVariables->Variables,
-NULL);
+        PrintVariableList(
+AnnotatedFormula->AnnotatedFormulaUnion.AnnotatedTSTPFormula.FormulaWithVariables->Variables,NULL);
         PrintSignature(Signature);
         Literal = AnnotatedFormula->AnnotatedFormulaUnion.AnnotatedTSTPFormula.FormulaWithVariables->Formula->FormulaUnion.QuantifiedFormula.Formula->FormulaUnion.BinaryFormula.LHS;
         Context.Signature = Signature;
         Context.Variables = &(AnnotatedFormula->AnnotatedFormulaUnion.AnnotatedTSTPFormula.FormulaWithVariables->Variables);
-        AnotherLiteral = DuplicateInternalFormulaWithVariables(
-Literal,Context);
+        AnotherLiteral = DuplicateInternalFormulaWithVariables(Literal,Context);
         PrintAnnotatedTSTPNode(stdout,AnnotatedFormula,tptp,1);
         printf("duplicate is ...\n");
-        PrintTSTPFormula(stdout,AnnotatedFormula->Syntax,AnotherLiteral,0,1,
-outermost,0);
+        PrintTSTPFormula(stdout,AnnotatedFormula->Syntax,AnotherLiteral,0,1,outermost,0);
         printf("\n");
-        PrintVariableList(AnnotatedFormula->
-AnnotatedFormulaUnion.AnnotatedTSTPFormula.FormulaWithVariables->Variables,
-NULL);
+        PrintVariableList(
+AnnotatedFormula->AnnotatedFormulaUnion.AnnotatedTSTPFormula.FormulaWithVariables->Variables,NULL);
         PrintSignature(Signature);
     } else {
         printf("Could not get first formula\n");
@@ -526,12 +517,11 @@ NULL);
     AnnotatedFormula = GetAnnotatedFormulaFromListByNumber(Head,1);
     if (AnnotatedFormula != NULL) {
         PrintAnnotatedTSTPNode(stdout,AnnotatedFormula,tptp,0);
-        VarCount = CountVariableUsageInFormula(AnnotatedFormula->
-AnnotatedFormulaUnion.AnnotatedTSTPFormula.FormulaWithVariables->Formula,
-AnnotatedFormula->AnnotatedFormulaUnion.AnnotatedTSTPFormula.
-FormulaWithVariables->Variables,&QuantCount);
-        printf("First variable occurs %d times, plus quantified %d times\n",
-VarCount,QuantCount);
+        VarCount = CountVariableUsageInFormula(
+AnnotatedFormula->AnnotatedFormulaUnion.AnnotatedTSTPFormula.FormulaWithVariables->Formula,
+AnnotatedFormula->AnnotatedFormulaUnion.AnnotatedTSTPFormula.FormulaWithVariables->Variables,
+&QuantCount);
+        printf("First variable occurs %d times, plus quantified %d times\n",VarCount,QuantCount);
     } else {
         printf("Could not get first formula\n");
     }
@@ -539,8 +529,7 @@ VarCount,QuantCount);
 
 //----Test getting parents' names
     if (AnnotatedFormula != NULL) {
-        printf("Parents are\n%s\n",GetParentNames(AnnotatedFormula,
-PutNamesHere));
+        printf("Parents are\n%s\n",GetParentNames(AnnotatedFormula,PutNamesHere));
     } else {
         printf("Formula of that name not found\n");
     }
@@ -550,16 +539,13 @@ PutNamesHere));
     AnnotatedFormula = GetAnnotatedFormulaFromListByNumber(Head,1);
     if (AnnotatedFormula != NULL) {
         PrintAnnotatedTSTPNode(stdout,AnnotatedFormula,tptp,0);
-        PrintVariableList(AnnotatedFormula->
-AnnotatedFormulaUnion.AnnotatedTSTPFormula.FormulaWithVariables->Variables,
-NULL);
+        PrintVariableList(
+AnnotatedFormula->AnnotatedFormulaUnion.AnnotatedTSTPFormula.FormulaWithVariables->Variables,NULL);
         PrintSignature(Signature);
-        NumberRemoved = RemoveVacuousQuantifiersFromAnnotatedFormula(
-AnnotatedFormula);
+        NumberRemoved = RemoveVacuousQuantifiersFromAnnotatedFormula(AnnotatedFormula);
         PrintAnnotatedTSTPNode(stdout,AnnotatedFormula,tptp,1);
-        PrintVariableList(AnnotatedFormula->
-AnnotatedFormulaUnion.AnnotatedTSTPFormula.FormulaWithVariables->Variables,
-NULL);
+        PrintVariableList(
+AnnotatedFormula->AnnotatedFormulaUnion.AnnotatedTSTPFormula.FormulaWithVariables->Variables,NULL);
         PrintSignature(Signature);
         printf("%d removed\n",NumberRemoved);
     } else {
@@ -657,31 +643,27 @@ Signature,0);
 CountFormulaAtomsByPredicate(AnnotatedFormula->
 AnnotatedFormulaUnion.AnnotatedTSTPFormula.FormulaWithVariables->Formula,""),Positive,Negative);
     }
-    if ((Literal = GetLiteralFromAnnotatedClauseByNumber(AnnotatedFormula,1))
-!= NULL) {
+    if ((Literal = GetLiteralFromAnnotatedClauseByNumber(AnnotatedFormula,1))!= NULL) {
         printf("The literal is ");
         PrintTSTPFormula(stdout,AnnotatedFormula->Syntax,Literal,0,1,none,0);
         printf("\n");
         SymbolUsage = (char *)Malloc(sizeof(String));
-        GetLiteralSymbolUsage(Literal,&SymbolUsage,&VariablesStartHere);
+        GetLiteralSymbolUsage(Literal,&SymbolUsage,&VariableUsage);
         printf("The literal data is \n%s\n",SymbolUsage);
-        printf("The variables are \n%s\n",VariablesStartHere);
+        printf("The variables are \n%s\n",VariableUsage);
 
-        if ((AnotherLiteral = GetLiteralFromAnnotatedClauseByNumber(
-AnnotatedFormula,2)) != NULL) {
+        if ((AnotherLiteral = GetLiteralFromAnnotatedClauseByNumber(AnnotatedFormula,2)) != NULL) {
             printf("The literal is ");
-            PrintTSTPFormula(stdout,AnnotatedFormula->Syntax,AnotherLiteral,
-0,1,none,0);
+            PrintTSTPFormula(stdout,AnnotatedFormula->Syntax,AnotherLiteral,0,1,none,0);
             printf("\n");
-            AnotherSymbolUsage = (char *)Malloc(sizeof(String));
-            if (GetLiteralSymbolUsage(AnotherLiteral,&AnotherSymbolUsage,
-NULL) != NULL) {
-                printf("The literal data is \n%s\n",AnotherSymbolUsage);
+            FunctorUsage = (char *)Malloc(sizeof(String));
+            if (GetLiteralSymbolUsage(AnotherLiteral,&FunctorUsage,NULL) != NULL) {
+                printf("The literal data is \n%s\n",FunctorUsage);
             }
-            ExtendString(&SymbolUsage,AnotherSymbolUsage,&SymbolUsageLength);
+            ExtendString(&SymbolUsage,FunctorUsage,&SymbolUsageLength);
             NormalizeSymbolUsage(SymbolUsage);
             printf("The combined data is \n%s\n",SymbolUsage);
-            Free((void **)&AnotherSymbolUsage);
+            Free((void **)&FunctorUsage);
         } else {
             printf("Could not get literal number 2\n");
         }

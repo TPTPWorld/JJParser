@@ -34,8 +34,7 @@ char * TSTPTermToString(TERM Term,String PutTermHere);
 
 int CountVariableUsageInFormula(FORMULA Formula,VARIABLENODE Variable,int * QuantifiedOccurences);
 void NormalizeSymbolUsage(char * SymbolUsage);
-char * GetLiteralSymbolUsage(FORMULA Literal,char ** PutUsageHere,char ** VariablesStartHere,
-char ** TypesStartHere);
+char * GetLiteralSymbolUsage(FORMULA Literal,char ** PutUsageHere,char ** VariablesStartHere);
 void CollectSymbolsInTerm(TERM Term,char ** PredicateCollector,int * PredicateCollectorLength,
 char ** FunctorCollector,int * FunctorCollectorLength,char ** VariableCollector,
 int * VariableCollectorLength,char ** TypeCollector,int * TypeCollectorLength);
