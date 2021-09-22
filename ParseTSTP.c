@@ -138,7 +138,7 @@ CopyHeapString(CurrentToken(Stream)->NameToken);
     AcceptToken(Stream,punctuation,",");
     EnsureTokenType(Stream,lower_word);
     if ((AnnotatedFormula->AnnotatedFormulaUnion.AnnotatedTSTPFormula.Status = 
-CheckStringToStatus(CurrentToken(Stream)->NameToken)) == nonstatus) {
+StringToStatus(CurrentToken(Stream)->NameToken)) == nonstatus) {
         TokenError(Stream,"Invalid role");
     }
     AcceptTokenType(Stream,lower_word);

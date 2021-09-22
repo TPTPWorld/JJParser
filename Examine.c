@@ -415,6 +415,9 @@ int CountVariableUsageInArguments(TERMArray Arguments,int Arity,VARIABLENODE Var
 //-------------------------------------------------------------------------------------------------
 int CountVariableUsageInTerm(TERM Term,VARIABLENODE Variable) {
 
+    int LocalQuantifiedUsage;
+    String ErrorMessage;
+
     switch (Term->Type) {
         case variable:
             return(Term->TheSymbol.Variable == Variable ? 1 : 0);
@@ -425,17 +428,35 @@ int CountVariableUsageInTerm(TERM Term,VARIABLENODE Variable) {
 Term->TheSymbol.NonVariable->Arity,Variable));
             break;
         case formula:
-//TODO
+            return(CountVariableUsageInFormula(Term->TheSymbol.Formula,Variable,
+&LocalQuantifiedUsage));
             break;
         default:
-            CodingError("Bad term type for counting variable occurrences");
+            sprintf(ErrorMessage,"Bad term type %s for counting variable occurrences",
+TermTypeToString(Term->Type));
+            CodingError(ErrorMessage);
             return(0);
             break;
     }
     return(0);
 }
 //-------------------------------------------------------------------------------------------------
-int CountVariableUsageInTupleFormulae(int NumberOfElements,FORMULAArray TupleFormulae,
+int CountSimpleUsageInFORMULAArray(int NumberOfElements,FORMULAArray Formulae,
+int (*CountFunction)(FORMULA)) {
+
+    int ElementNumber;
+    int Total;
+
+    Total = 0;
+    if (NumberOfElements > 0 && Formulae != NULL) {
+        for (ElementNumber = 0;ElementNumber < NumberOfElements;ElementNumber++) {
+            Total += (*CountFunction)(Formulae[ElementNumber]);
+        }
+    }
+    return(Total);
+}
+//-------------------------------------------------------------------------------------------------
+int CountVariableUsageInTuple(int NumberOfElements,FORMULAArray TupleFormulae,
 VARIABLENODE Variable,int * QuantifiedOccurrences) {
 
     int ElementNumber;
@@ -467,10 +488,10 @@ int * QuantifiedOccurrences) {
 
     switch (Formula->Type) {
         case sequent:
-            LocalCount = CountVariableUsageInTupleFormulae(
+            LocalCount = CountVariableUsageInTuple(
 Formula->FormulaUnion.SequentFormula.NumberOfLHSElements,Formula->FormulaUnion.SequentFormula.LHS,
 Variable,&LocalQuantifiedOccurrences);
-            LocalCount += CountVariableUsageInTupleFormulae(
+            LocalCount += CountVariableUsageInTuple(
 Formula->FormulaUnion.SequentFormula.NumberOfRHSElements,Formula->FormulaUnion.SequentFormula.RHS,
 Variable,&LocalQuantifiedOccurrences2);
             LocalQuantifiedOccurrences += LocalQuantifiedOccurrences2;
@@ -742,9 +763,6 @@ VariableCollector,VariableCollectorLength,TypeCollector,TypeCollectorLength);
 PredicateCollectorLength,FunctorCollector,FunctorCollectorLength,VariableCollector,
 VariableCollectorLength,TypeCollector,TypeCollectorLength);
             break;
-        case type_declaration:
-//TODO HERE
-            break;
         case quantified:
 //----Add in RHS of : and := variables
 //            if (Formula->FormulaUnion.QuantifiedFormula.VariableType != NULL) {
@@ -758,6 +776,7 @@ PredicateCollector,PredicateCollectorLength,FunctorCollector,FunctorCollectorLen
 VariableCollector,VariableCollectorLength,TypeCollector,TypeCollectorLength);
 //DEBUG printf("quantified:\nP:%sF:%sV:%sT%s\n",*PredicateCollector,*FunctorCollector,*VariableCollector,*TypeCollector);
             break;
+        case type_declaration:
         case binary:
             CollectSymbolsInFormula(Formula->FormulaUnion.BinaryFormula.LHS,PredicateCollector,
 PredicateCollectorLength,FunctorCollector,FunctorCollectorLength,VariableCollector,
@@ -818,9 +837,7 @@ FormulaTypeToString(Formula->Type));
 //-------------------------------------------------------------------------------------------------
 //----PutUsageHere must be address of a malloced String
 char * GetFormulaSymbolUsage(FORMULA Formula,char ** PutUsageHere,char ** FunctorUsageStartsHere,
-char ** VariableUsageStartsHere,char **TypeUsageStartsHere
-) {
-//TODO Collect types here too
+char ** VariableUsageStartsHere,char **TypeUsageStartsHere) {
 
     char * PredicateCollector;
     char * FunctorCollector;
@@ -1394,7 +1411,64 @@ FormulaTypeToString(Formula->Type));
 //-------------------------------------------------------------------------------------------------
 int CountFormulaTuples(FORMULA Formula) {
 
-//TODO
+    String ErrorMessage;
+
+    switch (Formula->Type) {
+        case sequent:
+            return(CountFormulaTuples(Formula->FormulaUnion.SequentFormula.LHS)+
+CountFormulaTuples(Formula->FormulaUnion.SequentFormula.RHS));
+            break;
+        case quantified:
+            return(CountFormulaTuples(Formula->FormulaUnion.QuantifiedFormula.Formula));
+            break;
+        case assignment:
+        case type_declaration:
+        case binary:
+            return(CountFormulaTuples(Formula->FormulaUnion.BinaryFormula.LHS)+
+CountFormulaTuples(Formula->FormulaUnion.BinaryFormula.RHS));
+            break;
+        case unary:
+            return(CountFormulaTuples(Formula->FormulaUnion.UnaryFormula.Formula));
+            break;
+        case atom:
+TODO
+            CollectSymbolsInTerm(Formula->FormulaUnion.Atom,PredicateCollector,
+PredicateCollectorLength,FunctorCollector,FunctorCollectorLength,VariableCollector,
+VariableCollectorLength,TypeCollector,TypeCollectorLength);
+            break;
+        case tuple:
+            CollectSymbolsInTupleFormulae(Formula->FormulaUnion.TupleFormula.NumberOfElements,
+Formula->FormulaUnion.TupleFormula.Elements,PredicateCollector,PredicateCollectorLength,
+FunctorCollector,FunctorCollectorLength,VariableCollector,VariableCollectorLength,TypeCollector,
+TypeCollectorLength);
+            break;
+        case ite_formula:
+//DEBUG printf("CollectSymbolsInFormula: ite_formula");
+            CollectSymbolsInFormula(Formula->FormulaUnion.ConditionalFormula.Condition,
+PredicateCollector,PredicateCollectorLength,FunctorCollector,FunctorCollectorLength,
+VariableCollector,VariableCollectorLength,TypeCollector,TypeCollectorLength);
+            CollectSymbolsInFormula(Formula->FormulaUnion.ConditionalFormula.FormulaIfTrue,
+PredicateCollector,PredicateCollectorLength,FunctorCollector,FunctorCollectorLength,
+VariableCollector,VariableCollectorLength,TypeCollector,TypeCollectorLength);
+            CollectSymbolsInFormula(Formula->FormulaUnion.ConditionalFormula.FormulaIfFalse,
+PredicateCollector,PredicateCollectorLength,FunctorCollector,FunctorCollectorLength,
+VariableCollector,VariableCollectorLength,TypeCollector,TypeCollectorLength);
+            break;
+        case let_formula:
+            CollectSymbolsInFormula(Formula->FormulaUnion.LetFormula.LetDefn,PredicateCollector,
+PredicateCollectorLength,FunctorCollector,FunctorCollectorLength,VariableCollector,
+VariableCollectorLength,TypeCollector,TypeCollectorLength);
+            CollectSymbolsInFormula(Formula->FormulaUnion.LetFormula.LetBody,PredicateCollector,
+PredicateCollectorLength,FunctorCollector,FunctorCollectorLength,VariableCollector,
+VariableCollectorLength,TypeCollector,TypeCollectorLength);
+            break;
+        default:
+            sprintf(ErrorMessage,"Invalid formula type %s for counting atoms",
+FormulaTypeToString(Formula->Type));
+            CodingError(ErrorMessage);
+            break;
+    }
+
     return(0);
 }
 //-------------------------------------------------------------------------------------------------
@@ -1439,7 +1513,7 @@ CountFormulaTerms(Formula->FormulaUnion.BinaryFormula.RHS));
             break;
         case atom:
 //TODO - What does this mean for TFX and THF?
-            return(GetArity(Formula->FormulaUnion.Atom));
+            return(20000);
             break;
         case tuple:
             return(CountTupleFormulaeTerms(Formula->FormulaUnion.TupleFormula.NumberOfElements,
@@ -1461,11 +1535,11 @@ CountFormulaTerms(Formula->FormulaUnion.ConditionalFormula.FormulaIfFalse));
     }
 }
 //-------------------------------------------------------------------------------------------------
-//int CountAnnotatedFormulaTerms(ANNOTATEDFORMULA AnnotatedFormula) {
-//
-//    return(CountFormulaTerms(AnnotatedFormula->AnnotatedFormulaUnion.
-//AnnotatedTSTPFormula.FormulaWithVariables->Formula));
-//}
+int CountAnnotatedFormulaTerms(ANNOTATEDFORMULA AnnotatedFormula) {
+
+    return(CountFormulaTerms(AnnotatedFormula->AnnotatedFormulaUnion.
+AnnotatedTSTPFormula.FormulaWithVariables->Formula));
+}
 //-------------------------------------------------------------------------------------------------
 int CountTupleFormulaeAtomsByPredicate(int NumberOfElements,FORMULAArray TupleFormulae,
 char * Predicate) {

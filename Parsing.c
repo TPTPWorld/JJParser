@@ -425,7 +425,7 @@ VARIABLENODE * EndOfScope,TermType DesiredType,int VariablesMustBeQuantified) {
 VariablesMustBeQuantified,none);
         return(FormulaArgument);
     } else {
-//----If parsing non-logical, keep it like that, else it must be a term
+//----If parsing non-logical, keep it like that, else it must be a term (variable or function)
         if (DesiredType != non_logical_data) {
             DesiredType = term;
         }
@@ -598,7 +598,8 @@ int InfixOperatorParsing(READFILE Stream,SyntaxType Language,TermType Originally
 TermType * ExpectedRHSTermType) {
 
 //DEBUG printf("Checking for infix, syntax %s, expected %s\n",SyntaxToString(Language),TermTypeToString(OriginallyExpectedType));
-//----For THF equality is dealt with as a binary operator
+//----For THF and TFF equality is dealt with as a binary operator. That means here it's a regular
+//----first-order situation, and equality is between terms (variables of functions).
     if (Language != tptp_thf && Language != tptp_tff && OriginallyExpectedType == predicate && 
 (CheckToken(Stream,lower_word,"=") || CheckToken(Stream,lower_word,"!="))) {
         *ExpectedRHSTermType = term;
@@ -643,6 +644,7 @@ int VariablesMustBeQuantified) {
 //----If a generic term, look at first letter to decide which
     switch (DesiredType) {
         case term:
+//----Will come back as variable or function
             DesiredType = KnownTermTypeOrError(Stream,Language);
             break;
         case variable:
@@ -1021,7 +1023,7 @@ GetSymbol(GetResultFromTyping(Stream,QuantifiedFormula->VariableType)->FormulaUn
 term : formula;
     } else {
         QuantifiedFormula->VariableType = NULL;
-        QuantifiedFormula->Variable->TheSymbol.Variable->Type = term;
+        QuantifiedFormula->Variable->TheSymbol.Variable->Type = nonterm;
     }
 }
 //-------------------------------------------------------------------------------------------------

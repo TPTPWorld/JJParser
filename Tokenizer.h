@@ -21,7 +21,6 @@ int SetStreamWarnings(READFILE Stream,int GiveWarnings);
 int EndFile(TOKEN CurrentToken);
 
 int Character(READFILE CurrentFile,int Operation);
-StatusType CheckStringToStatus(char * String);
 StatusType StringToStatus(char * String);
 char * StatusToString(StatusType Status);
 ConnectiveType StringToConnective(char * String);

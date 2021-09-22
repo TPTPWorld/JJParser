@@ -149,160 +149,156 @@ Stream->StringFileContent[Stream->StringOffset];
     }
 }
 //-------------------------------------------------------------------------------------------------
-StatusType CheckStringToStatus(char * String) {
+StatusType StringToStatus(char * StatusString) {
 
-    if (!strcmp(String,"initial")) {
+    String ErrorMessage;
+
+    if (!strcmp(StatusString,"initial")) {
         return(initial);
     }
-    if (!strcmp(String,"derived")) {
+    if (!strcmp(StatusString,"derived")) {
         return(derived);
     }
-    if (!strcmp(String,"assumption")) {
+    if (!strcmp(StatusString,"assumption")) {
         return(assumption);
     }
-    if (!strcmp(String,"axiom")) {
+    if (!strcmp(StatusString,"axiom")) {
         return(axiom);
     }
-    if (!strcmp(String,"hypothesis")) {
+    if (!strcmp(StatusString,"hypothesis")) {
         return(hypothesis);
     }
-    if (!strcmp(String,"definition")) {
+    if (!strcmp(StatusString,"definition")) {
         return(definition);
     }
-    if (!strcmp(String,"lemma")) {
+    if (!strcmp(StatusString,"lemma")) {
         return(lemma);
     }
-    if (!strcmp(String,"theorem")) {
+    if (!strcmp(StatusString,"theorem")) {
         return(theorem);
     }
-    if (!strcmp(String,"corollary")) {
+    if (!strcmp(StatusString,"corollary")) {
         return(corollary);
     }
-    if (!strcmp(String,"conjecture")) {
+    if (!strcmp(StatusString,"conjecture")) {
         return(conjecture);
     }
-    if (!strcmp(String,"question")) {
+    if (!strcmp(StatusString,"question")) {
         return(question);
     }
-    if (!strcmp(String,"answer")) {
+    if (!strcmp(StatusString,"answer")) {
         return(answer);
     }
-    if (!strcmp(String,"negated_conjecture")) {
+    if (!strcmp(StatusString,"negated_conjecture")) {
         return(negated_conjecture);
     }
-    if (!strcmp(String,"plain")) {
+    if (!strcmp(StatusString,"plain")) {
         return(plain);
     }
-    if (!strcmp(String,"type")) {
+    if (!strcmp(StatusString,"type")) {
         return(type);
     }
-    if (!strcmp(String,"fi_domain")) {
+    if (!strcmp(StatusString,"fi_domain")) {
         return(fi_domain);
     }
-    if (!strcmp(String,"fi_functors")) {
+    if (!strcmp(StatusString,"fi_functors")) {
         return(fi_functors);
     }
-    if (!strcmp(String,"fi_predicates")) {
+    if (!strcmp(StatusString,"fi_predicates")) {
         return(fi_predicates);
     }
-    if (!strcmp(String,"unknown")) {
+    if (!strcmp(StatusString,"unknown")) {
         return(unknown);
     }
-    if (!strcmp(String,"knowledge")) {
+    if (!strcmp(StatusString,"knowledge")) {
         return(knowledge);
     }
-    if (!strcmp(String,"external")) {
+    if (!strcmp(StatusString,"external")) {
         return(external);
     }
-    if (!strcmp(String,"logic")) {
+    if (!strcmp(StatusString,"logic")) {
         return(logic);
     }
-    if (!strcmp(String,"input")) {
+    if (!strcmp(StatusString,"input")) {
         return(tpi_input);
     }
-    if (!strcmp(String,"output")) {
+    if (!strcmp(StatusString,"output")) {
         return(tpi_output);
     }
-    if (!strcmp(String,"activate")) {
+    if (!strcmp(StatusString,"activate")) {
         return(tpi_activate);
     }
-    if (!strcmp(String,"deactivate")) {
+    if (!strcmp(StatusString,"deactivate")) {
         return(tpi_deactivate);
     }
-    if (!strcmp(String,"delete")) {
+    if (!strcmp(StatusString,"delete")) {
         return(tpi_delete);
     }
-    if (!strcmp(String,"set_role")) {
+    if (!strcmp(StatusString,"set_role")) {
         return(tpi_set_role);
     }
-    if (!strcmp(String,"start_group")) {
+    if (!strcmp(StatusString,"start_group")) {
         return(tpi_start_group);
     }
-    if (!strcmp(String,"end_group")) {
+    if (!strcmp(StatusString,"end_group")) {
         return(tpi_end_group);
     }
-    if (!strcmp(String,"activate_group")) {
+    if (!strcmp(StatusString,"activate_group")) {
         return(tpi_activate_group);
     }
-    if (!strcmp(String,"deactivate_group")) {
+    if (!strcmp(StatusString,"deactivate_group")) {
         return(tpi_deactivate_group);
     }
-    if (!strcmp(String,"delete_group")) {
+    if (!strcmp(StatusString,"delete_group")) {
         return(tpi_delete_group);
     }
-    if (!strcmp(String,"setenv")) {
+    if (!strcmp(StatusString,"setenv")) {
         return(tpi_setenv);
     }
-    if (!strcmp(String,"waitenv")) {
+    if (!strcmp(StatusString,"waitenv")) {
         return(tpi_waitenv);
     }
-    if (!strcmp(String,"unsetenv")) {
+    if (!strcmp(StatusString,"unsetenv")) {
         return(tpi_unsetenv);
     }
-    if (!strcmp(String,"set_logic")) {
+    if (!strcmp(StatusString,"set_logic")) {
         return(tpi_set_logic);
     }
-    if (!strcmp(String,"execute")) {
+    if (!strcmp(StatusString,"execute")) {
         return(tpi_execute);
     }
-    if (!strcmp(String,"execute_async")) {
+    if (!strcmp(StatusString,"execute_async")) {
         return(tpi_execute_async);
     }
-    if (!strcmp(String,"filter")) {
+    if (!strcmp(StatusString,"filter")) {
         return(tpi_filter);
     }
-    if (!strcmp(String,"generate")) {
+    if (!strcmp(StatusString,"generate")) {
         return(tpi_generate);
     }
-    if (!strcmp(String,"mktemp")) {
+    if (!strcmp(StatusString,"mktemp")) {
         return(tpi_mktemp);
     }
-    if (!strcmp(String,"assert")) {
+    if (!strcmp(StatusString,"assert")) {
         return(tpi_assert);
     }
-    if (!strcmp(String,"write")) {
+    if (!strcmp(StatusString,"write")) {
         return(tpi_write);
     }
-    if (!strcmp(String,"clean")) {
+    if (!strcmp(StatusString,"clean")) {
         return(tpi_clean);
     }
-    if (!strcmp(String,"exit")) {
+    if (!strcmp(StatusString,"exit")) {
         return(tpi_exit);
     }
+    sprintf(ErrorMessage,"Not a string to make into a role: %s",StatusString);
+    CodingError(ErrorMessage);
     return(nonstatus);
 }
 //-------------------------------------------------------------------------------------------------
-StatusType StringToStatus(char * String) {
-
-    StatusType Role;
-
-    if ((Role = CheckStringToStatus(String)) == nonstatus) {
-        CodingError("String not a role");
-    }
-    return(Role);
-}
-//-------------------------------------------------------------------------------------------------
 char * StatusToString(StatusType Status) {
+
+    String ErrorMessage;
 
      switch (Status) {
         case initial:
@@ -444,115 +440,121 @@ char * StatusToString(StatusType Status) {
             return("exit");
             break;
         default:
-            CodingError("Not a status to make into a string");
+            sprintf(ErrorMessage,"Not a role to make into a string, index is %d",Status);
+            CodingError(ErrorMessage);
             return(NULL);
             break;
     }
 }
 //-------------------------------------------------------------------------------------------------
-ConnectiveType StringToConnective(char * String) {
+ConnectiveType StringToConnective(char * ConnectiveString) {
 
-    if (!strcmp(String,"|")) {
+    String ErrorMessage;
+
+    if (!strcmp(ConnectiveString,"|")) {
         return(disjunction);
     }
-    if (!strcmp(String,"&")) {
+    if (!strcmp(ConnectiveString,"&")) {
         return(conjunction);
     }
-    if (!strcmp(String,"<=>")) {
+    if (!strcmp(ConnectiveString,"<=>")) {
         return(equivalence);
     }
-    if (!strcmp(String,"=>")) {
+    if (!strcmp(ConnectiveString,"=>")) {
         return(implication);
     }
-    if (!strcmp(String,"<=")) {
+    if (!strcmp(ConnectiveString,"<=")) {
         return(reverseimplication);
     }
-    if (!strcmp(String,"<~>")) {
+    if (!strcmp(ConnectiveString,"<~>")) {
         return(nonequivalence);
     }
-    if (!strcmp(String,"~|")) {
+    if (!strcmp(ConnectiveString,"~|")) {
         return(negateddisjunction);
     }
-    if (!strcmp(String,"~&")) {
+    if (!strcmp(ConnectiveString,"~&")) {
         return(negatedconjunction);
     }
-    if (!strcmp(String,"~")) {
+    if (!strcmp(ConnectiveString,"~")) {
         return(negation);
     }
-    if (!strcmp(String,"--")) {
+    if (!strcmp(ConnectiveString,"--")) {
         return(negation);
     }
-    if (!strcmp(String,"!")) {
+    if (!strcmp(ConnectiveString,"!")) {
         return(universal);
     }
-    if (!strcmp(String,"?")) {
+    if (!strcmp(ConnectiveString,"?")) {
         return(existential);
     }
-    if (!strcmp(String,"^")) {
+    if (!strcmp(ConnectiveString,"^")) {
         return(lambda);
     }
-    if (!strcmp(String,"!>")) {
+    if (!strcmp(ConnectiveString,"!>")) {
         return(pibinder);
     }
-    if (!strcmp(String,"?*")) {
+    if (!strcmp(ConnectiveString,"?*")) {
         return(sigmabinder);
     }
-    if (!strcmp(String,"@+")) {
+    if (!strcmp(ConnectiveString,"@+")) {
         return(choicebinder);
     }
-    if (!strcmp(String,"@-")) {
+    if (!strcmp(ConnectiveString,"@-")) {
         return(descriptionbinder);
     }
-    if (!strcmp(String,"@")) {
+    if (!strcmp(ConnectiveString,"@")) {
         return(application);
     }
-    if (!strcmp(String,"=")) {
+    if (!strcmp(ConnectiveString,"=")) {
         return(equation);
     }
-    if (!strcmp(String,"@=")) {
+    if (!strcmp(ConnectiveString,"@=")) {
         return(typedequation);
     }
-    if (!strcmp(String,"!=")) {
+    if (!strcmp(ConnectiveString,"!=")) {
         return(negequation);
     }
-    if (!strcmp(String,"!!")) {
+    if (!strcmp(ConnectiveString,"!!")) {
         return(pi);
     }
-    if (!strcmp(String,"??")) {
+    if (!strcmp(ConnectiveString,"??")) {
         return(sigma);
     }
-    if (!strcmp(String,"@@+")) {
+    if (!strcmp(ConnectiveString,"@@+")) {
         return(choice);
     }
-    if (!strcmp(String,"@@-")) {
+    if (!strcmp(ConnectiveString,"@@-")) {
         return(description);
     }
-    if (!strcmp(String,":")) {
+    if (!strcmp(ConnectiveString,":")) {
         return(typecolon);
     }
-    if (!strcmp(String,":=")) {
+    if (!strcmp(ConnectiveString,":=")) {
         return(assignmentsym);
     }
-    if (!strcmp(String,"<<")) {
+    if (!strcmp(ConnectiveString,"<<")) {
         return(subtype);
     }
-    if (!strcmp(String,">")) {
+    if (!strcmp(ConnectiveString,">")) {
         return(maparrow);
     }
-    if (!strcmp(String,"*")) {
+    if (!strcmp(ConnectiveString,"*")) {
         return(xprodtype);
     }
-    if (!strcmp(String,"+")) {
+    if (!strcmp(ConnectiveString,"+")) {
         return(uniontype);
     }
-    if (!strcmp(String,"-->")) {
+    if (!strcmp(ConnectiveString,"-->")) {
         return(gentzenarrow);
     }
-    CodingError("String not a connective");
+    sprintf(ErrorMessage,"Not a string to make into a connective: %s",ConnectiveString);
+    CodingError(ErrorMessage);
     return(none);
 }
 //-------------------------------------------------------------------------------------------------
 char * ConnectiveToString(ConnectiveType Connective) {
+
+    String ErrorMessage;
 
     switch (Connective) {
         case disjunction:
@@ -658,40 +660,46 @@ char * ConnectiveToString(ConnectiveType Connective) {
             return("none");
             break;
         default:
-            CodingError("Not a connective to make into a string");
+            sprintf(ErrorMessage,"Not a connective to make into a string, index is %d",Connective);
+            CodingError(ErrorMessage);
             return(NULL);
             break;
     }
 }
 //-------------------------------------------------------------------------------------------------
-SyntaxType StringToSyntax(char * String) {
+SyntaxType StringToSyntax(char * SyntaxString) {
 
-    if (!strcmp(String,"tpi")) {
+    String ErrorMessage;
+
+    if (!strcmp(SyntaxString,"tpi")) {
         return(tptp_tpi);
     }
-    if (!strcmp(String,"thf")) {
+    if (!strcmp(SyntaxString,"thf")) {
         return(tptp_thf);
     }
-    if (!strcmp(String,"tff")) {
+    if (!strcmp(SyntaxString,"tff")) {
         return(tptp_tff);
     }
-    if (!strcmp(String,"tcf")) {
+    if (!strcmp(SyntaxString,"tcf")) {
         return(tptp_tcf);
     }
-    if (!strcmp(String,"fof")) {
+    if (!strcmp(SyntaxString,"fof")) {
         return(tptp_fof);
     }
-    if (!strcmp(String,"cnf")) {
+    if (!strcmp(SyntaxString,"cnf")) {
         return(tptp_cnf);
     }
-    if (!strcmp(String,"include")) {
+    if (!strcmp(SyntaxString,"include")) {
         return(include);
     }
-    CodingError("Not a string to make into a syntax type");
+    sprintf(ErrorMessage,"Not a string to make into a syntax type: %s",SyntaxString);
+    CodingError(ErrorMessage);
     return(nontype);
 }
 //-------------------------------------------------------------------------------------------------
 char * TokenTypeToString(TokenType Type) {
+
+    String ErrorMessage;
 
     switch (Type) {
         case punctuation:
@@ -740,13 +748,16 @@ char * TokenTypeToString(TokenType Type) {
             return("endeof");
             break;
         default:
-            CodingError("Not a token type to make into a string");
+            sprintf(ErrorMessage,"Not a token type to make into a string, index is %d",Type);
+            CodingError(ErrorMessage);
             return(NULL);
             break;
     }
 }
 //-------------------------------------------------------------------------------------------------
 char * SyntaxToString(SyntaxType Syntax) {
+
+    String ErrorMessage;
 
     switch (Syntax) {
         case tptp_tpi:
@@ -783,13 +794,16 @@ char * SyntaxToString(SyntaxType Syntax) {
             return("nontype");
             break;
         default:
-            CodingError("Not a syntax to make into a string");
+            sprintf(ErrorMessage,"Not a syntax type to make into a string, index is %d",Syntax);
+            CodingError(ErrorMessage);
             return(NULL);
             break;
     }
 }
 //-------------------------------------------------------------------------------------------------
 char * TermTypeToString(TermType Type) {
+
+    String ErrorMessage;
 
     switch (Type) {
         case connective:
@@ -841,7 +855,8 @@ char * TermTypeToString(TermType Type) {
             return("nonterm");
             break;
         default:
-            CodingError("Not a term type to make into a string");
+            sprintf(ErrorMessage,"Not a term type to make into a string, index is %d",Type);
+            CodingError(ErrorMessage);
             return(NULL);
             break;
     }

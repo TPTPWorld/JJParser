@@ -130,7 +130,7 @@ typedef enum {
 //----Terms
 typedef enum {
     connective,
-    term,
+    term,   //----A variable or a function
     predicate,
 //----Set TheSymbol = "[]" for a tuple "function"
     function,
