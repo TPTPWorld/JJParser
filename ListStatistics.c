@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
+#include <limits.h>
 
 #include "DataTypes.h"
 #include "Utilities.h"
@@ -539,6 +540,9 @@ printf("PROGRESS: got term depth\n");
 nested_formulae);
     Statistics.SymbolStatistics.NumberBooleanVariables = HeadListCount(&HeadListNode,
 boolean_variables);
+    Statistics.SymbolStatistics.NumberOfTuples = HeadListCount(&HeadListNode,tuples);
+    Statistics.SymbolStatistics.NumberOfITEs = HeadListCount(&HeadListNode,ite_forms);
+    Statistics.SymbolStatistics.NumberOfLets = HeadListCount(&HeadListNode,let_forms);
 
 //----Statistics for mathematics. Number of vars collected with connectives.
     GetMathmaticsUsage(ListHead,Signature,&Statistics.SymbolStatistics.NumberOfMathPredicates,
@@ -550,7 +554,7 @@ printf("PROGRESS: got mathematics statistics\n");
 //-------------------------------------------------------------------------------------------------
 void PrintMinMaxArity(FILE * Stream,double Arity) {
 
-    if (Arity == -1) {
+    if (Arity == -1 || Arity == INT_MAX) {
         fprintf(Stream,"-");
     } else {
         fprintf(Stream,"%.0f",Arity);
@@ -727,7 +731,7 @@ Statistics.FormulaStatistics.NumberOfTFF > 0) {
 Statistics.FormulaStatistics.MaxTermDepth,Statistics.FormulaStatistics.AverageTermDepth);
     }
 
-//----TFX symbols
+//----TFX and THX symbols
     if (Statistics.FormulaStatistics.NumberOfNestedFormulae > 0 ||
 Statistics.SymbolStatistics.NumberBooleanVariables > 0) {
         fprintf(Stream,
@@ -736,6 +740,17 @@ Statistics.FormulaStatistics.NumberOfNestedFormulae +
 Statistics.SymbolStatistics.NumberBooleanVariables,
 Statistics.FormulaStatistics.NumberOfNestedFormulae,
 Statistics.SymbolStatistics.NumberBooleanVariables);
+    }
+
+if (Statistics.SymbolStatistics.NumberOfTuples > 0 ||
+Statistics.SymbolStatistics.NumberOfITEs > 0 ||
+Statistics.SymbolStatistics.NumberOfLets > 0) {
+        fprintf(Stream,
+"%%            Extended terms        : %4d (%4d  [];%4d ite;%4d let)\n",
+Statistics.SymbolStatistics.NumberOfTuples +
+Statistics.SymbolStatistics.NumberOfITEs + Statistics.SymbolStatistics.NumberOfLets,
+Statistics.SymbolStatistics.NumberOfTuples,Statistics.SymbolStatistics.NumberOfITEs,
+Statistics.SymbolStatistics.NumberOfLets);
     }
 
 //----Mathematics
