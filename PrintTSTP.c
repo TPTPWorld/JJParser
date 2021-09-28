@@ -431,7 +431,7 @@ ConnectiveType LastConnective,int TSTPSyntaxFlag) {
     char OpeningBracket,ClosingBracket;
     char * StartOfSymbol;
 
-//DEBUG printf("Printing term of type %s indent %d\n",TermTypeToString(Term->Type),Indent);
+//DEBUG printf("Printing term of type %s last connective %s indent %d\n",TermTypeToString(Term->Type),ConnectiveToString(LastConnective),Indent);
 //----All THF and TFF (because of TFX) terms are formulae
     if ((Language == tptp_thf || Language == tptp_tff) && Term->Type == formula) {
         PrintFileTSTPFormula(Stream,Language,Term->TheSymbol.Formula,Indent,Pretty,
@@ -576,7 +576,7 @@ char OpeningBracket,char ClosingBracket,int TSTPSyntaxFlag) {
                 LastConnective = none;
             }
             PrintFileTSTPTerm(Stream,Language,Term->Arguments[ElementNumber],Pretty,Indent,
-LastConnective,TSTPSyntaxFlag);
+brackets,TSTPSyntaxFlag);
         }
         PFprintf(Stream,"%c",ClosingBracket);
     }
@@ -681,10 +681,6 @@ Formula->FormulaUnion.SequentFormula.NumberOfRHSElements,
 Formula->FormulaUnion.SequentFormula.RHS,Pretty,Indent,TSTPSyntaxFlag);
             break;
         case quantified:
-//            if (LastConnective == brackets) {
-//                PFprintf(Stream,"( ");
-//                Indent += 2;
-//            }
             PFprintf(Stream,"%s",ConnectiveToString(
 Formula->FormulaUnion.QuantifiedFormula.Quantifier));
             PrintSpaces(Stream,2 - strlen(ConnectiveToString(
@@ -730,9 +726,6 @@ Formula->FormulaUnion.QuantifiedFormula.Formula,0,Pretty,none,TSTPSyntaxFlag);
                 PrintFileTSTPFormula(Stream,Language,
 Formula->FormulaUnion.QuantifiedFormula.Formula,Indent,Pretty,none,TSTPSyntaxFlag);
             }
-//            if (LastConnective == brackets) {
-//                PFprintf(Stream," )");
-//            }
             break;
 
         case binary:
@@ -879,16 +872,18 @@ Indent,Pretty,FakeConnective,TSTPSyntaxFlag);
 //DEBUG printf("Printing atom %s (last connective was %s) indent %d\n",FormulaTypeToString(Formula->Type),ConnectiveToString(LastConnective),Indent);
             NeedBrackets = Formula->FormulaUnion.Atom->Type == connective || 
 (Formula->FormulaUnion.Atom->Type == variable && 
- Formula->FormulaUnion.Atom->TheSymbol.Variable->Type == formula) ||
-LastConnective == brackets;
+ Formula->FormulaUnion.Atom->TheSymbol.Variable->Type == formula &&
+ LastConnective != brackets);
+            FakeConnective = LastConnective;
             if (NeedBrackets) {
                 PFprintf(Stream,"(");
                 if (LastConnective == brackets) {
                     PFprintf(Stream," ");
                 }
+                FakeConnective = brackets;
             }
             PrintFileTSTPTerm(Stream,Language,Formula->FormulaUnion.Atom,Pretty,Indent+2,
-LastConnective,TSTPSyntaxFlag);
+FakeConnective,TSTPSyntaxFlag);
             if (NeedBrackets) {
                 if (LastConnective == brackets) {
                     PFprintf(Stream," ");

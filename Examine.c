@@ -401,46 +401,6 @@ char * TSTPTermToString(TERM Term,char * PutTermHere) {
     }
 }
 //-------------------------------------------------------------------------------------------------
-int CountVariableUsageInArguments(TERMArray Arguments,int Arity,VARIABLENODE Variable) {
-
-    int Count;
-    int Index;
-
-    Count = 0;
-    for (Index = 0;Index<Arity;Index++) {
-        Count += CountVariableUsageInTerm(Arguments[Index],Variable);
-    }
-    return(Count);
-}
-//-------------------------------------------------------------------------------------------------
-int CountVariableUsageInTerm(TERM Term,VARIABLENODE Variable) {
-
-    int LocalQuantifiedUsage;
-    String ErrorMessage;
-
-    switch (Term->Type) {
-        case variable:
-            return(Term->TheSymbol.Variable == Variable ? 1 : 0);
-            break;
-        case function:
-        case predicate:
-            return(CountVariableUsageInArguments(Term->Arguments,
-Term->TheSymbol.NonVariable->Arity,Variable));
-            break;
-        case formula:
-            return(CountVariableUsageInFormula(Term->TheSymbol.Formula,Variable,
-&LocalQuantifiedUsage));
-            break;
-        default:
-            sprintf(ErrorMessage,"Bad term type %s for counting variable occurrences",
-TermTypeToString(Term->Type));
-            CodingError(ErrorMessage);
-            return(0);
-            break;
-    }
-    return(0);
-}
-//-------------------------------------------------------------------------------------------------
 int CountSimpleUsageInTERMArray(int NumberOfElements,TERMArray Terms,int (*CountFunction)(TERM)) {
 
     int ElementNumber;
@@ -483,6 +443,47 @@ int (*CountFunction)(FORMULA)) {
         }
     }
     return(Total);
+}
+//-------------------------------------------------------------------------------------------------
+int CountVariableUsageInTERMArray(int NumberOfElements,TERMArray Terms,VARIABLENODE Variable) {
+
+    int Count;
+    int Index;
+
+    Count = 0;
+    if (NumberOfElements > 0 && Terms != NULL) {
+        for (Index = 0;Index<NumberOfElements;Index++) {
+            Count += CountVariableUsageInTerm(Terms[Index],Variable);
+        }
+    }
+    return(Count);
+}
+//-------------------------------------------------------------------------------------------------
+int CountVariableUsageInTerm(TERM Term,VARIABLENODE Variable) {
+
+    int LocalQuantifiedUsage;
+    String ErrorMessage;
+
+    switch (Term->Type) {
+        case variable:
+            return(Term->TheSymbol.Variable == Variable ? 1 : 0);
+            break;
+        case function:
+        case predicate:
+            return(CountVariableUsageInTERMArray(GetArity(Term),GetArguments(Term),Variable));
+            break;
+        case formula:
+            return(CountVariableUsageInFormula(Term->TheSymbol.Formula,Variable,
+&LocalQuantifiedUsage));
+            break;
+        default:
+            sprintf(ErrorMessage,"Bad term type %s for counting variable occurrences",
+TermTypeToString(Term->Type));
+            CodingError(ErrorMessage);
+            return(0);
+            break;
+    }
+    return(0);
 }
 //-------------------------------------------------------------------------------------------------
 int CountVariableUsageInTuple(int NumberOfElements,FORMULAArray TupleFormulae,
@@ -1232,9 +1233,8 @@ int MaxUse,ConnectiveType Quantification) {
         VariableNode = AnnotatedFormula->
 AnnotatedFormulaUnion.AnnotatedTSTPFormula.FormulaWithVariables->Variables;
         while (VariableNode != NULL) {
-printf("Variable %s %s\n",GetSignatureSymbol(VariableNode->VariableName),
-VariableNode->Quantification == universal ? "!" : VariableNode->Quantification == existential ? "?" : "DUNNO");
-printf("Want MIN %d MAX %d TYPE %s\n",MinUse,MaxUse,Quantification == universal ? "!" : Quantification == existential ? "?" : "DUNNO");
+//DEBUG printf("Variable %s %s\n",GetSignatureSymbol(VariableNode->VariableName),VariableNode->Quantification == universal ? "!" : VariableNode->Quantification == existential ? "?" : "DUNNO");
+//DEBUG printf("Want MIN %d MAX %d TYPE %s\n",MinUse,MaxUse,Quantification == universal ? "!" : Quantification == existential ? "?" : "DUNNO");
             if (
 //----Usage constraint
 (MinUse < 0 || MaxUse < MinUse || (VariableNode->NumberOfUses >= MinUse && 
@@ -1672,32 +1672,63 @@ FormulaTypeToString(Formula->Type));
     }
 }
 //-------------------------------------------------------------------------------------------------
-//int CountAnnotatedFormulaAtomsByPredicate(ANNOTATEDFORMULA AnnotatedFormula,char * Predicate) {
-//
-//    if (LogicalAnnotatedFormula(AnnotatedFormula)) {
-//        return(CountFormulaAtomsByPredicate(AnnotatedFormula->
-//AnnotatedFormulaUnion.AnnotatedTSTPFormula.FormulaWithVariables->Formula,Predicate));
-//    } else {
-//        return(-1);
-//    }
-//}
-//-------------------------------------------------------------------------------------------------
-ConnectiveStatisticsType GetTupleFormulaeConnectiveUsage(int NumberOfElements,
-FORMULAArray TupleFormulae) {
+ConnectiveStatisticsType GetSimpleConnectiveStatisticsInTERMArray(int NumberOfElements,
+TERMArray Terms,ConnectiveStatisticsType (*GetFunction)(TERM)) {
 
-    ConnectiveStatisticsType ConnectiveStatistics;
-    ConnectiveStatisticsType MoreConnectiveStatistics;
     int ElementNumber;
+    ConnectiveStatisticsType TotalStatistics;
 
-    InitializeConnectiveStatistics(&ConnectiveStatistics);
-
-    for (ElementNumber = 0;ElementNumber < NumberOfElements;ElementNumber++) {
-        MoreConnectiveStatistics = GetFormulaConnectiveUsage(
-TupleFormulae[ElementNumber]);
-        AddOnConnectiveStatistics(&ConnectiveStatistics,
-MoreConnectiveStatistics);
+    InitializeConnectiveStatistics(&TotalStatistics);
+    if (NumberOfElements > 0 && Terms != NULL) {
+        TotalStatistics = (*GetFunction)(Terms[0]);
+        for (ElementNumber = 1;ElementNumber < NumberOfElements;ElementNumber++) {
+            AddOnConnectiveStatistics(&TotalStatistics,(*GetFunction)(Terms[ElementNumber]));
+        }
     }
-    return(ConnectiveStatistics);
+    return(TotalStatistics);
+}
+//-------------------------------------------------------------------------------------------------
+ConnectiveStatisticsType GetSimpleConnectiveStatisticsInFORMULATERMArray(int NumberOfElements,
+TERMArray Terms,ConnectiveStatisticsType (*GetFunction)(FORMULA)) {
+
+    int ElementNumber;
+    ConnectiveStatisticsType TotalStatistics;
+
+    InitializeConnectiveStatistics(&TotalStatistics);
+    if (NumberOfElements > 0 && Terms != NULL) {
+        TotalStatistics = (*GetFunction)(Terms[0]->TheSymbol.Formula);
+        for (ElementNumber = 1;ElementNumber < NumberOfElements;ElementNumber++) {
+            AddOnConnectiveStatistics(&TotalStatistics,(*GetFunction)(
+Terms[ElementNumber]->TheSymbol.Formula));
+        }
+    }
+    return(TotalStatistics);
+}
+//-------------------------------------------------------------------------------------------------
+ConnectiveStatisticsType GetSimpleConnectiveStatisticsInFORMULAArray(int NumberOfElements,
+FORMULAArray Formulae,ConnectiveStatisticsType (*GetFunction)(FORMULA)) {
+
+    int ElementNumber;
+    ConnectiveStatisticsType TotalStatistics;
+
+    InitializeConnectiveStatistics(&TotalStatistics);
+    if (NumberOfElements > 0 && Formulae != NULL) {
+        TotalStatistics = (*GetFunction)(Formulae[0]);
+        for (ElementNumber = 1;ElementNumber < NumberOfElements;ElementNumber++) {
+            AddOnConnectiveStatistics(&TotalStatistics,(*GetFunction)(Formulae[ElementNumber]));
+        }
+    }
+    return(TotalStatistics);
+}
+//-------------------------------------------------------------------------------------------------
+ConnectiveStatisticsType GetArgumentConnectiveUsage(TERM Term) {
+
+    if (Term->Type == formula) {
+        return(GetFormulaConnectiveUsage(Term->TheSymbol.Formula));
+    } else {
+        return(GetSimpleConnectiveStatisticsInTERMArray(GetArity(Term),GetArguments(Term),
+&GetArgumentConnectiveUsage));
+    }
 }
 //-------------------------------------------------------------------------------------------------
 ConnectiveStatisticsType GetFormulaConnectiveUsage(FORMULA Formula) {
@@ -1705,31 +1736,30 @@ ConnectiveStatisticsType GetFormulaConnectiveUsage(FORMULA Formula) {
     ConnectiveStatisticsType ConnectiveStatistics;
     ConnectiveStatisticsType MoreConnectiveStatistics;
     FormulaType * VariableType;
+    String ErrorMessage;
 
     InitializeConnectiveStatistics(&ConnectiveStatistics);
     InitializeConnectiveStatistics(&MoreConnectiveStatistics);
 
     switch(Formula->Type) {
         case sequent:
-            ConnectiveStatistics = GetTupleFormulaeConnectiveUsage(
+            ConnectiveStatistics = GetSimpleConnectiveStatisticsInFORMULAArray(
 Formula->FormulaUnion.SequentFormula.NumberOfLHSElements,
-Formula->FormulaUnion.SequentFormula.LHS);
-            MoreConnectiveStatistics = GetTupleFormulaeConnectiveUsage(
+Formula->FormulaUnion.SequentFormula.LHS,&GetFormulaConnectiveUsage);
+            MoreConnectiveStatistics = GetSimpleConnectiveStatisticsInFORMULAArray(
 Formula->FormulaUnion.SequentFormula.NumberOfRHSElements,
-Formula->FormulaUnion.SequentFormula.RHS);
+Formula->FormulaUnion.SequentFormula.RHS,&GetFormulaConnectiveUsage);
             AddOnConnectiveStatistics(&ConnectiveStatistics,
 MoreConnectiveStatistics);
             break;
         case assignment:
             ConnectiveStatistics = GetFormulaConnectiveUsage(
-Formula->FormulaUnion.BinaryFormula.LHS);
-            MoreConnectiveStatistics = GetFormulaConnectiveUsage(
 Formula->FormulaUnion.BinaryFormula.RHS);
-            AddOnConnectiveStatistics(&ConnectiveStatistics,
-MoreConnectiveStatistics);
             ConnectiveStatistics.NumberOfGlobalDefns++;
             break;
         case type_declaration:
+            ConnectiveStatistics = GetFormulaConnectiveUsage(
+Formula->FormulaUnion.BinaryFormula.RHS);
             ConnectiveStatistics.NumberOfGlobalTypeDecs++;
             break;
         case quantified:
@@ -1866,6 +1896,9 @@ Formula->FormulaUnion.UnaryFormula.Formula);
             ConnectiveStatistics.NumberOfConnectives++;
             break;
         case atom:
+            ConnectiveStatistics = GetSimpleConnectiveStatisticsInTERMArray(
+GetArity(Formula->FormulaUnion.Atom),GetArguments(Formula->FormulaUnion.Atom),
+&GetArgumentConnectiveUsage);
 //----Count use of connectives as atoms
             if (!strcmp(GetSymbol(Formula->FormulaUnion.Atom),"=")) {
                 ConnectiveStatistics.NumberOfEquations++;
@@ -1882,8 +1915,9 @@ Formula->FormulaUnion.UnaryFormula.Formula);
             }
             break;
         case tuple:
-            ConnectiveStatistics = GetTupleFormulaeConnectiveUsage(
-Formula->FormulaUnion.TupleFormula.NumberOfElements,Formula->FormulaUnion.TupleFormula.Elements);
+            ConnectiveStatistics = GetSimpleConnectiveStatisticsInFORMULAArray(
+Formula->FormulaUnion.TupleFormula.NumberOfElements,Formula->FormulaUnion.TupleFormula.Elements,
+&GetFormulaConnectiveUsage);
             break;
         case ite_formula:
             ConnectiveStatistics = GetFormulaConnectiveUsage(
@@ -1900,7 +1934,9 @@ Formula->FormulaUnion.ConditionalFormula.FormulaIfFalse);
 Formula->FormulaUnion.LetFormula.LetBody);
             break;
         default:
-            CodingError("Invalid formula type for counting connectives");
+            sprintf(ErrorMessage,"Invalid formula type %s for counting connectives",
+FormulaTypeToString(Formula->Type));
+            CodingError(ErrorMessage);
             break;
     }
     return(ConnectiveStatistics);

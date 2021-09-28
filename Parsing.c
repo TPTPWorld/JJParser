@@ -938,6 +938,7 @@ FORMULA ChangeAssociationRightToLeft(FORMULA Formula) {
     }
 }
 //-------------------------------------------------------------------------------------------------
+//----This parses an atom, or a variable that is a formula (type $o)
 FORMULA ParseAtom(READFILE Stream,SyntaxType Language,ContextType Context,
 VARIABLENODE * EndOfScope,int VariablesMustBeQuantified) {
 
@@ -1341,11 +1342,12 @@ VariablesMustBeQuantified);
                 Formula = ParseLETFormula(Stream,Language,Context,EndOfScope,
 VariablesMustBeQuantified);
             } else {
+//DEBUG printf("Parsed as an atom %s\n",CurrentToken(Stream)->NameToken);
                 Formula = ParseAtom(Stream,Language,Context,EndOfScope,VariablesMustBeQuantified);
             }
             break;
     }
-//DEBUG printf("Parsed formula is\n");PrintTSTPFormula(stdout,Language,Formula,0,1,outermost,1);printf("\n");
+//DEBUG printf("Parsed formula of type %s is\n",FormulaTypeToString(Formula->Type));PrintTSTPFormula(stdout,Language,Formula,0,1,outermost,1);printf("\n");
 
 //----Check for an equality
 //DEBUG printf("check equality with token %s and allow is %d\n",CurrentToken(Stream)->NameToken,AllowInfixEquality);
