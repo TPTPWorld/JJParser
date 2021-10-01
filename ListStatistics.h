@@ -4,8 +4,8 @@
 #include "DataTypes.h"
 #include "Statistics.h"
 //-------------------------------------------------------------------------------------------------
-int ListCount(LISTNODE List,CountType WhatToCount);
-int HeadListCount(HEADLIST HeadListHead,CountType WhatToCount);
+int ListCount(SIGNATURE Signature,LISTNODE List,CountType WhatToCount);
+int HeadListCount(SIGNATURE Signature,HEADLIST HeadListHead,CountType WhatToCount);
 int ListMaximal(LISTNODE List,MaximizeType WhatToMaximize);
 
 SymbolStatisticsType GetListSymbolUsageStatistics(HEADLIST HeadList);

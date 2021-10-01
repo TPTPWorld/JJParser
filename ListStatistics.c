@@ -15,7 +15,7 @@
 #include "PrintTSTP.h"
 #include "Signature.h"
 //-------------------------------------------------------------------------------------------------
-int ListCount(LISTNODE List,CountType WhatToCount) {
+int ListCount(SIGNATURE Signature,LISTNODE List,CountType WhatToCount) {
 
     int Counter;
 
@@ -109,16 +109,25 @@ GetListNodeFormula(List)->Type == sequent) {
                     Counter += CountAnnotatedFormulaSingletons(List->AnnotatedFormula);
                     break;
                 case tuples:
-                    Counter += CountFormulaTuples(GetListNodeFormula(List));
+                    if (GetSyntax(List->AnnotatedFormula) == tptp_thf ||
+GetSyntax(List->AnnotatedFormula) == tptp_tff) {
+                        Counter += CountFormulaTuples(GetListNodeFormula(List));
+                    }
                     break;
                 case ite_forms:
-                    Counter += CountFormulaAtomsByPredicate(GetListNodeFormula(List),"$ite");
+                    if (GetSyntax(List->AnnotatedFormula) == tptp_thf ||
+GetSyntax(List->AnnotatedFormula) == tptp_tff) {
+                        Counter += CountFormulaAtomsByPredicate(GetListNodeFormula(List),"$ite");
+                    }
                     break;
                 case let_forms:
-                    Counter += CountFormulaAtomsByPredicate(GetListNodeFormula(List),"$let");
+                    if (GetSyntax(List->AnnotatedFormula) == tptp_thf ||
+GetSyntax(List->AnnotatedFormula) == tptp_tff) {
+                        Counter += CountFormulaAtomsByPredicate(GetListNodeFormula(List),"$let");
+                    }
                     break;
                 case nested_formulae:
-                    Counter += CountNestedFormulae(GetListNodeFormula(List),0);
+                    Counter += CountNestedFormulae(Signature,GetListNodeFormula(List),0);
                     break;
                 case boolean_variables:
                     Counter += CountBooleanVariablesInFormula(GetListNodeFormula(List));
@@ -139,14 +148,14 @@ GetListNodeFormula(List)->Type == sequent) {
     return(Counter);
 }
 //-------------------------------------------------------------------------------------------------
-int HeadListCount(HEADLIST HeadListHead,CountType WhatToCount) {
+int HeadListCount(SIGNATURE Signature,HEADLIST HeadListHead,CountType WhatToCount) {
 
     int Counter;
 
     Counter = 0;
     while (HeadListHead != NULL) {
         if (HeadListHead->TheList != NULL) {
-            Counter += ListCount(HeadListHead->TheList,WhatToCount);
+            Counter += ListCount(Signature,HeadListHead->TheList,WhatToCount);
         }
         HeadListHead = HeadListHead->Next;
     }
@@ -237,6 +246,25 @@ int * MinArity,int * MaxArity) {
     }
 }
 //-------------------------------------------------------------------------------------------------
+void AnalyseTypeSymbolList(char * TypeSymbolList,int * NumberOfTypes,int * NumberOfUserTypes) {
+
+    char * SymbolRecord;
+    char * RecordRestart;
+
+    *NumberOfTypes = 0;
+    *NumberOfUserTypes = 0;
+
+    SymbolRecord = strtok_r(TypeSymbolList,"\n",&RecordRestart);
+    while (SymbolRecord != NULL) {
+//DEBUG printf("Symbol is %s\n",SymbolRecord);
+        (*NumberOfTypes)++;
+        if (SymbolRecord[0] != '$') {
+            (*NumberOfUserTypes)++;
+        }
+        SymbolRecord = strtok_r(NULL,"\n",&RecordRestart);
+    }
+}
+//-------------------------------------------------------------------------------------------------
 SymbolStatisticsType GetListSymbolUsageStatistics(HEADLIST HeadList) {
 
     char * PredicateCollector;
@@ -286,14 +314,15 @@ SymbolStatisticsType GetListSymbolUsageStatistics(HEADLIST HeadList) {
     NormalizeSymbolUsage(VariableCollector);
     NormalizeSymbolUsage(FunctorCollector);
     NormalizeSymbolUsage(PredicateCollector);
-printf("PREDICATES\n%sFUNCTORS\n%sVARIABLES\n%sTYPES\n%s\n",PredicateCollector,FunctorCollector,
-VariableCollector,TypeCollector);
+//DEBUG printf("PREDICATES\n%sFUNCTORS\n%sVARIABLES\n%sTYPES\n%s\n",PredicateCollector,FunctorCollector,VariableCollector,TypeCollector);
     AnalyseSymbolList(FunctorCollector,&(SymbolStatistics.NumberOfFunctors),
 &(SymbolStatistics.NumberOfConstants),&(SymbolStatistics.MinFunctorArity),
 &(SymbolStatistics.MaxFunctorArity));
     AnalyseSymbolList(PredicateCollector,&(SymbolStatistics.NumberOfPredicates),
 &(SymbolStatistics.NumberOfPropositions),&(SymbolStatistics.MinPredicateArity),
 &(SymbolStatistics.MaxPredicateArity));
+    AnalyseTypeSymbolList(TypeCollector,&(SymbolStatistics.NumberOfTypes),
+&(SymbolStatistics.NumberOfUserTypes));
 
     Free((void **)&TypeCollector);
     Free((void **)&VariableCollector);
@@ -452,6 +481,7 @@ StatisticsType GetListStatistics(LISTNODE ListHead,SIGNATURE Signature) {
     StatisticsType Statistics;
     HeadListType HeadListNode;
     double NumberOfTerms;
+    int DummyCounter;
 
 //----Make a single node for list of lists
     HeadListNode.TheList = ListHead;
@@ -460,29 +490,37 @@ StatisticsType GetListStatistics(LISTNODE ListHead,SIGNATURE Signature) {
     InitializeStatistics(&Statistics);
 
 printf("PROGRESS: starting\n");
-    Statistics.FormulaStatistics.NumberOfFormulae = HeadListCount(&HeadListNode,nodes);
-    Statistics.FormulaStatistics.NumberOfTHF = HeadListCount(&HeadListNode,thf_nodes);
-    Statistics.FormulaStatistics.NumberOfTFF = HeadListCount(&HeadListNode,tff_nodes);
-    Statistics.FormulaStatistics.NumberOfTCF = HeadListCount(&HeadListNode,tcf_nodes);
-    Statistics.FormulaStatistics.NumberOfFOF = HeadListCount(&HeadListNode,fof_nodes);
-    Statistics.FormulaStatistics.NumberOfCNF = HeadListCount(&HeadListNode,cnf_nodes);
+    Statistics.FormulaStatistics.NumberOfFormulae = HeadListCount(Signature,&HeadListNode,nodes);
+    Statistics.FormulaStatistics.NumberOfTHF = HeadListCount(Signature,&HeadListNode,thf_nodes);
+    Statistics.FormulaStatistics.NumberOfTFF = HeadListCount(Signature,&HeadListNode,tff_nodes);
+    Statistics.FormulaStatistics.NumberOfTCF = HeadListCount(Signature,&HeadListNode,tcf_nodes);
+    Statistics.FormulaStatistics.NumberOfFOF = HeadListCount(Signature,&HeadListNode,fof_nodes);
+    Statistics.FormulaStatistics.NumberOfCNF = HeadListCount(Signature,&HeadListNode,cnf_nodes);
 printf("PROGRESS: counted nodes of type\n");
 
-    Statistics.FormulaStatistics.NumberOfUnitFormulae = HeadListCount(&HeadListNode,unit_formulae);
-    Statistics.FormulaStatistics.NumberOfTypeFormulae = HeadListCount(&HeadListNode,type_formulae);
-    Statistics.FormulaStatistics.NumberOfDefnFormulae = HeadListCount(&HeadListNode,defn_formulae);
-    Statistics.FormulaStatistics.NumberOfSequents = HeadListCount(&HeadListNode,sequent_formulae);
+    Statistics.FormulaStatistics.NumberOfUnitFormulae = HeadListCount(Signature,&HeadListNode,
+unit_formulae);
+    Statistics.FormulaStatistics.NumberOfTypeFormulae = HeadListCount(Signature,&HeadListNode,
+type_formulae);
+    Statistics.FormulaStatistics.NumberOfDefnFormulae = HeadListCount(Signature,&HeadListNode,
+defn_formulae);
+    Statistics.FormulaStatistics.NumberOfSequents = HeadListCount(Signature,&HeadListNode,
+sequent_formulae);
 printf("PROGRESS: counted formulae of type\n");
-    Statistics.FormulaStatistics.NumberOfAtoms = HeadListCount(&HeadListNode,atoms);
-    Statistics.FormulaStatistics.NumberOfEqualityAtoms = HeadListCount(&HeadListNode,equality_atoms);
-    Statistics.FormulaStatistics.NumberOfVariableAtoms = HeadListCount(&HeadListNode,variable_atoms);
-    Statistics.FormulaStatistics.NumberOfLiterals = HeadListCount(&HeadListNode,literal_count);
+    Statistics.FormulaStatistics.NumberOfAtoms = HeadListCount(Signature,&HeadListNode,atoms);
+    Statistics.FormulaStatistics.NumberOfEqualityAtoms = HeadListCount(Signature,&HeadListNode,
+equality_atoms);
+    Statistics.FormulaStatistics.NumberOfVariableAtoms = HeadListCount(Signature,&HeadListNode,
+variable_atoms);
+    Statistics.FormulaStatistics.NumberOfLiterals = HeadListCount(Signature,&HeadListNode,
+literal_count);
 printf("PROGRESS: counted atoms of type\n");
 
     Statistics.FormulaStatistics.MaxFormulaDepth = HeadListMaximal(&HeadListNode,max_formula_depth);
     if (Statistics.FormulaStatistics.NumberOfFormulae > 0) {
         Statistics.FormulaStatistics.AverageFormulaDepth = 
-HeadListCount(&HeadListNode,formula_depth) / Statistics.FormulaStatistics.NumberOfFormulae;
+HeadListCount(Signature,&HeadListNode,formula_depth) / 
+Statistics.FormulaStatistics.NumberOfFormulae;
     } else {
         Statistics.FormulaStatistics.AverageFormulaDepth = 0.0;
     }
@@ -490,9 +528,11 @@ printf("PROGRESS: got formulae depth\n");
     Statistics.ConnectiveStatistics = GetListConnectiveUsageStatistics(&HeadListNode);
 printf("PROGRESS: counted connectives\n");
 
-    Statistics.FormulaStatistics.NumberOfHornClauses = HeadListCount(&HeadListNode,horn_clauses);
+    Statistics.FormulaStatistics.NumberOfHornClauses = HeadListCount(Signature,&HeadListNode,
+horn_clauses);
 printf("PROGRESS: counted Horn clauses\n");
-    Statistics.FormulaStatistics.NumberOfRRClauses = HeadListCount(&HeadListNode,rr_clauses);
+    Statistics.FormulaStatistics.NumberOfRRClauses = HeadListCount(Signature,&HeadListNode,
+rr_clauses);
 printf("PROGRESS: counted RR clauses\n");
     Statistics.FormulaStatistics.MaxClauseSize = HeadListMaximal(&HeadListNode,literals);
 printf("PROGRESS: got max clause size\n");
@@ -505,44 +545,52 @@ Statistics.FormulaStatistics.NumberOfLiterals / Statistics.FormulaStatistics.Num
 printf("PROGRESS: counted THF and CNF formula types\n");
 
     if (Signature != NULL) {
-printf("PROGRESS: Getting predicate symbol statistics from signature\n");
         GetSignatureSymbolUsageStatistics(Signature->Predicates,
 &(Statistics.SymbolStatistics.NumberOfPredicates),
 &(Statistics.SymbolStatistics.NumberOfPropositions),
+&(Statistics.SymbolStatistics.NumberOfUserPredicates),
 &(Statistics.SymbolStatistics.MinPredicateArity),
 &(Statistics.SymbolStatistics.MaxPredicateArity));
-printf("PROGRESS: Getting function symbol statistics from signature\n");
+printf("PROGRESS: Got predicate symbol statistics from signature\n");
         GetSignatureSymbolUsageStatistics(Signature->Functions,
 &(Statistics.SymbolStatistics.NumberOfFunctors),
 &(Statistics.SymbolStatistics.NumberOfConstants),
+&(Statistics.SymbolStatistics.NumberOfUserFunctors),
 &(Statistics.SymbolStatistics.MinFunctorArity),
 &(Statistics.SymbolStatistics.MaxFunctorArity));
+printf("PROGRESS: Got function symbol statistics from signature\n");
+        GetSignatureSymbolUsageStatistics(Signature->Types,
+&(Statistics.SymbolStatistics.NumberOfTypes),&DummyCounter,
+&(Statistics.SymbolStatistics.NumberOfUserTypes),&DummyCounter,&DummyCounter);
+printf("PROGRESS: Got type symbol statistics from signature\n");
     } else {
-printf("Getting symbol statistics from formulae\n");
+//DEBUG printf("Getting symbol statistics from formulae\n");
         Statistics.SymbolStatistics = GetListSymbolUsageStatistics(&HeadListNode);
     }
 printf("PROGRESS: counted predicates and functions\n");
-    Statistics.SymbolStatistics.NumberOfVariables = HeadListCount(&HeadListNode,variables);
-    Statistics.SymbolStatistics.NumberOfSingletons = HeadListCount(&HeadListNode,singletons);
+    Statistics.SymbolStatistics.NumberOfVariables = HeadListCount(Signature,&HeadListNode,
+variables);
+    Statistics.SymbolStatistics.NumberOfSingletons = HeadListCount(Signature,&HeadListNode,
+singletons);
 printf("PROGRESS: counted variables\n");
     Statistics.FormulaStatistics.MaxTermDepth = HeadListMaximal(&HeadListNode,max_term_depth);
 printf("PROGRESS: got max term depth\n");
-    if ((NumberOfTerms = HeadListCount(&HeadListNode,terms)) > 0) {
-        Statistics.FormulaStatistics.AverageTermDepth = HeadListCount(&HeadListNode,term_depth) / 
-NumberOfTerms;
+    if ((NumberOfTerms = HeadListCount(Signature,&HeadListNode,terms)) > 0) {
+        Statistics.FormulaStatistics.AverageTermDepth = HeadListCount(Signature,&HeadListNode,
+term_depth) / NumberOfTerms;
     } else {
         Statistics.FormulaStatistics.AverageTermDepth = 0.0;
     }
 printf("PROGRESS: got term depth\n");
 
 //----Statistics for TFX and THF
-    Statistics.FormulaStatistics.NumberOfNestedFormulae = HeadListCount(&HeadListNode,
+    Statistics.FormulaStatistics.NumberOfNestedFormulae = HeadListCount(Signature,&HeadListNode,
 nested_formulae);
-    Statistics.SymbolStatistics.NumberBooleanVariables = HeadListCount(&HeadListNode,
+    Statistics.SymbolStatistics.NumberBooleanVariables = HeadListCount(Signature,&HeadListNode,
 boolean_variables);
-    Statistics.SymbolStatistics.NumberOfTuples = HeadListCount(&HeadListNode,tuples);
-    Statistics.SymbolStatistics.NumberOfITEs = HeadListCount(&HeadListNode,ite_forms);
-    Statistics.SymbolStatistics.NumberOfLets = HeadListCount(&HeadListNode,let_forms);
+    Statistics.SymbolStatistics.NumberOfTuples = HeadListCount(Signature,&HeadListNode,tuples);
+    Statistics.SymbolStatistics.NumberOfITEs = HeadListCount(Signature,&HeadListNode,ite_forms);
+    Statistics.SymbolStatistics.NumberOfLets = HeadListCount(Signature,&HeadListNode,let_forms);
 
 //----Statistics for mathematics. Number of vars collected with connectives.
     GetMathmaticsUsage(ListHead,Signature,&Statistics.SymbolStatistics.NumberOfMathPredicates,
@@ -565,12 +613,12 @@ void PrintListStatistics(FILE * Stream,StatisticsType Statistics) {
 
     if (Statistics.FormulaStatistics.NumberOfFOF > 0 || 
 Statistics.FormulaStatistics.NumberOfTHF > 0 || Statistics.FormulaStatistics.NumberOfTFF > 0) {
-        fprintf(Stream,"%% Syntax   : Number of formulae    : %4d (%4d unit",
+        fprintf(Stream,"%% Syntax   : Number of formulae    : %4d (%4d unt",
 Statistics.FormulaStatistics.NumberOfFormulae,Statistics.FormulaStatistics.NumberOfUnitFormulae);
         if (Statistics.FormulaStatistics.NumberOfTHF > 0 || 
 Statistics.FormulaStatistics.NumberOfTFF) {
-            fprintf(Stream,";%4d type",Statistics.FormulaStatistics.NumberOfTypeFormulae);
-            fprintf(Stream,";%4d defn",Statistics.FormulaStatistics.NumberOfDefnFormulae);
+            fprintf(Stream,";%4d typ",Statistics.FormulaStatistics.NumberOfTypeFormulae);
+            fprintf(Stream,";%4d def",Statistics.FormulaStatistics.NumberOfDefnFormulae);
         }
     fprintf(Stream,")\n");
     }
@@ -589,22 +637,12 @@ Statistics.FormulaStatistics.NumberOfHornClauses,
 Statistics.FormulaStatistics.NumberOfUnitFormulae,Statistics.FormulaStatistics.NumberOfRRClauses);
     }
 
-    fprintf(Stream,"%%            Number of atoms       : %4d (%4d equality",
+    fprintf(Stream,"%%            Number of atoms       : %4d (%4d equ",
 Statistics.FormulaStatistics.NumberOfAtoms,Statistics.FormulaStatistics.NumberOfEqualityAtoms);
     if (Statistics.FormulaStatistics.NumberOfTHF > 0) {
-        fprintf(Stream,";%4d variable",Statistics.FormulaStatistics.NumberOfVariableAtoms);
+        fprintf(Stream,";%4d var",Statistics.FormulaStatistics.NumberOfVariableAtoms);
     }
     fprintf(Stream,")\n");
-
-    if (Statistics.FormulaStatistics.NumberOfFOF > 0 || 
-Statistics.FormulaStatistics.NumberOfTHF > 0 || Statistics.FormulaStatistics.NumberOfTFF > 0) {
-        fprintf(Stream,"%%            Maximal formula depth : %4d (%4.0f average)\n",
-Statistics.FormulaStatistics.MaxFormulaDepth,Statistics.FormulaStatistics.AverageFormulaDepth);
-    }
-    if (Statistics.FormulaStatistics.NumberOfCNF > 0) {
-        fprintf(Stream,"%%            Maximal clause size   : %4d (%4.0f average)\n",
-Statistics.FormulaStatistics.MaxClauseSize,Statistics.FormulaStatistics.AverageClauseSize);
-    }
 
     if (Statistics.FormulaStatistics.NumberOfFOF > 0 || 
 Statistics.FormulaStatistics.NumberOfTHF > 0 || Statistics.FormulaStatistics.NumberOfTFF > 0) {
@@ -632,17 +670,84 @@ Statistics.ConnectiveStatistics.NumberOfXors);
 Statistics.ConnectiveStatistics.NumberOfNors,
 Statistics.ConnectiveStatistics.NumberOfNands);
         fprintf(Stream,")\n");
-        if (Statistics.FormulaStatistics.NumberOfTHF > 0 || 
+    }
+
+    if (Statistics.FormulaStatistics.NumberOfFOF > 0 || 
+Statistics.FormulaStatistics.NumberOfTHF > 0 || Statistics.FormulaStatistics.NumberOfTFF > 0) {
+        fprintf(Stream,"%%            Maximal formula depth : %4d (%4.0f avg)\n",
+Statistics.FormulaStatistics.MaxFormulaDepth,Statistics.FormulaStatistics.AverageFormulaDepth);
+    }
+    if (Statistics.FormulaStatistics.NumberOfCNF > 0) {
+        fprintf(Stream,"%%            Maximal clause size   : %4d (%4.0f avg)\n",
+Statistics.FormulaStatistics.MaxClauseSize,Statistics.FormulaStatistics.AverageClauseSize);
+    }
+
+    if (Statistics.FormulaStatistics.NumberOfFOF > 0 || 
+Statistics.FormulaStatistics.NumberOfCNF > 0 ||
 Statistics.FormulaStatistics.NumberOfTFF > 0) {
-//----Fourth connectives line, THF and TFF only
-            fprintf(Stream,
+        if (Statistics.FormulaStatistics.NumberOfTFF > 0 &&
+(Statistics.FormulaStatistics.NumberOfNestedFormulae > 0 ||
+ Statistics.SymbolStatistics.NumberBooleanVariables > 0 ||
+ Statistics.SymbolStatistics.NumberOfTuples > 0 ||
+ Statistics.SymbolStatistics.NumberOfITEs > 0 ||
+ Statistics.SymbolStatistics.NumberOfLets > 0)) {
+//----TFX and THX symbols
+            if (Statistics.FormulaStatistics.NumberOfNestedFormulae > 0 ||
+Statistics.SymbolStatistics.NumberBooleanVariables > 0) {
+                fprintf(Stream,
+"%%            Number of $o terms    : %4d (%4d fml;%4d var)\n",
+Statistics.FormulaStatistics.NumberOfNestedFormulae +
+Statistics.SymbolStatistics.NumberBooleanVariables,
+Statistics.FormulaStatistics.NumberOfNestedFormulae,
+Statistics.SymbolStatistics.NumberBooleanVariables);
+            }
+
+        if (Statistics.SymbolStatistics.NumberOfTuples > 0 ||
+Statistics.SymbolStatistics.NumberOfITEs > 0 ||
+Statistics.SymbolStatistics.NumberOfLets > 0) {
+        fprintf(Stream,
+"%%            Number of X terms     : %4d (%4d  [];%4d ite;%4d let)\n",
+Statistics.SymbolStatistics.NumberOfTuples +
+Statistics.SymbolStatistics.NumberOfITEs + Statistics.SymbolStatistics.NumberOfLets,
+Statistics.SymbolStatistics.NumberOfTuples,Statistics.SymbolStatistics.NumberOfITEs,
+Statistics.SymbolStatistics.NumberOfLets);
+            }
+        } else {
+            fprintf(Stream,"%%            Maximal term depth    : %4d (%4.0f average)\n",
+Statistics.FormulaStatistics.MaxTermDepth,Statistics.FormulaStatistics.AverageTermDepth);
+        }
+    }
+
+    if (Statistics.FormulaStatistics.NumberOfTFF > 0 ||
+Statistics.FormulaStatistics.NumberOfTHF > 0) {
+        fprintf(Stream,"%%            Number of types       : %4d (%4d usr)\n",
+Statistics.SymbolStatistics.NumberOfTypes,
+Statistics.SymbolStatistics.NumberOfUserTypes);
+        fprintf(Stream,
 "%%            Number of type conns  : %4d (%4d   >;%4d   *;%4d   +;%4d  <<)\n",
 Statistics.ConnectiveStatistics.NumberOfTypeConnectives,
 Statistics.ConnectiveStatistics.NumberOfMaparrows,
 Statistics.ConnectiveStatistics.NumberOfXprods,
 Statistics.ConnectiveStatistics.NumberOfUnions,
 Statistics.ConnectiveStatistics.NumberOfSubtypes);
-        }
+    }
+
+    if (Statistics.FormulaStatistics.NumberOfFOF > 0 || 
+Statistics.FormulaStatistics.NumberOfCNF > 0 ||
+Statistics.FormulaStatistics.NumberOfTFF > 0) {
+        fprintf(Stream,"%%            Number of predicates  : %4d (%4d prp; ",
+Statistics.SymbolStatistics.NumberOfPredicates,
+Statistics.SymbolStatistics.NumberOfPropositions);
+        PrintMinMaxArity(Stream,Statistics.SymbolStatistics.MinPredicateArity);
+        fprintf(Stream,"-");
+        PrintMinMaxArity(Stream,Statistics.SymbolStatistics.MaxPredicateArity);
+        fprintf(Stream," arity)\n");
+        fprintf(Stream,"%%            Number of functors    : %4d (%4d con; ",
+Statistics.SymbolStatistics.NumberOfFunctors,Statistics.SymbolStatistics.NumberOfConstants);
+        PrintMinMaxArity(Stream,Statistics.SymbolStatistics.MinFunctorArity),
+        fprintf(Stream,"-");
+        PrintMinMaxArity(Stream,Statistics.SymbolStatistics.MaxFunctorArity);
+        fprintf(Stream," arity)\n");
     }
 
 //----Symbols
@@ -671,24 +776,6 @@ Statistics.ConnectiveStatistics.NumberOfDescriptions);
         } else {
             fprintf(Stream,")\n");
         }
-    }
-
-    if (Statistics.FormulaStatistics.NumberOfFOF > 0 || 
-Statistics.FormulaStatistics.NumberOfCNF > 0 ||
-Statistics.FormulaStatistics.NumberOfTFF > 0) {
-        fprintf(Stream,"%%            Number of predicates  : %4d (%4d propositional; ",
-Statistics.SymbolStatistics.NumberOfPredicates,
-Statistics.SymbolStatistics.NumberOfPropositions);
-        PrintMinMaxArity(Stream,Statistics.SymbolStatistics.MinPredicateArity);
-        fprintf(Stream,"-");
-        PrintMinMaxArity(Stream,Statistics.SymbolStatistics.MaxPredicateArity);
-        fprintf(Stream," arity)\n");
-        fprintf(Stream,"%%            Number of functors    : %4d (%4d constant; ",
-Statistics.SymbolStatistics.NumberOfFunctors,Statistics.SymbolStatistics.NumberOfConstants);
-        PrintMinMaxArity(Stream,Statistics.SymbolStatistics.MinFunctorArity),
-        fprintf(Stream,"-");
-        PrintMinMaxArity(Stream,Statistics.SymbolStatistics.MaxFunctorArity);
-        fprintf(Stream," arity)\n");
     }
 
 //----Variables. Fuck, watch the sgn for FOF and THF, singleton for CNF
@@ -723,43 +810,13 @@ Statistics.ConnectiveStatistics.NumberOfDescriptionBinders,
 Statistics.ConnectiveStatistics.NumberOfChoiceBinders);
     }
 
-//----Terms
-    if (Statistics.FormulaStatistics.NumberOfFOF > 0 || 
-Statistics.FormulaStatistics.NumberOfCNF > 0 ||
-Statistics.FormulaStatistics.NumberOfTFF > 0) {
-        fprintf(Stream,"%%            Maximal term depth    : %4d (%4.0f average)\n",
-Statistics.FormulaStatistics.MaxTermDepth,Statistics.FormulaStatistics.AverageTermDepth);
-    }
-
-//----TFX and THX symbols
-    if (Statistics.FormulaStatistics.NumberOfNestedFormulae > 0 ||
-Statistics.SymbolStatistics.NumberBooleanVariables > 0) {
-        fprintf(Stream,
-"%%            Boolean terms         : %4d (%4d formulae;%4d variables)\n",
-Statistics.FormulaStatistics.NumberOfNestedFormulae +
-Statistics.SymbolStatistics.NumberBooleanVariables,
-Statistics.FormulaStatistics.NumberOfNestedFormulae,
-Statistics.SymbolStatistics.NumberBooleanVariables);
-    }
-
-if (Statistics.SymbolStatistics.NumberOfTuples > 0 ||
-Statistics.SymbolStatistics.NumberOfITEs > 0 ||
-Statistics.SymbolStatistics.NumberOfLets > 0) {
-        fprintf(Stream,
-"%%            Extended terms        : %4d (%4d  [];%4d ite;%4d let)\n",
-Statistics.SymbolStatistics.NumberOfTuples +
-Statistics.SymbolStatistics.NumberOfITEs + Statistics.SymbolStatistics.NumberOfLets,
-Statistics.SymbolStatistics.NumberOfTuples,Statistics.SymbolStatistics.NumberOfITEs,
-Statistics.SymbolStatistics.NumberOfLets);
-    }
-
 //----Mathematics
     if (Statistics.SymbolStatistics.NumberOfMathPredicates > 0 ||
 Statistics.SymbolStatistics.NumberOfMathFunctions > 0 ||
 Statistics.SymbolStatistics.NumberOfNumbers > 0 ||
 Statistics.ConnectiveStatistics.NumberOfMathVariables > 0 ) {
         fprintf(Stream,
-"%%            Arithmetic symbols    : %4d (%4d prd;%4d fun;%4d num;%4d var)\n",
+"%%            Number arithmetic     : %4d (%4d prd;%4d fun;%4d num;%4d var)\n",
 Statistics.SymbolStatistics.NumberOfMathPredicates + 
 Statistics.SymbolStatistics.NumberOfMathFunctions +
 Statistics.SymbolStatistics.NumberOfNumbers +

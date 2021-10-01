@@ -533,25 +533,28 @@ char ** FunctorUsageStartsHere) {
     UsageLength = STRINGLENGTH;
     SpareLength = STRINGLENGTH;
     PutNextHere = *PutUsageHere;
-    DoGetSignatureSymbolUsage(PutUsageHere,&PutNextHere,Signature->Predicates,
-&UsageLength,&SpareLength);
+    DoGetSignatureSymbolUsage(PutUsageHere,&PutNextHere,Signature->Predicates,&UsageLength,
+&SpareLength);
 //DEBUG printf("Predicates ===>>%s<<===\n",*PutUsageHere);
     FunctorUsageOffset = PutNextHere - *PutUsageHere;
-    DoGetSignatureSymbolUsage(PutUsageHere,&PutNextHere,Signature->Functions,
-&UsageLength,&SpareLength);
+    DoGetSignatureSymbolUsage(PutUsageHere,&PutNextHere,Signature->Functions,&UsageLength,
+&SpareLength);
 //DEBUG printf("===\n%s",*PutUsageHere);
     *FunctorUsageStartsHere = *PutUsageHere + FunctorUsageOffset;
     return(*PutUsageHere);
 }
 //-------------------------------------------------------------------------------------------------
 void DoGetSignatureSymbolUsageStatistics(SYMBOLNODE SignatureNode,int * NumberOfSymbols,
-int * NumberOfSymbolsArity0,int * MinSymbolArity,int * MaxSymbolArity) {
+int * NumberOfSymbolsArity0,int * NumberOfUserSymbols,int * MinSymbolArity,int * MaxSymbolArity) {
 
     if (SignatureNode != NULL) {
 //DEBUG printf("Symbol is %s\n",SignatureNode->NameSymbol);
-        if (GetSignatureUses(SignatureNode) > 0 && !DefinedSymbol(SignatureNode)) {
+        if (GetSignatureUses(SignatureNode)) {
 //DEBUG printf("    and it is used\n");
             (*NumberOfSymbols)++;
+            if (!DefinedSymbol(SignatureNode)) { 
+                (*NumberOfUserSymbols)++;
+            }
             if (SignatureNode->Arity == 0) {
                 (*NumberOfSymbolsArity0)++;
             }
@@ -562,21 +565,21 @@ int * NumberOfSymbolsArity0,int * MinSymbolArity,int * MaxSymbolArity) {
                 *MaxSymbolArity = SignatureNode->Arity;
             }
         }
-        DoGetSignatureSymbolUsageStatistics(SignatureNode->LastSymbol,
-NumberOfSymbols,NumberOfSymbolsArity0,MinSymbolArity,MaxSymbolArity);
-        DoGetSignatureSymbolUsageStatistics(SignatureNode->NextSymbol,
-NumberOfSymbols,NumberOfSymbolsArity0,MinSymbolArity,MaxSymbolArity);
+        DoGetSignatureSymbolUsageStatistics(SignatureNode->LastSymbol,NumberOfSymbols,
+NumberOfSymbolsArity0,NumberOfUserSymbols,MinSymbolArity,MaxSymbolArity);
+        DoGetSignatureSymbolUsageStatistics(SignatureNode->NextSymbol,NumberOfSymbols,
+NumberOfSymbolsArity0,NumberOfUserSymbols,MinSymbolArity,MaxSymbolArity);
     }
 }
 //-------------------------------------------------------------------------------------------------
 void GetSignatureSymbolUsageStatistics(SYMBOLNODE SignatureNode,int * NumberOfSymbols,
-int * NumberOfSymbolsArity0,int * MinSymbolArity,int * MaxSymbolArity) {
+int * NumberOfSymbolsArity0,int * NumberOfUserSymbols,int * MinSymbolArity,int * MaxSymbolArity) {
 
     *NumberOfSymbols = 0;
     *NumberOfSymbolsArity0 = 0;
     *MinSymbolArity = INT_MAX;
     *MaxSymbolArity = -1;
     DoGetSignatureSymbolUsageStatistics(SignatureNode,NumberOfSymbols,NumberOfSymbolsArity0,
-MinSymbolArity,MaxSymbolArity);
+NumberOfUserSymbols,MinSymbolArity,MaxSymbolArity);
 }
 //-------------------------------------------------------------------------------------------------

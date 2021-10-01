@@ -107,22 +107,20 @@ long * SymbolIndex) {
             Symbols->NameSymbol = ShortSymbol;
             (*SymbolIndex)++;
         }
-        ShortenSymbols(Symbols->LastSymbol,FormatString,MallocLength,
-SymbolIndex);
-        ShortenSymbols(Symbols->NextSymbol,FormatString,MallocLength,
-SymbolIndex);
+        ShortenSymbols(Symbols->LastSymbol,FormatString,MallocLength,SymbolIndex);
+        ShortenSymbols(Symbols->NextSymbol,FormatString,MallocLength,SymbolIndex);
     }
 }
 //-------------------------------------------------------------------------------------------------
 void ShortenSymbolType(SYMBOLNODE Symbols,char ShortChar) {
 
-    int NumberOfSymbols,NumberOfSymbolsArity0,MinSymbolArity,MaxSymbolArity;
+    int NumberOfSymbols,NumberOfSymbolsArity0,MinSymbolArity,MaxSymbolArity,DummyCounter;
     int NumberOfDigits;
     String FormatString;
     long SymbolIndex = 1;
 
     GetSignatureSymbolUsageStatistics(Symbols,&NumberOfSymbols,&NumberOfSymbolsArity0,
-&MinSymbolArity,&MaxSymbolArity);
+&DummyCounter,&MinSymbolArity,&MaxSymbolArity);
     NumberOfDigits = (int)ceil(log10(NumberOfSymbols+1));
     sprintf(FormatString,"%c%%0%dld",ShortChar,NumberOfDigits);
     ShortenSymbols(Symbols,FormatString,NumberOfDigits+2,&SymbolIndex);
@@ -723,8 +721,7 @@ char * UsefulInformation,int DoRemove,int DoAdd) {
     int MoveIndex;
 
 //----Check that the new term is well formed
-    if (DoAdd && (ListTerm = ParseStringTerm(UsefulInformation,nontype,
-Signature,0)) == NULL) {
+    if (DoAdd && (ListTerm = ParseStringTerm(UsefulInformation,nontype,Signature,0)) == NULL) {
         ListTerm = NULL;
         CodingError("Trying to add a bad term as useful info");
     }

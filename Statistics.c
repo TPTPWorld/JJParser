@@ -37,12 +37,16 @@ void InitializeFormulaStatistics(FormulaStatisticsType * FormulaStatistics) {
 //-------------------------------------------------------------------------------------------------
 void InitializeSymbolStatistics(SymbolStatisticsType * SymbolStatistics) {
 
+    SymbolStatistics->NumberOfTypes = 0;
+    SymbolStatistics->NumberOfUserTypes = 0;
     SymbolStatistics->NumberOfPredicates = 0;
     SymbolStatistics->NumberOfPropositions = 0;
+    SymbolStatistics->NumberOfUserPredicates = 0;
     SymbolStatistics->MinPredicateArity = 0;
     SymbolStatistics->MaxPredicateArity = 0;
     SymbolStatistics->NumberOfFunctors = 0;
     SymbolStatistics->NumberOfConstants = 0;
+    SymbolStatistics->NumberOfUserFunctors = 0;
     SymbolStatistics->MinFunctorArity = 0;
     SymbolStatistics->MaxFunctorArity = 0;
     SymbolStatistics->NumberOfVariables = 0;
@@ -110,8 +114,8 @@ void InitializeStatistics(StatisticsType * Statistics) {
 
 }
 //-------------------------------------------------------------------------------------------------
-void AddOnConnectiveStatistics(ConnectiveStatisticsType *
-ConnectiveStatistics,ConnectiveStatisticsType MoreConnectiveStatistics) {
+void AddOnConnectiveStatistics(ConnectiveStatisticsType * ConnectiveStatistics,
+ConnectiveStatisticsType MoreConnectiveStatistics) {
 
     ConnectiveStatistics->NumberOfConnectives += MoreConnectiveStatistics.NumberOfConnectives;
     ConnectiveStatistics->NumberOfTypeConnectives += 

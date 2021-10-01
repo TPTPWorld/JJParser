@@ -619,7 +619,7 @@ Signature,0);
     }
 
 //----Test getting by count
-    printf("There are %d clauses\n",ListCount(Head,cnf_nodes));
+    printf("There are %d clauses\n",ListCount(Signature,Head,cnf_nodes));
     AnnotatedFormula = GetAnnotatedFormulaFromListByNumber(Head,20);
     GetName(AnnotatedFormula,PutNamesHere);
     printf("Got the node for clause named %s\n",PutNamesHere);

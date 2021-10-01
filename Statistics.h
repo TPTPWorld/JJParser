@@ -79,12 +79,16 @@ typedef struct {
 } FormulaStatisticsType;
 
 typedef struct {
+    int NumberOfTypes;
+    int NumberOfUserTypes;
     int NumberOfPredicates;  //----Doubles as number of symbols
     int NumberOfPropositions; 
+    int NumberOfUserPredicates;
     int MinPredicateArity;
     int MaxPredicateArity;
     int NumberOfFunctors;
     int NumberOfConstants;
+    int NumberOfUserFunctors;
     int MinFunctorArity;
     int MaxFunctorArity;
     int NumberOfVariables;
