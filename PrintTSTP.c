@@ -169,7 +169,9 @@ void PrintSpaces(PRINTFILE Stream,int Spaces) {
 }
 //-------------------------------------------------------------------------------------------------
 //----Local mutual recursion
+int AtomicallyFlatFormula(FORMULA Formula);
 int FlatFormula(FORMULA Formula);
+int AtomicallyFlatTerm(TERM Term);
 int FlatTerm(TERM Term);
 //-------------------------------------------------------------------------------------------------
 int TypeConnective(ConnectiveType Connective) {
@@ -207,6 +209,20 @@ int FlatTermList(int NumberOfElements,TERMArray Elements) {
     return(1);
 }
 //-------------------------------------------------------------------------------------------------
+int AtomicallyFlatTermList(int NumberOfElements,TERMArray Elements) {
+
+    int ElementNumber;
+
+    if (NumberOfElements > 0 && Elements != NULL) {
+        for (ElementNumber = 0; ElementNumber < NumberOfElements; ElementNumber++) {
+            if (!AtomicallyFlatTerm(Elements[ElementNumber])) {
+                return(0);
+            }
+        }
+    }
+    return(1);
+}
+//-------------------------------------------------------------------------------------------------
 int FlatTerm(TERM Term) {
 
     switch (Term->Type) {
@@ -230,6 +246,29 @@ int FlatTerm(TERM Term) {
     return(0);
 }
 //-------------------------------------------------------------------------------------------------
+int AtomicallyFlatTerm(TERM Term) {
+
+    switch (Term->Type) {
+        case connective:
+            break;
+        case predicate:
+        case function:
+            return(AtomicallyFlatTermList(GetArity(Term),Term->Arguments));
+            break;
+        case a_type:
+        case variable:
+            return(1);
+            break;
+        case formula:
+            return(AtomicallyFlatFormula(Term->TheSymbol.Formula));
+            break;
+        default:
+            return(0);
+            break;
+    }
+    return(0);
+}
+//-------------------------------------------------------------------------------------------------
 int SymbolFormula(FORMULA Formula) {
 
 //----Atoms and FOL predicates are "symbols". Thus $ite() and $let() are in 
@@ -240,6 +279,12 @@ int SymbolFormula(FORMULA Formula) {
 int FlatSymbolFormula(FORMULA Formula) {
 
     return(Formula->Type == atom && FlatTermList(GetArity(Formula->FormulaUnion.Atom),
+Formula->FormulaUnion.Atom->Arguments));
+}
+//-------------------------------------------------------------------------------------------------
+int AtomicallyFlatSymbolFormula(FORMULA Formula) {
+
+    return(Formula->Type == atom && AtomicallyFlatTermList(GetArity(Formula->FormulaUnion.Atom),
 Formula->FormulaUnion.Atom->Arguments));
 }
 //-------------------------------------------------------------------------------------------------
@@ -258,10 +303,24 @@ int FlatUnarySymbolFormula(FORMULA Formula) {
     return(UnaryFormula(Formula) && FlatSymbolFormula(Formula->FormulaUnion.UnaryFormula.Formula));
 }
 //-------------------------------------------------------------------------------------------------
+int AtomicallyFlatUnarySymbolFormula(FORMULA Formula) {
+
+    return(UnaryFormula(Formula) && AtomicallyFlatSymbolFormula(
+Formula->FormulaUnion.UnaryFormula.Formula));
+}
+//-------------------------------------------------------------------------------------------------
 int LiteralFormula(FORMULA Formula) {
 
     return(SymbolFormula(Formula) ||
 (UnarySymbolFormula(Formula) && Formula->FormulaUnion.UnaryFormula.Connective == negation));
+}
+//-------------------------------------------------------------------------------------------------
+int AtomicallyFlatLiteralFormula(FORMULA Formula) {
+
+    return(AtomicallyFlatSymbolFormula(Formula) ||
+(AtomicallyFlatUnarySymbolFormula(Formula) && 
+ Formula->FormulaUnion.UnaryFormula.Connective == negation));
+
 }
 //-------------------------------------------------------------------------------------------------
 int FlatSymbolOrUnaryFormula(FORMULA Formula) {
@@ -386,9 +445,27 @@ int FlatFormulaList(int NumberOfElements,FORMULAArray Elements) {
     return(1);
 }
 //-------------------------------------------------------------------------------------------------
+int AtomicallyFlatFormulaList(int NumberOfElements,FORMULAArray Elements) {
+
+    int ElementNumber;
+
+    for (ElementNumber = 0; ElementNumber < NumberOfElements; ElementNumber++) {
+        if (!AtomicallyFlatFormula(Elements[ElementNumber])) {
+            return(0);
+        }
+    }
+    return(1);
+}
+//-------------------------------------------------------------------------------------------------
 int FlatTuple(FORMULA Formula) {
 
     return(Formula->Type == tuple && FlatFormulaList(
+Formula->FormulaUnion.TupleFormula.NumberOfElements,Formula->FormulaUnion.TupleFormula.Elements));
+}
+//-------------------------------------------------------------------------------------------------
+int AtomicallyFlatTuple(FORMULA Formula) {
+
+    return(Formula->Type == tuple && AtomicallyFlatFormulaList(
 Formula->FormulaUnion.TupleFormula.NumberOfElements,Formula->FormulaUnion.TupleFormula.Elements));
 }
 //-------------------------------------------------------------------------------------------------
@@ -419,10 +496,16 @@ int QuantifiedFormula(FORMULA Formula) {
     return(Formula->Type == quantified);
 }
 //-------------------------------------------------------------------------------------------------
+int AtomicallyFlatFormula(FORMULA Formula) {
+
+    return(AtomicallyFlatLiteralFormula(Formula) || FlatEquation(Formula) || 
+AtomicallyFlatTuple(Formula));
+}
+//-------------------------------------------------------------------------------------------------
 int FlatFormula(FORMULA Formula) {
 
-    return(LiteralFormula(Formula) || FlatEquation(Formula) || 
-FlatBinaryFormula(Formula) || FlatTypeOrDefnFormula(Formula) || FlatTuple(Formula));
+    return(AtomicallyFlatFormula(Formula) || FlatBinaryFormula(Formula) || 
+FlatTypeOrDefnFormula(Formula) || FlatTuple(Formula));
 }
 //-------------------------------------------------------------------------------------------------
 void PrintFileTSTPTerm(PRINTFILE Stream,SyntaxType Language,TERM Term,int Pretty,int Indent,
@@ -587,26 +670,30 @@ FORMULAArray FormulaTuple,int Pretty,int Indent,int TSTPSyntaxFlag) {
 
     int ElementNumber;
     int NeedSpace;
-    ConnectiveType LastConnective = none;
+    ConnectiveType LastConnective;
 
     PFprintf(Stream,"[");
-    if ((NeedSpace = !FlatFormulaList(NumberOfElements,FormulaTuple))) {
+    if ((NeedSpace = !AtomicallyFlatFormulaList(NumberOfElements,FormulaTuple))) {
         PFprintf(Stream," ");
     }
-    PrintFileTSTPFormula(Stream,Language,FormulaTuple[0],Indent+2,Pretty,outermost,TSTPSyntaxFlag);
+    if (FlatFormula(FormulaTuple[0])) {
+        LastConnective = outermost;
+    } else {
+        LastConnective = none;
+    }
+    PrintFileTSTPFormula(Stream,Language,FormulaTuple[0],Indent+2,Pretty,LastConnective,
+TSTPSyntaxFlag);
     for (ElementNumber=1;ElementNumber < NumberOfElements;ElementNumber++) {
         PFprintf(Stream,",");
-        if (Pretty && FormulaTuple[ElementNumber]->Type != atom && 
-!FlatTuple(FormulaTuple[ElementNumber])) {
+        if (Pretty && (!AtomicallyFlatFormula(FormulaTuple[ElementNumber-1]) ||
+!AtomicallyFlatFormula(FormulaTuple[ElementNumber]))) {
             PFprintf(Stream,"\n");
             PrintSpaces(Stream,Indent+2);
-            LastConnective = brackets;
-        } else {
-            if (LastConnective == brackets) {
-                PFprintf(Stream,"\n");
-                PrintSpaces(Stream,Indent+2);
-            }
+        }
+        if (FlatFormula(FormulaTuple[ElementNumber])) {
             LastConnective = outermost;
+        } else {
+            LastConnective = none;
         }
         PrintFileTSTPFormula(Stream,Language,FormulaTuple[ElementNumber],Indent+2,Pretty,
 LastConnective,TSTPSyntaxFlag);
@@ -714,6 +801,7 @@ FlatSymbolOrUnaryFormula(Formula->FormulaUnion.QuantifiedFormula.Formula) ||
 FlatEquation(Formula->FormulaUnion.QuantifiedFormula.Formula)) {
                 PFprintf(Stream," ");
                 PrintFileTSTPFormula(Stream,Language,
+//TODO THIS 0 seems wrong
 Formula->FormulaUnion.QuantifiedFormula.Formula,0,Pretty,none,TSTPSyntaxFlag);
             } else {
 //----Otherwise on the next line
@@ -999,35 +1087,26 @@ AnnotatedTSTPFormulaType AnnotatedTSTPFormula,PrintFormatType Format,int Pretty)
 0,0,outermost,1);
     } else {
         if (Pretty) {
+            PFprintf(Stream,"\n");
+            PrintSpaces(Stream,4);
 //----Things that start on a new line alone
             if (
-(Language == tptp_thf || Language == tptp_tff || Language == tptp_fof) &&
-(QuantifiedFormula(AnnotatedTSTPFormula.FormulaWithVariables->Formula) ||
- UnaryFormula(AnnotatedTSTPFormula.FormulaWithVariables->Formula) ||
-//----No top level tuples
-// AnnotatedTSTPFormula.FormulaWithVariables->Formula->Type == tuple ||
+QuantifiedFormula(AnnotatedTSTPFormula.FormulaWithVariables->Formula) ||
+UnaryFormula(AnnotatedTSTPFormula.FormulaWithVariables->Formula) ||
 TypeOrDefnFormula(AnnotatedTSTPFormula.FormulaWithVariables->Formula) ||
 LiteralFormula(AnnotatedTSTPFormula.FormulaWithVariables->Formula) ||
-FlatEquation(AnnotatedTSTPFormula.FormulaWithVariables->Formula) ||
-FlatBinaryFormula(AnnotatedTSTPFormula.FormulaWithVariables->Formula))) {
-                PFprintf(Stream,"(\n");
-                PrintSpaces(Stream,4);
+FlatFormula(AnnotatedTSTPFormula.FormulaWithVariables->Formula)) {
                 PrintFileTSTPFormula(Stream,Language,
 AnnotatedTSTPFormula.FormulaWithVariables->Formula,4,Pretty,outermost,1);
             } else {
 //----Things that need ()s on the new line
-                PFprintf(Stream,"\n");
-                PrintSpaces(Stream,4);
-                PFprintf(Stream,"( ");
                 PrintFileTSTPFormula(Stream,Language,
-AnnotatedTSTPFormula.FormulaWithVariables->Formula,6,Pretty,outermost,1);
+AnnotatedTSTPFormula.FormulaWithVariables->Formula,4,Pretty,none,1);
             }
         } else {
-            PFprintf(Stream,"( ");
             PrintFileTSTPFormula(Stream,Language,
 AnnotatedTSTPFormula.FormulaWithVariables->Formula,0,Pretty,outermost,1);
         }
-        PFprintf(Stream," )");
     }
 
 //----Source and useful info are optional
@@ -1042,7 +1121,7 @@ AnnotatedTSTPFormula.FormulaWithVariables->Formula,0,Pretty,outermost,1);
 outermost,1);
         }
     }
-    PFprintf(Stream,").\n");
+    PFprintf(Stream," ).\n");
 }
 //-------------------------------------------------------------------------------------------------
 void PrintAnnotatedTSTPFormula(FILE * Stream,SyntaxType Language,
@@ -1274,13 +1353,11 @@ PrintFormatType Format,int Pretty) {
             while (Head != NULL) {
                 PrintFileAnnotatedTSTPNode(Stream,Head->AnnotatedFormula,Format,Pretty);
 //----Always a blank line after a logical, if pretty
-                if (
-Pretty && 
+                if (Pretty && 
 ((LogicalAnnotatedFormula(Head->AnnotatedFormula) &&
  (Head->Next == NULL || Head->Next->AnnotatedFormula->Syntax != blank_line)) ||
 (TPIAnnotatedFormula(Head->AnnotatedFormula) &&
- (Head->Next == NULL || 
-  LogicalAnnotatedFormula(Head->Next->AnnotatedFormula))))) {
+ (Head->Next == NULL || LogicalAnnotatedFormula(Head->Next->AnnotatedFormula))))) {
                     PFprintf(Stream,"\n");
                 }
                 Head = Head->Next;

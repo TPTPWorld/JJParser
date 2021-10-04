@@ -1311,7 +1311,7 @@ int CountNestedFormulae(SIGNATURE Signature,FORMULA Formula,int NestedYet) {
 
     String ErrorMessage;
     
-printf("Look at symbol with type %s\n",FormulaTypeToString(Formula->Type));
+//DEBUG printf("Look at symbol with type %s\n",FormulaTypeToString(Formula->Type));
     switch (Formula->Type) {
         case sequent:
             return(NestedYet + CountNestedFormulaeInFormulae(Signature,
@@ -1341,7 +1341,7 @@ Formula->FormulaUnion.BinaryFormula.RHS,NestedYet));
 Formula->FormulaUnion.UnaryFormula.Formula,NestedYet));
             break;
         case atom:
-printf("It's an atom with symbol %s\n",GetSymbol(Formula->FormulaUnion.Atom));
+//DEBUG printf("It's an atom with symbol %s\n",GetSymbol(Formula->FormulaUnion.Atom));
                 return(
 (IsSymbolInSignatureList(Signature->Functions,GetSymbol(Formula->FormulaUnion.Atom),
 GetArity(Formula->FormulaUnion.Atom)) == NULL) + CountNestedFormulaeInTerms(Signature,
@@ -2093,7 +2093,6 @@ MaxFormulaTermDepth(Formula->FormulaUnion.BinaryFormula.LHS),
 MaxFormulaTermDepth(Formula->FormulaUnion.BinaryFormula.RHS)));
             break;
         case unary:
-printf("Do atom\n");
             return(MaxFormulaTermDepth(Formula->FormulaUnion.UnaryFormula.Formula));
             break;
         case atom:

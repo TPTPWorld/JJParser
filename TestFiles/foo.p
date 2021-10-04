@@ -1,5 +1,10 @@
-tff(b,type,butler: $i).
+thf(p_type,type,
+    p: $i > $o ).
 
-tff(pel55_2_2,axiom,
-    ( lives(butler) )).
+thf(ptt_type,type,
+    ptt: [$int,$i,$o] > $o > $i > $o ).
 
+thf(tuples_2,axiom,
+    ( p
+    = ( ^ [X: $i] :
+          ( ptt @ [33,a,$true] @ ( ( q @ a @ b ) ) ) ) ) ).
