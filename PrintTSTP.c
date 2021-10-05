@@ -288,6 +288,14 @@ int AtomicallyFlatSymbolFormula(FORMULA Formula) {
 Formula->FormulaUnion.Atom->Arguments));
 }
 //-------------------------------------------------------------------------------------------------
+int FlatITEFormula(FORMULA Formula) {
+
+    return(Formula->Type == ite_formula &&
+FlatFormula(Formula->FormulaUnion.ConditionalFormula.Condition) &&
+FlatFormula(Formula->FormulaUnion.ConditionalFormula.FormulaIfTrue) &&
+FlatFormula(Formula->FormulaUnion.ConditionalFormula.FormulaIfFalse));
+}
+//-------------------------------------------------------------------------------------------------
 int UnaryFormula(FORMULA Formula) {
 
     return(Formula->Type == unary);
@@ -391,6 +399,15 @@ int FlatEquation(FORMULA Formula) {
     return(Equation(Formula,&LHS,&RHS) && FlatSymbolFormula(LHS) && FlatSymbolFormula(RHS));
 }
 //-------------------------------------------------------------------------------------------------
+int AtomicallyFlatEquation(FORMULA Formula) {
+    
+    FORMULA LHS;
+    FORMULA RHS;
+
+    return(Equation(Formula,&LHS,&RHS) && AtomicallyFlatSymbolFormula(LHS) && 
+AtomicallyFlatSymbolFormula(RHS));
+}
+//-------------------------------------------------------------------------------------------------
 int TypeFormula(FORMULA Formula) {
 
     return(Formula->Type == type_declaration && 
@@ -480,6 +497,14 @@ int FlatBinaryFormula(FORMULA Formula) {
 FlatBinaryConnective(Formula->FormulaUnion.BinaryFormula.Connective) &&
 FlatFormula(Formula->FormulaUnion.BinaryFormula.LHS) &&
 FlatFormula(Formula->FormulaUnion.BinaryFormula.RHS));
+}
+//-------------------------------------------------------------------------------------------------
+int AtomicallyFlatBinaryFormula(FORMULA Formula) {
+
+    return(BinaryFormula(Formula) &&
+FlatBinaryConnective(Formula->FormulaUnion.BinaryFormula.Connective) &&
+AtomicallyFlatFormula(Formula->FormulaUnion.BinaryFormula.LHS) &&
+AtomicallyFlatFormula(Formula->FormulaUnion.BinaryFormula.RHS));
 }
 //-------------------------------------------------------------------------------------------------
 int FlatQuantifiedVariable(QuantifiedFormulaType QuantifiedFormula) {
@@ -641,6 +666,7 @@ char OpeningBracket,char ClosingBracket,int TSTPSyntaxFlag) {
             }
 //----Only some formula arguments stay on the same line
             if (Pretty && Term->Arguments[ElementNumber]->Type == formula &&
+!FlatITEFormula(Term->Arguments[ElementNumber]->TheSymbol.Formula) &&
 !FlatSymbolOrUnaryFormula(Term->Arguments[ElementNumber]->TheSymbol.Formula) &&
 !FlatTuple(Term->Arguments[ElementNumber]->TheSymbol.Formula) &&
 !FlatEquation(Term->Arguments[ElementNumber]->TheSymbol.Formula)) {
@@ -798,7 +824,8 @@ Formula->FormulaUnion.QuantifiedFormula,Pretty,Indent+4,TSTPSyntaxFlag);
 //----If not pretty, or unary and atom, or atom, do on same line
             if (!Pretty || 
 FlatSymbolOrUnaryFormula(Formula->FormulaUnion.QuantifiedFormula.Formula) ||
-FlatEquation(Formula->FormulaUnion.QuantifiedFormula.Formula)) {
+FlatEquation(Formula->FormulaUnion.QuantifiedFormula.Formula) || 
+FlatBinaryFormula(Formula->FormulaUnion.QuantifiedFormula.Formula)) {
                 PFprintf(Stream," ");
                 PrintFileTSTPFormula(Stream,Language,
 //TODO THIS 0 seems wrong
@@ -820,10 +847,10 @@ Formula->FormulaUnion.QuantifiedFormula.Formula,Indent,Pretty,none,TSTPSyntaxFla
         case assignment:
         case type_declaration:
             Connective = Formula->FormulaUnion.BinaryFormula.Connective;
-//DEBUG fprintf(stderr,"Printing binary %s with connective %s (last was %s) indent %d\n",FormulaTypeToString(Formula->Type),ConnectiveToString(Connective),ConnectiveToString(LastConnective),Indent);
+fprintf(stderr,"Printing binary %s with connective %s (last was %s) indent %d\n",FormulaTypeToString(Formula->Type),ConnectiveToString(Connective),ConnectiveToString(LastConnective),Indent);
 //----No brackets for sequences of associative formulae and top level
-            if (LastConnective == outermost || FlatEquation(Formula) || 
-(Connective == LastConnective && Associative(Connective))) {
+            if (LastConnective == outermost || LastConnective == brackets ||
+FlatEquation(Formula) || (Connective == LastConnective && Associative(Connective))) {
                 NeedBrackets = 0;
                 ConnectiveIndent = Indent - strlen(ConnectiveToString(Connective)) - 1;
             } else {
@@ -860,7 +887,7 @@ TSTPSyntaxFlag);
             if (FakeConnective == brackets) {
                 PFprintf(Stream," )");
             }
-//----No new line for sequences of @ and >, and flat equations
+//----No new line for sequences of @ and >, and flat equations. Seems redundant here.
             NeedNewLine = !FlatFormula(Formula) && Formula->Type != assignment && 
 Formula->Type != type_declaration && !TypeOrDefnFormula(Formula);
             if (NeedNewLine && Pretty) {
@@ -981,8 +1008,9 @@ FakeConnective,TSTPSyntaxFlag);
             break;
 
         case ite_formula:
+            NeedNewLine = !FlatITEFormula(Formula);
             PFprintf(Stream,"$ite(");
-            if (Pretty) {
+            if (Pretty && NeedNewLine) {
                 PFprintf(Stream,"\n");
                 Indent += 2;
                 PrintSpaces(Stream,Indent);
@@ -990,20 +1018,23 @@ FakeConnective,TSTPSyntaxFlag);
             PrintFileTSTPFormula(Stream,Language,
 Formula->FormulaUnion.ConditionalFormula.Condition,Indent,Pretty,none,TSTPSyntaxFlag);
             PFprintf(Stream,", ");
-            if (Pretty) {
+            if (Pretty && NeedNewLine) {
                 PFprintf(Stream,"\n");
                 PrintSpaces(Stream,Indent);
             }
             PrintFileTSTPFormula(Stream,Language,
 Formula->FormulaUnion.ConditionalFormula.FormulaIfTrue,Indent,Pretty,none,TSTPSyntaxFlag);
             PFprintf(Stream,", ");
-            if (Pretty) {
+            if (Pretty && NeedNewLine) {
                 PFprintf(Stream,"\n");
                 PrintSpaces(Stream,Indent);
             }
             PrintFileTSTPFormula(Stream,Language,
 Formula->FormulaUnion.ConditionalFormula.FormulaIfFalse,Indent,Pretty,none,TSTPSyntaxFlag);
-            PFprintf(Stream," )");
+            if (NeedNewLine) {
+                PFprintf(Stream," ");
+            }
+            PFprintf(Stream,")");
             break;
 
         case let_formula:
