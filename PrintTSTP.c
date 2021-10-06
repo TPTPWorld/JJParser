@@ -847,10 +847,11 @@ Formula->FormulaUnion.QuantifiedFormula.Formula,Indent,Pretty,none,TSTPSyntaxFla
         case assignment:
         case type_declaration:
             Connective = Formula->FormulaUnion.BinaryFormula.Connective;
-fprintf(stderr,"Printing binary %s with connective %s (last was %s) indent %d\n",FormulaTypeToString(Formula->Type),ConnectiveToString(Connective),ConnectiveToString(LastConnective),Indent);
+//DEBUG printf("Printing %s with connective %s (last was %s) indent %d\n",FormulaTypeToString(Formula->Type),ConnectiveToString(Connective),ConnectiveToString(LastConnective),Indent);
 //----No brackets for sequences of associative formulae and top level
-            if (LastConnective == outermost || LastConnective == brackets ||
-FlatEquation(Formula) || (Connective == LastConnective && Associative(Connective))) {
+            if (LastConnective == outermost || FlatEquation(Formula) || 
+(Connective == LastConnective && Associative(Connective)) ||
+(LastConnective == brackets && LeftAssociative(Connective))) {
                 NeedBrackets = 0;
                 ConnectiveIndent = Indent - strlen(ConnectiveToString(Connective)) - 1;
             } else {
@@ -869,9 +870,7 @@ FlatEquation(Formula) || (Connective == LastConnective && Associative(Connective
             SideFormula = Formula->FormulaUnion.BinaryFormula.LHS;
             if ((Associative(Connective) && 
 !FullyAssociative(Connective) && SideFormula->Type == binary &&
-RightAssociative(SideFormula->FormulaUnion.BinaryFormula.Connective)) ||
-//----And for non-simple equations
-((Connective == equation || Connective == negequation) && !SymbolFormula(SideFormula))) {
+RightAssociative(SideFormula->FormulaUnion.BinaryFormula.Connective))) {
 //----tptp2X needs them for literals too (sad - the BNF does not)
 //    !LiteralFormula(SideFormula))) {
                 FakeConnective = brackets;
@@ -953,10 +952,10 @@ NegatedEquality(Formula->FormulaUnion.UnaryFormula.Formula)) {
                 } else {
                     FakeConnective = none;
                 }
-                if (LastConnective == brackets) {
-                    PFprintf(Stream,"( ");
-                    Indent +=2;
-                }
+//                if (LastConnective == brackets) {
+//                    PFprintf(Stream,"( ");
+//                    Indent +=2;
+//                }
                 PFprintf(Stream,"%s",ConnectiveToString(
 Formula->FormulaUnion.UnaryFormula.Connective));
                 if (2 - strlen(ConnectiveToString(
@@ -977,9 +976,9 @@ Indent,Pretty,FakeConnective,TSTPSyntaxFlag);
                 if (!Pretty || FakeConnective == brackets) {
                     PFprintf(Stream," )");
                 }
-                if (LastConnective == brackets) {
-                    PFprintf(Stream," )");
-                }
+//                if (LastConnective == brackets) {
+//                    PFprintf(Stream," )");
+//                }
             }
             break;
 
