@@ -1044,12 +1044,17 @@ int * PositivesLength,char ** PutNegativesHere,int * NegativesLength) {
 
     char * LiteralSymbols;
     char * LiteralVariables;
+    String ErrorMessage;
 
     if (DisjunctionOrLiteral == NULL) {
         return;
     }
 
     switch (DisjunctionOrLiteral->Type) {
+        case quantified:
+            CollectVariablesOfPolarity(DisjunctionOrLiteral->FormulaUnion.QuantifiedFormula.Formula,
+PutPositivesHere,PositivesLength,PutNegativesHere,NegativesLength);
+            break;
         case binary:
             CollectVariablesOfPolarity(DisjunctionOrLiteral->FormulaUnion.BinaryFormula.LHS,
 PutPositivesHere,PositivesLength,PutNegativesHere,NegativesLength);
@@ -1074,7 +1079,9 @@ NULL) {
             Free((void **)&LiteralSymbols);
             break;
         default:
-            ReportError("SyntaxError","Not a clause in tptp_cnf",1);
+            sprintf(ErrorMessage,"Cannot collect clause statistics for a %s",
+FormulaTypeToString(DisjunctionOrLiteral->Type));
+            CodingError(ErrorMessage);
             break;
     }
     NormalizeSymbolUsage(*PutPositivesHere);
@@ -1135,11 +1142,17 @@ AnnotatedTSTPFormula.FormulaWithVariables->Formula,&PutPositivesHere,
 //-------------------------------------------------------------------------------------------------
 int CountFormulaLiteralsOfPolarity(FORMULA DisjunctionOrLiteral,int Sign) {
 
+    String ErrorMessage;
+
     if (DisjunctionOrLiteral == NULL) {
         return(0);
     }
 
     switch (DisjunctionOrLiteral->Type) {
+        case quantified:
+            return(CountFormulaLiteralsOfPolarity(
+DisjunctionOrLiteral->FormulaUnion.QuantifiedFormula.Formula,Sign));
+            break;
         case binary:
             return(
 CountFormulaLiteralsOfPolarity(DisjunctionOrLiteral->FormulaUnion.BinaryFormula.LHS,Sign) +
@@ -1160,7 +1173,9 @@ CountFormulaLiteralsOfPolarity(DisjunctionOrLiteral->FormulaUnion.BinaryFormula.
             }
             break;
         default:
-            ReportError("SyntaxError","Not a clause in tptp_cnf",1);
+            sprintf(ErrorMessage,"Cannot collect clause polarity for a %s",
+FormulaTypeToString(DisjunctionOrLiteral->Type));
+            CodingError(ErrorMessage);
             return(0);
             break;
     }

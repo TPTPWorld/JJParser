@@ -1283,8 +1283,9 @@ FORMULA PossibleLHSFormula) {
         BinaryFormula->FormulaUnion.BinaryFormula.LHS = PossibleLHSFormula;
         BinaryFormula->FormulaUnion.BinaryFormula.Connective = assignmentsym;
         AcceptTokenType(Stream,binary_connective);
+//----Set the last connective to be none so that the RHS is parsed as a top level formula
         BinaryFormula->FormulaUnion.BinaryFormula.RHS =
-ParseFormula(Stream,Language,Context,EndOfScope,1,1,VariablesMustBeQuantified,assignmentsym);
+ParseFormula(Stream,Language,Context,EndOfScope,1,1,VariablesMustBeQuantified,none);
         return(BinaryFormula);
     } else {
         return(PossibleLHSFormula);
@@ -1454,10 +1455,10 @@ GetArityFromTyping(Stream,BinaryFormula->FormulaUnion.BinaryFormula.RHS),Stream)
 //DEBUG printf("Fixed atom symbol is %s and the arity is %d and the args are %s\n",GetSymbol(BinaryFormula->FormulaUnion.BinaryFormula.LHS->FormulaUnion.Atom),GetArity(BinaryFormula->FormulaUnion.BinaryFormula.LHS->FormulaUnion.Atom),GetArguments(BinaryFormula->FormulaUnion.BinaryFormula.LHS->FormulaUnion.Atom) == NULL ? "NULL" : "not NULL");
                     }
                 }
-//----If finished a binary, still need to allow another binary of low 
-//----precedence, right now that's :=
-                return(ParseLowPrecedenceBinary(Stream,Language,Context,
-EndOfScope,1,AllowInfixEquality,VariablesMustBeQuantified,BinaryFormula));
+//----If finished a binary, still need to allow another binary of low precedence, right now 
+//----that's :=
+                return(ParseLowPrecedenceBinary(Stream,Language,Context,EndOfScope,1,
+AllowInfixEquality,VariablesMustBeQuantified,BinaryFormula));
             } else if (LeftAssociative(ThisConnective)) {
                 while (LastConnective == none || LastConnective == ThisConnective) {
                     BinaryFormula = NewFormula();
@@ -1470,16 +1471,16 @@ EndOfScope,1,AllowInfixEquality,VariablesMustBeQuantified,BinaryFormula));
 Context,EndOfScope,0,1,VariablesMustBeQuantified,ThisConnective);
                     Formula = BinaryFormula;
                     LastConnective = ThisConnective;
-//----Check if we should continue a stream of binary. If a binary connective
-//----then keep it and the while loop will check, else nope.
+//----Check if we should continue a stream of binary. If a binary connective then keep it and the 
+//----while loop will check, else nope.
                     if (CheckTokenType(Stream,binary_connective)) {
                         ThisConnective = StringToConnective(CurrentToken(Stream)->NameToken);
                     } else {
                         ThisConnective = none;
                     }
                 }
-//----If finished a binary, still need to allow another binary of low 
-//----precedence, right now that's :=
+//----If finished a binary, still need to allow another binary of low precedence, right now 
+//----that's :=
                 return(ParseLowPrecedenceBinary(Stream,Language,Context,EndOfScope,1,
 AllowInfixEquality,VariablesMustBeQuantified,BinaryFormula));
             } else if (LastConnective != none) {

@@ -623,14 +623,15 @@ Statistics.FormulaStatistics.NumberOfTFF) {
     fprintf(Stream,")\n");
     }
 
-    if (Statistics.FormulaStatistics.NumberOfCNF > 0) {
+    if (Statistics.FormulaStatistics.NumberOfCNF > 0 || 
+Statistics.FormulaStatistics.NumberOfTCF > 0) {
         if (Statistics.FormulaStatistics.NumberOfFOF > 0 || 
 Statistics.FormulaStatistics.NumberOfTHF > 0 || Statistics.FormulaStatistics.NumberOfTFF > 0) {
             fprintf(Stream,"%%            ");
         } else {
             fprintf(Stream,"%% Syntax   : ");
         }
-        fprintf(Stream,"Number of clauses     : %4d (%4d non-Horn;%4d unit;%4d RR)\n",
+        fprintf(Stream,"Number of clauses     : %4d (%4d nHn;%4d unt;%4d RR)\n",
 Statistics.FormulaStatistics.NumberOfCNF + Statistics.FormulaStatistics.NumberOfTCF,
 Statistics.FormulaStatistics.NumberOfCNF + Statistics.FormulaStatistics.NumberOfTCF -
 Statistics.FormulaStatistics.NumberOfHornClauses,
@@ -677,13 +678,15 @@ Statistics.FormulaStatistics.NumberOfTHF > 0 || Statistics.FormulaStatistics.Num
         fprintf(Stream,"%%            Maximal formula depth : %4d (%4.0f avg)\n",
 Statistics.FormulaStatistics.MaxFormulaDepth,Statistics.FormulaStatistics.AverageFormulaDepth);
     }
-    if (Statistics.FormulaStatistics.NumberOfCNF > 0) {
+    if (Statistics.FormulaStatistics.NumberOfCNF > 0 || 
+Statistics.FormulaStatistics.NumberOfTCF > 0) {
         fprintf(Stream,"%%            Maximal clause size   : %4d (%4.0f avg)\n",
 Statistics.FormulaStatistics.MaxClauseSize,Statistics.FormulaStatistics.AverageClauseSize);
     }
 
     if (Statistics.FormulaStatistics.NumberOfFOF > 0 || 
 Statistics.FormulaStatistics.NumberOfCNF > 0 ||
+Statistics.FormulaStatistics.NumberOfTCF > 0 ||
 Statistics.FormulaStatistics.NumberOfTFF > 0) {
         if (Statistics.FormulaStatistics.NumberOfTFF > 0 &&
 (Statistics.FormulaStatistics.NumberOfNestedFormulae > 0 ||
@@ -713,7 +716,7 @@ Statistics.SymbolStatistics.NumberOfTuples,Statistics.SymbolStatistics.NumberOfI
 Statistics.SymbolStatistics.NumberOfLets);
             }
         } else {
-            fprintf(Stream,"%%            Maximal term depth    : %4d (%4.0f average)\n",
+            fprintf(Stream,"%%            Maximal term depth    : %4d (%4.0f avg)\n",
 Statistics.FormulaStatistics.MaxTermDepth,Statistics.FormulaStatistics.AverageTermDepth);
         }
     }
@@ -734,6 +737,7 @@ Statistics.ConnectiveStatistics.NumberOfSubtypes);
 
     if (Statistics.FormulaStatistics.NumberOfFOF > 0 || 
 Statistics.FormulaStatistics.NumberOfCNF > 0 ||
+Statistics.FormulaStatistics.NumberOfTCF > 0 ||
 Statistics.FormulaStatistics.NumberOfTFF > 0) {
         fprintf(Stream,"%%            Number of predicates  : %4d (%4d prp; ",
 Statistics.SymbolStatistics.NumberOfPredicates,
@@ -792,7 +796,7 @@ Statistics.ConnectiveStatistics.NumberOfExistentials);
             fprintf(Stream,";%4d   ^",Statistics.ConnectiveStatistics.NumberOfLambdas);
         }
     } else {
-        fprintf(Stream,"singleton");
+        fprintf(Stream,"sgn");
     }
     fprintf(Stream,")\n");
     if (Statistics.FormulaStatistics.NumberOfTFF > 0 ||

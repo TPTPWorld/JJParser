@@ -417,7 +417,7 @@ TypeConnective(Formula->FormulaUnion.BinaryFormula.Connective));
 int FlatTypeFormula(FORMULA Formula) {
 
     return(TypeFormula(Formula) &&
-SymbolFormula(Formula->FormulaUnion.BinaryFormula.LHS) &&
+FlatFormula(Formula->FormulaUnion.BinaryFormula.LHS) &&
 FlatFormula(Formula->FormulaUnion.BinaryFormula.RHS));
 }
 //-------------------------------------------------------------------------------------------------
@@ -430,7 +430,7 @@ DefnConnective(Formula->FormulaUnion.BinaryFormula.Connective));
 int FlatDefnFormula(FORMULA Formula) {
 
     return(DefnFormula(Formula) &&
-SymbolFormula(Formula->FormulaUnion.BinaryFormula.LHS) &&
+FlatFormula(Formula->FormulaUnion.BinaryFormula.LHS) &&
 FlatFormula(Formula->FormulaUnion.BinaryFormula.RHS));
 }
 //-------------------------------------------------------------------------------------------------
@@ -702,6 +702,7 @@ FORMULAArray FormulaTuple,int Pretty,int Indent,int TSTPSyntaxFlag) {
     if ((NeedSpace = !AtomicallyFlatFormulaList(NumberOfElements,FormulaTuple))) {
         PFprintf(Stream," ");
     }
+//----Need to () nested formula that are not flat, e.g., binaries.
     if (FlatFormula(FormulaTuple[0])) {
         LastConnective = outermost;
     } else {
@@ -1058,7 +1059,7 @@ Pretty,outermost,TSTPSyntaxFlag);
                 PrintSpaces(Stream,Indent);
             }
             PrintFileTSTPFormula(Stream,Language,Formula->FormulaUnion.LetFormula.LetBody,Indent,
-Pretty,none,TSTPSyntaxFlag);
+Pretty,outermost,TSTPSyntaxFlag);
             PFprintf(Stream," )");
             break;
 
