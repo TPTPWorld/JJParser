@@ -545,38 +545,19 @@ ConnectiveType LastConnective,int TSTPSyntaxFlag) {
         PrintFileTSTPFormula(Stream,Language,Term->TheSymbol.Formula,Indent,Pretty,
 LastConnective,1);
 //----Check if a nested formula - no symbol
-    } else if (Term->Type == nested_thf) {
-        PFprintf(Stream,"$thf(");
+    } else if (Term->Type == nested_thf || Term->Type == nested_tff || 
+Term->Type == nested_tcf || Term->Type == nested_fof || Term->Type == nested_cnf) {
+        PFprintf(Stream,"$%s( ",SyntaxToString(NestedTermTypeToSyntax(Term->Type)));
 //----Have to turn off pretty printing for nested formulae (so things come
 //----out on one line), which means sequences of quantifiers are not listed
 //----together. I'll live with it.
-        PrintFileTSTPFormula(Stream,tptp_thf,Term->TheSymbol.NestedFormula->
-Formula,0,0,LastConnective,1);
-        PFprintf(Stream,")");
-    } else if (Term->Type == nested_tff) {
-        PFprintf(Stream,"$tff(");
-        PrintFileTSTPFormula(Stream,tptp_tff,Term->TheSymbol.NestedFormula->Formula,0,0,
-LastConnective,1);
-        PFprintf(Stream,")");
-    } else if (Term->Type == nested_tcf) {
-        PFprintf(Stream,"$tcf(");
-        PrintFileTSTPFormula(Stream,tptp_tcf,Term->TheSymbol.NestedFormula->Formula,0,0,
-LastConnective,1);
-        PFprintf(Stream,")");
-    } else if (Term->Type == nested_fof) {
-        PFprintf(Stream,"$fof(");
-        PrintFileTSTPFormula(Stream,tptp_fof,Term->TheSymbol.NestedFormula->Formula,0,0,
-LastConnective,1);
-        PFprintf(Stream,")");
-    } else if (Term->Type == nested_cnf) {
-        PFprintf(Stream,"$cnf(");
-        PrintFileTSTPFormula(Stream,tptp_cnf,Term->TheSymbol.NestedFormula->Formula,0,0,
-LastConnective,1);
-        PFprintf(Stream,")");
+        PrintFileTSTPFormula(Stream,NestedTermTypeToSyntax(Term->Type),
+Term->TheSymbol.NestedFormula->Formula,0,0,outermost,1);
+        PFprintf(Stream," )");
     } else if (Term->Type == nested_fot) {
         PFprintf(Stream,"$fot(");
         PrintFileTSTPTerm(Stream,Language,Term->TheSymbol.NestedTerm->Term,Pretty,Indent,
-LastConnective,TSTPSyntaxFlag);
+outermost,TSTPSyntaxFlag);
         PFprintf(Stream,")");
 //----Check if infix - or : (see also TSTPTermToString in Examine.c)
     } else if (!strcmp(GetSymbol(Term),"-") || !strcmp(GetSymbol(Term),":")) {
@@ -848,11 +829,11 @@ Formula->FormulaUnion.QuantifiedFormula.Formula,Indent,Pretty,none,TSTPSyntaxFla
         case assignment:
         case type_declaration:
             Connective = Formula->FormulaUnion.BinaryFormula.Connective;
-//DEBUG printf("Printing %s with connective %s (last was %s) indent %d\n",FormulaTypeToString(Formula->Type),ConnectiveToString(Connective),ConnectiveToString(LastConnective),Indent);
+//DEBUG printf("Printing %s with connective %s, last connective was %s, indent %d\n",FormulaTypeToString(Formula->Type),ConnectiveToString(Connective),ConnectiveToString(LastConnective),Indent);
 //----No brackets for sequences of associative formulae and top level
             if (LastConnective == outermost || FlatEquation(Formula) || 
 (Connective == LastConnective && Associative(Connective)) ||
-(LastConnective == brackets && LeftAssociative(Connective))) {
+(LastConnective == brackets && Associative(Connective))) {
                 NeedBrackets = 0;
                 ConnectiveIndent = Indent - strlen(ConnectiveToString(Connective)) - 1;
             } else {
@@ -871,7 +852,9 @@ Formula->FormulaUnion.QuantifiedFormula.Formula,Indent,Pretty,none,TSTPSyntaxFla
             SideFormula = Formula->FormulaUnion.BinaryFormula.LHS;
             if ((Associative(Connective) && 
 !FullyAssociative(Connective) && SideFormula->Type == binary &&
-RightAssociative(SideFormula->FormulaUnion.BinaryFormula.Connective))) {
+RightAssociative(SideFormula->FormulaUnion.BinaryFormula.Connective)) ||
+//----Need ()s around quantified formulae on LHS (and RHS - see below) of equations
+((Connective == equation || Connective == negequation) && !SymbolFormula(SideFormula))) {
 //----tptp2X needs them for literals too (sad - the BNF does not)
 //    !LiteralFormula(SideFormula))) {
                 FakeConnective = brackets;
@@ -942,21 +925,19 @@ TSTPSyntaxFlag);
 Indent,Pretty,LastConnective,TSTPSyntaxFlag);
             } else {
                 if (
-(!SymbolFormula(Formula->FormulaUnion.UnaryFormula.Formula) &&
- !UnaryFormula(Formula->FormulaUnion.UnaryFormula.Formula) &&
- !BinaryFormula(Formula->FormulaUnion.UnaryFormula.Formula) &&
- !QuantifiedFormula(Formula->FormulaUnion.UnaryFormula.Formula)) ||
+!(Language == tptp_cnf && UnarySymbolFormula(Formula)) &&
+(!Pretty ||
+ (!SymbolFormula(Formula->FormulaUnion.UnaryFormula.Formula) &&
+  !UnaryFormula(Formula->FormulaUnion.UnaryFormula.Formula) &&
+  !BinaryFormula(Formula->FormulaUnion.UnaryFormula.Formula) &&
+  !QuantifiedFormula(Formula->FormulaUnion.UnaryFormula.Formula)) ||
 Equation(Formula->FormulaUnion.UnaryFormula.Formula,NULL,NULL) || 
 NegatedEquation(Formula->FormulaUnion.UnaryFormula.Formula,NULL,NULL) || 
-NegatedEquality(Formula->FormulaUnion.UnaryFormula.Formula)) {
+NegatedEquality(Formula->FormulaUnion.UnaryFormula.Formula))) {
                     FakeConnective = brackets;
                 } else {
                     FakeConnective = none;
                 }
-//                if (LastConnective == brackets) {
-//                    PFprintf(Stream,"( ");
-//                    Indent +=2;
-//                }
                 PFprintf(Stream,"%s",ConnectiveToString(
 Formula->FormulaUnion.UnaryFormula.Connective));
                 if (2 - strlen(ConnectiveToString(
@@ -967,27 +948,26 @@ Formula->FormulaUnion.UnaryFormula.Connective)) <= 0) {
 Formula->FormulaUnion.UnaryFormula.Connective)));
                 }
                 Indent += 2;
-//----If not pretty add extra ()s around negated formula
-                if (!Pretty || FakeConnective == brackets) {
+                if (FakeConnective == brackets) {
                     PFprintf(Stream,"( ");
                     Indent +=2;
                 }
                 PrintFileTSTPFormula(Stream,Language,Formula->FormulaUnion.UnaryFormula.Formula,
 Indent,Pretty,FakeConnective,TSTPSyntaxFlag);
-                if (!Pretty || FakeConnective == brackets) {
+                if (FakeConnective == brackets) {
                     PFprintf(Stream," )");
                 }
-//                if (LastConnective == brackets) {
-//                    PFprintf(Stream," )");
-//                }
             }
             break;
 
         case atom:
-//DEBUG printf("Printing atom %s (last connective was %s) indent %d\n",FormulaTypeToString(Formula->Type),ConnectiveToString(LastConnective),Indent);
+//DEBUG printf("Printing atom (last connective was %s) indent %d\n",ConnectiveToString(LastConnective),Indent);
+//----THF connectives in ()s are atoms
             NeedBrackets = Formula->FormulaUnion.Atom->Type == connective || 
+//----Boolean variables need to be ()ed to when I read them I know they are formulae not terms
 (Formula->FormulaUnion.Atom->Type == variable && 
  Formula->FormulaUnion.Atom->TheSymbol.Variable->Type == formula &&
+//----Can't remember why I excluded case of preceding (
  LastConnective != brackets);
             FakeConnective = LastConnective;
             if (NeedBrackets) {

@@ -29,6 +29,7 @@ SyntaxType StringToSyntax(char * String);
 char * TokenTypeToString(TokenType Type);
 char * SyntaxToString(SyntaxType Syntax);
 char * TermTypeToString(TermType Type);
+SyntaxType NestedTermTypeToSyntax(TermType Type);
 char * FormulaTypeToString(FormulaTypeType Type);
 TOKEN GetNextToken(READFILE CurrentFile);
 void FreeToken(TOKEN * Pointer);

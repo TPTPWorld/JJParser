@@ -862,6 +862,34 @@ char * TermTypeToString(TermType Type) {
     }
 }
 //-------------------------------------------------------------------------------------------------
+SyntaxType NestedTermTypeToSyntax(TermType Type) {
+
+    String ErrorMessage;
+
+    switch (Type) {
+        case nested_thf:
+            return(tptp_thf);
+            break;
+        case nested_tff:
+            return(tptp_tff);
+            break;
+        case nested_tcf:
+            return(tptp_tcf);
+            break;
+        case nested_fof:
+            return(tptp_fof);
+            break;
+        case nested_cnf:
+            return(tptp_cnf);
+            break;
+        default:
+            sprintf(ErrorMessage,"Not a nested term type to make into a syntax, index is %d",Type);
+            CodingError(ErrorMessage);
+            return(nontype);
+            break;
+    }
+}
+//-------------------------------------------------------------------------------------------------
 char * FormulaTypeToString(FormulaTypeType Type) {
 
     switch (Type) {
