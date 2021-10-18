@@ -269,6 +269,11 @@ int AtomicallyFlatTerm(TERM Term) {
     return(0);
 }
 //-------------------------------------------------------------------------------------------------
+int Variable(FORMULA Formula) {
+
+    return(Formula->Type == atom && Formula->FormulaUnion.Atom->Type == variable);
+}
+//-------------------------------------------------------------------------------------------------
 int SymbolFormula(FORMULA Formula) {
 
 //----Atoms and FOL predicates are "symbols". Thus $ite() and $let() are in 
@@ -831,7 +836,7 @@ Formula->FormulaUnion.QuantifiedFormula.Formula,Indent,Pretty,none,TSTPSyntaxFla
             Connective = Formula->FormulaUnion.BinaryFormula.Connective;
 //DEBUG printf("Printing %s with connective %s, last connective was %s, indent %d\n",FormulaTypeToString(Formula->Type),ConnectiveToString(Connective),ConnectiveToString(LastConnective),Indent);
 //----No brackets for sequences of associative formulae and top level
-            if (LastConnective == outermost || FlatEquation(Formula) || 
+            if (LastConnective == outermost || 
 (Connective == LastConnective && Associative(Connective)) ||
 (LastConnective == brackets && Associative(Connective))) {
                 NeedBrackets = 0;
@@ -853,10 +858,8 @@ Formula->FormulaUnion.QuantifiedFormula.Formula,Indent,Pretty,none,TSTPSyntaxFla
             if ((Associative(Connective) && 
 !FullyAssociative(Connective) && SideFormula->Type == binary &&
 RightAssociative(SideFormula->FormulaUnion.BinaryFormula.Connective)) ||
-//----Need ()s around quantified formulae on LHS (and RHS - see below) of equations
-((Connective == equation || Connective == negequation) && !SymbolFormula(SideFormula))) {
-//----tptp2X needs them for literals too (sad - the BNF does not)
-//    !LiteralFormula(SideFormula))) {
+//----Need ()s around equations and quantified formulae on LHS (and RHS - see below) of equations
+(Equation(Formula,NULL,NULL) && !SymbolFormula(SideFormula))) {
                 FakeConnective = brackets;
                 PFprintf(Stream,"( ");
                 Indent += 2;
@@ -897,9 +900,7 @@ Formula->Type != type_declaration && !TypeOrDefnFormula(Formula);
             } else if ((Associative(Connective) && !FullyAssociative(Connective) && 
 SideFormula->Type == binary && 
 LeftAssociative(SideFormula->FormulaUnion.BinaryFormula.Connective)) ||
-((Connective == equation || Connective == negequation) && !SymbolFormula(SideFormula))) {
-//----tptp2X needs them for literals too (sad - the BNF does not)
-//    !LiteralFormula(SideFormula))) {
+(Equation(Formula,NULL,NULL) && !SymbolFormula(SideFormula))) {
                 FakeConnective = brackets;
                 PFprintf(Stream,"( ");
                 Indent += 2;
@@ -925,7 +926,7 @@ TSTPSyntaxFlag);
 Indent,Pretty,LastConnective,TSTPSyntaxFlag);
             } else {
                 if (
-!(Language == tptp_cnf && UnarySymbolFormula(Formula)) &&
+!((Language == tptp_cnf || Language == tptp_fof) && UnarySymbolFormula(Formula)) &&
 (!Pretty ||
  (!SymbolFormula(Formula->FormulaUnion.UnaryFormula.Formula) &&
   !UnaryFormula(Formula->FormulaUnion.UnaryFormula.Formula) &&
