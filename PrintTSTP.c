@@ -752,6 +752,7 @@ int Pretty,ConnectiveType LastConnective,int TSTPSyntaxFlag) {
     int NeedNewLine;
     int ConnectiveIndent;
     int VariableIndent;
+    int SideIndent;
     ConnectiveType Connective;
     ConnectiveType FakeConnective;
     FORMULA SideFormula;
@@ -855,20 +856,22 @@ Formula->FormulaUnion.QuantifiedFormula.Formula,Indent,Pretty,none,TSTPSyntaxFla
             } 
 //----Need to force brackets for right associative operators
             SideFormula = Formula->FormulaUnion.BinaryFormula.LHS;
-            if ((Associative(Connective) && 
-!FullyAssociative(Connective) && SideFormula->Type == binary &&
+            SideIndent = Indent;
+            if ((Associative(Connective) && !FullyAssociative(Connective) && 
+SideFormula->Type == binary &&
 RightAssociative(SideFormula->FormulaUnion.BinaryFormula.Connective)) ||
 //----Need ()s around equations and quantified formulae on LHS (and RHS - see below) of equations
-(Equation(Formula,NULL,NULL) && !SymbolFormula(SideFormula))) {
+//----but not if the side formula is an equation becauyse it will get ()s itself.
+(Equation(Formula,NULL,NULL) && !SymbolFormula(SideFormula) && !Equation(SideFormula,NULL,NULL))) {
                 FakeConnective = brackets;
                 PFprintf(Stream,"( ");
-                Indent += 2;
+                SideIndent += 2;
             } else if (Formula->Type == assignment) {
                 FakeConnective = outermost;
             } else {
                 FakeConnective = Connective;
             }
-            PrintFileTSTPFormula(Stream,Language,SideFormula,Indent,Pretty,FakeConnective,
+            PrintFileTSTPFormula(Stream,Language,SideFormula,SideIndent,Pretty,FakeConnective,
 TSTPSyntaxFlag);
             if (FakeConnective == brackets) {
                 PFprintf(Stream," )");
@@ -888,8 +891,7 @@ Formula->Type != type_declaration && !TypeOrDefnFormula(Formula);
             if (!NeedNewLine && (Formula->Type == assignment || TypeOrDefnFormula(Formula)) && 
 !FlatFormula(SideFormula) && Pretty) {
                 PFprintf(Stream,"\n");
-                Indent +=2;
-                PrintSpaces(Stream,Indent);
+                PrintSpaces(Stream,Indent + 2);
             }
 //----If a : or := then no ()s required on RHS except if @ constructor
             if (TypeOrDefnConnective(Connective) && FlatFormula(SideFormula)) {
@@ -897,17 +899,20 @@ Formula->Type != type_declaration && !TypeOrDefnFormula(Formula);
 //      && !ApplicationFormula(SideFormula)) {
                 FakeConnective = outermost;
 //----Need to force brackets for left associative operators
-            } else if ((Associative(Connective) && !FullyAssociative(Connective) && 
+            } else {
+                SideIndent = Indent;
+                if ((Associative(Connective) && !FullyAssociative(Connective) && 
 SideFormula->Type == binary && 
 LeftAssociative(SideFormula->FormulaUnion.BinaryFormula.Connective)) ||
-(Equation(Formula,NULL,NULL) && !SymbolFormula(SideFormula))) {
-                FakeConnective = brackets;
-                PFprintf(Stream,"( ");
-                Indent += 2;
-            } else {
-                FakeConnective = Connective;
+(Equation(Formula,NULL,NULL) && !SymbolFormula(SideFormula) && !Equation(SideFormula,NULL,NULL))) {
+                    FakeConnective = brackets;
+                    PFprintf(Stream,"( ");
+                    SideIndent += 2;
+                } else {
+                    FakeConnective = Connective;
+                }
             }
-            PrintFileTSTPFormula(Stream,Language,SideFormula,Indent,Pretty,FakeConnective,
+            PrintFileTSTPFormula(Stream,Language,SideFormula,SideIndent,Pretty,FakeConnective,
 TSTPSyntaxFlag);
             if (FakeConnective == brackets) {
                 PFprintf(Stream," )");
@@ -966,7 +971,7 @@ Indent,Pretty,FakeConnective,TSTPSyntaxFlag);
 //----THF connectives in ()s are atoms
             NeedBrackets = Formula->FormulaUnion.Atom->Type == connective || 
 //----Boolean variables need to be ()ed to when I read them I know they are formulae not terms
-(Formula->FormulaUnion.Atom->Type == variable && 
+(Language != tptp_thf && Formula->FormulaUnion.Atom->Type == variable && 
  Formula->FormulaUnion.Atom->TheSymbol.Variable->Type == formula &&
 //----Can't remember why I excluded case of preceding (
  LastConnective != brackets);
