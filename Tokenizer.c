@@ -812,8 +812,8 @@ char * TermTypeToString(TermType Type) {
         case term:
             return("term");
             break;
-        case predicate:
-            return("predicate");
+        case atom_as_term:
+            return("atom_as_term");
             break;
         case function:
             return("function");

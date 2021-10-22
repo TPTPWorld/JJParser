@@ -129,12 +129,12 @@ typedef enum {
 //-------------------------------------------------------------------------------------------------
 //----Terms
 typedef enum {
-    connective,
-    term,   //----A variable or a function
-    predicate,
+//----A variable or a function, for requests not used after parsing has resolved it.
+    term,   
+//----Arguments in THF and TFX are formulae, which are terms of type atom
+    atom_as_term,
 //----Set TheSymbol = "[]" for a tuple "function"
     function,
-    a_type,
     variable,
     nested_thf,
     nested_tff,
@@ -142,12 +142,16 @@ typedef enum {
     nested_fof,
     nested_cnf,
     nested_fot,   // Used to record variable bindings in proofs
-//----Forcing a new variable to be inserted, replaced by variable
-    new_variable,
+//----Types are stored as terms too
+    a_type,
 //----For formulae arguments in THF and TFX
     formula,
+//----For connectives used as terms in THF
+    connective,
 //----For useful info, source, etc. Not in signature.
     non_logical_data,  
+//----Forcing a new variable to be inserted, replaced by variable
+    new_variable,
     nonterm
 } TermType;
 
@@ -288,8 +292,8 @@ typedef enum {
     tptp_tpi,
     tptp_thf,
     tptp_tff,
-    tptp_tcf,
     tptp_fof,
+    tptp_tcf,
     tptp_cnf,
     tptp_mixed,
     include,

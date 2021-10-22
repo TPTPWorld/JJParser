@@ -94,11 +94,6 @@ GetListNodeFormula(List)->Type == sequent) {
                 case variable_atoms:
                     Counter += CountFormulaAtomsByPredicate(GetListNodeFormula(List),"VARIABLE");
                     break;
-                case literal_count:
-                    if (GetSyntax(List->AnnotatedFormula) == tptp_cnf) {
-                        Counter += CountFormulaAtomsByPredicate(GetListNodeFormula(List),"");
-                    }
-                    break;
                 case terms:
                     Counter += CountFormulaTerms(GetListNodeFormula(List));
                     break;
@@ -127,7 +122,9 @@ GetSyntax(List->AnnotatedFormula) == tptp_tff) {
                     }
                     break;
                 case nested_formulae:
-                    Counter += CountNestedFormulae(Signature,GetListNodeFormula(List),0);
+                    if (GetSyntax(List->AnnotatedFormula) == tptp_thf) {
+                        Counter += CountNestedFormulae(Signature,GetListNodeFormula(List),0);
+                    }
                     break;
                 case boolean_variables:
                     Counter += CountBooleanVariablesInFormula(GetListNodeFormula(List));
@@ -410,7 +407,7 @@ int * NumberOfFunctions,int * NumberOfNumbers) {
         Slash++;
         Arity = atoi(Slash);
 //----Have to ignore arity for THF usage
-        if (GetSymbolUses(Signature,predicate,MyCopy,-1) > 0) {
+        if (GetSymbolUses(Signature,atom_as_term,MyCopy,-1) > 0) {
             (*NumberOfPredicates)++;
 //DEBUG printf("%s is used\n",MyCopy);
         }
@@ -424,7 +421,7 @@ int * NumberOfFunctions,int * NumberOfNumbers) {
         Arity = atoi(Slash+1);
 //----Need to look for math functiosn in predicates because that's what they
 //----look like in THF
-        if (GetSymbolUses(Signature,predicate,MyCopy,-1) > 0 ||
+        if (GetSymbolUses(Signature,atom_as_term,MyCopy,-1) > 0 ||
 GetSymbolUses(Signature,function,MyCopy,-1) > 0) {
 //----Add GetSymbolUses() to get total occurrences
             (*NumberOfFunctions)++;
@@ -512,8 +509,6 @@ printf("PROGRESS: counted formulae of type\n");
 equality_atoms);
     Statistics.FormulaStatistics.NumberOfVariableAtoms = HeadListCount(Signature,&HeadListNode,
 variable_atoms);
-    Statistics.FormulaStatistics.NumberOfLiterals = HeadListCount(Signature,&HeadListNode,
-literal_count);
 printf("PROGRESS: counted atoms of type\n");
 
     Statistics.FormulaStatistics.MaxFormulaDepth = HeadListMaximal(&HeadListNode,max_formula_depth);
@@ -526,6 +521,10 @@ Statistics.FormulaStatistics.NumberOfFormulae;
     }
 printf("PROGRESS: got formulae depth\n");
     Statistics.ConnectiveStatistics = GetListConnectiveUsageStatistics(&HeadListNode);
+    if (Statistics.ConnectiveStatistics.NumberOfEquations != 
+Statistics.FormulaStatistics.NumberOfEqualityAtoms) {
+printf("ERROR ERROR: Equations not the same as equality atoms\n");
+    }
 printf("PROGRESS: counted connectives\n");
 
     Statistics.FormulaStatistics.NumberOfHornClauses = HeadListCount(Signature,&HeadListNode,
@@ -611,42 +610,75 @@ void PrintMinMaxArity(FILE * Stream,double Arity) {
 //-------------------------------------------------------------------------------------------------
 void PrintListStatistics(FILE * Stream,StatisticsType Statistics) {
 
-    if (Statistics.FormulaStatistics.NumberOfFOF > 0 || 
-Statistics.FormulaStatistics.NumberOfTHF > 0 || Statistics.FormulaStatistics.NumberOfTFF > 0) {
+    if (
+Statistics.FormulaStatistics.NumberOfTHF > 0 || 
+Statistics.FormulaStatistics.NumberOfTFF > 0 ||
+Statistics.FormulaStatistics.NumberOfFOF > 0) {
         fprintf(Stream,"%% Syntax   : Number of formulae    : %4d (%4d unt",
 Statistics.FormulaStatistics.NumberOfFormulae,Statistics.FormulaStatistics.NumberOfUnitFormulae);
-        if (Statistics.FormulaStatistics.NumberOfTHF > 0 || 
-Statistics.FormulaStatistics.NumberOfTFF) {
+        if (
+Statistics.FormulaStatistics.NumberOfTHF > 0 || 
+Statistics.FormulaStatistics.NumberOfTFF > 0) {
             fprintf(Stream,";%4d typ",Statistics.FormulaStatistics.NumberOfTypeFormulae);
+        }
+        if (
+Statistics.FormulaStatistics.NumberOfTHF > 0 || 
+Statistics.FormulaStatistics.NumberOfTFF > 0 || 
+Statistics.FormulaStatistics.NumberOfFOF > 0) {
             fprintf(Stream,";%4d def",Statistics.FormulaStatistics.NumberOfDefnFormulae);
         }
     fprintf(Stream,")\n");
     }
 
-    if (Statistics.FormulaStatistics.NumberOfCNF > 0 || 
-Statistics.FormulaStatistics.NumberOfTCF > 0) {
-        if (Statistics.FormulaStatistics.NumberOfFOF > 0 || 
-Statistics.FormulaStatistics.NumberOfTHF > 0 || Statistics.FormulaStatistics.NumberOfTFF > 0) {
+    if (
+Statistics.FormulaStatistics.NumberOfTCF > 0 ||
+Statistics.FormulaStatistics.NumberOfCNF > 0) {
+        if (
+Statistics.FormulaStatistics.NumberOfTHF > 0 || 
+Statistics.FormulaStatistics.NumberOfTFF > 0 ||
+Statistics.FormulaStatistics.NumberOfFOF > 0) {
             fprintf(Stream,"%%            ");
         } else {
             fprintf(Stream,"%% Syntax   : ");
         }
-        fprintf(Stream,"Number of clauses     : %4d (%4d nHn;%4d unt;%4d RR)\n",
+        fprintf(Stream,"Number of clauses     : %4d (%4d unt;%4d nHn;%4d RR)\n",
 Statistics.FormulaStatistics.NumberOfCNF + Statistics.FormulaStatistics.NumberOfTCF,
+Statistics.FormulaStatistics.NumberOfUnitFormulae,
 Statistics.FormulaStatistics.NumberOfCNF + Statistics.FormulaStatistics.NumberOfTCF -
 Statistics.FormulaStatistics.NumberOfHornClauses,
-Statistics.FormulaStatistics.NumberOfUnitFormulae,Statistics.FormulaStatistics.NumberOfRRClauses);
+Statistics.FormulaStatistics.NumberOfRRClauses);
     }
 
-    fprintf(Stream,"%%            Number of atoms       : %4d (%4d equ",
+    if (
+Statistics.FormulaStatistics.NumberOfTCF > 0 ||
+Statistics.FormulaStatistics.NumberOfCNF > 0) {
+        fprintf(Stream,"%%            Number of atoms       : ");
+    } else {
+        fprintf(Stream,"%%            Number of literals    : ");
+    }
+    fprintf(Stream,%4d (%4d equ",
 Statistics.FormulaStatistics.NumberOfAtoms,Statistics.FormulaStatistics.NumberOfEqualityAtoms);
-    if (Statistics.FormulaStatistics.NumberOfTHF > 0) {
+    if (
+Statistics.FormulaStatistics.NumberOfTHF > 0 ||
+(Statistics.FormulaStatistics.NumberOfTFF > 0 &&
+ Statistics.FormulaStatistics.NumberOfVariableAtoms > 0)) {
         fprintf(Stream,";%4d var",Statistics.FormulaStatistics.NumberOfVariableAtoms);
     }
+    if (
+Statistics.FormulaStatistics.NumberOfTCF > 0 ||
+Statistics.FormulaStatistics.NumberOfCNF > 0) {
+        fprintf(Stream,";%4d neg",Statistics.ConnectiveStatistics.NumberOfNegations);
+    }
     fprintf(Stream,")\n");
+    if (Statistics.ConnectiveStatistics.NumberOfGlobalDefns > 0) {
+        fprintf(Stream,"%%            Number of defns       : %4d",
+Statistics.ConnectiveStatistics.NumberOfGlobalDefns);
+    }
 
-    if (Statistics.FormulaStatistics.NumberOfFOF > 0 || 
-Statistics.FormulaStatistics.NumberOfTHF > 0 || Statistics.FormulaStatistics.NumberOfTFF > 0) {
+    if (
+Statistics.FormulaStatistics.NumberOfTHF > 0 || 
+Statistics.FormulaStatistics.NumberOfTFF > 0 ||
+Statistics.FormulaStatistics.NumberOfFOF > 0) {
 //----First connectives line
         fprintf(Stream,
 "%%            Number of connectives : %4d (%4d   ~;%4d   |;%4d   &",
@@ -666,46 +698,57 @@ Statistics.ConnectiveStatistics.NumberOfImplications,
 Statistics.ConnectiveStatistics.NumberOfReverseImplications,
 Statistics.ConnectiveStatistics.NumberOfXors);
 //----Third connectives line
-        fprintf(Stream,
+        if (
+Statistics.ConnectiveStatistics.NumberOfNors > 0 ||
+Statistics.ConnectiveStatistics.NumberOfNands > 0) {
+            fprintf(Stream,
 "%%                                         (%4d  ~|;%4d  ~&",
 Statistics.ConnectiveStatistics.NumberOfNors,
 Statistics.ConnectiveStatistics.NumberOfNands);
+        }
         fprintf(Stream,")\n");
     }
 
-    if (Statistics.FormulaStatistics.NumberOfFOF > 0 || 
-Statistics.FormulaStatistics.NumberOfTHF > 0 || Statistics.FormulaStatistics.NumberOfTFF > 0) {
-        fprintf(Stream,"%%            Maximal formula depth : %4d (%4.0f avg)\n",
+    if (
+Statistics.FormulaStatistics.NumberOfTHF > 0 || 
+Statistics.FormulaStatistics.NumberOfTFF > 0 ||
+Statistics.FormulaStatistics.NumberOfFOF > 0) {
+        fprintf(Stream,"%%            Maximal formula depth : %4d (%4.0f avg",
 Statistics.FormulaStatistics.MaxFormulaDepth,Statistics.FormulaStatistics.AverageFormulaDepth);
+        if (Statistics.ConnectiveStatistics.NumberOfApplications) {
+            fprintf(Stream,";%4d nst",Statistics.ConnectiveStatistics.NumberOfApplications);
+        }
+        fprintf(Stream,")\n");
     }
-    if (Statistics.FormulaStatistics.NumberOfCNF > 0 || 
-Statistics.FormulaStatistics.NumberOfTCF > 0) {
+    if (
+Statistics.FormulaStatistics.NumberOfTCF > 0 ||
+Statistics.FormulaStatistics.NumberOfCNF > 0) {
         fprintf(Stream,"%%            Maximal clause size   : %4d (%4.0f avg)\n",
 Statistics.FormulaStatistics.MaxClauseSize,Statistics.FormulaStatistics.AverageClauseSize);
     }
 
-    if (Statistics.FormulaStatistics.NumberOfFOF > 0 || 
-Statistics.FormulaStatistics.NumberOfCNF > 0 ||
+    if (
+Statistics.FormulaStatistics.NumberOfTFF > 0 ||
+Statistics.FormulaStatistics.NumberOfFOF > 0 || 
 Statistics.FormulaStatistics.NumberOfTCF > 0 ||
-Statistics.FormulaStatistics.NumberOfTFF > 0) {
-        if (Statistics.FormulaStatistics.NumberOfTFF > 0 &&
+Statistics.FormulaStatistics.NumberOfCNF > 0) {
+        fprintf(Stream,"%%            Maximal term depth    : %4d (%4.0f avg)\n",
+Statistics.FormulaStatistics.MaxTermDepth,Statistics.FormulaStatistics.AverageTermDepth);
+    }
+    if (
+Statistics.FormulaStatistics.NumberOfTFF > 0 &&
 (Statistics.FormulaStatistics.NumberOfNestedFormulae > 0 ||
- Statistics.SymbolStatistics.NumberBooleanVariables > 0 ||
- Statistics.SymbolStatistics.NumberOfTuples > 0 ||
- Statistics.SymbolStatistics.NumberOfITEs > 0 ||
- Statistics.SymbolStatistics.NumberOfLets > 0)) {
-//----TFX and THX symbols
-            if (Statistics.FormulaStatistics.NumberOfNestedFormulae > 0 ||
-Statistics.SymbolStatistics.NumberBooleanVariables > 0) {
-                fprintf(Stream,
+ Statistics.SymbolStatistics.NumberBooleanVariables > 0)) {
+        fprintf(Stream,
 "%%            Number of $o terms    : %4d (%4d fml;%4d var)\n",
 Statistics.FormulaStatistics.NumberOfNestedFormulae +
 Statistics.SymbolStatistics.NumberBooleanVariables,
 Statistics.FormulaStatistics.NumberOfNestedFormulae,
 Statistics.SymbolStatistics.NumberBooleanVariables);
-            }
+    }
 
-        if (Statistics.SymbolStatistics.NumberOfTuples > 0 ||
+    if (
+Statistics.SymbolStatistics.NumberOfTuples > 0 ||
 Statistics.SymbolStatistics.NumberOfITEs > 0 ||
 Statistics.SymbolStatistics.NumberOfLets > 0) {
         fprintf(Stream,
@@ -714,18 +757,19 @@ Statistics.SymbolStatistics.NumberOfTuples +
 Statistics.SymbolStatistics.NumberOfITEs + Statistics.SymbolStatistics.NumberOfLets,
 Statistics.SymbolStatistics.NumberOfTuples,Statistics.SymbolStatistics.NumberOfITEs,
 Statistics.SymbolStatistics.NumberOfLets);
-            }
-        } else {
-            fprintf(Stream,"%%            Maximal term depth    : %4d (%4.0f avg)\n",
-Statistics.FormulaStatistics.MaxTermDepth,Statistics.FormulaStatistics.AverageTermDepth);
         }
     }
 
-    if (Statistics.FormulaStatistics.NumberOfTFF > 0 ||
-Statistics.FormulaStatistics.NumberOfTHF > 0) {
+    if (
+Statistics.FormulaStatistics.NumberOfTHF > 0 ||
+Statistics.FormulaStatistics.NumberOfTFF > 0 ||
+Statistics.FormulaStatistics.NumberOfTCF > 0) {
         fprintf(Stream,"%%            Number of types       : %4d (%4d usr)\n",
 Statistics.SymbolStatistics.NumberOfTypes,
 Statistics.SymbolStatistics.NumberOfUserTypes);
+        fprintf(Stream,
+"%%            Number of type decls  : %4d\n",
+Statistics.ConnectiveStatistics.NumberOfGlobalTypeDecs);
         fprintf(Stream,
 "%%            Number of type conns  : %4d (%4d   >;%4d   *;%4d   +;%4d  <<)\n",
 Statistics.ConnectiveStatistics.NumberOfTypeConnectives,
@@ -735,87 +779,58 @@ Statistics.ConnectiveStatistics.NumberOfUnions,
 Statistics.ConnectiveStatistics.NumberOfSubtypes);
     }
 
-    if (Statistics.FormulaStatistics.NumberOfFOF > 0 || 
-Statistics.FormulaStatistics.NumberOfCNF > 0 ||
-Statistics.FormulaStatistics.NumberOfTCF > 0 ||
-Statistics.FormulaStatistics.NumberOfTFF > 0) {
-        fprintf(Stream,"%%            Number of predicates  : %4d (%4d prp; ",
+//----Now down to the symbol level
+    if (Statistics.FormulaStatistics.NumberOfTHF > 0) {
+        fprintf(Stream,"%%            Number of symbols     : %4d (%4d usr;%4d con; ",
 Statistics.SymbolStatistics.NumberOfPredicates,
+Statistics.SymbolStatistics.NumberOfUserPredicates,
 Statistics.SymbolStatistics.NumberOfPropositions);
         PrintMinMaxArity(Stream,Statistics.SymbolStatistics.MinPredicateArity);
         fprintf(Stream,"-");
         PrintMinMaxArity(Stream,Statistics.SymbolStatistics.MaxPredicateArity);
-        fprintf(Stream," arity)\n");
-        fprintf(Stream,"%%            Number of functors    : %4d (%4d con; ",
-Statistics.SymbolStatistics.NumberOfFunctors,Statistics.SymbolStatistics.NumberOfConstants);
-        PrintMinMaxArity(Stream,Statistics.SymbolStatistics.MinFunctorArity),
-        fprintf(Stream,"-");
-        PrintMinMaxArity(Stream,Statistics.SymbolStatistics.MaxFunctorArity);
-        fprintf(Stream," arity)\n");
-    }
-
-//----Symbols
-    if (Statistics.FormulaStatistics.NumberOfTHF > 0) {
-        fprintf(Stream,"%%            Number of symbols     : %4d (%4d constant; ",
-Statistics.SymbolStatistics.NumberOfPredicates,Statistics.SymbolStatistics.NumberOfPropositions);
-        PrintMinMaxArity(Stream,Statistics.SymbolStatistics.MinPredicateArity);
-        fprintf(Stream,"-");
-        PrintMinMaxArity(Stream,Statistics.SymbolStatistics.MaxPredicateArity);
-        fprintf(Stream," arity");
-//----For TF1 print uses of @= and others as terms
-        if (Statistics.ConnectiveStatistics.NumberOfPiBinders > 0 ||
-Statistics.ConnectiveStatistics.NumberOfTypedEquations > 0 ||
+        fprintf(Stream," aty");
+        if (
+Statistics.ConnectiveStatistics.NumberOfTypedEquations > 0) {
+            fprintf(Stream,";%4d  @=)\n",
+Statistics.ConnectiveStatistics.NumberOfTypedEquations);
+        } else {
+            fprintf(Stream,")\n");
+        }
+        if (
 Statistics.ConnectiveStatistics.NumberOfPis > 0 ||
 Statistics.ConnectiveStatistics.NumberOfSigmas > 0 ||
 Statistics.ConnectiveStatistics.NumberOfChoices > 0 ||
 Statistics.ConnectiveStatistics.NumberOfDescriptions > 0) {
-            fprintf(Stream,";%4d  @=)\n",
-Statistics.ConnectiveStatistics.NumberOfTypedEquations);
             fprintf(Stream,
 "%%                                         (%4d  !!;%4d  ??;%4d @@+;%4d @@-)\n",
 Statistics.ConnectiveStatistics.NumberOfPis,
 Statistics.ConnectiveStatistics.NumberOfSigmas,
 Statistics.ConnectiveStatistics.NumberOfChoices,
 Statistics.ConnectiveStatistics.NumberOfDescriptions);
-        } else {
-            fprintf(Stream,")\n");
         }
+    } else if (
+Statistics.FormulaStatistics.NumberOfTFF > 0 ||
+Statistics.FormulaStatistics.NumberOfFOF > 0 || 
+Statistics.FormulaStatistics.NumberOfTCF > 0 ||
+Statistics.FormulaStatistics.NumberOfCNF > 0) {
+        fprintf(Stream,"%%            Number of predicates  : %4d (%4d usr;%4d prp; ",
+Statistics.SymbolStatistics.NumberOfUserPredicates,
+Statistics.SymbolStatistics.NumberOfPredicates,
+Statistics.SymbolStatistics.NumberOfPropositions);
+        PrintMinMaxArity(Stream,Statistics.SymbolStatistics.MinPredicateArity);
+        fprintf(Stream,"-");
+        PrintMinMaxArity(Stream,Statistics.SymbolStatistics.MaxPredicateArity);
+        fprintf(Stream," aty)\n");
+        fprintf(Stream,"%%            Number of functors    : %4d (%4d con; ",
+Statistics.SymbolStatistics.NumberOfFunctors,Statistics.SymbolStatistics.NumberOfConstants);
+        PrintMinMaxArity(Stream,Statistics.SymbolStatistics.MinFunctorArity),
+        fprintf(Stream,"-");
+        PrintMinMaxArity(Stream,Statistics.SymbolStatistics.MaxFunctorArity);
+        fprintf(Stream," aty)\n");
     }
 
-//----Variables. Fuck, watch the sgn for FOF and THF, singleton for CNF
-    fprintf(Stream,"%%            Number of variables   : %4d (%4d ",
-Statistics.SymbolStatistics.NumberOfVariables,Statistics.SymbolStatistics.NumberOfSingletons);
-
-    if (Statistics.FormulaStatistics.NumberOfFOF > 0 || 
-Statistics.FormulaStatistics.NumberOfTHF > 0 ||
-Statistics.FormulaStatistics.NumberOfTFF > 0) {
-        fprintf(Stream,"sgn;%4d   !;%4d   ?",
-Statistics.ConnectiveStatistics.NumberOfUniversals,
-Statistics.ConnectiveStatistics.NumberOfExistentials);
-        if (Statistics.FormulaStatistics.NumberOfTHF > 0) {
-            fprintf(Stream,";%4d   ^",Statistics.ConnectiveStatistics.NumberOfLambdas);
-        }
-    } else {
-        fprintf(Stream,"sgn");
-    }
-    fprintf(Stream,")\n");
-    if (Statistics.FormulaStatistics.NumberOfTFF > 0 ||
-Statistics.FormulaStatistics.NumberOfTHF > 0) {
-        fprintf(Stream,
-"%%                                         (%4d   :;%4d  !>;%4d  ?*)\n",
-Statistics.ConnectiveStatistics.NumberOfTypedVariables,
-Statistics.ConnectiveStatistics.NumberOfPiBinders,
-Statistics.ConnectiveStatistics.NumberOfSigmaBinders);
-    }
-    if (Statistics.FormulaStatistics.NumberOfTHF > 0) {
-        fprintf(Stream,
-"%%                                         (%4d  @-;%4d  @+)\n",
-Statistics.ConnectiveStatistics.NumberOfDescriptionBinders,
-Statistics.ConnectiveStatistics.NumberOfChoiceBinders);
-    }
-
-//----Mathematics
-    if (Statistics.SymbolStatistics.NumberOfMathPredicates > 0 ||
+    if (
+Statistics.SymbolStatistics.NumberOfMathPredicates > 0 ||
 Statistics.SymbolStatistics.NumberOfMathFunctions > 0 ||
 Statistics.SymbolStatistics.NumberOfNumbers > 0 ||
 Statistics.ConnectiveStatistics.NumberOfMathVariables > 0 ) {
@@ -830,5 +845,48 @@ Statistics.SymbolStatistics.NumberOfMathFunctions,
 Statistics.SymbolStatistics.NumberOfNumbers,
 Statistics.ConnectiveStatistics.NumberOfMathVariables);
     }
+
+//----Variables
+    fprintf(Stream,"%%            Number of variables   : %4d (%4d sgn;",
+Statistics.SymbolStatistics.NumberOfVariables,
+Statistics.SymbolStatistics.NumberOfSingletons);
+    if (
+Statistics.FormulaStatistics.NumberOfTHF > 0 ||
+Statistics.FormulaStatistics.NumberOfTFF > 0 ||
+Statistics.FormulaStatistics.NumberOfFOF > 0) {
+        fprintf(Stream,"%4d   !;%4d   ?",
+Statistics.ConnectiveStatistics.NumberOfUniversals,
+Statistics.ConnectiveStatistics.NumberOfExistentials);
+        if (Statistics.FormulaStatistics.NumberOfTHF > 0) {
+            fprintf(Stream,";%4d   ^",Statistics.ConnectiveStatistics.NumberOfLambdas);
+        }
+    }
+    fprintf(Stream,")\n");
+    if (
+Statistics.FormulaStatistics.NumberOfTHF > 0 ||
+Statistics.FormulaStatistics.NumberOfTFF > 0 ||
+Statistics.FormulaStatistics.NumberOfTCF > 0) {
+        fprintf(Stream,
+"%%                                         (%4d   :",
+Statistics.ConnectiveStatistics.NumberOfTypedVariables);
+    }
+    if (Statistics.ConnectiveStatistics.NumberOfPiBinders > 0 ||
+Statistics.ConnectiveStatistics.NumberOfSigmaBinders > 0 ) {
+        fprintf(Stream,
+"%%                                         (%4d   :;%4d  !>;%4d  ?*",
+Statistics.ConnectiveStatistics.NumberOfPiBinders,
+Statistics.ConnectiveStatistics.NumberOfSigmaBinders);
+    }
+    fprintf(Stream,)\n");
+
+    if (Statistics.FormulaStatistics.NumberOfTHF > 0 &&
+(Statistics.ConnectiveStatistics.NumberOfDescriptionBinders > 0 ||
+ Statistics.ConnectiveStatistics.NumberOfChoiceBinders > 0)) {
+        fprintf(Stream,
+"%%                                         (%4d  @-;%4d  @+)\n",
+Statistics.ConnectiveStatistics.NumberOfDescriptionBinders,
+Statistics.ConnectiveStatistics.NumberOfChoiceBinders);
+    }
+
 }
 //-------------------------------------------------------------------------------------------------

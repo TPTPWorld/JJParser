@@ -36,14 +36,14 @@ SIGNATURE NewSignatureWithTypes(void) {
     IncreaseSymbolUseCount(InsertIntoSignature(Signature,a_type,"$int",0,NULL),-1);
     IncreaseSymbolUseCount(InsertIntoSignature(Signature,a_type,"$rat",0,NULL),-1);
     IncreaseSymbolUseCount(InsertIntoSignature(Signature,a_type,"$real",0,NULL),-1);
-    IncreaseSymbolUseCount(InsertIntoSignature(Signature,predicate,"$true",0,NULL),-1);
-    IncreaseSymbolUseCount(InsertIntoSignature(Signature,predicate,"$false",0,NULL),-1);
-    IncreaseSymbolUseCount(InsertIntoSignature(Signature,predicate,"$is_int",1,NULL),-1);
-    IncreaseSymbolUseCount(InsertIntoSignature(Signature,predicate,"$is_rat",1,NULL),-1);
-    IncreaseSymbolUseCount(InsertIntoSignature(Signature,predicate,"$less",2,NULL),-1);
-    IncreaseSymbolUseCount(InsertIntoSignature(Signature,predicate,"$lesseq",2,NULL),-1);
-    IncreaseSymbolUseCount(InsertIntoSignature(Signature,predicate,"$greater",2,NULL),-1);
-    IncreaseSymbolUseCount(InsertIntoSignature(Signature,predicate,"$greatereq",2,NULL),-1);
+    IncreaseSymbolUseCount(InsertIntoSignature(Signature,atom_as_term,"$true",0,NULL),-1);
+    IncreaseSymbolUseCount(InsertIntoSignature(Signature,atom_as_term,"$false",0,NULL),-1);
+    IncreaseSymbolUseCount(InsertIntoSignature(Signature,atom_as_term,"$is_int",1,NULL),-1);
+    IncreaseSymbolUseCount(InsertIntoSignature(Signature,atom_as_term,"$is_rat",1,NULL),-1);
+    IncreaseSymbolUseCount(InsertIntoSignature(Signature,atom_as_term,"$less",2,NULL),-1);
+    IncreaseSymbolUseCount(InsertIntoSignature(Signature,atom_as_term,"$lesseq",2,NULL),-1);
+    IncreaseSymbolUseCount(InsertIntoSignature(Signature,atom_as_term,"$greater",2,NULL),-1);
+    IncreaseSymbolUseCount(InsertIntoSignature(Signature,atom_as_term,"$greatereq",2,NULL),-1);
     IncreaseSymbolUseCount(InsertIntoSignature(Signature,function,"$uminus",1,NULL),-1);
     IncreaseSymbolUseCount(InsertIntoSignature(Signature,function,"$sum",2,NULL),-1);
     IncreaseSymbolUseCount(InsertIntoSignature(Signature,function,"$difference",2,NULL),-1);
@@ -345,7 +345,7 @@ READFILE Stream) {
         case function:
             return(InsertIntoSignatureList(&(Signature->Functions),Name,Arity,Stream));
             break;
-        case predicate:
+        case atom_as_term:
         case connective:
             return(InsertIntoSignatureList(&(Signature->Predicates),Name,Arity,Stream));
             break;

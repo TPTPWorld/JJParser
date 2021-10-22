@@ -25,7 +25,6 @@ typedef enum {
     atoms,
     equality_atoms,
     variable_atoms,
-    literal_count,
     terms,
     variables,
     singletons,
@@ -142,7 +141,6 @@ typedef struct {
     int NumberOfDescriptionBinders;
 
     int NumberOfTypedVariables;  //----Not a symbol, but counted by :s
-    int NumberOfDefinedVariables; //----Not a symbol, but counted by :=s
     int NumberOfMathVariables;  //----Not a symbol, but counted by :s
     int NumberOfGlobalTypeDecs; //----Not a symbol, but counted by :s
     int NumberOfGlobalDefns; //----Not a symbol, but counted by :=s

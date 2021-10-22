@@ -100,7 +100,6 @@ void InitializeConnectiveStatistics(ConnectiveStatisticsType * ConnectiveStatist
     ConnectiveStatistics->NumberOfChoiceBinders = 0;
 
     ConnectiveStatistics->NumberOfTypedVariables = 0;
-    ConnectiveStatistics->NumberOfDefinedVariables = 0;
     ConnectiveStatistics->NumberOfMathVariables = 0;
     ConnectiveStatistics->NumberOfGlobalTypeDecs = 0;
     ConnectiveStatistics->NumberOfGlobalDefns = 0;
@@ -157,8 +156,6 @@ MoreConnectiveStatistics.NumberOfDescriptionBinders;
     ConnectiveStatistics->NumberOfChoiceBinders += MoreConnectiveStatistics.NumberOfChoiceBinders;
 
     ConnectiveStatistics->NumberOfTypedVariables += MoreConnectiveStatistics.NumberOfTypedVariables;
-    ConnectiveStatistics->NumberOfDefinedVariables +=
-MoreConnectiveStatistics.NumberOfDefinedVariables;
     ConnectiveStatistics->NumberOfMathVariables += MoreConnectiveStatistics.NumberOfMathVariables;
     ConnectiveStatistics->NumberOfGlobalTypeDecs += MoreConnectiveStatistics.NumberOfGlobalTypeDecs;
     ConnectiveStatistics->NumberOfGlobalDefns += MoreConnectiveStatistics.NumberOfGlobalDefns;

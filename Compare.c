@@ -73,7 +73,7 @@ int AllowCommutation,VARIABLERENAMING * RenamedVariables) {
     }
 
     switch (Term1->Type) {
-        case predicate:
+        case atom_as_term:
 //----If equality then compare modulo allowing commutation, else fall
 //----through to term case.
             if (Term1->TheSymbol.NonVariable == Term2->TheSymbol.NonVariable &&

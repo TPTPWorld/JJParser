@@ -415,10 +415,10 @@ VARIABLENODE * EndOfScope,TermType DesiredType,int VariablesMustBeQuantified) {
 
     TERM FormulaArgument;
 
-//----THF and TFF have formulae as arguments. Type is predicate if looking for arguments of a
+//----THF and TFF have formulae as arguments. Type is formula if looking for arguments of a
 //----predicate or function in THF and TFF.
     if ((Language == tptp_thf || Language == tptp_tff) &&
-(DesiredType == function || DesiredType == predicate) ) {
+(DesiredType == function || DesiredType == atom_as_term) ) {
         FormulaArgument = NewTerm();
         FormulaArgument->Type = formula;
         FormulaArgument->TheSymbol.Formula = ParseFormula(Stream,Language,Context,EndOfScope,1,1,
@@ -478,7 +478,7 @@ TERM DuplicateTerm(TERM Original,ContextType Context,int ForceNewVariables) {
     switch (Term->Type) {
         case connective:
             break;
-        case predicate:
+        case atom_as_term:
         case function:
         case a_type:
         case non_logical_data:
@@ -600,7 +600,7 @@ TermType * ExpectedRHSTermType) {
 //DEBUG printf("Checking for infix, syntax %s, expected %s\n",SyntaxToString(Language),TermTypeToString(OriginallyExpectedType));
 //----For THF and TFF equality is dealt with as a binary operator. That means here it's a regular
 //----first-order situation, and equality is between terms (variables of functions).
-    if (Language != tptp_thf && Language != tptp_tff && OriginallyExpectedType == predicate && 
+    if (Language != tptp_thf && Language != tptp_tff && OriginallyExpectedType == atom_as_term && 
 (CheckToken(Stream,lower_word,"=") || CheckToken(Stream,lower_word,"!="))) {
         *ExpectedRHSTermType = term;
         return(1);
@@ -654,7 +654,7 @@ int VariablesMustBeQuantified) {
         case function:
             EnsureTokenType(Stream,functor);
             break;
-        case predicate:
+        case atom_as_term:
 //----Can't check it's a predicate because it might be infix with var first
 //----      EnsureTokenType(Stream,predicate_symbol);
 //DEBUG printf("Found a predicate with symbol %s %s (want %s)\n",CurrentToken(Stream)->NameToken,TokenTypeToString(CurrentToken(Stream)->KindToken),TokenTypeToString(lower_word));
@@ -707,7 +707,7 @@ int VariablesMustBeQuantified) {
     }
 
     if (
-( DesiredType == predicate || DesiredType == function || DesiredType == non_logical_data ) &&
+( DesiredType == atom_as_term || DesiredType == function || DesiredType == non_logical_data ) &&
 ( CheckToken(Stream,punctuation,"(") || CheckToken(Stream,punctuation,"[") ) ) {
 //DEBUG printf("it ==%s==has arguments\n\n",PrefixSymbol);
 //----Now we can check that expected predicates look like predicates
@@ -715,7 +715,7 @@ int VariablesMustBeQuantified) {
 //THF TO FIX - Currently only allows ground predicates with arguments
         if (!CheckToken(Stream,punctuation,"[") &&
 (FunctorType == upper_word || FunctorType == distinct_object || FunctorType == number ||
-((DesiredType == predicate || DesiredType == function) && FunctorType != lower_word))) {
+((DesiredType == atom_as_term || DesiredType == function) && FunctorType != lower_word))) {
             sprintf(ErrorMessage,
 "Invalid form \"%s\" for a principal symbol, DesiredType is %s, FunctorType is %s\n",
 CurrentToken(Stream)->NameToken,TermTypeToString(DesiredType),TokenTypeToString(FunctorType));
@@ -771,7 +771,7 @@ Context.Signature,0);
 
 //----Check for infix predicate
     if ((DoInfixProcessing = InfixOperatorParsing(Stream,Language,DesiredType,&InfixRHSType))) {
-        if (DesiredType == predicate && Language != tptp_thf && Language != tptp_tff) {
+        if (DesiredType == atom_as_term && Language != tptp_thf && Language != tptp_tff) {
             Term->Type = TypeIfInfix;
         }
 //----If a term is expected, then if a variable it must be free here (infix =)
@@ -783,7 +783,7 @@ Context.Signature,0);
         InfixRHSType = nonterm;
 //----Cannot have a variable if a predicate was expected, unless in a typed
 //----language, where variables can be types in polymorphic cases.
-        if (Language != tptp_thf && Language != tptp_tff && DesiredType == predicate && 
+        if (Language != tptp_thf && Language != tptp_tff && DesiredType == atom_as_term && 
 TypeIfInfix == variable) {
             TokenError(Stream,"Variables cannot be used as predicates except in THF and TFX");
         }
@@ -809,6 +809,7 @@ Term->Type == nested_fof || Term->Type == nested_cnf || Term->Type == nested_fot
 //----Need to note connectives used as terms in THF
         SearchNumberOfArguments = (Language == tptp_thf ? -1 : NumberOfArguments);
 //DEBUG printf("See if type is known for %s/%d (search %d) currently %s\n",PrefixSymbol,NumberOfArguments,SearchNumberOfArguments,TermTypeToString(Term->Type));
+//----Fix functions created from connectives in THF to be connective
         if (FunctorType == unary_connective || FunctorType == binary_connective ||
 (FunctorType == lower_word && !strcmp(PrefixSymbol,"="))) {
             Term->Type = connective;
@@ -828,7 +829,7 @@ SearchNumberOfArguments)) != NULL) {
 //DEBUG printf("Yes, known function, convert %s to function arity %d\n",PrefixSymbol,NumberOfArguments);
         } else if ((FoundSymbol = IsSymbolInSignatureList(Context.Signature->Predicates,
 PrefixSymbol,SearchNumberOfArguments)) != NULL) {
-            Term->Type = predicate;
+            Term->Type = atom_as_term;
             NumberOfArguments = FoundSymbol->Arity;
 //DEBUG printf("Yes, known predicate, convert %s to predicate arity %d\n",PrefixSymbol,NumberOfArguments);
         }
@@ -949,7 +950,7 @@ VARIABLENODE * EndOfScope,int VariablesMustBeQuantified) {
     InfixNegatedAtom = 0;
     Formula = NewFormula();
     Formula->Type = atom;
-    Formula->FormulaUnion.Atom = ParseTerm(Stream,Language,Context,EndOfScope,predicate,none,
+    Formula->FormulaUnion.Atom = ParseTerm(Stream,Language,Context,EndOfScope,atom_as_term,none,
 &InfixNegatedAtom,VariablesMustBeQuantified);
 //DEBUG printf("Atom symbol is %s and the arity is %d and the args are %s\n",GetSymbol(Formula->FormulaUnion.Atom),GetArity(Formula->FormulaUnion.Atom),GetArguments(Formula->FormulaUnion.Atom) == NULL ? "NULL" : "not NULL");
 //DEBUG printf("Parsed an atom: ");PrintTSTPTerm(stdout,Language,Formula->FormulaUnion.Atom,0,1,1);printf("\n");
@@ -1328,7 +1329,7 @@ VariablesMustBeQuantified);
         case binary_connective:
             Formula = NewFormula();
             Formula->Type = atom;
-            Formula->FormulaUnion.Atom = ParseTerm(Stream,Language,Context,EndOfScope,predicate,
+            Formula->FormulaUnion.Atom = ParseTerm(Stream,Language,Context,EndOfScope,atom_as_term,
 none,NULL,VariablesMustBeQuantified);
             break;
         case unary_connective:
@@ -1446,7 +1447,8 @@ LHSSymbol,LHSSymbolArity)) != NULL) {
 //----If not just $o type, then it's a function (I hope!)
                         NewTermType = (GetResultFromTyping(Stream,BinaryFormula->
 FormulaUnion.BinaryFormula.RHS)->Type != atom || strcmp("$o",GetSymbol(GetResultFromTyping(
-Stream,BinaryFormula->FormulaUnion.BinaryFormula.RHS)->FormulaUnion.Atom))) ? function : predicate;
+Stream,BinaryFormula->FormulaUnion.BinaryFormula.RHS)->FormulaUnion.Atom))) ? 
+function : atom_as_term;
 //----Insert and assign correct version
 //DEBUG printf("Fix %s to be a %s of arity %d\n",LHSSymbol,TermTypeToString(NewTermType),GetArityFromTyping(Stream,BinaryFormula->FormulaUnion.BinaryFormula.RHS));
                         BinaryFormula->FormulaUnion.BinaryFormula.LHS->FormulaUnion.Atom->

@@ -228,7 +228,7 @@ int FlatTerm(TERM Term) {
     switch (Term->Type) {
         case connective:
             break;
-        case predicate:
+        case atom_as_term:
         case function:
             return(FlatTermList(GetArity(Term),Term->Arguments));
             break;
@@ -251,7 +251,7 @@ int AtomicallyFlatTerm(TERM Term) {
     switch (Term->Type) {
         case connective:
             break;
-        case predicate:
+        case atom_as_term:
         case function:
             return(AtomicallyFlatTermList(GetArity(Term),Term->Arguments));
             break;

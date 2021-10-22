@@ -68,13 +68,6 @@ double TreeCount(TREENODE Tree,CountType WhatToCount,int Expand) {
                 Counter = CountFormulaAtomsByPredicate(GetTreeNodeFormula(Tree),"=");
                 Counter += CountFormulaAtomsByPredicate(GetTreeNodeFormula(Tree),"@=");
                 break;
-            case literal_count:
-                if (GetSyntax(Tree->AnnotatedFormula) == tptp_cnf) {
-                    Counter = CountFormulaAtomsByPredicate(GetTreeNodeFormula(Tree),"");
-                } else {
-                    Counter = 0;
-                }
-                break;
             case terms:
                 Counter = CountFormulaTerms(GetTreeNodeFormula(Tree));
                 break;
@@ -256,19 +249,16 @@ TreeStatisticsRecordType * Statistics) {
     Statistics->NumberOfEqualityAtoms = RootListCount(RootListHead,equality_atoms,0);
     Statistics->NumberOfEqualityAtomsExpanded = RootListCount(RootListHead,equality_atoms,1);
     Statistics->MaxFormulaDepth = RootListMaximal(RootListHead,max_formula_depth);
-    Statistics->AverageFormulaDepth = RootListCount(RootListHead,
-formula_depth,0) / Statistics->NumberOfFormulae;
+    Statistics->AverageFormulaDepth = RootListCount(RootListHead,formula_depth,0) / 
+Statistics->NumberOfFormulae;
 
     Statistics->NumberOfTHF = RootListCount(RootListHead,thf_nodes,0);
     Statistics->NumberOfTFF = RootListCount(RootListHead,tff_nodes,0);
     Statistics->NumberOfTCF = RootListCount(RootListHead,tcf_nodes,0);
     Statistics->NumberOfFOF = RootListCount(RootListHead,fof_nodes,0);
-
     Statistics->NumberOfCNF = RootListCount(RootListHead,cnf_nodes,0);
-    Statistics->NumberOfLiterals = RootListCount(RootListHead,literal_count,0);
     if (Statistics->NumberOfCNF > 0) {
-        Statistics->NumberOfCNFExpanded = RootListCount(RootListHead,
-cnf_nodes,1);
+        Statistics->NumberOfCNFExpanded = RootListCount(RootListHead,cnf_nodes,1);
     }
     if (Statistics->NumberOfTCF > 0) {
         Statistics->NumberOfTCFExpanded = RootListCount(RootListHead,tcf_nodes,1);
@@ -295,8 +285,7 @@ void PrintTreeStatistics(FILE * Stream,TreeStatisticsRecordType Statistics) {
 Statistics.NumberOfFormulae,Statistics.NumberOfFormulaeExpanded);
     }
     if (Statistics.NumberOfCNF > 0 || Statistics.NumberOfTCF > 0) {
-        if (Statistics.NumberOfFormulae > 
-(Statistics.NumberOfCNF + Statistics.NumberOfTCF)) {
+        if (Statistics.NumberOfFormulae > (Statistics.NumberOfCNF + Statistics.NumberOfTCF)) {
             fprintf(Stream,"%%              ");
         } else {
             fprintf(Stream,"%% Statistics : ");

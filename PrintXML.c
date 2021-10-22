@@ -203,7 +203,7 @@ printf("====%s====\n",symbol);
     }
     // look up the term type
     switch (Term->Type) {
-        case predicate:
+        case atom_as_term:
             SuperStringCat(tagName,"predicate"); break;
         case function:
             SuperStringCat(tagName,"function"); break;

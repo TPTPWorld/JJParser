@@ -470,7 +470,7 @@ int CountVariableUsageInTerm(TERM Term,VARIABLENODE Variable) {
             return(Term->TheSymbol.Variable == Variable ? 1 : 0);
             break;
         case function:
-        case predicate:
+        case atom_as_term:
             return(CountVariableUsageInTERMArray(GetArity(Term),GetArguments(Term),Variable));
             break;
         case formula:
@@ -660,10 +660,10 @@ int * VariableCollectorLength,char ** TypeCollector,int * TypeCollectorLength) {
             sprintf(TermData,"%s/0/1\n",GetSymbol(Term));
             ExtendString(PredicateCollector,TermData,PredicateCollectorLength);
             break;
-        case predicate:
+        case atom_as_term:
         case function:
             sprintf(TermData,"%s/%d/1\n",GetSymbol(Term),GetArity(Term));
-            if (Term->Type == predicate) {
+            if (Term->Type == atom_as_term) {
                 ExtendString(PredicateCollector,TermData,PredicateCollectorLength);
             } else {
                 ExtendString(FunctorCollector,TermData,FunctorCollectorLength);
@@ -1185,18 +1185,26 @@ int GetSymbolUses(SIGNATURE Signature,TermType Type,char * Name,int Arity) {
 
     SYMBOLNODE List;
     SYMBOLNODE SymbolNode;
+    String ErrorMessage;
 
-    if (Type == predicate) {
-        List = Signature->Predicates;
-    } else if (Type == function) {
-        List = Signature->Functions;
-    } else if (Type == a_type) {
-        List = Signature->Types;
-    } else if (Type == variable) {
-        List = Signature->Variables;
-    } else {
-        List = NULL;
-        CodingError("Unknown type of symbol for GetSymbolUses");
+    switch (Type) {
+        case atom_as_term:
+            List = Signature->Predicates;
+            break;
+        case function:
+            List = Signature->Functions;
+            break;
+        case a_type:
+            List = Signature->Types;
+            break;
+        case variable:
+            List = Signature->Variables;
+            break;
+        default:
+            sprintf(ErrorMessage,"Unknown type %s for GetSymbolUses",TermTypeToString(Type));
+            CodingError(ErrorMessage);
+            return(0);
+            break;
     }
 
     if ((SymbolNode = IsSymbolInSignatureList(List,Name,Arity)) != NULL) {
@@ -1313,6 +1321,7 @@ int CountTermNestedFormulae(SIGNATURE Signature,TERM Term) {
         case formula:
             return(1 + CountNestedFormulae(Signature,Term->TheSymbol.Formula,1));
             break;
+        case atom_as_term:
         case function:
             return(CountNestedFormulaeInTerms(Signature,GetArity(Term),GetArguments(Term)));
             break;
@@ -2029,7 +2038,7 @@ Formula->FormulaUnion.ConditionalFormula.FormulaIfTrue),
 FormulaDepth(Formula->FormulaUnion.ConditionalFormula.FormulaIfFalse)));
             break;
         case let_formula:
-            return(1 + FormulaDepth(Formula->FormulaUnion.LetFormula.LetBody));
+            return(FormulaDepth(Formula->FormulaUnion.LetFormula.LetBody));
             break;
         default:
             CodingError("Invalid formula type for measuring depth");

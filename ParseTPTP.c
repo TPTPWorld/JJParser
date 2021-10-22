@@ -22,9 +22,9 @@ VARIABLENODE * EndOfScope) {
         Formula = NewFormula();
         Formula->Type = atom;
         Formula->FormulaUnion.Atom = NewTerm();
-        Formula->FormulaUnion.Atom->Type = predicate;
+        Formula->FormulaUnion.Atom->Type = atom_as_term;
         Formula->FormulaUnion.Atom->TheSymbol.NonVariable = 
-InsertIntoSignature(Context.Signature,predicate,"$false",0,Stream);
+InsertIntoSignature(Context.Signature,atom_as_term,"$false",0,Stream);
         Formula->FormulaUnion.Atom->Arguments = NULL;
         return(Formula);
     }
