@@ -28,10 +28,13 @@ typedef enum {
     terms,
     variables,
     singletons,
-    // count_math_variables,
     tuples,
     ite_forms,
     let_forms,
+    math_atoms,
+    math_terms,
+    math_variables,
+    numbers,
     nested_formulae, //----Not including boolean variables
     boolean_variables,
     formula_depth,
@@ -69,6 +72,12 @@ typedef struct {
     double AverageFormulaDepth;
     int MaxTermDepth;
     double AverageTermDepth;
+    int NumberOfTuples;
+    int NumberOfITEs;
+    int NumberOfLets;
+    int NumberOfMathAtoms;
+    int NumberOfMathTerms;
+    int NumberOfNumbers;
 
 //----Only for CNF
     int NumberOfHornClauses;
@@ -80,6 +89,7 @@ typedef struct {
 typedef struct {
     int NumberOfTypes;
     int NumberOfUserTypes;
+    int NumberOfMathTypes;
     int NumberOfPredicates;  //----Doubles as number of symbols
     int NumberOfPropositions; 
     int NumberOfUserPredicates;
@@ -92,13 +102,7 @@ typedef struct {
     int MaxFunctorArity;
     int NumberOfVariables;
     int NumberOfSingletons;
-    int NumberOfTuples;
-    int NumberOfITEs;
-    int NumberOfLets;
-    int NumberBooleanVariables;
-    int NumberOfMathPredicates;
-    int NumberOfMathFunctions;
-    int NumberOfNumbers;
+    int NumberOfBooleanVariables;
 } SymbolStatisticsType;
 
 typedef struct {
@@ -141,7 +145,7 @@ typedef struct {
     int NumberOfDescriptionBinders;
 
     int NumberOfTypedVariables;  //----Not a symbol, but counted by :s
-    int NumberOfMathVariables;  //----Not a symbol, but counted by :s
+    int NumberOfMathVariables;  //----Not a symbol, but counted by quantifications
     int NumberOfGlobalTypeDecs; //----Not a symbol, but counted by :s
     int NumberOfGlobalDefns; //----Not a symbol, but counted by :=s
 } ConnectiveStatisticsType;

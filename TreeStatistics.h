@@ -36,7 +36,7 @@ typedef struct {
     double NumberOfLiterals;
 } TreeStatisticsRecordType;
 //-------------------------------------------------------------------------------------------------
-TreeStatisticsRecordType * GetTreeStatistics(ROOTLIST RootListHead,
+TreeStatisticsRecordType * GetTreeStatistics(SIGNATURE Signature,ROOTLIST RootListHead,
 TreeStatisticsRecordType * Statistics);
 void PrintTreeStatistics(FILE * Stream,TreeStatisticsRecordType Statistics);
 //-------------------------------------------------------------------------------------------------

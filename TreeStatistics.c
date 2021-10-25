@@ -9,7 +9,7 @@
 #include "Tree.h"
 #include "TreeStatistics.h"
 //-------------------------------------------------------------------------------------------------
-double TreeCount(TREENODE Tree,CountType WhatToCount,int Expand) {
+double TreeCount(SIGNATURE Signature,TREENODE Tree,CountType WhatToCount,int Expand) {
 
     double Counter = 0;
     int Index;
@@ -62,11 +62,12 @@ double TreeCount(TREENODE Tree,CountType WhatToCount,int Expand) {
                 }
                 break;
             case atoms:
-                Counter = CountFormulaAtomsByPredicate(GetTreeNodeFormula(Tree),"");
+                Counter = CountFormulaAtomsByPredicate(Signature,GetTreeNodeFormula(Tree),
+"PREDICATE");
                 break;
             case equality_atoms:
-                Counter = CountFormulaAtomsByPredicate(GetTreeNodeFormula(Tree),"=");
-                Counter += CountFormulaAtomsByPredicate(GetTreeNodeFormula(Tree),"@=");
+                Counter = CountFormulaAtomsByPredicate(Signature,GetTreeNodeFormula(Tree),"=");
+                Counter += CountFormulaAtomsByPredicate(Signature,GetTreeNodeFormula(Tree),"@=");
                 break;
             case terms:
                 Counter = CountFormulaTerms(GetTreeNodeFormula(Tree));
@@ -83,7 +84,7 @@ double TreeCount(TREENODE Tree,CountType WhatToCount,int Expand) {
         }
     
         for (Index = 0; Index < Tree->NumberOfParents; Index++) {
-            Counter += TreeCount(Tree->Parents[Index],WhatToCount,Expand);
+            Counter += TreeCount(Signature,Tree->Parents[Index],WhatToCount,Expand);
         }
 //----Save value for future visits
         Tree->StatisticsCache = Counter;
@@ -100,7 +101,7 @@ double TreeCount(TREENODE Tree,CountType WhatToCount,int Expand) {
     return(Counter);
 }
 //-------------------------------------------------------------------------------------------------
-double RootListCount(ROOTLIST RootListHead,CountType WhatToCount,int Expand) {
+double RootListCount(SIGNATURE Signature,ROOTLIST RootListHead,CountType WhatToCount,int Expand) {
 
     double Counter;
 
@@ -108,7 +109,7 @@ double RootListCount(ROOTLIST RootListHead,CountType WhatToCount,int Expand) {
     ResetRootListVisited(RootListHead);
     while (RootListHead != NULL) {
         if (RootListHead->TheTree != NULL) {
-            Counter += TreeCount(RootListHead->TheTree,WhatToCount,Expand);
+            Counter += TreeCount(Signature,RootListHead->TheTree,WhatToCount,Expand);
         }
         RootListHead = RootListHead->Next;
     }
@@ -116,7 +117,7 @@ double RootListCount(ROOTLIST RootListHead,CountType WhatToCount,int Expand) {
     return(Counter);
 }
 //-------------------------------------------------------------------------------------------------
-double TreeMaximal(TREENODE Tree,MaximizeType WhatToMaximize) {
+double TreeMaximal(SIGNATURE Signature,TREENODE Tree,MaximizeType WhatToMaximize) {
 
     double Maximal = 0;
     int Index;
@@ -129,7 +130,7 @@ double TreeMaximal(TREENODE Tree,MaximizeType WhatToMaximize) {
                 Maximal = 0;
                 break;
             case literals:
-                Maximal = CountFormulaAtomsByPredicate(GetTreeNodeFormula(Tree),"");
+                Maximal = CountFormulaAtomsByPredicate(Signature,GetTreeNodeFormula(Tree),"");
                 break;
             case max_term_depth:
                 Maximal = MaxFormulaTermDepth(GetTreeNodeFormula(Tree));
@@ -143,7 +144,7 @@ double TreeMaximal(TREENODE Tree,MaximizeType WhatToMaximize) {
         }
 
         for (Index = 0; Index < Tree->NumberOfParents; Index++) {
-            NextMaximal = TreeMaximal(Tree->Parents[Index],WhatToMaximize);
+            NextMaximal = TreeMaximal(Signature,Tree->Parents[Index],WhatToMaximize);
             Maximal = MaximumOfDouble(NextMaximal,Maximal);
         }
         switch (WhatToMaximize) {
@@ -172,7 +173,7 @@ double TreeMaximal(TREENODE Tree,MaximizeType WhatToMaximize) {
     return(Maximal);
 }
 //-------------------------------------------------------------------------------------------------
-double RootListMaximal(ROOTLIST RootListHead,MaximizeType WhatToMaximize) {
+double RootListMaximal(SIGNATURE Signature,ROOTLIST RootListHead,MaximizeType WhatToMaximize) {
 
     double Maximal;
     double NextMaximal;
@@ -181,7 +182,7 @@ double RootListMaximal(ROOTLIST RootListHead,MaximizeType WhatToMaximize) {
     ResetRootListVisited(RootListHead);
     while (RootListHead != NULL) {
         if (RootListHead->TheTree != NULL) {
-            NextMaximal = TreeMaximal(RootListHead->TheTree,WhatToMaximize);
+            NextMaximal = TreeMaximal(Signature,RootListHead->TheTree,WhatToMaximize);
         } else {
             NextMaximal = -1;
         }
@@ -227,7 +228,7 @@ int RootListHasCycle(ROOTLIST RootListHead) {
     return(0);
 }
 //-------------------------------------------------------------------------------------------------
-TreeStatisticsRecordType * GetTreeStatistics(ROOTLIST RootListHead,
+TreeStatisticsRecordType * GetTreeStatistics(SIGNATURE Signature,ROOTLIST RootListHead,
 TreeStatisticsRecordType * Statistics) {
 
     if (RootListHead == NULL) {
@@ -239,39 +240,43 @@ TreeStatisticsRecordType * Statistics) {
         return(NULL);
     }
 
-    Statistics->NumberOfFormulae = RootListCount(RootListHead,nodes,0);
-    Statistics->NumberOfFormulaeExpanded = RootListCount(RootListHead,nodes,1);
-    Statistics->NumberOfLeaves = RootListCount(RootListHead,leaves,0);
-    Statistics->NumberOfLeavesExpanded = RootListCount(RootListHead,leaves,1);
-    Statistics->TreeDepth = RootListMaximal(RootListHead,depth);
-    Statistics->NumberOfAtoms = RootListCount(RootListHead,atoms,0);
-    Statistics->NumberOfAtomsExpanded = RootListCount(RootListHead,atoms,1);
-    Statistics->NumberOfEqualityAtoms = RootListCount(RootListHead,equality_atoms,0);
-    Statistics->NumberOfEqualityAtomsExpanded = RootListCount(RootListHead,equality_atoms,1);
-    Statistics->MaxFormulaDepth = RootListMaximal(RootListHead,max_formula_depth);
-    Statistics->AverageFormulaDepth = RootListCount(RootListHead,formula_depth,0) / 
-Statistics->NumberOfFormulae;
+    Statistics->NumberOfFormulae = RootListCount(Signature,RootListHead,nodes,0);
+    Statistics->NumberOfFormulaeExpanded = RootListCount(Signature,RootListHead,nodes,1);
+    Statistics->NumberOfLeaves = RootListCount(Signature,RootListHead,leaves,0);
+    Statistics->NumberOfLeavesExpanded = RootListCount(Signature,RootListHead,leaves,1);
+    Statistics->TreeDepth = RootListMaximal(Signature,RootListHead,depth);
+    Statistics->NumberOfAtoms = RootListCount(Signature,RootListHead,atoms,0);
+    Statistics->NumberOfAtomsExpanded = RootListCount(Signature,RootListHead,atoms,1);
+    Statistics->NumberOfEqualityAtoms = RootListCount(Signature,RootListHead,
+equality_atoms,0);
+    Statistics->NumberOfEqualityAtomsExpanded = RootListCount(Signature,RootListHead,
+equality_atoms,1);
+    Statistics->MaxFormulaDepth = RootListMaximal(Signature,RootListHead,max_formula_depth);
+    Statistics->AverageFormulaDepth = RootListCount(Signature,RootListHead,
+formula_depth,0) / Statistics->NumberOfFormulae;
 
-    Statistics->NumberOfTHF = RootListCount(RootListHead,thf_nodes,0);
-    Statistics->NumberOfTFF = RootListCount(RootListHead,tff_nodes,0);
-    Statistics->NumberOfTCF = RootListCount(RootListHead,tcf_nodes,0);
-    Statistics->NumberOfFOF = RootListCount(RootListHead,fof_nodes,0);
-    Statistics->NumberOfCNF = RootListCount(RootListHead,cnf_nodes,0);
+    Statistics->NumberOfTHF = RootListCount(Signature,RootListHead,thf_nodes,0);
+    Statistics->NumberOfTFF = RootListCount(Signature,RootListHead,tff_nodes,0);
+    Statistics->NumberOfTCF = RootListCount(Signature,RootListHead,tcf_nodes,0);
+    Statistics->NumberOfFOF = RootListCount(Signature,RootListHead,fof_nodes,0);
+    Statistics->NumberOfCNF = RootListCount(Signature,RootListHead,cnf_nodes,0);
     if (Statistics->NumberOfCNF > 0) {
-        Statistics->NumberOfCNFExpanded = RootListCount(RootListHead,cnf_nodes,1);
+        Statistics->NumberOfCNFExpanded = RootListCount(Signature,RootListHead,
+cnf_nodes,1);
     }
     if (Statistics->NumberOfTCF > 0) {
-        Statistics->NumberOfTCFExpanded = RootListCount(RootListHead,tcf_nodes,1);
+        Statistics->NumberOfTCFExpanded = RootListCount(Signature,RootListHead,
+tcf_nodes,1);
     }
     if (Statistics->NumberOfCNF > 0 || Statistics->NumberOfTCF > 0) {
-        Statistics->MaxClauseSize = RootListMaximal(RootListHead,literals);
+        Statistics->MaxClauseSize = RootListMaximal(Signature,RootListHead,literals);
         Statistics->AverageClauseSize = Statistics->NumberOfLiterals /
 (Statistics->NumberOfCNF + Statistics->NumberOfTCF);
     }
 
-    Statistics->MaxTermDepth = RootListMaximal(RootListHead,max_term_depth);
-    Statistics->AverageTermDepth = RootListCount(RootListHead,term_depth,0) / 
-RootListCount(RootListHead,terms,0);
+    Statistics->MaxTermDepth = RootListMaximal(Signature,RootListHead,max_term_depth);
+    Statistics->AverageTermDepth = RootListCount(Signature,RootListHead,term_depth,0) / 
+RootListCount(Signature,RootListHead,terms,0);
 
     return(Statistics);
 }

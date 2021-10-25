@@ -16,6 +16,8 @@
 char * GetInferenceParentNames(TERM InferenceTerm,String PutNamesHere);
 int CountVariableUsageInTerm(TERM Term,VARIABLENODE Variable);
 int CountTermNestedFormulae(SIGNATURE Signature,TERM Term);
+int CountVariablesInFormulaByType(FORMULA Formula,char * Type);
+int CountArgumentVariablesByType(TERM Term,char * Type);
 //-------------------------------------------------------------------------------------------------
 char * GetSymbol(TERM Term) {
 
@@ -231,6 +233,76 @@ int LooksLikeANumber(char * NumberString) {
 
     return(LooksLikeAnInteger(NumberString) || LooksLikeARational(NumberString) || 
 LooksLikeAReal(NumberString));
+}
+//-------------------------------------------------------------------------------------------------
+int IsMathPredicate(char * Symbol,int Arity) {
+
+    char* MathPredicates[] = {
+        "$less/2",
+        "$lesseq/2",
+        "$greater/2",
+        "$greatereq/2",
+        "$is_int/1",
+        "$is_rat/1" };
+    String LookFor;
+    int Index;
+
+    sprintf(LookFor,"%s/%d",Symbol,Arity);
+    for (Index=0; Index < sizeof(MathPredicates)/sizeof(char*);Index++) {
+        if (!strcmp(LookFor,MathPredicates[Index])) {
+            return(1);
+        }
+    }
+    return(0);
+}
+//-------------------------------------------------------------------------------------------------
+int IsMathFunctor(char * Symbol,int Arity) {
+
+    char* MathFunctors[] = {
+        "$uminus/1",
+        "$sum/2",
+        "$difference/2",
+        "$product/2",
+        "$quotient/2",
+        "$quotient_e/2",
+        "$quotient_t/2",
+        "$quotient_f/2",
+        "$remainder_e/2",
+        "$remainder_t/2",
+        "$remainder_f/2",
+        "$floor/1",
+        "$ceiling/1",
+        "$truncate/1",
+        "$round/1",
+        "$to_int/1",
+        "$to_rat/1",
+        "$to_real/1" };
+    String LookFor;
+    int Index;
+
+    sprintf(LookFor,"%s/%d",Symbol,Arity);
+    for (Index=0; Index < sizeof(MathFunctors)/sizeof(char*);Index++) {
+        if (!strcmp(LookFor,MathFunctors[Index])) {
+            return(1);
+        }
+    }
+    return(0);
+}
+//-------------------------------------------------------------------------------------------------
+int IsMathType(char * Symbol) {
+
+    char* MathTypes[] = {
+        "$int",
+        "$rat",
+        "$real" };
+    int Index;
+
+    for (Index=0; Index < sizeof(MathTypes)/sizeof(char*);Index++) {
+        if (!strcmp(Symbol,MathTypes[Index])) {
+            return(1);
+        }
+    }
+    return(0);
 }
 //-------------------------------------------------------------------------------------------------
 int LooksLikeAList(TERM Term,int MinElements,int MaxElements) {
@@ -1273,7 +1345,6 @@ VariableNode->NumberOfUses <= MaxUse)) &&
     } else {
         return(-1);
     }
-
 }
 //-------------------------------------------------------------------------------------------------
 int CountAnnotatedFormulaSingletons(ANNOTATEDFORMULA AnnotatedFormula) {
@@ -1395,70 +1466,97 @@ FormulaTypeToString(Formula->Type));
     }
 }
 //-------------------------------------------------------------------------------------------------
-int CountArgumentBooleanVariables(TERM Term)  {
+int CountVariablesInFormulaeByType(int NumberOfElements,FORMULAArray Formulae,char * Type) {
+
+    int ElementNumber;
+    int Count;
+
+    Count = 0;
+    if (NumberOfElements > 0 && Formulae != NULL) {
+        for (ElementNumber = 0;ElementNumber < NumberOfElements;ElementNumber++) {
+            CountVariablesInFormulaByType(Formulae[ElementNumber],Type);
+        }
+    }
+    return(Count);
+}
+//-------------------------------------------------------------------------------------------------
+int CountVariablesInTermsByType(int NumberOfElements,TERMArray Terms,char * Type) {
+
+    int ElementNumber;
+    int Count;
+
+    Count = 0;
+    if (NumberOfElements > 0 && Terms != NULL) {
+        for (ElementNumber = 0;ElementNumber < NumberOfElements;ElementNumber++) {
+            CountArgumentVariablesByType(Terms[ElementNumber],Type);
+        }
+    }
+    return(Count);
+}
+//-------------------------------------------------------------------------------------------------
+int CountArgumentVariablesByType(TERM Term,char * Type)  {
 
     if (Term->Type == formula) {
-        return(CountBooleanVariablesInFormula(Term->TheSymbol.Formula));
+        return(CountVariablesInFormulaByType(Term->TheSymbol.Formula,Type));
     } else {
-        return(CountSimpleUsageInTERMArray(GetArity(Term),GetArguments(Term),
-&CountArgumentBooleanVariables));
+        return(CountVariablesInTermsByType(GetArity(Term),GetArguments(Term),Type));
     }
 }
 //-------------------------------------------------------------------------------------------------
-int CountBooleanVariablesInFormula(FORMULA Formula) {
+int CountVariablesInFormulaByType(FORMULA Formula,char * Type) {
 
     int Count;
     String ErrorMessage;
 
     switch (Formula->Type) {
         case sequent:
-            return(CountSimpleUsageInFORMULAArray(
+            return(CountVariablesInFormulaeByType(
 Formula->FormulaUnion.SequentFormula.NumberOfLHSElements,Formula->FormulaUnion.SequentFormula.LHS,
-&CountBooleanVariablesInFormula) + CountSimpleUsageInFORMULAArray(
+Type) + CountVariablesInFormulaeByType(
 Formula->FormulaUnion.SequentFormula.NumberOfRHSElements,Formula->FormulaUnion.SequentFormula.RHS,
-&CountBooleanVariablesInFormula));
+Type));
             break;
         case assignment:
-            return(CountBooleanVariablesInFormula(Formula->FormulaUnion.BinaryFormula.RHS));
+            return(CountVariablesInFormulaByType(Formula->FormulaUnion.BinaryFormula.RHS,Type));
             break;
         case type_declaration:
             return(0);
             break;
         case quantified:
-            Count = CountBooleanVariablesInFormula(Formula->FormulaUnion.QuantifiedFormula.Formula);
+            Count = CountVariablesInFormulaByType(Formula->FormulaUnion.QuantifiedFormula.Formula,
+Type);
             if (Formula->FormulaUnion.QuantifiedFormula.VariableType != NULL &&
 Formula->FormulaUnion.QuantifiedFormula.VariableType->Type == atom &&
-!strcmp(GetSymbol(Formula->FormulaUnion.QuantifiedFormula.VariableType->FormulaUnion.Atom),"$o")) {
+!strcmp(GetSymbol(Formula->FormulaUnion.QuantifiedFormula.VariableType->FormulaUnion.Atom),Type)) {
                 return(Count + 1);
             } else {
                 return(Count + 0);
             }
             break;
         case binary:
-            return(CountBooleanVariablesInFormula(Formula->FormulaUnion.BinaryFormula.LHS)
-+ CountBooleanVariablesInFormula(Formula->FormulaUnion.BinaryFormula.RHS));
+            return(CountVariablesInFormulaByType(Formula->FormulaUnion.BinaryFormula.LHS,Type)
++ CountVariablesInFormulaByType(Formula->FormulaUnion.BinaryFormula.RHS,Type));
             break;
         case unary:
-            return(CountBooleanVariablesInFormula(Formula->FormulaUnion.UnaryFormula.Formula));
+            return(CountVariablesInFormulaByType(Formula->FormulaUnion.UnaryFormula.Formula,Type));
             break;
         case atom:
-            return(CountSimpleUsageInTERMArray(GetArity(Formula->FormulaUnion.Atom),
-GetArguments(Formula->FormulaUnion.Atom),&CountArgumentBooleanVariables));
+            return(CountVariablesInTermsByType(GetArity(Formula->FormulaUnion.Atom),
+GetArguments(Formula->FormulaUnion.Atom),Type));
             break;
         case tuple:
-            return(CountSimpleUsageInFORMULAArray(
+            return(CountVariablesInFormulaeByType(
 Formula->FormulaUnion.TupleFormula.NumberOfElements,Formula->FormulaUnion.TupleFormula.Elements,
-&CountBooleanVariablesInFormula));
+Type));
             break;
         case ite_formula:
-//DEBUG printf("CollectSymbolsInFormula: ite_formula");
             return(
-CountBooleanVariablesInFormula(Formula->FormulaUnion.ConditionalFormula.Condition) +
-CountBooleanVariablesInFormula(Formula->FormulaUnion.ConditionalFormula.FormulaIfTrue) +
-CountBooleanVariablesInFormula(Formula->FormulaUnion.ConditionalFormula.FormulaIfFalse));
+CountVariablesInFormulaByType(Formula->FormulaUnion.ConditionalFormula.Condition,Type) +
+CountVariablesInFormulaByType(Formula->FormulaUnion.ConditionalFormula.FormulaIfTrue,Type) +
+CountVariablesInFormulaByType(Formula->FormulaUnion.ConditionalFormula.FormulaIfFalse,Type));
             break;
         case let_formula:
-            return(CountBooleanVariablesInFormula(Formula->FormulaUnion.LetFormula.LetBody));
+            return(CountVariablesInFormulaByType(Formula->FormulaUnion.LetFormula.LetBody,Type));
             break;
         default:
             sprintf(ErrorMessage,"Invalid formula type %s for counting atoms",
@@ -1591,20 +1689,21 @@ int CountAnnotatedFormulaTerms(ANNOTATEDFORMULA AnnotatedFormula) {
 AnnotatedTSTPFormula.FormulaWithVariables->Formula));
 }
 //-------------------------------------------------------------------------------------------------
-int CountTupleFormulaeAtomsByPredicate(int NumberOfElements,FORMULAArray TupleFormulae,
-char * Predicate) {
+int CountTupleFormulaeAtomsByPredicate(SIGNATURE Signature,int NumberOfElements,
+FORMULAArray TupleFormulae,char * Predicate) {
 
     int ElementNumber;
     int TotalAtoms;
 
     TotalAtoms = 0;
     for (ElementNumber = 0;ElementNumber < NumberOfElements;ElementNumber++) {
-        TotalAtoms += CountFormulaAtomsByPredicate(TupleFormulae[ElementNumber],Predicate);
+        TotalAtoms += CountFormulaAtomsByPredicate(Signature,TupleFormulae[ElementNumber],
+Predicate);
     }
     return(TotalAtoms);
 }
 //-------------------------------------------------------------------------------------------------
-int CountNestedFormulaAtomsByPredicate(TERM Atom,char * Predicate) {
+int CountNestedFormulaAtomsByPredicate(SIGNATURE Signature,TERM Atom,char * Predicate) {
 
     int Index;
     int Count;
@@ -1615,15 +1714,15 @@ int CountNestedFormulaAtomsByPredicate(TERM Atom,char * Predicate) {
 //----If nested is possible everything is a formula, so just check first. Otherwise it's a GOF
 //----term that cannot have nested formulae.
             if (Atom->Arguments[Index]->Type == formula) {
-                Count += CountFormulaAtomsByPredicate(Atom->Arguments[Index]->TheSymbol.Formula,
-Predicate);
+                Count += CountFormulaAtomsByPredicate(Signature,
+Atom->Arguments[Index]->TheSymbol.Formula,Predicate);
             }
         }
     }
     return(Count);
 }
 //-------------------------------------------------------------------------------------------------
-int CountFormulaAtomsByPredicate(FORMULA Formula,char * Predicate) {
+int CountFormulaAtomsByPredicate(SIGNATURE Signature,FORMULA Formula,char * Predicate) {
 
     int Count;
     String ErrorMessage;
@@ -1631,16 +1730,17 @@ int CountFormulaAtomsByPredicate(FORMULA Formula,char * Predicate) {
     Count = 0;
     switch(Formula->Type) {
         case sequent:
-            return(CountTupleFormulaeAtomsByPredicate(
+            return(CountTupleFormulaeAtomsByPredicate(Signature,
 Formula->FormulaUnion.SequentFormula.NumberOfLHSElements,
 Formula->FormulaUnion.SequentFormula.LHS,Predicate) + 
-CountTupleFormulaeAtomsByPredicate(
+CountTupleFormulaeAtomsByPredicate(Signature,
 Formula->FormulaUnion.SequentFormula.NumberOfRHSElements,
 Formula->FormulaUnion.SequentFormula.RHS,Predicate));
             break;
         case assignment:
 //TODO - should I count the LHS?
-            return(CountFormulaAtomsByPredicate(Formula->FormulaUnion.BinaryFormula.RHS,Predicate));
+            return(CountFormulaAtomsByPredicate(Signature,Formula->FormulaUnion.BinaryFormula.RHS,
+Predicate));
             break;
         case type_declaration:
             return(0);
@@ -1651,17 +1751,17 @@ Formula->FormulaUnion.SequentFormula.RHS,Predicate));
 //                Count += CountFormulaAtomsByPredicate(
 //Formula->FormulaUnion.QuantifiedFormula.VariableType,Predicate);
 //            }
-            Count += CountFormulaAtomsByPredicate(Formula->FormulaUnion.QuantifiedFormula.Formula,
-Predicate);
+            Count += CountFormulaAtomsByPredicate(Signature,
+Formula->FormulaUnion.QuantifiedFormula.Formula,Predicate);
             return(Count);
             break;
         case binary:
-            Count += CountFormulaAtomsByPredicate(Formula->FormulaUnion.BinaryFormula.LHS,
-Predicate);
+            Count += CountFormulaAtomsByPredicate(Signature,
+Formula->FormulaUnion.BinaryFormula.LHS,Predicate);
 //----Don't count RHS of typings
             if (Formula->FormulaUnion.BinaryFormula.Connective != typecolon) {
-                Count += CountFormulaAtomsByPredicate(Formula->FormulaUnion.BinaryFormula.RHS,
-Predicate);
+                Count += CountFormulaAtomsByPredicate(Signature,
+Formula->FormulaUnion.BinaryFormula.RHS,Predicate);
             }
 //----Equality counts as an atom
             if (Formula->FormulaUnion.BinaryFormula.Connective == equation && 
@@ -1671,18 +1771,28 @@ Predicate);
             return(Count);
             break;
         case unary:
-            return(CountFormulaAtomsByPredicate(Formula->FormulaUnion.UnaryFormula.Formula,
-Predicate));
+            return(CountFormulaAtomsByPredicate(Signature,
+Formula->FormulaUnion.UnaryFormula.Formula,Predicate));
             break;
         case atom:
 //----Do nested for TFX (and first-order style THF, if it's ever used)
-            Count = CountNestedFormulaAtomsByPredicate(Formula->FormulaUnion.Atom,Predicate);
+            Count = CountNestedFormulaAtomsByPredicate(Signature,
+Formula->FormulaUnion.Atom,Predicate);
+//DEBUG printf("Look if required ==%s== is the symbol here ==%s==\n",Predicate,GetSymbol(Formula->FormulaUnion.Atom));
 //----If nothing requested, take everything
-            if (strlen(Predicate) == 0 || 
+            if (
+(!strcmp(Predicate,"PREDICATE") && IsSymbolInSignatureList(Signature->Predicates,
+GetSymbol(Formula->FormulaUnion.Atom),GetArity(Formula->FormulaUnion.Atom))) || 
 //----It's the predicate I want
 !strcmp(Predicate,GetSymbol(Formula->FormulaUnion.Atom)) ||
 //----A variable in THF
-(!strcmp(Predicate,"VARIABLE") && Formula->FormulaUnion.Atom->Type == variable)) {
+(!strcmp(Predicate,"VARIABLE") && Formula->FormulaUnion.Atom->Type == variable) ||
+//----A math predicate (non-variable)
+(!strcmp(Predicate,"MATH_PREDICATE") && IsMathPredicate(GetSymbol(Formula->FormulaUnion.Atom),
+GetArity(Formula->FormulaUnion.Atom))) ||
+(!strcmp(Predicate,"MATH_FUNCTOR") && IsMathFunctor(GetSymbol(Formula->FormulaUnion.Atom),
+GetArity(Formula->FormulaUnion.Atom))) ||
+(!strcmp(Predicate,"MATH_NUMBER") && LooksLikeANumber(GetSymbol(Formula->FormulaUnion.Atom))) ) {
 //DEBUG printf("--%s-- matches --%s--\n",GetSymbol(Formula->FormulaUnion.Atom),Predicate);
                 return(Count + 1);
             } else {
@@ -1690,22 +1800,25 @@ Predicate));
             }
             break;
         case tuple:
-            return(CountTupleFormulaeAtomsByPredicate(
+            return(CountTupleFormulaeAtomsByPredicate(Signature,
 Formula->FormulaUnion.TupleFormula.NumberOfElements,Formula->FormulaUnion.TupleFormula.Elements,
 Predicate));
             break;
         case ite_formula:
             Count = !strcmp(Predicate,"$ite") ? 1 : 0;
             Count += 
-CountFormulaAtomsByPredicate(Formula->FormulaUnion.ConditionalFormula.Condition,Predicate) +
-CountFormulaAtomsByPredicate(Formula->FormulaUnion.ConditionalFormula.FormulaIfTrue,Predicate) +
-CountFormulaAtomsByPredicate(Formula->FormulaUnion.ConditionalFormula.FormulaIfFalse,Predicate);
+CountFormulaAtomsByPredicate(Signature,Formula->FormulaUnion.ConditionalFormula.Condition,
+Predicate) +
+CountFormulaAtomsByPredicate(Signature,Formula->FormulaUnion.ConditionalFormula.FormulaIfTrue,
+Predicate) +
+CountFormulaAtomsByPredicate(Signature,Formula->FormulaUnion.ConditionalFormula.FormulaIfFalse,
+Predicate);
             return(Count);
             break;
         case let_formula:
             Count = !strcmp(Predicate,"$let") ? 1 : 0;
             Count += 
-CountFormulaAtomsByPredicate(Formula->FormulaUnion.LetFormula.LetBody,Predicate);
+CountFormulaAtomsByPredicate(Signature,Formula->FormulaUnion.LetFormula.LetBody,Predicate);
             return(Count);
             break;
         default:

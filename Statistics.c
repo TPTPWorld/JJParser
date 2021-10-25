@@ -29,6 +29,13 @@ void InitializeFormulaStatistics(FormulaStatisticsType * FormulaStatistics) {
     FormulaStatistics->MaxTermDepth = 0;
     FormulaStatistics->AverageTermDepth = 0;
 
+    FormulaStatistics->NumberOfTuples = 0;
+    FormulaStatistics->NumberOfITEs = 0;
+    FormulaStatistics->NumberOfLets = 0;
+    FormulaStatistics->NumberOfMathAtoms = 0;
+    FormulaStatistics->NumberOfMathTerms = 0;
+    FormulaStatistics->NumberOfNumbers = 0;
+
     FormulaStatistics->NumberOfHornClauses = 0;
     FormulaStatistics->NumberOfRRClauses = 0;
     FormulaStatistics->MaxClauseSize = 0;
@@ -39,6 +46,7 @@ void InitializeSymbolStatistics(SymbolStatisticsType * SymbolStatistics) {
 
     SymbolStatistics->NumberOfTypes = 0;
     SymbolStatistics->NumberOfUserTypes = 0;
+    SymbolStatistics->NumberOfMathTypes = 0;
     SymbolStatistics->NumberOfPredicates = 0;
     SymbolStatistics->NumberOfPropositions = 0;
     SymbolStatistics->NumberOfUserPredicates = 0;
@@ -51,13 +59,7 @@ void InitializeSymbolStatistics(SymbolStatisticsType * SymbolStatistics) {
     SymbolStatistics->MaxFunctorArity = 0;
     SymbolStatistics->NumberOfVariables = 0;
     SymbolStatistics->NumberOfSingletons = 0;
-    SymbolStatistics->NumberOfTuples = 0;
-    SymbolStatistics->NumberOfITEs = 0;
-    SymbolStatistics->NumberOfLets = 0;
-    SymbolStatistics->NumberBooleanVariables = 0;
-    SymbolStatistics->NumberOfMathPredicates = 0;
-    SymbolStatistics->NumberOfMathFunctions = 0;
-    SymbolStatistics->NumberOfNumbers = 0;
+    SymbolStatistics->NumberOfBooleanVariables = 0;
 }
 //-------------------------------------------------------------------------------------------------
 void InitializeConnectiveStatistics(ConnectiveStatisticsType * ConnectiveStatistics) {

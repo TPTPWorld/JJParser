@@ -4,10 +4,11 @@
 #include <ctype.h>
 #include <assert.h>
 #include <limits.h>
+#include "DataTypes.h"
 #include "Tokenizer.h"
 #include "Signature.h"
 #include "Utilities.h"
-#include "DataTypes.h"
+#include "Examine.h"
 //-------------------------------------------------------------------------------------------------
 static int GlobalSymbolIndex;
 //-------------------------------------------------------------------------------------------------
@@ -247,9 +248,9 @@ SYMBOLNODE IsSymbolInSignatureList(SYMBOLNODE List,char * Name,int Arity) {
     }
 }
 //-------------------------------------------------------------------------------------------------
-int DefinedSymbol(SYMBOLNODE Symbol) {
+int DefinedSymbol(char * Symbol) {
 
-    return(GetSignatureSymbol(Symbol)[0] == '$');
+    return(Symbol[0] == '$');
 }
 //-------------------------------------------------------------------------------------------------
 SYMBOLNODE * IsSymbolInSignatureListPointer(SYMBOLNODE * List,char * Name,int Arity) {
@@ -552,7 +553,7 @@ int * NumberOfSymbolsArity0,int * NumberOfUserSymbols,int * MinSymbolArity,int *
         if (GetSignatureUses(SignatureNode)) {
 //DEBUG printf("    and it is used\n");
             (*NumberOfSymbols)++;
-            if (!DefinedSymbol(SignatureNode)) { 
+            if (!DefinedSymbol(GetSignatureSymbol(SignatureNode))) { 
                 (*NumberOfUserSymbols)++;
             }
             if (SignatureNode->Arity == 0) {
@@ -581,5 +582,37 @@ int * NumberOfSymbolsArity0,int * NumberOfUserSymbols,int * MinSymbolArity,int *
     *MaxSymbolArity = -1;
     DoGetSignatureSymbolUsageStatistics(SignatureNode,NumberOfSymbols,NumberOfSymbolsArity0,
 NumberOfUserSymbols,MinSymbolArity,MaxSymbolArity);
+}
+//-------------------------------------------------------------------------------------------------
+void DoGetSignatureTypeUsageStatistics(SYMBOLNODE SignatureNode,int * NumberOfTypes,
+int * NumberOfUserTypes,int * NumberOfMathTypes) {
+
+    if (SignatureNode != NULL) {
+//DEBUG printf("Type symbol is %s\n",SignatureNode->NameSymbol);
+        if (GetSignatureUses(SignatureNode)) {
+//DEBUG printf("    and it is used\n");
+            (*NumberOfTypes)++;
+            if (!DefinedSymbol(GetSignatureSymbol(SignatureNode))) { 
+                (*NumberOfUserTypes)++;
+            }
+            if (IsMathType(GetSignatureSymbol(SignatureNode))) { 
+                (*NumberOfMathTypes)++;
+            }
+        }
+        DoGetSignatureTypeUsageStatistics(SignatureNode->LastSymbol,NumberOfTypes,
+NumberOfUserTypes,NumberOfMathTypes);
+        DoGetSignatureTypeUsageStatistics(SignatureNode->NextSymbol,NumberOfTypes,
+NumberOfUserTypes,NumberOfMathTypes);
+    }
+}
+//-------------------------------------------------------------------------------------------------
+void GetSignatureTypeUsageStatistics(SYMBOLNODE SignatureNode,int * NumberOfTypes,
+int * NumberOfUserTypes,int * NumberOfMathTypes) {
+
+    *NumberOfTypes = 0;
+    *NumberOfUserTypes = 0;
+    *NumberOfMathTypes = 0;
+    DoGetSignatureTypeUsageStatistics(SignatureNode,NumberOfTypes,NumberOfUserTypes,
+NumberOfMathTypes);
 }
 //-------------------------------------------------------------------------------------------------

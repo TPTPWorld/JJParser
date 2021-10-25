@@ -31,5 +31,7 @@ char ** FunctorUsageStartsHere);
 void GetSignatureSymbolUsageStatistics(SYMBOLNODE SignatureNode,int * NumberOfSymbols,
 int * NumberOfSymbolsArity0,int * NumberOfDefinedSymbols,int * MinSymbolArity,
 int * MaxSymbolArity);
+void GetSignatureTypeUsageStatistics(SYMBOLNODE SignatureNode,int * NumberOfTypes,
+int * NumberOfUserTypes,int * NumberOfMathTypes);
 //-------------------------------------------------------------------------------------------------
 #endif
