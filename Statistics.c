@@ -112,23 +112,20 @@ void InitializeStatistics(StatisticsType * Statistics) {
     InitializeFormulaStatistics(&(Statistics->FormulaStatistics));
     InitializeSymbolStatistics(&(Statistics->SymbolStatistics));
     InitializeConnectiveStatistics(&(Statistics->ConnectiveStatistics));
-
 }
 //-------------------------------------------------------------------------------------------------
 void AddOnConnectiveStatistics(ConnectiveStatisticsType * ConnectiveStatistics,
 ConnectiveStatisticsType MoreConnectiveStatistics) {
 
     ConnectiveStatistics->NumberOfConnectives += MoreConnectiveStatistics.NumberOfConnectives;
+    ConnectiveStatistics->NumberOfEquations += MoreConnectiveStatistics.NumberOfEquations;
     ConnectiveStatistics->NumberOfTypeConnectives += 
 MoreConnectiveStatistics.NumberOfTypeConnectives;
-
-//----Only THF connectives
     ConnectiveStatistics->NumberOfPis += MoreConnectiveStatistics.NumberOfPis;
     ConnectiveStatistics->NumberOfSigmas += MoreConnectiveStatistics.NumberOfSigmas;
     ConnectiveStatistics->NumberOfChoices += MoreConnectiveStatistics.NumberOfChoices;
     ConnectiveStatistics->NumberOfDescriptions += MoreConnectiveStatistics.NumberOfDescriptions;
     ConnectiveStatistics->NumberOfApplications += MoreConnectiveStatistics.NumberOfApplications;
-    ConnectiveStatistics->NumberOfEquations += MoreConnectiveStatistics.NumberOfEquations;
     ConnectiveStatistics->NumberOfTypedEquations += MoreConnectiveStatistics.NumberOfTypedEquations;
     ConnectiveStatistics->NumberOfMaparrows += MoreConnectiveStatistics.NumberOfMaparrows;
     ConnectiveStatistics->NumberOfXprods += MoreConnectiveStatistics.NumberOfXprods;

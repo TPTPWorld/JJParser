@@ -21,35 +21,60 @@ int CountArgumentVariablesByType(TERM Term,char * Type);
 //-------------------------------------------------------------------------------------------------
 char * GetSymbol(TERM Term) {
 
+    String ErrorMessage;
+
     if (Term == NULL) {
         CodingError("Getting symbol for NULL term");
     }
 
-    if (Term->Type == variable) {
-        return(GetSignatureSymbol(Term->TheSymbol.Variable->VariableName));
-    } else {
-        return(GetSignatureSymbol(Term->TheSymbol.NonVariable));
+    switch (Term->Type) {
+        case atom_as_term:
+        case function:
+        case a_type:
+            return(GetSignatureSymbol(Term->TheSymbol.NonVariable));
+            break;
+        case variable:
+            return(GetSignatureSymbol(Term->TheSymbol.Variable->VariableName));
+            break;
+        case formula:
+        default:
+            sprintf(ErrorMessage,"Invalid term type %s to get symbol\n",
+TermTypeToString(Term->Type));
+            CodingError(ErrorMessage);
+            break;
     }
+    return(NULL);
 }
 //-------------------------------------------------------------------------------------------------
 int GetArity(TERM Term) {
+
+    String ErrorMessage;
 
     if (Term == NULL) {
         CodingError("Getting arity for NULL term");
     }
 
-    if (Term->Type == variable) {
-        return (GetSignatureArity(Term->TheSymbol.Variable->VariableName));
-//----Lists have flexible arity (signature arity should be -1)
-    } else if (!strcmp(GetSymbol(Term),"[]")) {
-        return(Term->FlexibleArity);
-//----Otherwise get from the signature, but check Arguments because declared
-//----symbols have wrong arity THIS IS BEING FIXED NOW
-//    } if (Term->Arguments == NULL) {
-//          return(0);
-    } else {
-        return(GetSignatureArity(Term->TheSymbol.NonVariable));
+    switch (Term->Type) {
+        case atom_as_term:
+        case function:
+        case a_type:
+            if (!strcmp(GetSymbol(Term),"[]")) {
+                return(Term->FlexibleArity);
+            } else {
+                return(GetSignatureArity(Term->TheSymbol.NonVariable));
+            }
+            break;
+        case variable:
+            return(0);
+            break;
+        case formula:
+        default:
+            sprintf(ErrorMessage,"Invalid term type %s to get arity\n",
+TermTypeToString(Term->Type));
+            CodingError(ErrorMessage);
+            break;
     }
+    return(0);
 }
 //-------------------------------------------------------------------------------------------------
 TERMArray GetArguments(TERM Term) {
@@ -1366,7 +1391,7 @@ int NestedYet) {
     Count = 0;
     if (NumberOfElements > 0 && Formulae != NULL) {
         for (ElementNumber = 0;ElementNumber < NumberOfElements;ElementNumber++) {
-            CountNestedFormulae(Signature,Formulae[ElementNumber],NestedYet);
+            Count += CountNestedFormulae(Signature,Formulae[ElementNumber],NestedYet);
         }
     }
     return(Count);
@@ -1380,33 +1405,31 @@ int CountNestedFormulaeInTerms(SIGNATURE Signature,int NumberOfElements,TERMArra
     Count = 0;
     if (NumberOfElements > 0 && Terms != NULL) {
         for (ElementNumber = 0;ElementNumber < NumberOfElements;ElementNumber++) {
-            CountTermNestedFormulae(Signature,Terms[ElementNumber]);
+            switch (Terms[ElementNumber]->Type) {
+                case formula:
+                    Count += CountNestedFormulae(Signature,Terms[ElementNumber]->TheSymbol.Formula,
+1);
+                    break;
+                case atom_as_term:
+                case function:
+                    Count += CountNestedFormulaeInTerms(Signature,GetArity(Terms[ElementNumber]),
+GetArguments(Terms[ElementNumber]));
+                    break;
+                default:
+                    break;
+            }
         }
     }
     return(Count);
 }
 //-------------------------------------------------------------------------------------------------
-int CountTermNestedFormulae(SIGNATURE Signature,TERM Term) {
-
-    switch (Term->Type) {
-        case formula:
-            return(1 + CountNestedFormulae(Signature,Term->TheSymbol.Formula,1));
-            break;
-        case atom_as_term:
-        case function:
-            return(CountNestedFormulaeInTerms(Signature,GetArity(Term),GetArguments(Term)));
-            break;
-        default:
-            return(0);
-            break;
-    }
-}
-//-------------------------------------------------------------------------------------------------
 int CountNestedFormulae(SIGNATURE Signature,FORMULA Formula,int NestedYet) {
 
     String ErrorMessage;
+    int Count;
     
-//DEBUG printf("Look at symbol with type %s\n",FormulaTypeToString(Formula->Type));
+//DEBUG printf("Look at formula with type %s, NestedYet is %d\n",FormulaTypeToString(Formula->Type),NestedYet);
+    Count = 0;
     switch (Formula->Type) {
         case sequent:
             return(NestedYet + CountNestedFormulaeInFormulae(Signature,
@@ -1427,7 +1450,12 @@ Formula->FormulaUnion.BinaryFormula.RHS,NestedYet));
 Formula->FormulaUnion.QuantifiedFormula.Formula,NestedYet));
             break;
         case binary:
-            return(NestedYet + CountNestedFormulae(Signature,
+//DEBUG printf("Binary with connective %s\n",ConnectiveToString(Formula->FormulaUnion.BinaryFormula.Connective));
+            Count = NestedYet;
+            if (Formula->FormulaUnion.BinaryFormula.Connective == equation) {
+                NestedYet = 1;
+            }
+            return(Count + CountNestedFormulae(Signature,
 Formula->FormulaUnion.BinaryFormula.LHS,NestedYet) + CountNestedFormulae(Signature,
 Formula->FormulaUnion.BinaryFormula.RHS,NestedYet));
             break;
@@ -1437,10 +1465,13 @@ Formula->FormulaUnion.UnaryFormula.Formula,NestedYet));
             break;
         case atom:
 //DEBUG printf("It's an atom with symbol %s\n",GetSymbol(Formula->FormulaUnion.Atom));
-                return(
-(IsSymbolInSignatureList(Signature->Functions,GetSymbol(Formula->FormulaUnion.Atom),
-GetArity(Formula->FormulaUnion.Atom)) == NULL) + CountNestedFormulaeInTerms(Signature,
-GetArity(Formula->FormulaUnion.Atom),GetArguments(Formula->FormulaUnion.Atom)));
+            Count = IsSymbolInSignatureList(Signature->Predicates,GetSymbol(
+Formula->FormulaUnion.Atom),GetArity(Formula->FormulaUnion.Atom)) == NULL ? 0 : 1;
+//DEBUG printf("After looking at the symbol %s the count is %d\n",GetSymbol(Formula->FormulaUnion.Atom),Count);
+            Count += CountNestedFormulaeInTerms(Signature,GetArity(Formula->FormulaUnion.Atom),
+GetArguments(Formula->FormulaUnion.Atom));
+//DEBUG printf("After looking at the arguments of %s the count is %d\n",GetSymbol(Formula->FormulaUnion.Atom),Count);
+            return(Count);
             break;
         case tuple:
             return(CountNestedFormulaeInFormulae(Signature,
@@ -2026,10 +2057,12 @@ Formula->FormulaUnion.BinaryFormula.RHS);
                     ConnectiveStatistics.NumberOfTypeConnectives++;
                     break;
                 case equation:
+                    ConnectiveStatistics.NumberOfEquations++;
                     break;
                 default:
-//debug printf("%d===%s===\n",Formula->FormulaUnion.BinaryFormula.Connective,ConnectiveToString(Formula->FormulaUnion.BinaryFormula.Connective));
-                    CodingError("Unknown binary connective in counting");
+                    sprintf(ErrorMessage,"Unknown binary connective %s in counting",
+ConnectiveToString(Formula->FormulaUnion.BinaryFormula.Connective));
+                    CodingError(ErrorMessage);
                     break;
             }
             break;

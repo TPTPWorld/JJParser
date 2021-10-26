@@ -589,7 +589,8 @@ int * NumberOfUserTypes,int * NumberOfMathTypes) {
 
     if (SignatureNode != NULL) {
 //DEBUG printf("Type symbol is %s\n",SignatureNode->NameSymbol);
-        if (GetSignatureUses(SignatureNode)) {
+        if (GetSignatureUses(SignatureNode) > 0 && 
+strcmp(GetSignatureSymbol(SignatureNode),"$tType")) {
 //DEBUG printf("    and it is used\n");
             (*NumberOfTypes)++;
             if (!DefinedSymbol(GetSignatureSymbol(SignatureNode))) { 

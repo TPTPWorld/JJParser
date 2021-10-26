@@ -146,12 +146,16 @@ CountVariablesInFormulaByType(GetListNodeFormula(List),"$real");
 "MATH_NUMBER");
                     break;
                 case nested_formulae:
-                    if (GetSyntax(List->AnnotatedFormula) == tptp_thf) {
+                    if (GetSyntax(List->AnnotatedFormula) == tptp_thf ||
+GetSyntax(List->AnnotatedFormula) == tptp_tff) {
                         Counter += CountNestedFormulae(Signature,GetListNodeFormula(List),0);
                     }
                     break;
                 case boolean_variables:
-                    Counter += CountVariablesInFormulaByType(GetListNodeFormula(List),"$o");
+                    if (GetSyntax(List->AnnotatedFormula) == tptp_thf ||
+GetSyntax(List->AnnotatedFormula) == tptp_tff) {
+                        Counter += CountVariablesInFormulaByType(GetListNodeFormula(List),"$o");
+                    }
                     break;
                 case formula_depth:
                     Counter += FormulaDepth(GetListNodeFormula(List));
@@ -280,15 +284,17 @@ int * NumberOfMathTypes) {
     SymbolRecord = strtok_r(TypeSymbolList,"\n",&RecordRestart);
     while (SymbolRecord != NULL) {
 //DEBUG printf("Symbol is %s\n",SymbolRecord);
-        (*NumberOfTypes)++;
-        if (SymbolRecord[0] != '$') {
-            (*NumberOfUserTypes)++;
-        }
-        if (!strcmp(SymbolRecord,"$int") || !strcmp(SymbolRecord,"$int") ||
+        if (!strcmp(SymbolRecord,"$tType")) {
+            (*NumberOfTypes)++;
+            if (SymbolRecord[0] != '$') {
+                (*NumberOfUserTypes)++;
+            }
+            if (!strcmp(SymbolRecord,"$int") || !strcmp(SymbolRecord,"$int") ||
 !strcmp(SymbolRecord,"$int")) {
-            (*NumberOfMathTypes)++;
+                (*NumberOfMathTypes)++;
+            }
+            SymbolRecord = strtok_r(NULL,"\n",&RecordRestart);
         }
-        SymbolRecord = strtok_r(NULL,"\n",&RecordRestart);
     }
 }
 //-------------------------------------------------------------------------------------------------
@@ -392,6 +398,7 @@ StatisticsType GetListStatistics(LISTNODE ListHead,SIGNATURE Signature) {
     StatisticsType Statistics;
     HeadListType HeadListNode;
     double NumberOfTerms;
+    String ErrorMessage;
 
 //----Make a single node for list of lists
     HeadListNode.TheList = ListHead;
@@ -437,7 +444,10 @@ printf("PROGRESS: got formulae depth\n");
     Statistics.ConnectiveStatistics = GetListConnectiveUsageStatistics(&HeadListNode);
     if (Statistics.ConnectiveStatistics.NumberOfEquations != 
 Statistics.FormulaStatistics.NumberOfEqualityAtoms) {
-printf("ERROR ERROR: Equations not the same as equality atoms\n");
+        sprintf(ErrorMessage,"Equations %d not the same as equality atoms %d\n",
+Statistics.ConnectiveStatistics.NumberOfEquations,
+Statistics.FormulaStatistics.NumberOfEqualityAtoms);
+        CodingError(ErrorMessage);
     }
 printf("PROGRESS: counted connectives\n");
 
@@ -619,11 +629,10 @@ Statistics.ConnectiveStatistics.NumberOfXors);
 Statistics.ConnectiveStatistics.NumberOfNors > 0 ||
 Statistics.ConnectiveStatistics.NumberOfNands > 0) {
             fprintf(Stream,
-"%%                                         (%4d  ~|;%4d  ~&",
+"%%                                         (%4d  ~|;%4d  ~&}\n",
 Statistics.ConnectiveStatistics.NumberOfNors,
 Statistics.ConnectiveStatistics.NumberOfNands);
         }
-        fprintf(Stream,")\n");
     }
 
     if (
@@ -705,9 +714,13 @@ Statistics.SymbolStatistics.NumberOfUserTypes);
             fprintf(Stream,";%4d ari",Statistics.SymbolStatistics.NumberOfMathTypes);
         }
         fprintf(Stream,")\n");
-        fprintf(Stream,
+//----Print number of type declarations if more than type annotated formulae
+        if (Statistics.ConnectiveStatistics.NumberOfGlobalTypeDecs > 
+Statistics.FormulaStatistics.NumberOfTypeFormulae) {
+            fprintf(Stream,
 "%%            Number of type decls  : %4d\n",
 Statistics.ConnectiveStatistics.NumberOfGlobalTypeDecs);
+        }
         fprintf(Stream,
 "%%            Number of type conns  : %4d (%4d   >;%4d   *;%4d   +;%4d  <<)\n",
 Statistics.ConnectiveStatistics.NumberOfTypeConnectives,
@@ -765,46 +778,40 @@ Statistics.SymbolStatistics.NumberOfFunctors,Statistics.SymbolStatistics.NumberO
     }
 
 //----Variables
-    fprintf(Stream,"%%            Number of variables   : %4d (%4d sgn;",
-Statistics.SymbolStatistics.NumberOfVariables,
-Statistics.SymbolStatistics.NumberOfSingletons);
+    fprintf(Stream,"%%            Number of variables   : %4d (",
+Statistics.SymbolStatistics.NumberOfVariables);
+//REMOVED FOR NOW %4d sgn;",
+//REMOVED FOR NOW Statistics.SymbolStatistics.NumberOfSingletons);
     if (
 Statistics.FormulaStatistics.NumberOfTHF > 0 ||
 Statistics.FormulaStatistics.NumberOfTFF > 0 ||
-Statistics.FormulaStatistics.NumberOfFOF > 0) {
+Statistics.FormulaStatistics.NumberOfFOF > 0 ||
+Statistics.FormulaStatistics.NumberOfTCF > 0) {
         fprintf(Stream,"%4d   !;%4d   ?",
 Statistics.ConnectiveStatistics.NumberOfUniversals,
 Statistics.ConnectiveStatistics.NumberOfExistentials);
-        if (Statistics.FormulaStatistics.NumberOfTHF > 0) {
-            fprintf(Stream,";%4d   ^",Statistics.ConnectiveStatistics.NumberOfLambdas);
-        }
-    }
-    fprintf(Stream,")\n");
-    if (
+        if (
 Statistics.FormulaStatistics.NumberOfTHF > 0 ||
 Statistics.FormulaStatistics.NumberOfTFF > 0 ||
 Statistics.FormulaStatistics.NumberOfTCF > 0) {
-        fprintf(Stream,
-"%%                                         (%4d   :",
-Statistics.ConnectiveStatistics.NumberOfTypedVariables);
+            fprintf(Stream,";%4d   :",Statistics.ConnectiveStatistics.NumberOfTypedVariables);
+        }
+        if (Statistics.FormulaStatistics.NumberOfTHF > 0) {
+            fprintf(Stream,";%4d   ^",Statistics.ConnectiveStatistics.NumberOfLambdas);
+        }
+        fprintf(Stream,")\n");
     }
-    if (Statistics.ConnectiveStatistics.NumberOfPiBinders > 0 ||
-Statistics.ConnectiveStatistics.NumberOfSigmaBinders > 0 ) {
-        fprintf(Stream,
-"%%                                         ;%4d  !>;%4d  ?*",
+    if (
+Statistics.ConnectiveStatistics.NumberOfPiBinders > 0 ||
+Statistics.ConnectiveStatistics.NumberOfSigmaBinders > 0 ||
+Statistics.ConnectiveStatistics.NumberOfDescriptionBinders > 0 ||
+Statistics.ConnectiveStatistics.NumberOfChoiceBinders > 0) {
+            fprintf(Stream,
+"%%                                         (%4d  !>;%4d  ?*;%4d  @-;%4d  @+)\n",
 Statistics.ConnectiveStatistics.NumberOfPiBinders,
-Statistics.ConnectiveStatistics.NumberOfSigmaBinders);
-    }
-    fprintf(Stream,")\n");
-
-    if (Statistics.FormulaStatistics.NumberOfTHF > 0 &&
-(Statistics.ConnectiveStatistics.NumberOfDescriptionBinders > 0 ||
- Statistics.ConnectiveStatistics.NumberOfChoiceBinders > 0)) {
-        fprintf(Stream,
-"%%                                         (%4d  @-;%4d  @+)\n",
+Statistics.ConnectiveStatistics.NumberOfSigmaBinders,
 Statistics.ConnectiveStatistics.NumberOfDescriptionBinders,
 Statistics.ConnectiveStatistics.NumberOfChoiceBinders);
     }
-
 }
 //-------------------------------------------------------------------------------------------------
