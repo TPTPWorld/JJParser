@@ -31,6 +31,7 @@ char * GetSymbol(TERM Term) {
         case atom_as_term:
         case function:
         case a_type:
+        case non_logical_data:
             return(GetSignatureSymbol(Term->TheSymbol.NonVariable));
             break;
         case variable:
@@ -58,6 +59,7 @@ int GetArity(TERM Term) {
         case atom_as_term:
         case function:
         case a_type:
+        case non_logical_data:
             if (!strcmp(GetSymbol(Term),"[]")) {
                 return(Term->FlexibleArity);
             } else {

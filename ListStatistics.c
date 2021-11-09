@@ -461,7 +461,7 @@ printf("PROGRESS: counted RR clauses\n");
 printf("PROGRESS: got max clause size\n");
     if (Statistics.FormulaStatistics.NumberOfCNF > 0) {
         Statistics.FormulaStatistics.AverageClauseSize = 
-Statistics.FormulaStatistics.NumberOfLiterals / Statistics.FormulaStatistics.NumberOfCNF;
+Statistics.FormulaStatistics.NumberOfAtoms / Statistics.FormulaStatistics.NumberOfCNF;
     } else {
         Statistics.FormulaStatistics.AverageClauseSize = 0.0;
     }
@@ -762,8 +762,8 @@ Statistics.FormulaStatistics.NumberOfFOF > 0 ||
 Statistics.FormulaStatistics.NumberOfTCF > 0 ||
 Statistics.FormulaStatistics.NumberOfCNF > 0) {
         fprintf(Stream,"%%            Number of predicates  : %4d (%4d usr;%4d prp; ",
-Statistics.SymbolStatistics.NumberOfUserPredicates,
 Statistics.SymbolStatistics.NumberOfPredicates,
+Statistics.SymbolStatistics.NumberOfUserPredicates,
 Statistics.SymbolStatistics.NumberOfPropositions);
         PrintMinMaxArity(Stream,Statistics.SymbolStatistics.MinPredicateArity);
         fprintf(Stream,"-");
@@ -780,27 +780,30 @@ Statistics.SymbolStatistics.NumberOfFunctors,Statistics.SymbolStatistics.NumberO
 //----Variables
     fprintf(Stream,"%%            Number of variables   : %4d (",
 Statistics.SymbolStatistics.NumberOfVariables);
-//REMOVED FOR NOW %4d sgn;",
-//REMOVED FOR NOW Statistics.SymbolStatistics.NumberOfSingletons);
     if (
+Statistics.FormulaStatistics.NumberOfCNF > 0) {
+        fprintf(Stream,"%4d sgn",Statistics.SymbolStatistics.NumberOfSingletons);
+    } else {
+        if (
 Statistics.FormulaStatistics.NumberOfTHF > 0 ||
 Statistics.FormulaStatistics.NumberOfTFF > 0 ||
 Statistics.FormulaStatistics.NumberOfFOF > 0 ||
 Statistics.FormulaStatistics.NumberOfTCF > 0) {
-        fprintf(Stream,"%4d   !;%4d   ?",
+            fprintf(Stream,"%4d   !;%4d   ?",
 Statistics.ConnectiveStatistics.NumberOfUniversals,
 Statistics.ConnectiveStatistics.NumberOfExistentials);
-        if (
+            if (
 Statistics.FormulaStatistics.NumberOfTHF > 0 ||
 Statistics.FormulaStatistics.NumberOfTFF > 0 ||
 Statistics.FormulaStatistics.NumberOfTCF > 0) {
-            fprintf(Stream,";%4d   :",Statistics.ConnectiveStatistics.NumberOfTypedVariables);
+                fprintf(Stream,";%4d   :",Statistics.ConnectiveStatistics.NumberOfTypedVariables);
+            }
+            if (Statistics.FormulaStatistics.NumberOfTHF > 0) {
+                fprintf(Stream,";%4d   ^",Statistics.ConnectiveStatistics.NumberOfLambdas);
+            }
         }
-        if (Statistics.FormulaStatistics.NumberOfTHF > 0) {
-            fprintf(Stream,";%4d   ^",Statistics.ConnectiveStatistics.NumberOfLambdas);
-        }
-        fprintf(Stream,")\n");
     }
+    fprintf(Stream,")\n");
     if (
 Statistics.ConnectiveStatistics.NumberOfPiBinders > 0 ||
 Statistics.ConnectiveStatistics.NumberOfSigmaBinders > 0 ||

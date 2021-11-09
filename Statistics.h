@@ -66,7 +66,6 @@ typedef struct {
     int NumberOfEqualityAtoms;  //----Doubles as NumberOfEqualityLiterals
     int NumberOfVariableAtoms;
     int NumberOfNestedFormulae;
-    int NumberOfLiterals;
 
     int MaxFormulaDepth;
     double AverageFormulaDepth;

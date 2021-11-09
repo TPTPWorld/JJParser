@@ -22,7 +22,6 @@ void InitializeFormulaStatistics(FormulaStatisticsType * FormulaStatistics) {
     FormulaStatistics->NumberOfEqualityAtoms = 0;
     FormulaStatistics->NumberOfVariableAtoms = 0;
     FormulaStatistics->NumberOfNestedFormulae = 0;
-    FormulaStatistics->NumberOfLiterals = 0;
 
     FormulaStatistics->MaxFormulaDepth = 0;
     FormulaStatistics->AverageFormulaDepth = 0;

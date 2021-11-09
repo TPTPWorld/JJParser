@@ -1608,7 +1608,6 @@ ANNOTATEDFORMULA ParseInclude(READFILE Stream,SIGNATURE Signature) {
     Context.Signature = Signature;
     AnnotatedFormula->AnnotatedFormulaUnion.Include = ParseTerm(Stream,nontype,Context,NULL,
 non_logical_data,none,NULL,0);
-//DEBUG printf("file\n%s\n",AnnotatedFormula->AnnotatedFormulaUnion.Include->Arguments[0]->TheSymbol.NonVariable->NameSymbol);
     TakeToken(Stream,punctuation,".");
 
 //----Check it looks like an include
@@ -1872,8 +1871,8 @@ strstr(AnnotatedFormula->AnnotatedFormulaUnion.Comment,"% File ") != NULL) {
     return(Head);
 }
 //-------------------------------------------------------------------------------------------------
-LISTNODE ParseREADFILEOfFormulae(READFILE Stream,
-SIGNATURE Signature,int ExpandIncludes,char * NameFilter) {
+LISTNODE ParseREADFILEOfFormulae(READFILE Stream,SIGNATURE Signature,int ExpandIncludes,
+char * NameFilter) {
 
     ANNOTATEDFORMULA AnnotatedFormula;
     LISTNODE Head;

@@ -270,7 +270,7 @@ tcf_nodes,1);
     }
     if (Statistics->NumberOfCNF > 0 || Statistics->NumberOfTCF > 0) {
         Statistics->MaxClauseSize = RootListMaximal(Signature,RootListHead,literals);
-        Statistics->AverageClauseSize = Statistics->NumberOfLiterals /
+        Statistics->AverageClauseSize = Statistics->NumberOfAtoms /
 (Statistics->NumberOfCNF + Statistics->NumberOfTCF);
     }
 
