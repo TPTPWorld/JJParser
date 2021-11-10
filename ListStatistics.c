@@ -459,9 +459,12 @@ rr_clauses);
 printf("PROGRESS: counted RR clauses\n");
     Statistics.FormulaStatistics.MaxClauseSize = HeadListMaximal(Signature,&HeadListNode,literals);
 printf("PROGRESS: got max clause size\n");
-    if (Statistics.FormulaStatistics.NumberOfCNF > 0) {
+    if (
+Statistics.FormulaStatistics.NumberOfTCF > 0 ||
+Statistics.FormulaStatistics.NumberOfCNF > 0) {
         Statistics.FormulaStatistics.AverageClauseSize = 
-Statistics.FormulaStatistics.NumberOfAtoms / Statistics.FormulaStatistics.NumberOfCNF;
+Statistics.FormulaStatistics.NumberOfAtoms / 
+(Statistics.FormulaStatistics.NumberOfTCF + Statistics.FormulaStatistics.NumberOfCNF);
     } else {
         Statistics.FormulaStatistics.AverageClauseSize = 0.0;
     }
@@ -569,9 +572,9 @@ Statistics.FormulaStatistics.NumberOfFOF > 0) {
             fprintf(Stream,"%% Syntax   : ");
         }
         fprintf(Stream,"Number of clauses     : %4d (%4d unt;%4d nHn;%4d RR)\n",
-Statistics.FormulaStatistics.NumberOfCNF + Statistics.FormulaStatistics.NumberOfTCF,
+Statistics.FormulaStatistics.NumberOfTCF + Statistics.FormulaStatistics.NumberOfCNF,
 Statistics.FormulaStatistics.NumberOfUnitFormulae,
-Statistics.FormulaStatistics.NumberOfCNF + Statistics.FormulaStatistics.NumberOfTCF -
+Statistics.FormulaStatistics.NumberOfTCF + Statistics.FormulaStatistics.NumberOfCNF -
 Statistics.FormulaStatistics.NumberOfHornClauses,
 Statistics.FormulaStatistics.NumberOfRRClauses);
     }
@@ -781,6 +784,7 @@ Statistics.SymbolStatistics.NumberOfFunctors,Statistics.SymbolStatistics.NumberO
     fprintf(Stream,"%%            Number of variables   : %4d (",
 Statistics.SymbolStatistics.NumberOfVariables);
     if (
+Statistics.FormulaStatistics.NumberOfTCF > 0 ||
 Statistics.FormulaStatistics.NumberOfCNF > 0) {
         fprintf(Stream,"%4d sgn",Statistics.SymbolStatistics.NumberOfSingletons);
     } else {
