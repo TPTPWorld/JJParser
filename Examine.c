@@ -2307,13 +2307,23 @@ int SumTermDepth(TERM Atom) {
     int SumDepth;
     int Index;
     
-    SumDepth = 0;
-    if (GetArity(Atom) > 0 && GetArguments(Atom) != NULL) {
-        for (Index = 0; Index < GetArity(Atom); Index++) {
-            SumDepth += MaxTermDepth(Atom->Arguments[Index]);
+    if (Atom->Type == formula) {
+        return(0);
+    } else {
+//----Don't count predicate
+        if (Atom->Type == atom_as_term) {
+            SumDepth = 0;
+        } else {
+            SumDepth = 1;
+        }
+ZZZZZZZZ
+        if (GetArity(Atom) > 0 && GetArguments(Atom) != NULL) {
+            for (Index = 0; Index < GetArity(Atom); Index++) {
+                SumDepth += SumTermDepth(Atom->Arguments[Index]);
+            }
         }
     }
-
+printf("depth of %s is %d\n",GetSymbol(Atom),SumDepth);
     return(SumDepth);
 }
 //-------------------------------------------------------------------------------------------------

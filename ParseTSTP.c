@@ -90,8 +90,7 @@ Context,0);
     return(AnnotatedFormula);
 }
 //-------------------------------------------------------------------------------------------------
-ANNOTATEDFORMULA ParseAnnotatedTSTPFormula(READFILE Stream,
-SIGNATURE Signature) {
+ANNOTATEDFORMULA ParseAnnotatedTSTPFormula(READFILE Stream,SIGNATURE Signature) {
 
     ContextType Context;
     ANNOTATEDFORMULA AnnotatedFormula;
@@ -165,8 +164,7 @@ Language,Signature,VariablesMustBeQuantifiedAlready);
         AnnotatedFormula->AnnotatedFormulaUnion.AnnotatedTSTPFormula.Source =
 ParseTerm(Stream,nontype,Context,&EndOfScope,non_logical_data,none,NULL,0);
 //DEBUG printf("The source is \n");
-//DEBUG PrintTSTPTerm(stdout,AnnotatedFormula->AnnotatedFormulaUnion.AnnotatedTSTPFormula.Source,-1,1);
-//DEBUG printf("\n===========\n");
+//DEBUG PrintTSTPTerm(stdout,Language,AnnotatedFormula->AnnotatedFormulaUnion.AnnotatedTSTPFormula.Source,0,1,-1);
 //----Check inference record has three arguments
         if (!strcmp(GetSymbol(AnnotatedFormula->AnnotatedFormulaUnion.
 AnnotatedTSTPFormula.Source),"inference") && GetArity(AnnotatedFormula->
@@ -188,8 +186,7 @@ AnnotatedFormulaUnion.AnnotatedTSTPFormula.Source) != 3) {
             AcceptToken(Stream,punctuation,",");
 //----Local scope for useful info
             EndOfScope = NULL;
-            AnnotatedFormula->
-AnnotatedFormulaUnion.AnnotatedTSTPFormula.UsefulInfo =
+            AnnotatedFormula->AnnotatedFormulaUnion.AnnotatedTSTPFormula.UsefulInfo =
 ParseTerm(Stream,nontype,Context,&EndOfScope,non_logical_data,none,NULL,0);
         }
     }

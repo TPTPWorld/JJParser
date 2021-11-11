@@ -701,7 +701,7 @@ int VariablesMustBeQuantified) {
 
 //----Save the symbol for inserting in signature later
     PrefixSymbol = CopyHeapString(CurrentToken(Stream)->NameToken);
-//----Move on if not a list 
+//----Eat the symbol if not a list WHAT IS ( USED FOR?
     if (strcmp(PrefixSymbol,"[") && strcmp(PrefixSymbol,"(")) {
         NextToken(Stream);
     }
@@ -790,7 +790,10 @@ TypeIfInfix == variable) {
     }
 
 //----Insert symbol into signature. Could be LHS of infix.
-    if (Term->Type == new_variable) {
+    if (Term->Type == non_logical_data) {
+        Term->TheSymbol.NonVariable = InsertIntoSignature(Context.Signature,Term->Type,
+PrefixSymbol,NumberOfArguments,Stream);        
+    } else if (Term->Type == new_variable) {
         Term->Type = variable;
         Term->TheSymbol.Variable = InsertVariable(Stream,Context.Signature,Context.Variables,
 EndOfScope,1,PrefixSymbol,VariableQuantifier,VariablesMustBeQuantified);

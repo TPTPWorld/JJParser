@@ -1,2 +1,2 @@
-fof(m__3520,hypothesis,(
-    ~ xK != sz00 )).
+fof(first_order,axiom,
+    p(f(f(a)))).

@@ -5,6 +5,7 @@
 #include <string.h>
 #include <ctype.h>
 #include <limits.h>
+#include <math.h>
 
 #include "DataTypes.h"
 #include "Utilities.h"
@@ -397,7 +398,7 @@ StatisticsType GetListStatistics(LISTNODE ListHead,SIGNATURE Signature) {
 
     StatisticsType Statistics;
     HeadListType HeadListNode;
-    double NumberOfTerms;
+    int NumberOfTerms;
     String ErrorMessage;
 
 //----Make a single node for list of lists
@@ -434,9 +435,9 @@ printf("PROGRESS: counted atoms of type\n");
     Statistics.FormulaStatistics.MaxFormulaDepth = HeadListMaximal(Signature,&HeadListNode,
 max_formula_depth);
     if (Statistics.FormulaStatistics.NumberOfFormulae > 0) {
-        Statistics.FormulaStatistics.AverageFormulaDepth = 
+        Statistics.FormulaStatistics.AverageFormulaDepth = (int)round(
 HeadListCount(Signature,&HeadListNode,formula_depth) / 
-Statistics.FormulaStatistics.NumberOfFormulae;
+(double)Statistics.FormulaStatistics.NumberOfFormulae);
     } else {
         Statistics.FormulaStatistics.AverageFormulaDepth = 0.0;
     }
@@ -503,8 +504,9 @@ printf("PROGRESS: counted variables\n");
 max_term_depth);
 printf("PROGRESS: got max term depth\n");
     if ((NumberOfTerms = HeadListCount(Signature,&HeadListNode,terms)) > 0) {
-        Statistics.FormulaStatistics.AverageTermDepth = HeadListCount(Signature,&HeadListNode,
-term_depth) / NumberOfTerms;
+printf("Total term depth %d in %d terms\n",HeadListCount(Signature,&HeadListNode,term_depth),NumberOfTerms);
+        Statistics.FormulaStatistics.AverageTermDepth = (int)round(
+HeadListCount(Signature,&HeadListNode,term_depth) / (double)NumberOfTerms);
     } else {
         Statistics.FormulaStatistics.AverageTermDepth = 0.0;
     }
@@ -671,7 +673,7 @@ Statistics.FormulaStatistics.NumberOfMathTerms > 0 ||
 Statistics.FormulaStatistics.NumberOfNumbers > 0 ||
 Statistics.ConnectiveStatistics.NumberOfMathVariables > 0 ) {
         fprintf(Stream,
-"%%            Number arithmetic     : %4d (%4d prd;%4d fun;%4d num;%4d var)\n",
+"%%            Number arithmetic     : %4d (%4d atm;%4d fun;%4d num;%4d var)\n",
 Statistics.FormulaStatistics.NumberOfMathAtoms + 
 Statistics.FormulaStatistics.NumberOfMathTerms +
 Statistics.FormulaStatistics.NumberOfNumbers +
@@ -736,12 +738,15 @@ Statistics.ConnectiveStatistics.NumberOfSubtypes);
 //----Now down to the symbol level
     if (Statistics.FormulaStatistics.NumberOfTHF > 0) {
         fprintf(Stream,"%%            Number of symbols     : %4d (%4d usr;%4d con; ",
-Statistics.SymbolStatistics.NumberOfPredicates,
+Statistics.SymbolStatistics.NumberOfPredicates + 
+Statistics.SymbolStatistics.NumberOfFunctors, //----The arithmetic ones are here
 Statistics.SymbolStatistics.NumberOfUserPredicates,
 Statistics.SymbolStatistics.NumberOfPropositions);
-        PrintMinMaxArity(Stream,Statistics.SymbolStatistics.MinPredicateArity);
+        PrintMinMaxArity(Stream,MinimumOfInt(
+Statistics.SymbolStatistics.MinPredicateArity,Statistics.SymbolStatistics.MinFunctorArity));
         fprintf(Stream,"-");
-        PrintMinMaxArity(Stream,Statistics.SymbolStatistics.MaxPredicateArity);
+        PrintMinMaxArity(Stream,MaximumOfInt(
+Statistics.SymbolStatistics.MaxPredicateArity,Statistics.SymbolStatistics.MaxFunctorArity));
         fprintf(Stream," aty");
         if (Statistics.ConnectiveStatistics.NumberOfTypedEquations > 0) {
             fprintf(Stream,";%4d  @=",Statistics.ConnectiveStatistics.NumberOfTypedEquations);
@@ -772,8 +777,10 @@ Statistics.SymbolStatistics.NumberOfPropositions);
         fprintf(Stream,"-");
         PrintMinMaxArity(Stream,Statistics.SymbolStatistics.MaxPredicateArity);
         fprintf(Stream," aty)\n");
-        fprintf(Stream,"%%            Number of functors    : %4d (%4d con; ",
-Statistics.SymbolStatistics.NumberOfFunctors,Statistics.SymbolStatistics.NumberOfConstants);
+        fprintf(Stream,"%%            Number of functors    : %4d (%4d usr;%4d con; ",
+Statistics.SymbolStatistics.NumberOfFunctors,
+Statistics.SymbolStatistics.NumberOfUserFunctors,
+Statistics.SymbolStatistics.NumberOfConstants);
         PrintMinMaxArity(Stream,Statistics.SymbolStatistics.MinFunctorArity),
         fprintf(Stream,"-");
         PrintMinMaxArity(Stream,Statistics.SymbolStatistics.MaxFunctorArity);

@@ -24,6 +24,8 @@ void * Malloc(int Size);
 void * Realloc(void * OldMemory,int Size);
 
 char * CopyHeapString(char * String);
+int MinimumOfInt(int I1,int I2);
+double MinimumOfDouble(double D1,double D2);
 int MaximumOfInt(int I1,int I2);
 double MaximumOfDouble(double D1,double D2);
 void SeedRand(int Seed);
