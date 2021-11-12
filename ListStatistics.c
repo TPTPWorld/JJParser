@@ -499,18 +499,18 @@ printf("PROGRESS: counted predicates and functions\n");
 variables);
     Statistics.SymbolStatistics.NumberOfSingletons = HeadListCount(Signature,&HeadListNode,
 singletons);
-printf("PROGRESS: counted variables\n");
+printf("PROGRESS: counted variables %d\n",Statistics.SymbolStatistics.NumberOfVariables);
     Statistics.FormulaStatistics.MaxTermDepth = HeadListMaximal(Signature,&HeadListNode,
 max_term_depth);
-printf("PROGRESS: got max term depth\n");
+printf("PROGRESS: got max term depth %d\n",Statistics.FormulaStatistics.MaxTermDepth);
     if ((NumberOfTerms = HeadListCount(Signature,&HeadListNode,terms)) > 0) {
-printf("Total term depth %d in %d terms\n",HeadListCount(Signature,&HeadListNode,term_depth),NumberOfTerms);
+//DEBUG printf("Total term depth %d in %d terms\n",HeadListCount(Signature,&HeadListNode,term_depth),NumberOfTerms);
         Statistics.FormulaStatistics.AverageTermDepth = (int)round(
 HeadListCount(Signature,&HeadListNode,term_depth) / (double)NumberOfTerms);
     } else {
         Statistics.FormulaStatistics.AverageTermDepth = 0.0;
     }
-printf("PROGRESS: got term depth\n");
+printf("PROGRESS: got average term depth %.2f\n",Statistics.FormulaStatistics.AverageTermDepth);
 
 //----Statistics for terms
     Statistics.FormulaStatistics.NumberOfNestedFormulae = HeadListCount(Signature,&HeadListNode,

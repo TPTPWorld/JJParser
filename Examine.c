@@ -1434,41 +1434,50 @@ int CountNestedFormulae(SIGNATURE Signature,FORMULA Formula,int NestedYet) {
     Count = 0;
     switch (Formula->Type) {
         case sequent:
-            return(NestedYet + CountNestedFormulaeInFormulae(Signature,
+            Count = NestedYet;
+            NestedYet = 0;
+            return(Count + CountNestedFormulaeInFormulae(Signature,
 Formula->FormulaUnion.SequentFormula.NumberOfLHSElements,Formula->FormulaUnion.SequentFormula.LHS,
 NestedYet) + CountNestedFormulaeInFormulae(Signature,
 Formula->FormulaUnion.SequentFormula.NumberOfRHSElements,Formula->FormulaUnion.SequentFormula.RHS,
 NestedYet));
             break;
         case assignment:
-            return(NestedYet + CountNestedFormulae(Signature,
+            Count = NestedYet;
+            NestedYet = 0;
+            return(Count + CountNestedFormulae(Signature,
 Formula->FormulaUnion.BinaryFormula.RHS,NestedYet));
             break;
         case type_declaration:
             return(0);
             break;
         case quantified:
-            return(NestedYet + CountNestedFormulae(Signature,
+            Count = NestedYet;
+            NestedYet = 0;
+            return(Count + CountNestedFormulae(Signature,
 Formula->FormulaUnion.QuantifiedFormula.Formula,NestedYet));
             break;
         case binary:
 //DEBUG printf("Binary with connective %s\n",ConnectiveToString(Formula->FormulaUnion.BinaryFormula.Connective));
             Count = NestedYet;
-            if (Formula->FormulaUnion.BinaryFormula.Connective == equation) {
-                NestedYet = 1;
-            }
+            NestedYet = 0;
             return(Count + CountNestedFormulae(Signature,
 Formula->FormulaUnion.BinaryFormula.LHS,NestedYet) + CountNestedFormulae(Signature,
 Formula->FormulaUnion.BinaryFormula.RHS,NestedYet));
             break;
         case unary:
-            return(NestedYet + CountNestedFormulae(Signature,
+            Count = NestedYet;
+            NestedYet = 0;
+            return(Count + CountNestedFormulae(Signature,
 Formula->FormulaUnion.UnaryFormula.Formula,NestedYet));
             break;
         case atom:
 //DEBUG printf("It's an atom with symbol %s\n",GetSymbol(Formula->FormulaUnion.Atom));
-            Count = IsSymbolInSignatureList(Signature->Predicates,GetSymbol(
-Formula->FormulaUnion.Atom),GetArity(Formula->FormulaUnion.Atom)) == NULL ? 0 : 1;
+            if (IsSymbolInSignatureList(Signature->Predicates,
+GetSymbol(Formula->FormulaUnion.Atom),GetArity(Formula->FormulaUnion.Atom)) != NULL) {
+                Count = NestedYet;
+                NestedYet = 1;
+            }
 //DEBUG printf("After looking at the symbol %s the count is %d\n",GetSymbol(Formula->FormulaUnion.Atom),Count);
             Count += CountNestedFormulaeInTerms(Signature,GetArity(Formula->FormulaUnion.Atom),
 GetArguments(Formula->FormulaUnion.Atom));
@@ -1476,18 +1485,23 @@ GetArguments(Formula->FormulaUnion.Atom));
             return(Count);
             break;
         case tuple:
+            NestedYet = 1;
             return(CountNestedFormulaeInFormulae(Signature,
 Formula->FormulaUnion.TupleFormula.NumberOfElements,
 Formula->FormulaUnion.TupleFormula.Elements,NestedYet));
             break;
         case ite_formula:
-            return(NestedYet + 
+            Count = NestedYet;
+            NestedYet = 0;
+            return(Count + 
 CountNestedFormulae(Signature,Formula->FormulaUnion.ConditionalFormula.Condition,NestedYet) +
 CountNestedFormulae(Signature,Formula->FormulaUnion.ConditionalFormula.FormulaIfTrue,NestedYet) +
 CountNestedFormulae(Signature,Formula->FormulaUnion.ConditionalFormula.FormulaIfFalse,NestedYet));
             break;
         case let_formula:
-            return(NestedYet + CountNestedFormulae(Signature,
+            Count = NestedYet;
+            NestedYet = 0;
+            return(Count + CountNestedFormulae(Signature,
 Formula->FormulaUnion.LetFormula.LetBody,NestedYet));
             break;
         default:
@@ -1650,13 +1664,22 @@ FormulaTypeToString(Formula->Type));
     return(0);
 }
 //-------------------------------------------------------------------------------------------------
-int CountArgumentTerms(TERM Term) {
+int CountTermTerms(TERM Term) {
 
+    int TermCount;
+    
     if (Term->Type == formula) {
         return(CountFormulaTerms(Term->TheSymbol.Formula));
     } else {
-        return(1 + CountSimpleUsageInTERMArray(GetArity(Term),GetArguments(Term),
-&CountArgumentTerms));
+        if (Term->Type == atom_as_term) {
+            TermCount = 0;
+        } else {
+            TermCount = 1;
+        }
+        TermCount += CountSimpleUsageInTERMArray(GetArity(Term),GetArguments(Term),
+&CountTermTerms);
+//DEBUG printf("CountTermTerms for %s is %d\n",GetSymbol(Term),TermCount);
+        return (TermCount);
     }
 }
 //-------------------------------------------------------------------------------------------------
@@ -1690,8 +1713,8 @@ CountFormulaTerms(Formula->FormulaUnion.BinaryFormula.RHS));
             return(CountFormulaTerms(Formula->FormulaUnion.UnaryFormula.Formula));
             break;
         case atom:
-            return(CountSimpleUsageInTERMArray(GetArity(Formula->FormulaUnion.Atom),
-GetArguments(Formula->FormulaUnion.Atom),&CountArgumentTerms));
+//DEBUG printf("The number of terms in %s is %d\n",GetSymbol(Formula->FormulaUnion.Atom),CountTermTerms(Formula->FormulaUnion.Atom));
+            return(CountTermTerms(Formula->FormulaUnion.Atom));
             break;
         case tuple:
             return(CountSimpleUsageInFORMULAArray(
@@ -2211,7 +2234,7 @@ int MaxTermDepth(TERM Term) {
     int Index;
 
     if (Term->Type == formula) {
-        return(0);
+        return(MaxFormulaTermDepth(Term->TheSymbol.Formula));
     } else {
         MaxDepth = 0;
         if (GetArity(Term) > 0 && GetArguments(Term) != NULL) {
@@ -2219,7 +2242,11 @@ int MaxTermDepth(TERM Term) {
                 MaxDepth = MaximumOfInt(MaxDepth,MaxTermDepth(Term->Arguments[Index]));
             }
         }
-        return (1 + MaxDepth);
+        if (Term->Type != atom_as_term) {
+            MaxDepth += 1;
+        }
+//DEBUG printf("MaxTermDepth for %s is %d\n",GetSymbol(Term),MaxDepth);
+        return (MaxDepth);
     }
 }
 //-------------------------------------------------------------------------------------------------
@@ -2268,8 +2295,7 @@ MaxFormulaTermDepth(Formula->FormulaUnion.BinaryFormula.RHS)));
             return(MaxFormulaTermDepth(Formula->FormulaUnion.UnaryFormula.Formula));
             break;
         case atom:
-//-----1 because predicate doesn't count
-            return(-1 + MaxTermDepth(Formula->FormulaUnion.Atom));
+            return(MaxTermDepth(Formula->FormulaUnion.Atom));
             break;
         case tuple:
             return(MaxTupleFormulaeTermDepth(Formula->FormulaUnion.TupleFormula.NumberOfElements,
@@ -2308,22 +2334,21 @@ int SumTermDepth(TERM Atom) {
     int Index;
     
     if (Atom->Type == formula) {
-        return(0);
+        return(SumFormulaTermDepth(Atom->TheSymbol.Formula));
     } else {
 //----Don't count predicate
         if (Atom->Type == atom_as_term) {
             SumDepth = 0;
         } else {
-            SumDepth = 1;
+            SumDepth = MaxTermDepth(Atom);
         }
-ZZZZZZZZ
         if (GetArity(Atom) > 0 && GetArguments(Atom) != NULL) {
             for (Index = 0; Index < GetArity(Atom); Index++) {
                 SumDepth += SumTermDepth(Atom->Arguments[Index]);
             }
         }
     }
-printf("depth of %s is %d\n",GetSymbol(Atom),SumDepth);
+//DEBUG printf("SumTermDepth for %s is %d\n",GetSymbol(Atom),SumDepth);
     return(SumDepth);
 }
 //-------------------------------------------------------------------------------------------------
