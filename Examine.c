@@ -29,6 +29,7 @@ char * GetSymbol(TERM Term) {
 
     switch (Term->Type) {
         case atom_as_term:
+        case connective:
         case function:
         case a_type:
         case non_logical_data:
@@ -57,6 +58,7 @@ int GetArity(TERM Term) {
 
     switch (Term->Type) {
         case atom_as_term:
+        case connective:
         case function:
         case a_type:
         case non_logical_data:

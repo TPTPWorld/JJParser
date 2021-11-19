@@ -761,6 +761,7 @@ int Pretty,ConnectiveType LastConnective,int TSTPSyntaxFlag) {
         CodingError("No TSTP formula to print");
         return;
     }
+//DEBUG printf("Printing a formula of type %s, last connective was %s\n",FormulaTypeToString(Formula->Type),ConnectiveToString(LastConnective));
     switch (Formula->Type) {
         case tuple:
             PrintFileFormulaeTuple(Stream,Language,
@@ -862,7 +863,8 @@ SideFormula->Type == binary &&
 RightAssociative(SideFormula->FormulaUnion.BinaryFormula.Connective)) ||
 //----Need ()s around equations and quantified formulae on LHS (and RHS - see below) of equations
 //----but not if the side formula is an equation becauyse it will get ()s itself.
-(Equation(Formula,NULL,NULL) && !SymbolFormula(SideFormula) && !Equation(SideFormula,NULL,NULL))) {
+(Equation(Formula,NULL,NULL) && !SymbolFormula(SideFormula) && !BinaryFormula(SideFormula))) {
+//OLD (Equation(Formula,NULL,NULL) && !SymbolFormula(SideFormula) && !Equation(SideFormula,NULL,NULL))) {
                 FakeConnective = brackets;
                 PFprintf(Stream,"( ");
                 SideIndent += 2;
@@ -904,7 +906,8 @@ Formula->Type != type_declaration && !TypeOrDefnFormula(Formula);
                 if ((Associative(Connective) && !FullyAssociative(Connective) && 
 SideFormula->Type == binary && 
 LeftAssociative(SideFormula->FormulaUnion.BinaryFormula.Connective)) ||
-(Equation(Formula,NULL,NULL) && !SymbolFormula(SideFormula) && !Equation(SideFormula,NULL,NULL))) {
+(Equation(Formula,NULL,NULL) && !SymbolFormula(SideFormula) && !BinaryFormula(SideFormula))) {
+//OLD (Equation(Formula,NULL,NULL) && !SymbolFormula(SideFormula) && !Equation(SideFormula,NULL,NULL))) {
                     FakeConnective = brackets;
                     PFprintf(Stream,"( ");
                     SideIndent += 2;
