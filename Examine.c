@@ -90,6 +90,132 @@ TERMArray GetArguments(TERM Term) {
     return(Term->Arguments);
 }
 //-------------------------------------------------------------------------------------------------
+//----If PutNameHere is NULL, return pointer to original, else copy into PutNameHere and return 
+//----pointer to that.
+char * GetName(ANNOTATEDFORMULA AnnotatedFormula,char * PutNameHere) {
+
+    if (ReallyAnAnnotatedFormula(AnnotatedFormula)) {
+        if (PutNameHere == NULL) {
+            return(AnnotatedFormula->AnnotatedFormulaUnion.AnnotatedTSTPFormula.Name);
+        } else {
+            strcpy(PutNameHere,AnnotatedFormula->AnnotatedFormulaUnion.AnnotatedTSTPFormula.Name);
+            return(PutNameHere);
+        }
+    } else {
+        return(NULL);
+    }
+}
+//-------------------------------------------------------------------------------------------------
+StatusType GetRole(ANNOTATEDFORMULA AnnotatedFormula,StatusType * SubStatus) {
+
+    if (AnnotatedFormula == NULL) {
+        CodingError("No formula in GetRole");
+    }
+
+    if (ReallyAnAnnotatedFormula(AnnotatedFormula)) {
+//----Return the substatus only if the pointer is non-NULL
+        if (SubStatus != NULL) {
+            *SubStatus = AnnotatedFormula->AnnotatedFormulaUnion.AnnotatedTSTPFormula.SubStatus;
+        }
+        return(AnnotatedFormula->AnnotatedFormulaUnion.AnnotatedTSTPFormula.Status);
+    } else {
+        return(nonstatus);
+    }
+}
+//-------------------------------------------------------------------------------------------------
+AnnotatedTSTPFormulaType * GetAnnotatedTSTPFormula(ANNOTATEDFORMULA AnnotatedFormula) {
+
+    if (AnnotatedFormula != NULL && ReallyAnAnnotatedFormula(AnnotatedFormula)) {
+        return(&(AnnotatedFormula->AnnotatedFormulaUnion.AnnotatedTSTPFormula));
+    } else {
+        return(NULL);
+    }
+}
+//-------------------------------------------------------------------------------------------------
+AnnotatedTSTPFormulaType * GetListNodeAnnotatedTSTPFormula(LISTNODE List) {
+
+    if (List != NULL && ReallyAnAnnotatedFormula(List->AnnotatedFormula)) {
+        return(&(List->AnnotatedFormula->AnnotatedFormulaUnion.AnnotatedTSTPFormula));
+    } else {
+        return(NULL);
+    }
+}
+//-------------------------------------------------------------------------------------------------
+StatusType GetListNodeStatus(LISTNODE List) {
+
+    AnnotatedTSTPFormulaType * AnnotatedTSTPFormula;
+
+    if ((AnnotatedTSTPFormula = GetListNodeAnnotatedTSTPFormula(List)) != NULL) {
+        return(AnnotatedTSTPFormula->Status);
+    } else {
+        return(nonstatus);
+    }
+}
+//-------------------------------------------------------------------------------------------------
+FORMULA GetListNodeFormula(LISTNODE List) {
+
+    AnnotatedTSTPFormulaType * AnnotatedTSTPFormula;
+
+    if ((AnnotatedTSTPFormula = GetListNodeAnnotatedTSTPFormula(List)) != NULL) {
+        return(AnnotatedTSTPFormula->FormulaWithVariables->Formula);
+    } else {
+        return(NULL);
+    }
+}
+//-------------------------------------------------------------------------------------------------
+VARIABLENODE GetListNodeVariables(LISTNODE List) {
+
+    AnnotatedTSTPFormulaType * AnnotatedTSTPFormula;
+
+    if ((AnnotatedTSTPFormula = GetListNodeAnnotatedTSTPFormula(List)) != NULL) {
+        return(AnnotatedTSTPFormula->FormulaWithVariables->Variables);
+    } else {
+        return(NULL);
+    }
+}
+//-------------------------------------------------------------------------------------------------
+AnnotatedTSTPFormulaType * GetTreeNodeAnnotatedTSTPFormula(TREENODE Tree) {
+
+    if (Tree != NULL && ReallyAnAnnotatedFormula(Tree->AnnotatedFormula)) {
+        return(&(Tree->AnnotatedFormula->AnnotatedFormulaUnion.AnnotatedTSTPFormula));
+    } else {
+        return(NULL);
+    }
+}
+//-------------------------------------------------------------------------------------------------
+StatusType GetTreeNodeStatus(TREENODE Tree) {
+
+    AnnotatedTSTPFormulaType * AnnotatedTSTPFormula;
+
+    if ((AnnotatedTSTPFormula = GetTreeNodeAnnotatedTSTPFormula(Tree)) != NULL) {
+        return(AnnotatedTSTPFormula->Status);
+    } else {
+        return(nonstatus);
+    }
+}
+//-------------------------------------------------------------------------------------------------
+FORMULA GetTreeNodeFormula(TREENODE Tree) {
+
+    AnnotatedTSTPFormulaType * AnnotatedTSTPFormula;
+
+    if ((AnnotatedTSTPFormula = GetTreeNodeAnnotatedTSTPFormula(Tree)) != NULL) {
+        return(AnnotatedTSTPFormula->FormulaWithVariables->Formula);
+    } else {
+        return(NULL);
+    }
+}
+//-------------------------------------------------------------------------------------------------
+VARIABLENODE GetTreeNodeVariables(TREENODE Tree) {
+
+    AnnotatedTSTPFormulaType * AnnotatedTSTPFormula;
+
+    if ((AnnotatedTSTPFormula = GetTreeNodeAnnotatedTSTPFormula(Tree)) != NULL) {
+        return(AnnotatedTSTPFormula->FormulaWithVariables->Variables);
+    } else {
+        return(NULL);
+    }
+}
+//-------------------------------------------------------------------------------------------------
 FORMULA GetResultFromTyping(READFILE Stream,FORMULA TypeFormula) {
 
     if (TypeFormula->Type == atom) {
@@ -143,30 +269,6 @@ Side->FormulaUnion.BinaryFormula.Connective == maparrow) {
         TokenError(Stream,"Could not get arity from typing");
         return(0);
     }
-}
-//-------------------------------------------------------------------------------------------------
-FORMULA GetListNodeFormula(LISTNODE List) {
-
-    return(List->AnnotatedFormula->AnnotatedFormulaUnion.AnnotatedTSTPFormula.
-FormulaWithVariables->Formula);
-}
-//-------------------------------------------------------------------------------------------------
-VARIABLENODE GetListNodeVariables(LISTNODE List) {
-
-    return(List->AnnotatedFormula->AnnotatedFormulaUnion.AnnotatedTSTPFormula.
-FormulaWithVariables->Variables);
-}
-//-------------------------------------------------------------------------------------------------
-FORMULA GetTreeNodeFormula(TREENODE Tree) {
-
-    return(Tree->AnnotatedFormula->AnnotatedFormulaUnion.AnnotatedTSTPFormula.
-FormulaWithVariables->Formula);
-}
-//-------------------------------------------------------------------------------------------------
-VARIABLENODE GetTreeNodeVariables(TREENODE Tree) {
-
-    return(Tree->AnnotatedFormula->AnnotatedFormulaUnion.AnnotatedTSTPFormula.
-FormulaWithVariables->Variables);
 }
 //-------------------------------------------------------------------------------------------------
 int LooksLikeAReal(char * RealString) {
@@ -357,13 +459,16 @@ Role != negated_conjecture && Role != question));
 //-------------------------------------------------------------------------------------------------
 int CheckAnnotatedFormulaRole(ANNOTATEDFORMULA AnnotatedFormula,StatusType DesiredRole) {
 
-    return(ReallyAnAnnotatedFormula(AnnotatedFormula) &&
-CheckRole(AnnotatedFormula->AnnotatedFormulaUnion.AnnotatedTSTPFormula.Status,DesiredRole));
+    AnnotatedTSTPFormulaType * AnnotatedTSTPFormula;
 
+    if ((AnnotatedTSTPFormula = GetAnnotatedTSTPFormula(AnnotatedFormula)) != NULL) {
+        return(CheckRole(AnnotatedTSTPFormula->Status,DesiredRole));
+    } else {
+        return(0);
+    }
 }
 //-------------------------------------------------------------------------------------------------
-int CheckAnnotatedFormula(ANNOTATEDFORMULA AnnotatedFormula,
-SyntaxType ExpectedSyntax) {
+int CheckAnnotatedFormula(ANNOTATEDFORMULA AnnotatedFormula,SyntaxType ExpectedSyntax) {
 
     return(AnnotatedFormula != NULL && AnnotatedFormula->Syntax == ExpectedSyntax &&
 AnnotatedFormula->AnnotatedFormulaUnion.AnnotatedTSTPFormula.FormulaWithVariables != NULL);
@@ -1823,7 +1928,8 @@ Formula->FormulaUnion.BinaryFormula.RHS,Predicate);
             }
 //----Equality counts as an atom
             if (Formula->FormulaUnion.BinaryFormula.Connective == equation && 
-(strlen(Predicate) == 0 || !strcmp(Predicate,"="))) {
+(strlen(Predicate) == 0 || !strcmp(Predicate,"=") || !strcmp(Predicate,"PREDICATE"))) {
+//DEBUG printf("--=-- matches --%s--\n",Predicate);
                 Count++;
             }
             return(Count);
@@ -2191,9 +2297,13 @@ Formula->FormulaUnion.SequentFormula.RHS)));
             return(1 + FormulaDepth(Formula->FormulaUnion.QuantifiedFormula.Formula));
             break;
         case binary:
-            return(1 + 
+            if (Formula->FormulaUnion.BinaryFormula.Connective == equation) {
+                return(1);
+            } else {
+                return(1 + 
 MaximumOfInt(FormulaDepth(Formula->FormulaUnion.BinaryFormula.LHS),
 FormulaDepth(Formula->FormulaUnion.BinaryFormula.RHS)));
+            }
             break;
         case unary:
             return(1 + FormulaDepth(Formula->FormulaUnion.UnaryFormula.Formula));
@@ -2476,39 +2586,6 @@ void GetListSyntaxTypes(LISTNODE Head,String SyntaxTypes) {
                 Node = Node->Next;
             }
         }
-    }
-}
-//-------------------------------------------------------------------------------------------------
-//----If PutNameHere is NULL, return pointer to original, else copy into PutNameHere and return 
-//----pointer to that.
-char * GetName(ANNOTATEDFORMULA AnnotatedFormula,char * PutNameHere) {
-
-    if (ReallyAnAnnotatedFormula(AnnotatedFormula)) {
-        if (PutNameHere == NULL) {
-            return(AnnotatedFormula->AnnotatedFormulaUnion.AnnotatedTSTPFormula.Name);
-        } else {
-            strcpy(PutNameHere,AnnotatedFormula->AnnotatedFormulaUnion.AnnotatedTSTPFormula.Name);
-            return(PutNameHere);
-        }
-    } else {
-        return(NULL);
-    }
-}
-//-------------------------------------------------------------------------------------------------
-StatusType GetRole(ANNOTATEDFORMULA AnnotatedFormula,StatusType * SubStatus) {
-
-    if (AnnotatedFormula == NULL) {
-        CodingError("No formula in GetRole");
-    }
-
-    if (ReallyAnAnnotatedFormula(AnnotatedFormula)) {
-//----Return the substatus only if the pointer is non-NULL
-        if (SubStatus != NULL) {
-            *SubStatus = AnnotatedFormula->AnnotatedFormulaUnion.AnnotatedTSTPFormula.SubStatus;
-        }
-        return(AnnotatedFormula->AnnotatedFormulaUnion.AnnotatedTSTPFormula.Status);
-    } else {
-        return(nonstatus);
     }
 }
 //-------------------------------------------------------------------------------------------------

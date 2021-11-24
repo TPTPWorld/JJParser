@@ -206,6 +206,7 @@ CountFormulaAtomsByPredicate(Signature,GetListNodeFormula(List),"PREDICATE"));
                     Maximal = MaximumOfInt(Maximal,MaxFormulaTermDepth(GetListNodeFormula(List)));
                     break;
                 case max_formula_depth:
+//DEBUG printf("%s has depth %d\n",GetName(List->AnnotatedFormula,NULL),FormulaDepth(GetListNodeFormula(List)));
                     Maximal = MaximumOfInt(Maximal,FormulaDepth(GetListNodeFormula(List)));
                     break;
                 default:
@@ -437,7 +438,8 @@ max_formula_depth);
     if (Statistics.FormulaStatistics.NumberOfFormulae > 0) {
         Statistics.FormulaStatistics.AverageFormulaDepth = (int)round(
 HeadListCount(Signature,&HeadListNode,formula_depth) / 
-(double)Statistics.FormulaStatistics.NumberOfFormulae);
+(double)(Statistics.FormulaStatistics.NumberOfFormulae - 
+Statistics.FormulaStatistics.NumberOfTypeFormulae));
     } else {
         Statistics.FormulaStatistics.AverageFormulaDepth = 0.0;
     }
@@ -560,9 +562,7 @@ Statistics.FormulaStatistics.NumberOfFOF > 0) {
             fprintf(Stream,";%4d def",Statistics.FormulaStatistics.NumberOfDefnFormulae);
         }
     fprintf(Stream,")\n");
-    }
-
-    if (
+    } else if (
 Statistics.FormulaStatistics.NumberOfTCF > 0 ||
 Statistics.FormulaStatistics.NumberOfCNF > 0) {
         if (
@@ -580,6 +580,10 @@ Statistics.FormulaStatistics.NumberOfTCF + Statistics.FormulaStatistics.NumberOf
 Statistics.FormulaStatistics.NumberOfHornClauses,
 Statistics.FormulaStatistics.NumberOfRRClauses);
     }
+    if (Statistics.ConnectiveStatistics.NumberOfGlobalDefns > 0) {
+        fprintf(Stream,"%%            Number of defns       : %4d\n",
+Statistics.ConnectiveStatistics.NumberOfGlobalDefns);
+    }
 
     if (
 Statistics.FormulaStatistics.NumberOfTCF > 0 ||
@@ -590,22 +594,20 @@ Statistics.FormulaStatistics.NumberOfCNF > 0) {
     }
     fprintf(Stream,"%4d (%4d equ",
 Statistics.FormulaStatistics.NumberOfAtoms,Statistics.FormulaStatistics.NumberOfEqualityAtoms);
-    if (
-Statistics.FormulaStatistics.NumberOfTHF > 0 ||
-(Statistics.FormulaStatistics.NumberOfTFF > 0 &&
- Statistics.FormulaStatistics.NumberOfVariableAtoms > 0)) {
-        fprintf(Stream,";%4d var",Statistics.FormulaStatistics.NumberOfVariableAtoms);
-    }
+//----Right now I can't tell of a variable occurence is an atom (variable of type $o) or a 
+//----regular term variable.
+//    if (
+//Statistics.FormulaStatistics.NumberOfTHF > 0 ||
+//(Statistics.FormulaStatistics.NumberOfTFF > 0 &&
+// Statistics.FormulaStatistics.NumberOfVariableAtoms > 0)) {
+//        fprintf(Stream,";%4d var",Statistics.FormulaStatistics.NumberOfVariableAtoms);
+//    }
     if (
 Statistics.FormulaStatistics.NumberOfTCF > 0 ||
 Statistics.FormulaStatistics.NumberOfCNF > 0) {
         fprintf(Stream,";%4d neg",Statistics.ConnectiveStatistics.NumberOfNegations);
     }
     fprintf(Stream,")\n");
-    if (Statistics.ConnectiveStatistics.NumberOfGlobalDefns > 0) {
-        fprintf(Stream,"%%            Number of defns       : %4d",
-Statistics.ConnectiveStatistics.NumberOfGlobalDefns);
-    }
 
     if (
 Statistics.FormulaStatistics.NumberOfTHF > 0 || 

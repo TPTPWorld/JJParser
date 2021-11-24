@@ -9,15 +9,20 @@
 char * GetSymbol(TERM Term);
 int GetArity(TERM Term);
 TERMArray GetArguments(TERM Term);
-FORMULA GetResultFromTyping(READFILE Stream,FORMULA TypeFormula);
-int GetArityFromTyping(READFILE Stream,FORMULA TypeFormula);
+SyntaxType GetSyntax(ANNOTATEDFORMULA AnnotatedFormula);
+char * GetName(ANNOTATEDFORMULA AnnotatedFormula,String PutNameHere);
+StatusType GetRole(ANNOTATEDFORMULA AnnotatedFormula,StatusType * SubStatus);
+AnnotatedTSTPFormulaType * GetAnnotatedTSTPFormula(ANNOTATEDFORMULA AnnotatedFormula);
+AnnotatedTSTPFormulaType * GetListNodeAnnotatedTSTPFormula(LISTNODE List);
+StatusType GetListNodeStatus(LISTNODE List);
 FORMULA GetListNodeFormula(LISTNODE List);
 VARIABLENODE GetListNodeVariables(LISTNODE List);
 FORMULA GetTreeNodeFormula(TREENODE Tree);
 VARIABLENODE GetTreeNodeVariables(TREENODE Tree);
+FORMULA GetResultFromTyping(READFILE Stream,FORMULA TypeFormula);
+int GetArityFromTyping(READFILE Stream,FORMULA TypeFormula);
 
-int CheckAnnotatedFormula(ANNOTATEDFORMULA AnnotatedFormula,
-SyntaxType ExpectedSyntax);
+int CheckAnnotatedFormula(ANNOTATEDFORMULA AnnotatedFormula,SyntaxType ExpectedSyntax);
 int LogicalAnnotatedFormula(ANNOTATEDFORMULA AnnotatedFormula);
 int TPIAnnotatedFormula(ANNOTATEDFORMULA AnnotatedFormula);
 int ReallyAnAnnotatedFormula(ANNOTATEDFORMULA AnnotatedFormula);
@@ -68,11 +73,8 @@ int FormulaDepth(FORMULA Formula);
 int MaxFormulaTermDepth(FORMULA Formula);
 int SumFormulaTermDepth(FORMULA Formula);
 
-SyntaxType GetSyntax(ANNOTATEDFORMULA AnnotatedFormula);
 SyntaxType GetListSyntax(LISTNODE Head);
 void GetListSyntaxTypes(LISTNODE Head,String SyntaxTypes);
-char * GetName(ANNOTATEDFORMULA AnnotatedFormula,String PutNameHere);
-StatusType GetRole(ANNOTATEDFORMULA AnnotatedFormula,StatusType * SubStatus);
 FORMULA GetUniversalCoreFormula(FORMULA QuantifiedFormula);
 int ThereIsAConjecture(LISTNODE Head);
 FORMULA GetLiteralFromAnnotatedClauseByNumber(ANNOTATEDFORMULA Clause,int Number);
