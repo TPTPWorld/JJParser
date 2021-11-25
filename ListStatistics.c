@@ -452,7 +452,15 @@ Statistics.ConnectiveStatistics.NumberOfEquations,
 Statistics.FormulaStatistics.NumberOfEqualityAtoms);
         CodingError(ErrorMessage);
     }
-printf("PROGRESS: counted connectives\n");
+//----Replace number of variables by sum of number of binders
+    Statistics.SymbolStatistics.NumberOfVariables =
+Statistics.ConnectiveStatistics.NumberOfUniversals +
+Statistics.ConnectiveStatistics.NumberOfExistentials +
+Statistics.ConnectiveStatistics.NumberOfLambdas +
+Statistics.ConnectiveStatistics.NumberOfPiBinders +
+Statistics.ConnectiveStatistics.NumberOfSigmaBinders +
+Statistics.ConnectiveStatistics.NumberOfDescriptionBinders +
+Statistics.ConnectiveStatistics.NumberOfChoiceBinders;
 
     Statistics.FormulaStatistics.NumberOfHornClauses = HeadListCount(Signature,&HeadListNode,
 horn_clauses);
@@ -497,8 +505,10 @@ printf("PROGRESS: Got type symbol statistics from signature\n");
         Statistics.SymbolStatistics = GetListSymbolUsageStatistics(&HeadListNode);
     }
 printf("PROGRESS: counted predicates and functions\n");
-    Statistics.SymbolStatistics.NumberOfVariables = HeadListCount(Signature,&HeadListNode,
-variables);
+//----This now gets replaced by the sum of all the binders because this captures quantified
+//----variables inside $let definitions
+//    Statistics.SymbolStatistics.NumberOfVariables = HeadListCount(Signature,&HeadListNode,
+//variables);
     Statistics.SymbolStatistics.NumberOfSingletons = HeadListCount(Signature,&HeadListNode,
 singletons);
 printf("PROGRESS: counted variables %d\n",Statistics.SymbolStatistics.NumberOfVariables);
@@ -742,8 +752,10 @@ Statistics.ConnectiveStatistics.NumberOfSubtypes);
         fprintf(Stream,"%%            Number of symbols     : %4d (%4d usr;%4d con; ",
 Statistics.SymbolStatistics.NumberOfPredicates + 
 Statistics.SymbolStatistics.NumberOfFunctors, //----The arithmetic ones are here
-Statistics.SymbolStatistics.NumberOfUserPredicates,
-Statistics.SymbolStatistics.NumberOfPropositions);
+Statistics.SymbolStatistics.NumberOfUserPredicates +
+Statistics.SymbolStatistics.NumberOfUserFunctors,
+Statistics.SymbolStatistics.NumberOfPropositions +
+Statistics.SymbolStatistics.NumberOfConstants);
         PrintMinMaxArity(Stream,MinimumOfInt(
 Statistics.SymbolStatistics.MinPredicateArity,Statistics.SymbolStatistics.MinFunctorArity));
         fprintf(Stream,"-");
@@ -796,24 +808,22 @@ Statistics.SymbolStatistics.NumberOfVariables);
 Statistics.FormulaStatistics.NumberOfTCF > 0 ||
 Statistics.FormulaStatistics.NumberOfCNF > 0) {
         fprintf(Stream,"%4d sgn",Statistics.SymbolStatistics.NumberOfSingletons);
-    } else {
-        if (
+    } else if (
 Statistics.FormulaStatistics.NumberOfTHF > 0 ||
 Statistics.FormulaStatistics.NumberOfTFF > 0 ||
 Statistics.FormulaStatistics.NumberOfFOF > 0 ||
 Statistics.FormulaStatistics.NumberOfTCF > 0) {
-            fprintf(Stream,"%4d   !;%4d   ?",
+        fprintf(Stream,"%4d   !;%4d   ?",
 Statistics.ConnectiveStatistics.NumberOfUniversals,
 Statistics.ConnectiveStatistics.NumberOfExistentials);
-            if (
+        if (Statistics.FormulaStatistics.NumberOfTHF > 0) {
+            fprintf(Stream,";%4d   ^",Statistics.ConnectiveStatistics.NumberOfLambdas);
+        }
+        if (
 Statistics.FormulaStatistics.NumberOfTHF > 0 ||
 Statistics.FormulaStatistics.NumberOfTFF > 0 ||
 Statistics.FormulaStatistics.NumberOfTCF > 0) {
-                fprintf(Stream,";%4d   :",Statistics.ConnectiveStatistics.NumberOfTypedVariables);
-            }
-            if (Statistics.FormulaStatistics.NumberOfTHF > 0) {
-                fprintf(Stream,";%4d   ^",Statistics.ConnectiveStatistics.NumberOfLambdas);
-            }
+            fprintf(Stream,";%4d   :",Statistics.ConnectiveStatistics.NumberOfTypedVariables);
         }
     }
     fprintf(Stream,")\n");

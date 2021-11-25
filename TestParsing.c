@@ -85,7 +85,7 @@ int main(int argc, char *argv[]) {
     ListStatistics = GetListStatistics(Head,Signature);
     PrintListStatistics(stdout,ListStatistics);
 
-    FreeListOfAnnotatedFormulae(&Head);
+    FreeListOfAnnotatedFormulae(&Head,Signature);
     assert(Head == NULL);
     FreeSignature(&Signature);
     assert(Signature == NULL);
@@ -95,15 +95,15 @@ int main(int argc, char *argv[]) {
 //----Test list duplication
     AnotherHead = DuplicateListOfAnnotatedFormulae(Head,Signature);
     PrintListOfAnnotatedTSTPNodes(stdout,Signature,AnotherHead,tptp,1);
-    FreeListOfAnnotatedFormulae(&Head);
-    FreeListOfAnnotatedFormulae(&AnotherHead);
+    FreeListOfAnnotatedFormulae(&Head,Signature);
+    FreeListOfAnnotatedFormulae(&AnotherHead,Signature);
     FreeSignature(&Signature);
     return(EXIT_SUCCESS);
 
 //----Test stats
     ListStatistics = GetListStatistics(Head,Signature);
     PrintListStatistics(stdout,ListStatistics);
-    FreeListOfAnnotatedFormulae(&Head);
+    FreeListOfAnnotatedFormulae(&Head,Signature);
     assert(Head == NULL);
     return(EXIT_SUCCESS);
 
@@ -133,24 +133,24 @@ AnotherAnnotatedFormula,1,1)) {
             printf("They are quite different\n");
         }
     }
-    FreeListOfAnnotatedFormulae(&Head);
+    FreeListOfAnnotatedFormulae(&Head,Signature);
     FreeSignature(&Signature);
     return(EXIT_SUCCESS);
 
 //----Test reading header
-    FreeListOfAnnotatedFormulae(&Head);
+    FreeListOfAnnotatedFormulae(&Head,Signature);
     FreeSignature(&Signature);
     SetNeedForNonLogicTokens(1);
     Head = ParseFileOfHeader(argv[1]);
     PrintListOfAnnotatedTSTPNodes(stdout,Signature,Head,tptp,1);
-    FreeListOfAnnotatedFormulae(&Head);
+    FreeListOfAnnotatedFormulae(&Head,Signature);
     return(EXIT_SUCCESS);
 
 //----Test building root list
-    RootListHead = BuildRootList(Head);
+    RootListHead = BuildRootList(Head,Signature);
     PrintRootList(stdout,RootListHead);
-    FreeRootList(&RootListHead,1);
-    FreeListOfAnnotatedFormulae(&Head);
+    FreeRootList(&RootListHead,1,Signature);
+    FreeListOfAnnotatedFormulae(&Head,Signature);
     FreeSignature(&Signature);
     return(EXIT_SUCCESS);
 
@@ -158,26 +158,26 @@ AnotherAnnotatedFormula,1,1)) {
     RandomizeListOfAnnotatedFormulae(&Head,1);
     printf("------------ Randomized ---------------\n");
     PrintListOfAnnotatedTSTPNodes(stdout,Signature,Head,tptp,1);
-    FreeListOfAnnotatedFormulae(&Head);
+    FreeListOfAnnotatedFormulae(&Head,Signature);
     FreeSignature(&Signature);
     return(EXIT_SUCCESS);
 
 //----Test getting root list
-    PrintListOfAnnotatedTSTPNodes(stdout,Signature,GetRootList(Head),tptp,1);
+    PrintListOfAnnotatedTSTPNodes(stdout,Signature,GetRootList(Head,Signature),tptp,1);
     return(EXIT_SUCCESS);
 
 //----Test vine of lemmas extraction
     printf("---- Vine of lemmas ---\n");
-    RootListHead = BuildRootList(Head);
+    RootListHead = BuildRootList(Head,Signature);
     PrintRootList(stdout,RootListHead);
     if (GetRootLemmaList(RootListHead->TheTree,&Axioms,0)) {
         PrintListOfAnnotatedTSTPNodes(stdout,Signature,Axioms,tptp,1);
-        FreeListOfAnnotatedFormulae(&Axioms);
+        FreeListOfAnnotatedFormulae(&Axioms,Signature);
     } else {
         printf("Could not extract vine of axioms\n");
     }
-    FreeRootList(&RootListHead,1);
-    FreeListOfAnnotatedFormulae(&Head);
+    FreeRootList(&RootListHead,1,Signature);
+    FreeListOfAnnotatedFormulae(&Head,Signature);
     FreeSignature(&Signature);
     return(EXIT_SUCCESS);
 
@@ -187,7 +187,7 @@ AnotherAnnotatedFormula,1,1)) {
     DequoteSymbolsInSignature(Signature);
     PrintSignature(Signature);
     PrintListOfAnnotatedTSTPNodes(stdout,Signature,Head,tptp,1);
-    FreeListOfAnnotatedFormulae(&Head);
+    FreeListOfAnnotatedFormulae(&Head,Signature);
     FreeSignature(&Signature);
     return(EXIT_SUCCESS);
 
@@ -197,7 +197,7 @@ AnotherAnnotatedFormula,1,1)) {
     AritizeSymbolsInSignature(Signature);
     PrintSignature(Signature);
     PrintListOfAnnotatedTSTPNodes(stdout,Signature,Head,tptp,1);
-    FreeListOfAnnotatedFormulae(&Head);
+    FreeListOfAnnotatedFormulae(&Head,Signature);
     FreeSignature(&Signature);
     return(EXIT_SUCCESS);
 
@@ -205,7 +205,7 @@ AnotherAnnotatedFormula,1,1)) {
     printf("---- Expand assumptions ---\n");
     ExpandListAssumptions(Head,Signature);
     PrintListOfAnnotatedTSTPNodes(stdout,Signature,Head,tptp,1);
-    FreeListOfAnnotatedFormulae(&Head);
+    FreeListOfAnnotatedFormulae(&Head,Signature);
     FreeSignature(&Signature);
     return(EXIT_SUCCESS);
 
@@ -250,7 +250,7 @@ AnnotatedFormulaUnion.AnnotatedTSTPFormula.FormulaWithVariables->Variables,NULL)
         printf("The status term is %s\n",SymbolUsage);
         Free((void **)&SymbolUsage);
     }
-    FreeListOfAnnotatedFormulae(&Head);
+    FreeListOfAnnotatedFormulae(&Head,Signature);
     FreeSignature(&Signature);
     return(EXIT_SUCCESS);
 
@@ -282,7 +282,7 @@ AnnotatedFormulaUnion.AnnotatedTSTPFormula.FormulaWithVariables->Variables,NULL)
     } else {
         printf("No source for file and node\n");
     }
-    FreeListOfAnnotatedFormulae(&Head);
+    FreeListOfAnnotatedFormulae(&Head,Signature);
     FreeSignature(&Signature);
     exit(EXIT_SUCCESS);
 
@@ -309,7 +309,7 @@ AnnotatedFormulaUnion.AnnotatedTSTPFormula.FormulaWithVariables->Variables,NULL)
     RemoveUsefulInformationFromAnnotatedFormula(AnnotatedFormula,Signature,
 "useful");
     PrintAnnotatedTSTPNode(stdout,AnnotatedFormula,tptp,1);
-    FreeListOfAnnotatedFormulae(&Head);
+    FreeListOfAnnotatedFormulae(&Head,Signature);
     FreeSignature(&Signature);
     return(EXIT_SUCCESS);
 
@@ -329,9 +329,9 @@ AnnotatedFormulaUnion.AnnotatedTSTPFormula.FormulaWithVariables->Variables,NULL)
     } else {
         PrintAnnotatedTSTPNode(stdout,(*SearchResult)->AnnotatedFormula,tptp,1);
     }
-    FreeBTreeOfAnnotatedFormulae(&BTreeRoot);
+    FreeBTreeOfAnnotatedFormulae(&BTreeRoot,Signature);
     assert(BTreeRoot == NULL);
-    FreeListOfAnnotatedFormulae(&Head);
+    FreeListOfAnnotatedFormulae(&Head,Signature);
     FreeSignature(&Signature);
     return(EXIT_SUCCESS);
 
@@ -343,7 +343,7 @@ AnnotatedFormulaUnion.AnnotatedTSTPFormula.FormulaWithVariables->Variables,NULL)
 
 //----Look at the signature
     PrintSignature(Signature);
-    FreeListOfAnnotatedFormulae(&Head);
+    FreeListOfAnnotatedFormulae(&Head,Signature);
     FreeSignature(&Signature);
     return(EXIT_SUCCESS);
 
@@ -357,7 +357,7 @@ AnnotatedFormulaUnion.AnnotatedTSTPFormula.FormulaWithVariables->Variables,NULL)
     printf("-------------------\n");
     PrintListOfAnnotatedTSTPNodes(stdout,Signature,AnotherHead,tptp,1);
     printf("===================\n");
-    Head = MergeInListOfAnnotatedFormulaeByFields(&Head,&AnotherHead,1,0,1);
+    Head = MergeInListOfAnnotatedFormulaeByFields(&Head,&AnotherHead,1,0,1,Signature);
     PrintListOfAnnotatedTSTPNodes(stdout,Signature,Head,tptp,1);
     printf("-------------------\n");
     PrintListOfAnnotatedTSTPNodes(stdout,Signature,AnotherHead,tptp,1);
@@ -385,16 +385,16 @@ AnnotatedFormulaUnion.AnnotatedTSTPFormula.FormulaWithVariables->Variables,NULL)
     return(EXIT_SUCCESS);
 
 //----Test selection of nodes with status
-    Axioms = GetListOfAnnotatedFormulaeWithType(Head,axiom_like);
+    Axioms = GetListOfAnnotatedFormulaeWithType(Head,axiom_like,Signature);
     PrintListOfAnnotatedTSTPNodes(stdout,Signature,Axioms,tptp,1);
     return(EXIT_SUCCESS);
 
 //----Test use of SystemOnTPTP
     if (SystemOnTPTPAvailable()) {
-        Axioms = GetListOfAnnotatedFormulaeWithType(Head,axiom_like);
+        Axioms = GetListOfAnnotatedFormulaeWithType(Head,axiom_like,Signature);
         printf("Axioms are ...\n");
         PrintListOfAnnotatedTSTPNodes(stdout,Signature,Axioms,tptp,1);
-        Conjectures = GetListOfAnnotatedFormulaeWithType(Head,conjecture);
+        Conjectures = GetListOfAnnotatedFormulaeWithType(Head,conjecture,Signature);
         Target = Conjectures;
         while (Target != NULL) {
             printf("Trying to prove %s\n",GetName(Target->AnnotatedFormula,
@@ -426,14 +426,14 @@ FormulaName));
             }
             Target = Target->Next;
         }
-        FreeListOfAnnotatedFormulae(&Axioms);
-        FreeListOfAnnotatedFormulae(&Conjectures);
+        FreeListOfAnnotatedFormulae(&Axioms,Signature);
+        FreeListOfAnnotatedFormulae(&Conjectures,Signature);
     }
     return(EXIT_SUCCESS);
 
 //----Test freeing
     PrintSignature(Signature);
-    FreeListOfAnnotatedFormulae(&Head);
+    FreeListOfAnnotatedFormulae(&Head,Signature);
     assert(Head == NULL);
     PrintSignature(Signature);
     RemovedUnusedSymbols(Signature);
@@ -463,7 +463,7 @@ FormulaName));
         PrintAnnotatedTSTPNode(stdout,AnnotatedFormula,tptp,1);
         PrintSignature(Signature);
         printf("Free ------------------\n");
-        FreeAnnotatedFormula(&AnnotatedFormula);
+        FreeAnnotatedFormula(&AnnotatedFormula,Signature);
         PrintSignature(Signature);
         printf("End ------------------\n");
     }
@@ -672,7 +672,7 @@ AnnotatedFormulaUnion.AnnotatedTSTPFormula.FormulaWithVariables->Formula,""),Pos
         printf("Could not get literal number 1\n");
     }
 
-    FreeListOfAnnotatedFormulae(&Head);
+    FreeListOfAnnotatedFormulae(&Head,Signature);
     assert(Head == NULL);
 
     return(EXIT_SUCCESS);

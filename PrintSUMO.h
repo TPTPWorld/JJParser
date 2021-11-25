@@ -3,7 +3,7 @@
 //-------------------------------------------------------------------------------------------------
 #include "DataTypes.h"
 //-------------------------------------------------------------------------------------------------
-void SUMOPrintListOfAnnotatedTSTPNodes(FILE * Stream,LISTNODE Head);
+void SUMOPrintListOfAnnotatedTSTPNodes(FILE * Stream,LISTNODE Head,SIGNATURE Signature);
 //-------------------------------------------------------------------------------------------------
 #endif
 

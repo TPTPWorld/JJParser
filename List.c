@@ -113,17 +113,17 @@ LISTNODE DuplicateListOfAnnotatedFormulae(LISTNODE Head,SIGNATURE Signature) {
 //-------------------------------------------------------------------------------------------------
 //----Simply does the memory deallocation for a list node. Not for users, who
 //----should use FreeAListNode() below.
-static void FreeListNode(LISTNODE * FreeThis) {
+static void FreeListNode(LISTNODE * FreeThis,SIGNATURE Signature) {
 
 // printf("freeing ...\n");
 // PrintAnnotatedTSTPNode(stdout,(*FreeThis)->AnnotatedFormula,tptp,1);
 // printf("it has %d uses\n",(*FreeThis)->AnnotatedFormula->NumberOfUses);
-    FreeAnnotatedFormula(&((*FreeThis)->AnnotatedFormula));
+    FreeAnnotatedFormula(&((*FreeThis)->AnnotatedFormula),Signature);
     Free((void **)FreeThis);
 }
 //-------------------------------------------------------------------------------------------------
 //----Frees a list node is a list, and updates the linking
-void FreeAListNode(LISTNODE * ToDelete) {
+void FreeAListNode(LISTNODE * ToDelete,SIGNATURE Signature) {
 
     LISTNODE NextOne;
 
@@ -132,15 +132,15 @@ void FreeAListNode(LISTNODE * ToDelete) {
     }
 
     NextOne = (*ToDelete)->Next;
-    FreeListNode(ToDelete);
+    FreeListNode(ToDelete,Signature);
     *ToDelete = NextOne;
 }
 //-------------------------------------------------------------------------------------------------
-void FreeListOfAnnotatedFormulae(LISTNODE * Head) {
+void FreeListOfAnnotatedFormulae(LISTNODE * Head,SIGNATURE Signature) {
 
 //----Used to do this recursively, but run out of stack
     while (*Head != NULL) {
-        FreeAListNode(Head);
+        FreeAListNode(Head,Signature);
     }
 }
 //-------------------------------------------------------------------------------------------------
@@ -327,16 +327,16 @@ NULL) {
 }
 //-------------------------------------------------------------------------------------------------
 int GetNodesForNames(LISTNODE Head,StringParts ParentNames,int NumberOfParents,
-LISTNODE * ParentList) {
+LISTNODE * ParentList,SIGNATURE Signature) {
 
     int ParentNumber;
     ANNOTATEDFORMULA ParentAnnotatedFormula;
 
     *ParentList = NULL;
     for (ParentNumber = 0;ParentNumber < NumberOfParents;ParentNumber++) {
-        if ((ParentAnnotatedFormula = GetAnnotatedFormulaFromListByName(
-Head,ParentNames[ParentNumber])) == NULL) {
-            FreeListOfAnnotatedFormulae(ParentList);
+        if ((ParentAnnotatedFormula = GetAnnotatedFormulaFromListByName(Head,
+ParentNames[ParentNumber])) == NULL) {
+            FreeListOfAnnotatedFormulae(ParentList,Signature);
             return(0);
         } else {
             AddListNode(ParentList,NULL,ParentAnnotatedFormula);
@@ -360,8 +360,8 @@ AnnotatedFormula) {
 }
 //-------------------------------------------------------------------------------------------------
 //----This one can remove those with the desired type
-LISTNODE SelectListOfAnnotatedFormulaeWithType(LISTNODE * Head,StatusType 
-DesiredRole,int DeletedSelected) {
+LISTNODE SelectListOfAnnotatedFormulaeWithType(LISTNODE * Head,StatusType DesiredRole,
+int DeletedSelected,SIGNATURE Signature) {
 
     LISTNODE ListWithRole;
     LISTNODE * AddHere;
@@ -377,7 +377,7 @@ DesiredRole,int DeletedSelected) {
                 AddHere = &((*AddHere)->Next);
 //----Delete if requested
                 if (DeletedSelected) {
-                    FreeAListNode(Head);
+                    FreeAListNode(Head,Signature);
                 } else {
 //----Move along if not deleted
                     Head = &(*Head)->Next;
@@ -395,10 +395,10 @@ DesiredRole,int DeletedSelected) {
 }
 //-------------------------------------------------------------------------------------------------
 //----For backwards compatitibility
-LISTNODE GetListOfAnnotatedFormulaeWithType(LISTNODE Head,StatusType 
-DesiredRole) {
+LISTNODE GetListOfAnnotatedFormulaeWithType(LISTNODE Head,StatusType DesiredRole,SIGNATURE 
+Signature) {
 
-    return(SelectListOfAnnotatedFormulaeWithType(&Head,DesiredRole,0));
+    return(SelectListOfAnnotatedFormulaeWithType(&Head,DesiredRole,0,Signature));
 }
 //-------------------------------------------------------------------------------------------------
 LISTNODE GetListWithSyntaxType(LISTNODE Head,SyntaxType DesiredSyntax) {
@@ -418,8 +418,8 @@ LISTNODE GetListWithSyntaxType(LISTNODE Head,SyntaxType DesiredSyntax) {
     return(ListWithSyntaxType);
 }
 //-------------------------------------------------------------------------------------------------
-LISTNODE SelectListOfAnnotatedFormulaeWithParents(LISTNODE * Head,
-int DeletedSelected) {
+LISTNODE SelectListOfAnnotatedFormulaeWithParents(LISTNODE * Head,int DeletedSelected,
+SIGNATURE Signature) {
 
     LISTNODE ListWithRole;
     LISTNODE * AddHere;
@@ -432,7 +432,7 @@ int DeletedSelected) {
             AddHere = &((*AddHere)->Next);
 //----Delete if requested
             if (DeletedSelected) {
-                FreeAListNode(Head);
+                FreeAListNode(Head,Signature);
             } else {
 //----Move along if not deleted
                 Head = &(*Head)->Next;
@@ -495,8 +495,8 @@ int AllowCommutation) {
 //-------------------------------------------------------------------------------------------------
 //----If SameFormula = 1, then check modulo variable naming, if 2 then allow
 //----commutation of operators (not fully implemented yet)
-LISTNODE MergeInListOfAnnotatedFormulaeByFields(LISTNODE * MainList, 
-LISTNODE * MergeList,int SameName,int SameRole,int SameFormula) {
+LISTNODE MergeInListOfAnnotatedFormulaeByFields(LISTNODE * MainList,LISTNODE * MergeList,
+int SameName,int SameRole,int SameFormula,SIGNATURE Signature) {
 
     LISTNODE Target;
     LISTNODE NewMergeList;
@@ -535,7 +535,7 @@ Target->AnnotatedFormula,SameName,SameRole,SameFormula)) != NULL) {
         Target = Target->Next;
     }
 //----Free the old MergeList and assign the new one
-    FreeListOfAnnotatedFormulae(MergeList);
+    FreeListOfAnnotatedFormulae(MergeList,Signature);
     *MergeList = NewMergeList;
 //----Return the new MainList
     return(*MainList);
@@ -843,16 +843,16 @@ BTREENODE ListToBTree(LISTNODE Head) {
     return(Root);
 }
 //-------------------------------------------------------------------------------------------------
-void FreeBTreeOfAnnotatedFormulae(BTREENODE * Root) {
+void FreeBTreeOfAnnotatedFormulae(BTREENODE * Root,SIGNATURE Signature) {
 
     if (Root == NULL) {
         CodingError("Trying to free a non-existent binary tree");
     }
 
     if (*Root != NULL) {
-        FreeBTreeOfAnnotatedFormulae(&((*Root)->Last));
-        FreeBTreeOfAnnotatedFormulae(&((*Root)->Next));
-        FreeListNode(Root);
+        FreeBTreeOfAnnotatedFormulae(&((*Root)->Last),Signature);
+        FreeBTreeOfAnnotatedFormulae(&((*Root)->Next),Signature);
+        FreeListNode(Root,Signature);
     }
 }
 //-------------------------------------------------------------------------------------------------

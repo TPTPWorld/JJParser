@@ -227,7 +227,7 @@ TERMWITHVARIABLES NewTermWithVariables(void) {
     return(TermWithVariables);
 }
 //-------------------------------------------------------------------------------------------------
-void FreeTerm(TERM * Term,VARIABLENODE * Variables) {
+void FreeTerm(TERM * Term,SIGNATURE Signature,VARIABLENODE * Variables) {
 
     int ArgumentIndex;
 
@@ -240,16 +240,16 @@ void FreeTerm(TERM * Term,VARIABLENODE * Variables) {
                 assert((*Term)->TheSymbol.Variable == NULL);
             }
         } else if ((*Term)->Type == formula) {
-            FreeFormula(&((*Term)->TheSymbol.Formula),Variables);
+            FreeFormula(&((*Term)->TheSymbol.Formula),Signature,Variables);
         } else if ((*Term)->Type == nested_thf || (*Term)->Type == nested_tff || 
 (*Term)->Type == nested_tcf || (*Term)->Type == nested_fof || (*Term)->Type == nested_cnf) {
-            FreeFormulaWithVariables(&((*Term)->TheSymbol.NestedFormula));
+            FreeFormulaWithVariables(&((*Term)->TheSymbol.NestedFormula),Signature);
         } else if ((*Term)->Type == nested_fot) {
-            FreeTermWithVariables(&((*Term)->TheSymbol.NestedTerm));
+            FreeTermWithVariables(&((*Term)->TheSymbol.NestedTerm),Signature);
         } else {
             if ((*Term)->Arguments != NULL) {
                 for (ArgumentIndex=0;ArgumentIndex<GetArity(*Term);ArgumentIndex++) {
-                    FreeTerm(&((*Term)->Arguments[ArgumentIndex]),Variables);
+                    FreeTerm(&((*Term)->Arguments[ArgumentIndex]),Signature,Variables);
                     assert((*Term)->Arguments[ArgumentIndex] == NULL);
                 }
                 Free((void **)&((*Term)->Arguments));
@@ -260,10 +260,10 @@ void FreeTerm(TERM * Term,VARIABLENODE * Variables) {
     }
 }
 //-------------------------------------------------------------------------------------------------
-void FreeTermWithVariables(TERMWITHVARIABLES * TermWithVariables) {
+void FreeTermWithVariables(TERMWITHVARIABLES * TermWithVariables,SIGNATURE Signature) {
 
     if (*TermWithVariables != NULL) {
-        FreeTerm(&((*TermWithVariables)->Term),&((*TermWithVariables)->Variables));
+        FreeTerm(&((*TermWithVariables)->Term),Signature,&((*TermWithVariables)->Variables));
         assert((*TermWithVariables)->Term == NULL);
         assert((*TermWithVariables)->Variables == NULL);
         Free((void **)TermWithVariables);
@@ -291,12 +291,12 @@ FORMULAWITHVARIABLES NewFormulaWithVariables(void) {
     return(FormulaWithVariables);
 }
 //-------------------------------------------------------------------------------------------------
-void FreeTupleFormulae(int NumberOfElements,FORMULAArray * TupleFormulae,
+void FreeTupleFormulae(int NumberOfElements,FORMULAArray * TupleFormulae,SIGNATURE Signature,
 VARIABLENODE * Variables) {
 
     if (NumberOfElements > 0) {
         while (NumberOfElements > 0) {
-            FreeFormula((*TupleFormulae)+NumberOfElements-1,Variables);
+            FreeFormula((*TupleFormulae)+NumberOfElements-1,Signature,Variables);
             NumberOfElements--;
         }
         Free((void **)TupleFormulae);
@@ -307,56 +307,71 @@ VARIABLENODE * Variables) {
     }
 }
 //-------------------------------------------------------------------------------------------------
-void FreeFormula(FORMULA * Formula,VARIABLENODE * Variables) {
+void FreeFormula(FORMULA * Formula,SIGNATURE Signature,VARIABLENODE * Variables) {
+
+    SYMBOLNODE Symbol;
 
     if (*Formula != NULL) {
         switch ((*Formula)->Type) {
             case tuple:
                 FreeTupleFormulae((*Formula)->FormulaUnion.TupleFormula.NumberOfElements,
-&((*Formula)->FormulaUnion.TupleFormula.Elements),Variables);
+&((*Formula)->FormulaUnion.TupleFormula.Elements),Signature,Variables);
                 assert((*Formula)->FormulaUnion.TupleFormula.Elements == NULL);
                 break;
                 FreeTupleFormulae((*Formula)->FormulaUnion.SequentFormula.NumberOfLHSElements,
-&((*Formula)->FormulaUnion.SequentFormula.LHS),Variables);
+&((*Formula)->FormulaUnion.SequentFormula.LHS),Signature,Variables);
                 assert((*Formula)->FormulaUnion.SequentFormula.LHS == NULL);
                 FreeTupleFormulae((*Formula)->FormulaUnion.SequentFormula.NumberOfRHSElements,
-&((*Formula)->FormulaUnion.SequentFormula.RHS),Variables);
+&((*Formula)->FormulaUnion.SequentFormula.RHS),Signature,Variables);
                 assert((*Formula)->FormulaUnion.SequentFormula.RHS == NULL);
                 break;
             case quantified:
-                FreeTerm(&((*Formula)->FormulaUnion.QuantifiedFormula.Variable), Variables);
+                FreeTerm(&((*Formula)->FormulaUnion.QuantifiedFormula.Variable),Signature,
+Variables);
                 assert((*Formula)->FormulaUnion.QuantifiedFormula.Variable == NULL);
-                FreeFormula(&((*Formula)->FormulaUnion.QuantifiedFormula.VariableType),Variables);
+                FreeFormula(&((*Formula)->FormulaUnion.QuantifiedFormula.VariableType),Signature,
+Variables);
                 assert((*Formula)->FormulaUnion.QuantifiedFormula.VariableType == NULL);
-                FreeFormula(&((*Formula)->FormulaUnion.QuantifiedFormula.Formula),Variables);
+                FreeFormula(&((*Formula)->FormulaUnion.QuantifiedFormula.Formula),Signature,
+Variables);
                 assert((*Formula)->FormulaUnion.QuantifiedFormula.Formula == NULL);
                 break;
             case binary:
             case assignment:
             case type_declaration:
-                FreeFormula(&((*Formula)->FormulaUnion.BinaryFormula.LHS),Variables);
+                FreeFormula(&((*Formula)->FormulaUnion.BinaryFormula.LHS),Signature,Variables);
                 assert((*Formula)->FormulaUnion.BinaryFormula.LHS == NULL);
-                FreeFormula(&((*Formula)->FormulaUnion.BinaryFormula.RHS),Variables);
+                if ((*Formula)->FormulaUnion.BinaryFormula.Connective == equation) {
+                    if ((Symbol = IsSymbolInSignatureList(Signature->Predicates,"=",2)) != NULL) {
+                        IncreaseSymbolUseCount(Symbol,-1);
+                    } else {
+                        CodingError("Freeing an equation, but = not in signature");
+                    }
+// ZZZZ
+                }
+                FreeFormula(&((*Formula)->FormulaUnion.BinaryFormula.RHS),Signature,Variables);
                 assert((*Formula)->FormulaUnion.BinaryFormula.RHS == NULL);
                 break;
             case unary:
-                FreeFormula(&((*Formula)->FormulaUnion.UnaryFormula.Formula),Variables);
+                FreeFormula(&((*Formula)->FormulaUnion.UnaryFormula.Formula),Signature,Variables);
                 assert((*Formula)->FormulaUnion.UnaryFormula.Formula == NULL);
                 break; 
             case atom:
-                FreeTerm(&((*Formula)->FormulaUnion.Atom),Variables);
+                FreeTerm(&((*Formula)->FormulaUnion.Atom),Signature,Variables);
                 assert((*Formula)->FormulaUnion.Atom == NULL);
                 break;
             case ite_formula:
-                FreeFormula(&((*Formula)->FormulaUnion.ConditionalFormula.Condition),Variables);
-                FreeFormula(&((*Formula)->FormulaUnion.ConditionalFormula.FormulaIfTrue),Variables);
-                FreeFormula(&((*Formula)->FormulaUnion.ConditionalFormula.FormulaIfFalse),
+                FreeFormula(&((*Formula)->FormulaUnion.ConditionalFormula.Condition),Signature,
 Variables);
+                FreeFormula(&((*Formula)->FormulaUnion.ConditionalFormula.FormulaIfTrue),Signature,
+Variables);
+                FreeFormula(&((*Formula)->FormulaUnion.ConditionalFormula.FormulaIfFalse),
+Signature,Variables);
                 break;
             case let_formula:
-                FreeFormula(&((*Formula)->FormulaUnion.LetFormula.LetTypes),Variables);
-                FreeFormula(&((*Formula)->FormulaUnion.LetFormula.LetDefn),Variables);
-                FreeFormula(&((*Formula)->FormulaUnion.LetFormula.LetBody),Variables);
+                FreeFormula(&((*Formula)->FormulaUnion.LetFormula.LetTypes),Signature,Variables);
+                FreeFormula(&((*Formula)->FormulaUnion.LetFormula.LetDefn),Signature,Variables);
+                FreeFormula(&((*Formula)->FormulaUnion.LetFormula.LetBody),Signature,Variables);
                 break;
             default:
                 CodingError("Formula type unknown for freeing");
@@ -366,10 +381,11 @@ Variables);
     }
 }
 //-------------------------------------------------------------------------------------------------
-void FreeFormulaWithVariables(FORMULAWITHVARIABLES * FormulaWithVariables) {
+void FreeFormulaWithVariables(FORMULAWITHVARIABLES * FormulaWithVariables,SIGNATURE Signature) {
 
     if (*FormulaWithVariables != NULL) {
-        FreeFormula(&((*FormulaWithVariables)->Formula),&((*FormulaWithVariables)->Variables));
+        FreeFormula(&((*FormulaWithVariables)->Formula),Signature,
+&((*FormulaWithVariables)->Variables));
         assert((*FormulaWithVariables)->Formula == NULL);
         assert((*FormulaWithVariables)->Variables == NULL);
         Free((void **)FormulaWithVariables);
@@ -1206,6 +1222,7 @@ FORMULA DuplicateFormula(FORMULA Original,ContextType Context,int ForceNewVariab
 
     FORMULA Formula;
     String ErrorMessage;
+    SYMBOLNODE Symbol;
 
     if (Original == NULL) {
         return(NULL);
@@ -1235,6 +1252,14 @@ Original->FormulaUnion.QuantifiedFormula.Formula,Context,ForceNewVariables);
             case binary:
                 Formula->FormulaUnion.BinaryFormula.LHS = DuplicateFormula(
 Original->FormulaUnion.BinaryFormula.LHS,Context,ForceNewVariables);
+                if (Formula->FormulaUnion.BinaryFormula.Connective == equation) {
+                    if ((Symbol = IsSymbolInSignatureList(Context.Signature->Predicates,"=",2)) != 
+NULL) {
+                        IncreaseSymbolUseCount(Symbol,1);
+                    } else {
+                        CodingError("Duplicating an equation, but = not in signature");
+                    }
+                }
                 Formula->FormulaUnion.BinaryFormula.RHS = DuplicateFormula(
 Original->FormulaUnion.BinaryFormula.RHS,Context,ForceNewVariables);
                 break;
@@ -1363,6 +1388,7 @@ VariablesMustBeQuantified);
         BinaryFormula->FormulaUnion.BinaryFormula.LHS = Formula;
         ThisConnective = StringToConnective(CurrentToken(Stream)->NameToken);
         BinaryFormula->FormulaUnion.BinaryFormula.Connective = ThisConnective;
+        InsertIntoSignatureList(&(Context.Signature->Predicates),"=",2,Stream);
         NextToken(Stream);
         BinaryFormula->FormulaUnion.BinaryFormula.RHS = ParseFormula(Stream,Language,
 Context,EndOfScope,0,0,VariablesMustBeQuantified,ThisConnective);
@@ -1536,8 +1562,7 @@ FormulaWithVariables->Variables);
     return(FormulaWithVariables); 
 }
 //-------------------------------------------------------------------------------------------------
-FORMULA DuplicateInternalFormulaWithVariables(FORMULA Original,ContextType 
-OriginalContext) {
+FORMULA DuplicateInternalFormulaWithVariables(FORMULA Original,ContextType OriginalContext) {
 
     FORMULAWITHVARIABLES LocalFormulaWithVariables;
     FORMULAWITHVARIABLES CopiedFormulaWithVariables;
@@ -1673,13 +1698,13 @@ ANNOTATEDFORMULA DuplicateAnnotatedFormula(ANNOTATEDFORMULA Original,SIGNATURE S
     return(NULL);
 }
 //-------------------------------------------------------------------------------------------------
-void FreeAnnotatedFormula(ANNOTATEDFORMULA * AnnotatedFormula) {
+void FreeAnnotatedFormula(ANNOTATEDFORMULA * AnnotatedFormula,SIGNATURE Signature) {
 
     if (*AnnotatedFormula != NULL) {
         if (--((*AnnotatedFormula)->NumberOfUses) == 0) {
             switch ((*AnnotatedFormula)->Syntax) {
                 case include:
-                    FreeTerm(&((*AnnotatedFormula)->AnnotatedFormulaUnion.Include),NULL);
+                    FreeTerm(&((*AnnotatedFormula)->AnnotatedFormulaUnion.Include),Signature,NULL);
                     Free((void **)AnnotatedFormula);
                     break;
                 case comment:
@@ -1695,7 +1720,7 @@ void FreeAnnotatedFormula(ANNOTATEDFORMULA * AnnotatedFormula) {
                 case tptp_tcf:
                 case tptp_fof:
                 case tptp_cnf:
-                    FreeAnnotatedTSTPFormula(AnnotatedFormula);
+                    FreeAnnotatedTSTPFormula(AnnotatedFormula,Signature);
                     break;
                 default:
                     CodingError("Annotated formula syntax unknown for freeing\n");
@@ -1778,8 +1803,8 @@ AnnotatedFormulaUnion.Include->Arguments[1]->Arguments[Index]));
 //DEBUG printf("==%s==%s==\n",IncludeFile,IncludeFilter);
 }
 //-------------------------------------------------------------------------------------------------
-LISTNODE GetIncludedAnnotatedFormulae(READFILE Stream,SIGNATURE Signature,
-int ExpandIncludes,ANNOTATEDFORMULA AnnotatedFormula) {
+LISTNODE GetIncludedAnnotatedFormulae(READFILE Stream,SIGNATURE Signature,int ExpandIncludes,
+ANNOTATEDFORMULA AnnotatedFormula) {
 
     String IncludeFile;
     SuperString IncludeFilter;
@@ -1807,7 +1832,7 @@ AnnotatedFormulaUnion.Comment) {
             do {
                 HeaderNode = IncludedHead;
                 IncludedHead = IncludedHead->Next;
-                FreeAnnotatedFormula(&(HeaderNode-> AnnotatedFormula));
+                FreeAnnotatedFormula(&(HeaderNode->AnnotatedFormula),Signature);
                 Free((void **)&HeaderNode);
             } while (IncludedHead != NULL &&
 !(IncludedHead->AnnotatedFormula->Syntax == comment &&
@@ -1844,7 +1869,7 @@ strstr(AnnotatedFormula->AnnotatedFormulaUnion.Comment,"% File ") != NULL) {
             if (GetSyntax(AnnotatedFormula) != comment) {
                 HeaderMissing = 1;
             }
-            FreeAnnotatedFormula(&AnnotatedFormula);
+            FreeAnnotatedFormula(&AnnotatedFormula,Signature);
         } 
     }
     while (HeaderFound && !HeaderMissing && !CheckTokenType(Stream,endeof)) {
@@ -1854,21 +1879,20 @@ strstr(AnnotatedFormula->AnnotatedFormulaUnion.Comment,"% File ") != NULL) {
         if (GetSyntax(AnnotatedFormula) == blank_line) {
 //----Blank lines are OK
         } else if (GetSyntax(AnnotatedFormula) == comment) {
-            if (strstr(AnnotatedFormula->AnnotatedFormulaUnion.Comment,
-"%--------") != NULL) {
+            if (strstr(AnnotatedFormula->AnnotatedFormulaUnion.Comment,"%--------") != NULL) {
                 HeaderFound = 0;
-                FreeAnnotatedFormula(&AnnotatedFormula);
+                FreeAnnotatedFormula(&AnnotatedFormula,Signature);
             }
         } else {
             HeaderMissing = 1;
-            FreeAnnotatedFormula(&AnnotatedFormula);
+            FreeAnnotatedFormula(&AnnotatedFormula,Signature);
         }
     }
 
 
 //----Delete if still in header
     if (HeaderMissing) {
-        FreeListOfAnnotatedFormulae(&Head);
+        FreeListOfAnnotatedFormulae(&Head,Signature);
     } 
     FreeSignature(&Signature);
     return(Head);
@@ -1916,7 +1940,7 @@ ExpandIncludes,(*Current)->AnnotatedFormula);
                     }
                     Mover->Next = IncludeNode->Next;
                 }
-                FreeAnnotatedFormula(&(IncludeNode->AnnotatedFormula));
+                FreeAnnotatedFormula(&(IncludeNode->AnnotatedFormula),Signature);
                 Free((void **)&IncludeNode);
             } else {
                 Current = &((*Current)->Next);
@@ -1944,7 +1968,7 @@ FormulaName);
                     strcat(IncludedNames,"\n");
                 } else {
                     Mover = (*Current)->Next;
-                    FreeAnnotatedFormula(&((*Current)->AnnotatedFormula));
+                    FreeAnnotatedFormula(&((*Current)->AnnotatedFormula),Signature);
                     Free((void **)Current);
                     *Current = Mover;
                 }

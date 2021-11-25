@@ -14,8 +14,8 @@ void PrintVariableList(VARIABLENODE Variables,VARIABLENODE EndOfScope);
 TERM NewTerm(void);
 TERMWITHVARIABLES ParseTermWithVariables(READFILE Stream,SyntaxType Language,
 SIGNATURE Signature,int VariablesMustBeQuantifiedAlready);
-void FreeTerm(TERM * Term,VARIABLENODE * Variables);
-void FreeTermWithVariables(TERMWITHVARIABLES * TermWithVariables);
+void FreeTerm(TERM * Term,SIGNATURE Signature,VARIABLENODE * Variables);
+void FreeTermWithVariables(TERMWITHVARIABLES * TermWithVariables,SIGNATURE Signature);
 TERM DuplicateTerm(TERM Original,ContextType Context,int ForceNewVariables);
 TERMWITHVARIABLES DuplicateTermWithVariables(TERMWITHVARIABLES Original,
 SIGNATURE Signature,int ForceNewVariables);
@@ -24,7 +24,7 @@ VARIABLENODE * EndOfScope,TermType Type,ConnectiveType Quantification,
 int * InfixNegatedAtom,int VariablesMustBeQuantifiedAlready);
 
 FORMULA NewFormula(void);
-void FreeFormula(FORMULA * Formula,VARIABLENODE * Variables);
+void FreeFormula(FORMULA * Formula,SIGNATURE Signature,VARIABLENODE * Variables);
 FORMULAWITHVARIABLES NewFormulaWithVariables(void);
 FORMULA ParseAtom(READFILE Stream,SyntaxType Language,ContextType Context,
 VARIABLENODE * EndOfScope,int VariablesMustBeQuantifiedAlready);
@@ -38,11 +38,10 @@ int LeftAssociative(ConnectiveType Connective);
 int Associative(ConnectiveType Connective);
 int FullyAssociative(ConnectiveType Connective);
 int Symmetric(ConnectiveType Connective);
-void FreeFormulaWithVariables(FORMULAWITHVARIABLES * FormulaWithVariables);
-FORMULAWITHVARIABLES DuplicateFormulaWithVariables(FORMULAWITHVARIABLES 
-Original,SIGNATURE Signature,int ForceNewVariables);
-FORMULA DuplicateInternalFormulaWithVariables(FORMULA Original,ContextType
-OriginalContext);
+void FreeFormulaWithVariables(FORMULAWITHVARIABLES * FormulaWithVariables,SIGNATURE Signature);
+FORMULAWITHVARIABLES DuplicateFormulaWithVariables(FORMULAWITHVARIABLES riginal,
+SIGNATURE Signature,int ForceNewVariables);
+FORMULA DuplicateInternalFormulaWithVariables(FORMULA Original,ContextType OriginalContext);
 FORMULA ParseFormula(READFILE Stream,SyntaxType Language,ContextType Context,
 VARIABLENODE * EndOfScope,int AllowBinary,int AllowInfixEquality,
 int VariablesMustBeQuantifiedAlready,ConnectiveType LastConnective);
@@ -51,7 +50,7 @@ SyntaxType Language,SIGNATURE Signature,int VariablesMustBeQuantifiedAlready);
 
 ANNOTATEDFORMULA DuplicateAnnotatedFormula(ANNOTATEDFORMULA Original,
 SIGNATURE Signature);
-void FreeAnnotatedFormula(ANNOTATEDFORMULA * AnnotatedFormula);
+void FreeAnnotatedFormula(ANNOTATEDFORMULA * AnnotatedFormula,SIGNATURE Signature);
 //----Not for the weak 
 ANNOTATEDFORMULA ParseAnnotatedFormula(READFILE Stream,SIGNATURE Signature);
 ANNOTATEDFORMULA ParseAndUseAnnotatedFormula(READFILE Stream,SIGNATURE 

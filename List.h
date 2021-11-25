@@ -11,8 +11,8 @@ void AddListNode(LISTNODE * From,LISTNODE Next,ANNOTATEDFORMULA
 AnnotatedFormulae);
 LISTNODE DuplicateListOfNodes(LISTNODE Head,int KeepNonLogicNodes);
 LISTNODE DuplicateListOfAnnotatedFormulae(LISTNODE Head,SIGNATURE Signature);
-void FreeAListNode(LISTNODE * ToDelete);
-void FreeListOfAnnotatedFormulae(LISTNODE * Head);
+void FreeAListNode(LISTNODE * ToDelete,SIGNATURE Signature);
+void FreeListOfAnnotatedFormulae(LISTNODE * Head,SIGNATURE Signature);
 LISTNODE AppendListsOfAnnotatedTSTPNodes(LISTNODE List1,LISTNODE List2);
 LISTNODE * GetLastNext(LISTNODE * Head);
 
@@ -24,37 +24,33 @@ LISTNODE * GetNodeFromListByAnnotatedFormulaName(LISTNODE * Head,
 char * Name);
 ANNOTATEDFORMULA GetAnnotatedFormulaFromListByName(LISTNODE Head, char * Name);
 int GetNodesForNames(LISTNODE Head,StringParts ParentNames,int NumberOfParents,
-LISTNODE * ParentList);
+LISTNODE * ParentList,SIGNATURE Signature);
 LISTNODE * GetNodeFromListByAnnotatedFormula(LISTNODE * Head,ANNOTATEDFORMULA
 AnnotatedFormula);
 
-LISTNODE SelectListOfAnnotatedFormulaeWithType(LISTNODE * Head,StatusType 
-DesiredStatus,int DeletedSelected);
-LISTNODE GetListOfAnnotatedFormulaeWithType(LISTNODE Head,StatusType 
-DesiredStatus);
+LISTNODE SelectListOfAnnotatedFormulaeWithType(LISTNODE * Head,StatusType DesiredStatus,
+int DeletedSelected,SIGNATURE Signature);
+LISTNODE GetListOfAnnotatedFormulaeWithType(LISTNODE Head,StatusType DesiredStatus,
+SIGNATURE Signature);
 LISTNODE GetListWithSyntaxType(LISTNODE Head,SyntaxType DesiredSyntax);
-LISTNODE SelectListOfAnnotatedFormulaeWithParents(LISTNODE * Head,
-int DeletedSelected);
+LISTNODE SelectListOfAnnotatedFormulaeWithParents(LISTNODE * Head,int DeletedSelected,
+SIGNATURE Signature);
 
-int SetRelationshipListOfAnnotatedFormulae(LISTNODE Set1,LISTNODE Set2,
-int AllowCommutation);
-LISTNODE MergeInListOfAnnotatedFormulaeByFields(LISTNODE * MainList, 
-LISTNODE * MergeList,int SameName,int SameRole,int SameFormula);
+int SetRelationshipListOfAnnotatedFormulae(LISTNODE Set1,LISTNODE Set2,int AllowCommutation);
+LISTNODE MergeInListOfAnnotatedFormulaeByFields(LISTNODE * MainList,LISTNODE * MergeList,
+int SameName,int SameRole,int SameFormula,SIGNATURE Signature);
 
-LISTNODE SlowSortByUsefulInfoField(LISTNODE * Head,char * FieldName,
-char DataType,int InvertOrder);
-LISTNODE SortByUsefulInfoField(LISTNODE * Head,char * FieldName,char DataType,
-int InvertOrder);
+LISTNODE SlowSortByUsefulInfoField(LISTNODE * Head,char * FieldName,char DataType,int InvertOrder);
+LISTNODE SortByUsefulInfoField(LISTNODE * Head,char * FieldName,char DataType,int InvertOrder);
 void RandomizeAnnotatedFormulaeInList(LISTNODE Head,unsigned int Seed);
 void RandomizeListOrder(LISTNODE * Head,unsigned int Seed);
 void RandomizeListOfAnnotatedFormulae(LISTNODE * Head,unsigned int Seed);
 
 void ResetBTreeVisited(BTREENODE Root);
-BTREENODE * GetNodeFromBTreeByAnnotatedFormulaName(BTREENODE * Root,
-char * Name);
+BTREENODE * GetNodeFromBTreeByAnnotatedFormulaName(BTREENODE * Root,char * Name);
 BTREENODE AddBTreeNode(BTREENODE * Root,ANNOTATEDFORMULA AnnotatedFormula);
 BTREENODE ListToBTree(LISTNODE Head);
-void FreeBTreeOfAnnotatedFormulae(BTREENODE * Root);
+void FreeBTreeOfAnnotatedFormulae(BTREENODE * Root,SIGNATURE Signature);
 void PrintBTreeOfAnnotatedFormulae(BTREENODE Root);
 int BTreeDepth(BTREENODE Root);
 //-------------------------------------------------------------------------------------------------

@@ -323,7 +323,7 @@ TREENODE GetFalseRootNode(ROOTLIST RootListHead) {
     return(NULL);
 }
 //-------------------------------------------------------------------------------------------------
-LISTNODE GetRootList(LISTNODE Head) {
+LISTNODE GetRootList(LISTNODE Head,SIGNATURE Signature) {
 
     LISTNODE RootList;
     char * AllParentNames;
@@ -357,7 +357,7 @@ GetName((*Remover)->AnnotatedFormula,ParentName))) {
 //----If found then remove from list and add to tree
                 if (*Remover != NULL) {
                     AddBTreeNode(&ParentTree,(*Remover)->AnnotatedFormula);
-                    FreeAListNode(Remover);
+                    FreeAListNode(Remover,Signature);
                 }
             }
         }
@@ -365,7 +365,7 @@ GetName((*Remover)->AnnotatedFormula,ParentName))) {
         Head = Head->Next;
     }
 //----Free the tree of parents
-    FreeBTreeOfAnnotatedFormulae(&ParentTree);
+    FreeBTreeOfAnnotatedFormulae(&ParentTree,Signature);
 
     return(RootList);
 }
@@ -423,7 +423,7 @@ void AddRootNode(ROOTLIST * From,ROOTLIST Next,TREENODE TheTree) {
     *From = NewNode;
 }
 //-------------------------------------------------------------------------------------------------
-void FreeTree(TREENODE * Tree) {
+void FreeTree(TREENODE * Tree,SIGNATURE Signature) {
 
     int Index;
 //DEBUG String FormulaName;
@@ -437,7 +437,7 @@ void FreeTree(TREENODE * Tree) {
             if ((*Tree)->NumberOfParents > 0) {
 //DEBUG printf("do the %d parents of %s\n",(*Tree)->NumberOfParents,FormulaName);
                 for (Index = 0; Index < (*Tree)->NumberOfParents; Index++) {
-                    FreeTree(&((*Tree)->Parents[Index]));
+                    FreeTree(&((*Tree)->Parents[Index]),Signature);
                 }
                 (*Tree)->NumberOfParents = 0;;
                 Free((void **)&((*Tree)->Parents));
@@ -450,7 +450,7 @@ void FreeTree(TREENODE * Tree) {
 //----If no more uses then free it up
         if ((*Tree)->NumberOfUses == 0) {
 //DEBUG printf("and now free memory for %s\n",FormulaName);
-            FreeAnnotatedFormula(&((*Tree)->AnnotatedFormula));
+            FreeAnnotatedFormula(&((*Tree)->AnnotatedFormula),Signature);
             if ((*Tree)->UserData != NULL) {
                 Free((void **)&((*Tree)->UserData));
             }
@@ -459,10 +459,10 @@ void FreeTree(TREENODE * Tree) {
     }
 }
 //-------------------------------------------------------------------------------------------------
-void FreeRootNode(ROOTLIST * FreeThis,int MustFreeTree) {
+void FreeRootNode(ROOTLIST * FreeThis,int MustFreeTree,SIGNATURE Signature) {
 
     if (MustFreeTree) {
-        FreeTree(&((*FreeThis)->TheTree));
+        FreeTree(&((*FreeThis)->TheTree),Signature);
     } else {
 //----Simply decrement the direct node counter
         (*FreeThis)->TheTree->NumberOfUses--;
@@ -470,7 +470,7 @@ void FreeRootNode(ROOTLIST * FreeThis,int MustFreeTree) {
     Free((void **)FreeThis);
 }
 //-------------------------------------------------------------------------------------------------
-void FreeARootNode(ROOTLIST * ToDelete,int MustFreeTree) {
+void FreeARootNode(ROOTLIST * ToDelete,int MustFreeTree,SIGNATURE Signature) {
 
     ROOTLIST NextOne;
 
@@ -479,17 +479,17 @@ void FreeARootNode(ROOTLIST * ToDelete,int MustFreeTree) {
     }
 
     NextOne = (*ToDelete)->Next;
-    FreeRootNode(ToDelete,MustFreeTree);
+    FreeRootNode(ToDelete,MustFreeTree,Signature);
     *ToDelete = NextOne;
 }
 //-------------------------------------------------------------------------------------------------
-void FreeRootList(ROOTLIST * Head,int MustFreeTree) {
+void FreeRootList(ROOTLIST * Head,int MustFreeTree,SIGNATURE Signature) {
 
     if (MustFreeTree) {
         ResetRootListVisited(*Head);
     }
     while(*Head != NULL) {
-        FreeARootNode(Head,MustFreeTree);
+        FreeARootNode(Head,MustFreeTree,Signature);
     }
 }
 //-------------------------------------------------------------------------------------------------
@@ -581,7 +581,7 @@ LookingForThis) {
 //----Using a reference parameter rather than returning so that the linking
 //----is done immediately to allow search what we have done already
 TREENODE BuildTree(LISTNODE * NodesNotInTree,char * Name,TREENODE * TheTree,
-ROOTBTREE * BTreeOfTreeNodes) {
+ROOTBTREE * BTreeOfTreeNodes,SIGNATURE Signature) {
 
     ROOTBTREE * InTree;
     LISTNODE * PtrToNodeInList;
@@ -613,7 +613,7 @@ NodesNotInTree,Name)) == NULL) {
 //----Add to binary tree
         AddRootBTreeNode(BTreeOfTreeNodes,*TheTree);
 //----Remove from nodes not in tree
-        FreeAListNode(PtrToNodeInList);
+        FreeAListNode(PtrToNodeInList,Signature);
 
 //----Do parents if derived 
         if (DerivedAnnotatedFormula((*TheTree)->AnnotatedFormula)) {
@@ -633,7 +633,7 @@ ParentNames,"\n")) == 0) {
 ParentIndex++) {
 //DEBUG printf("Dealing with parent %s\n",ParentNames[ParentIndex]);fflush(stdout);
                     if (BuildTree(NodesNotInTree,ParentNames[ParentIndex],
-&((*TheTree)->Parents[ParentIndex]),BTreeOfTreeNodes) == NULL) {
+&((*TheTree)->Parents[ParentIndex]),BTreeOfTreeNodes,Signature) == NULL) {
 //DEBUG printf("ERROR: Could not build parent trees\n");fflush(stdout);
                         return(NULL);
                     }
@@ -648,7 +648,7 @@ ParentIndex++) {
     return(*TheTree);
 }
 //-------------------------------------------------------------------------------------------------
-ROOTLIST BuildRootList(LISTNODE Head) {
+ROOTLIST BuildRootList(LISTNODE Head,SIGNATURE Signature) {
 
     LISTNODE NodesNotInTree;
     ROOTBTREE BTreeOfTreeNodes;
@@ -671,19 +671,19 @@ ROOTLIST BuildRootList(LISTNODE Head) {
 //----Keep a pointer to last link field in the list of tree roots
     NextRootList = &RootListHead;
 //----Find all the root annotated formulae - each will start a tree
-    RootAnnotatedFormulae = GetRootList(Head);
+    RootAnnotatedFormulae = GetRootList(Head,Signature);
     RootAnnotatedFormulaNode = RootAnnotatedFormulae;
     while (RootAnnotatedFormulaNode != NULL) {
         GetName(RootAnnotatedFormulaNode->AnnotatedFormula,RootName);
         *NextRootList = NewRootNode(NULL);
-        if (BuildTree(&NodesNotInTree,RootName,&((*NextRootList)->TheTree),
-&BTreeOfTreeNodes) == NULL) {
+        if (BuildTree(&NodesNotInTree,RootName,&((*NextRootList)->TheTree),&BTreeOfTreeNodes,
+Signature) == NULL) {
             sprintf(ErrorMessage,"Could not build tree for root %s",RootName);
             ReportError("InputError",ErrorMessage,0);
-            FreeListOfAnnotatedFormulae(&RootAnnotatedFormulae);
-            FreeRootBTree(&BTreeOfTreeNodes,0);
-            FreeRootList(&RootListHead,1);
-            FreeListOfAnnotatedFormulae(&NodesNotInTree);
+            FreeListOfAnnotatedFormulae(&RootAnnotatedFormulae,Signature);
+            FreeRootBTree(&BTreeOfTreeNodes,0,Signature);
+            FreeRootList(&RootListHead,1,Signature);
+            FreeListOfAnnotatedFormulae(&NodesNotInTree,Signature);
             return(NULL);
         } else {
             NextRootList = &((*NextRootList)->Next);
@@ -692,14 +692,14 @@ ROOTLIST BuildRootList(LISTNODE Head) {
     }
 
 //----Free list of root annotated formulae
-    FreeListOfAnnotatedFormulae(&RootAnnotatedFormulae);
+    FreeListOfAnnotatedFormulae(&RootAnnotatedFormulae,Signature);
 //----Free binary tree
-    FreeRootBTree(&BTreeOfTreeNodes,0);
+    FreeRootBTree(&BTreeOfTreeNodes,0,Signature);
 //----Should be none left not in tree
     if (NodesNotInTree != NULL) {
         ReportError("InputError","Could not build root list",0);
-        FreeRootList(&RootListHead,1);
-        FreeListOfAnnotatedFormulae(&NodesNotInTree);
+        FreeRootList(&RootListHead,1,Signature);
+        FreeListOfAnnotatedFormulae(&NodesNotInTree,Signature);
         return(NULL);
     }
 
@@ -862,16 +862,16 @@ AnnotatedFormulaUnion.AnnotatedTSTPFormula.Name);
     }
 }
 //-------------------------------------------------------------------------------------------------
-void FreeRootBTree(ROOTBTREE * Root,int MustFreeTree) {
+void FreeRootBTree(ROOTBTREE * Root,int MustFreeTree,SIGNATURE Signature) {
 
     if (Root == NULL) {
         CodingError("Trying to free a non-existent binary root tree");
     }
 
     if (*Root != NULL) {
-        FreeRootBTree(&((*Root)->Last),MustFreeTree);
-        FreeRootBTree(&((*Root)->Next),MustFreeTree);
-        FreeRootNode(Root,MustFreeTree);
+        FreeRootBTree(&((*Root)->Last),MustFreeTree,Signature);
+        FreeRootBTree(&((*Root)->Next),MustFreeTree,Signature);
+        FreeRootNode(Root,MustFreeTree,Signature);
     }
 }
 //-------------------------------------------------------------------------------------------------

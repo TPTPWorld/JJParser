@@ -98,7 +98,8 @@ char * GetDischargedNames(ANNOTATEDFORMULA AnnotatedFormula,TERM * DischargeList
 char * ExtractAssumptionsList(TERM AssumptionsTerm);
 char * GetParentNames(ANNOTATEDFORMULA AnnotatedFormula,char * PutNamesHere);
 char * GetNodeParentNames(ANNOTATEDFORMULA AnnotatedFormula,char * PutNamesHere);
-int GetNodeParentList(ANNOTATEDFORMULA AnnotatedFormula,LISTNODE Head,LISTNODE * Parents);
+int GetNodeParentList(ANNOTATEDFORMULA AnnotatedFormula,LISTNODE Head,LISTNODE * Parents,
+SIGNATURE Signature);
 char * GetFileSourceNameAndNode(ANNOTATEDFORMULA AnnotatedFormula,char * PutUsageHere);
 
 TERM GetUsefulInfoTERM(ANNOTATEDFORMULA AnnotatedFormula,char * Symbol,int OccurenceNumber);

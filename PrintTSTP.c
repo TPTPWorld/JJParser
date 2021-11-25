@@ -538,6 +538,12 @@ int FlatFormula(FORMULA Formula) {
 FlatTypeOrDefnFormula(Formula) || FlatTuple(Formula));
 }
 //-------------------------------------------------------------------------------------------------
+int OutermostWithoutBrackets(FORMULA Formula) {
+
+    return(QuantifiedFormula(Formula) || UnaryFormula(Formula) || TypeOrDefnFormula(Formula) ||
+LiteralFormula(Formula) || FlatFormula(Formula));
+}
+//-------------------------------------------------------------------------------------------------
 void PrintFileTSTPTerm(PRINTFILE Stream,SyntaxType Language,TERM Term,int Pretty,int Indent,
 ConnectiveType LastConnective,int TSTPSyntaxFlag) {
 
@@ -1005,21 +1011,24 @@ FakeConnective,TSTPSyntaxFlag);
                 PrintSpaces(Stream,Indent);
             }
             PrintFileTSTPFormula(Stream,Language,
-Formula->FormulaUnion.ConditionalFormula.Condition,Indent,Pretty,none,TSTPSyntaxFlag);
-            PFprintf(Stream,", ");
+Formula->FormulaUnion.ConditionalFormula.Condition,Indent,Pretty,OutermostWithoutBrackets(
+Formula->FormulaUnion.ConditionalFormula.Condition) ? outermost : none,TSTPSyntaxFlag);
+            PFprintf(Stream,",");
             if (Pretty && NeedNewLine) {
                 PFprintf(Stream,"\n");
                 PrintSpaces(Stream,Indent);
             }
             PrintFileTSTPFormula(Stream,Language,
-Formula->FormulaUnion.ConditionalFormula.FormulaIfTrue,Indent,Pretty,none,TSTPSyntaxFlag);
-            PFprintf(Stream,", ");
+Formula->FormulaUnion.ConditionalFormula.FormulaIfTrue,Indent,Pretty,OutermostWithoutBrackets(
+Formula->FormulaUnion.ConditionalFormula.FormulaIfTrue) ? outermost : none,TSTPSyntaxFlag);
+            PFprintf(Stream,",");
             if (Pretty && NeedNewLine) {
                 PFprintf(Stream,"\n");
                 PrintSpaces(Stream,Indent);
             }
             PrintFileTSTPFormula(Stream,Language,
-Formula->FormulaUnion.ConditionalFormula.FormulaIfFalse,Indent,Pretty,none,TSTPSyntaxFlag);
+Formula->FormulaUnion.ConditionalFormula.FormulaIfFalse,Indent,Pretty,OutermostWithoutBrackets(
+Formula->FormulaUnion.ConditionalFormula.FormulaIfFalse) ? outermost : none,TSTPSyntaxFlag);
             if (NeedNewLine) {
                 PFprintf(Stream," ");
             }
@@ -1035,20 +1044,21 @@ Formula->FormulaUnion.ConditionalFormula.FormulaIfFalse,Indent,Pretty,none,TSTPS
             }
             PrintFileTSTPFormula(Stream,Language,Formula->FormulaUnion.LetFormula.LetTypes,Indent,
 Pretty,outermost,TSTPSyntaxFlag);
-            PFprintf(Stream,", ");
+            PFprintf(Stream,",");
             if (Pretty) {
                 PFprintf(Stream,"\n");
                 PrintSpaces(Stream,Indent);
             }
             PrintFileTSTPFormula(Stream,Language,Formula->FormulaUnion.LetFormula.LetDefn,Indent,
 Pretty,outermost,TSTPSyntaxFlag);
-            PFprintf(Stream,", ");
+            PFprintf(Stream,",");
             if (Pretty) {
                 PFprintf(Stream,"\n");
                 PrintSpaces(Stream,Indent);
             }
             PrintFileTSTPFormula(Stream,Language,Formula->FormulaUnion.LetFormula.LetBody,Indent,
-Pretty,outermost,TSTPSyntaxFlag);
+Pretty,OutermostWithoutBrackets(Formula->FormulaUnion.LetFormula.LetBody) ? outermost : none,
+TSTPSyntaxFlag);
             PFprintf(Stream," )");
             break;
 
@@ -1110,12 +1120,7 @@ AnnotatedTSTPFormulaType AnnotatedTSTPFormula,PrintFormatType Format,int Pretty)
             PFprintf(Stream,"\n");
             PrintSpaces(Stream,4);
 //----Things that start on a new line alone
-            if (
-QuantifiedFormula(AnnotatedTSTPFormula.FormulaWithVariables->Formula) ||
-UnaryFormula(AnnotatedTSTPFormula.FormulaWithVariables->Formula) ||
-TypeOrDefnFormula(AnnotatedTSTPFormula.FormulaWithVariables->Formula) ||
-LiteralFormula(AnnotatedTSTPFormula.FormulaWithVariables->Formula) ||
-FlatFormula(AnnotatedTSTPFormula.FormulaWithVariables->Formula)) {
+            if (OutermostWithoutBrackets(AnnotatedTSTPFormula.FormulaWithVariables->Formula)) {
                 PrintFileTSTPFormula(Stream,Language,
 AnnotatedTSTPFormula.FormulaWithVariables->Formula,4,Pretty,outermost,1);
             } else {
@@ -1403,7 +1408,7 @@ PrintFormatType Format,int Pretty) {
             XMLPrintListOfAnnotatedTSTPNodes(Stream->FileHandle,Head,CONTENT_TSTP,FALSE);
             break;
         case sumo:
-            SUMOPrintListOfAnnotatedTSTPNodes(Stream->FileHandle,Head);
+            SUMOPrintListOfAnnotatedTSTPNodes(Stream->FileHandle,Head,Signature);
             break;
         case smt2:
             SMT2PrintHeader(Stream->FileHandle,Head,Signature);

@@ -237,37 +237,48 @@ int GetArityFromTyping(READFILE Stream,FORMULA TypeFormula) {
 
     int Arity;
     FORMULA Side;
+    String ErrorMessage;
 
 //DEBUG printf("Get arity from type %s\n",FormulaTypeToString(TypeFormula->Type));
-    if (TypeFormula->Type == atom || TypeFormula->Type == tuple) {
-        return(0);
-    } else if (TypeFormula->Type == binary) {
-        if (TypeFormula->FormulaUnion.BinaryFormula.Connective == maparrow) {
-            Arity = 1;
-//----Do xprods on LHS for TFF
-            Side = TypeFormula->FormulaUnion.BinaryFormula.LHS;
-            while (Side->Type == binary && 
-Side->FormulaUnion.BinaryFormula.Connective == xprodtype) {
-                Arity++;
-                Side = Side->FormulaUnion.BinaryFormula.LHS;
-            }
-//----Do maps on RHS for THF
-            Side = TypeFormula->FormulaUnion.BinaryFormula.RHS;
-            while (Side->Type == binary && 
-Side->FormulaUnion.BinaryFormula.Connective == maparrow) {
-                Arity++;
-                Side = Side->FormulaUnion.BinaryFormula.RHS;
-            }
-            return(Arity);
-        } else {
+    switch (TypeFormula->Type) {
+        case atom:
             return(0);
-        }
-//----Polymorphic types
-    } else if (TypeFormula->Type == quantified) {
-        return(1 + GetArityFromTyping(Stream,TypeFormula->FormulaUnion.QuantifiedFormula.Formula));
-    } else {
-        TokenError(Stream,"Could not get arity from typing");
-        return(0);
+            break;
+        case tuple:
+            return(1);
+            break;
+        case binary:
+            if (TypeFormula->FormulaUnion.BinaryFormula.Connective == maparrow) {
+                Arity = 1;
+//----Do xprods on LHS for TFF
+                Side = TypeFormula->FormulaUnion.BinaryFormula.LHS;
+                while (Side->Type == binary && 
+Side->FormulaUnion.BinaryFormula.Connective == xprodtype) {
+                    Arity++;
+                    Side = Side->FormulaUnion.BinaryFormula.LHS;
+                }
+//----Do maps on RHS for THF
+                Side = TypeFormula->FormulaUnion.BinaryFormula.RHS;
+                while (Side->Type == binary && 
+Side->FormulaUnion.BinaryFormula.Connective == maparrow) {
+                    Arity++;
+                    Side = Side->FormulaUnion.BinaryFormula.RHS;
+                }
+                return(Arity);
+            } else {
+                return(0);
+            }
+            break;
+        case  quantified:
+            return(1 + GetArityFromTyping(Stream,
+TypeFormula->FormulaUnion.QuantifiedFormula.Formula));
+            break;
+        default:
+            sprintf(ErrorMessage,"Unknown type %s for getting arity from type",
+FormulaTypeToString(TypeFormula->Type));
+            CodingError(ErrorMessage);
+            return(0);
+            break;
     }
 }
 //-------------------------------------------------------------------------------------------------
@@ -1452,7 +1463,7 @@ int NonHornClause(ANNOTATEDFORMULA AnnotatedFormula) {
 }
 //-------------------------------------------------------------------------------------------------
 int CountAnnotatedFormulaUniqueVariablesByUse(ANNOTATEDFORMULA AnnotatedFormula,int MinUse,
-int MaxUse,ConnectiveType Quantification) {
+int MaxUse,ConnectiveType RequiredQuantification) {
 
     int Counter;
     VARIABLENODE VariableNode;
@@ -1462,16 +1473,19 @@ int MaxUse,ConnectiveType Quantification) {
         Counter = 0;
         VariableNode = AnnotatedFormula->
 AnnotatedFormulaUnion.AnnotatedTSTPFormula.FormulaWithVariables->Variables;
+//DEBUG printf("Want MIN %d MAX %d TYPE %s\n",MinUse,MaxUse,RequiredQuantification == universal ? "!" : RequiredQuantification == existential ? "?" : "DUNNO");
         while (VariableNode != NULL) {
 //DEBUG printf("Variable %s %s\n",GetSignatureSymbol(VariableNode->VariableName),VariableNode->Quantification == universal ? "!" : VariableNode->Quantification == existential ? "?" : "DUNNO");
-//DEBUG printf("Want MIN %d MAX %d TYPE %s\n",MinUse,MaxUse,Quantification == universal ? "!" : Quantification == existential ? "?" : "DUNNO");
             if (
+//----Care only about quantified variables, not free, e.g., in $let
+VariableNode->Quantification != none && VariableNode->Quantification != free_variable &&
 //----Usage constraint
-(MinUse < 0 || MaxUse < MinUse || (VariableNode->NumberOfUses >= MinUse && 
-VariableNode->NumberOfUses <= MaxUse)) && 
+(MinUse < 0 || MaxUse < MinUse || 
+ (VariableNode->NumberOfUses >= MinUse && VariableNode->NumberOfUses <= MaxUse)) && 
 //----Quantification constraint
-(Quantification == none || VariableNode->Quantification == Quantification)) {
+(RequiredQuantification == none || VariableNode->Quantification == RequiredQuantification)) {
                 Counter++;
+//DEBUG printf("That one counts %s\n",GetSignatureSymbol(VariableNode->VariableName));
             }
             VariableNode = VariableNode->NextVariable;
         }
@@ -1736,10 +1750,12 @@ Formula->FormulaUnion.SequentFormula.RHS,&CountFormulaTuples));
         case quantified:
             return(CountFormulaTuples(Formula->FormulaUnion.QuantifiedFormula.Formula));
             break;
-        case assignment:
         case type_declaration:
+            return(0);
+            break;
+        case assignment:
         case binary:
-            return(CountFormulaTuples(Formula->FormulaUnion.BinaryFormula.LHS)+
+            return(CountFormulaTuples(Formula->FormulaUnion.BinaryFormula.LHS) +
 CountFormulaTuples(Formula->FormulaUnion.BinaryFormula.RHS));
             break;
         case unary:
@@ -2085,6 +2101,7 @@ Formula->FormulaUnion.BinaryFormula.RHS);
             ConnectiveStatistics.NumberOfGlobalTypeDecs++;
             break;
         case quantified:
+//DEBUG printf("Looking at quantified variable %s with quantifier %s\n",GetSymbol(Formula->FormulaUnion.QuantifiedFormula.Variable),ConnectiveToString(Formula->FormulaUnion.QuantifiedFormula.Quantifier));
 //----For typed variables
             VariableType = Formula->FormulaUnion.QuantifiedFormula.VariableType;
             if (VariableType != NULL) {
@@ -2101,8 +2118,7 @@ GetArity(VariableType->FormulaUnion.Atom) == 0 &&
             }
             MoreConnectiveStatistics = GetFormulaConnectiveUsage(
 Formula->FormulaUnion.QuantifiedFormula.Formula);
-            AddOnConnectiveStatistics(&ConnectiveStatistics,
-MoreConnectiveStatistics);
+            AddOnConnectiveStatistics(&ConnectiveStatistics,MoreConnectiveStatistics);
             switch (Formula->FormulaUnion.QuantifiedFormula.Quantifier) {
                 case universal:
                     ConnectiveStatistics.NumberOfUniversals++;
@@ -3093,8 +3109,8 @@ char * PutNamesHere) {
     return(BufferReturn(&Buffer,PutNamesHere));
 }
 //-------------------------------------------------------------------------------------------------
-int GetNodeParentList(ANNOTATEDFORMULA AnnotatedFormula,LISTNODE Head,
-LISTNODE * Parents) {
+int GetNodeParentList(ANNOTATEDFORMULA AnnotatedFormula,LISTNODE Head,LISTNODE * Parents,
+SIGNATURE Signature) {
 
     char * AllParentNames;
     int NumberOfParents;
@@ -3103,7 +3119,7 @@ LISTNODE * Parents) {
     *Parents = NULL;
     AllParentNames = GetNodeParentNames(AnnotatedFormula,NULL);
     NumberOfParents = Tokenize(AllParentNames,ParentNames,"\n");
-    if (!GetNodesForNames(Head,ParentNames,NumberOfParents,Parents)) {
+    if (!GetNodesForNames(Head,ParentNames,NumberOfParents,Parents,Signature)) {
         Free((void **)&AllParentNames);
         return(0);
     }

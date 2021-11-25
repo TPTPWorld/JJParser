@@ -6,10 +6,9 @@
 //-------------------------------------------------------------------------------------------------
 ANNOTATEDFORMULA NewAnnotatedFormula(SyntaxType Syntax);
 ANNOTATEDFORMULA NewAnnotatedTSTPFormula(SyntaxType Syntax);
-void FreeAnnotatedTSTPFormula(ANNOTATEDFORMULA * AnnotatedFormula);
-ANNOTATEDFORMULA DuplicateAnnotatedTSTPFormula(ANNOTATEDFORMULA Original,
-SIGNATURE Signature,int ForceNewVariables);
-ANNOTATEDFORMULA ParseAnnotatedTSTPFormula(READFILE Stream,
-SIGNATURE Signature);
+void FreeAnnotatedTSTPFormula(ANNOTATEDFORMULA * AnnotatedFormula,SIGNATURE Signature);
+ANNOTATEDFORMULA DuplicateAnnotatedTSTPFormula(ANNOTATEDFORMULA Original,SIGNATURE Signature,
+int ForceNewVariables);
+ANNOTATEDFORMULA ParseAnnotatedTSTPFormula(READFILE Stream,SIGNATURE Signature);
 //-------------------------------------------------------------------------------------------------
 #endif

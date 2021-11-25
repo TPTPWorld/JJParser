@@ -213,8 +213,8 @@ void AppendVariableList(VARIABLENODE * OntoThis,VARIABLENODE AppendThis) {
     *OntoThis = AppendThis;
 }
 //-------------------------------------------------------------------------------------------------
-void ExpandAnnotatedFormulaAssumptions(ANNOTATEDFORMULA AnnotatedFormula,
-LISTNODE AllFormula,SIGNATURE Signature) {
+void ExpandAnnotatedFormulaAssumptions(ANNOTATEDFORMULA AnnotatedFormula,LISTNODE AllFormula,
+SIGNATURE Signature) {
 
     TERM FormulaAssumptionsTerm;
     char * FormulaAssumptions;
@@ -280,7 +280,7 @@ FormulaWithVariables->Formula = AssumptionFormula;
 //----Remove the assumption parent if exists
             if (NameInList(AssumptionNames[AssumptionNumber],ParentNames)) {
                 RemoveParentFromInferenceTerm(AssumptionNames[AssumptionNumber],
-AnnotatedFormula->AnnotatedFormulaUnion.AnnotatedTSTPFormula.Source);
+AnnotatedFormula->AnnotatedFormulaUnion.AnnotatedTSTPFormula.Source,Signature);
                 RemoveNameFromList(AssumptionNames[AssumptionNumber],
 ParentNames);
             }
@@ -309,12 +309,12 @@ AnnotatedTSTPFormula.Source->Arguments[1],Signature,"assumptions",1,0);
 DischargeNumber++) {
             if (NameInList(DischargeNames[DischargeNumber],ParentNames)) {
                 RemoveParentFromInferenceTerm(DischargeNames[DischargeNumber],
-AnnotatedFormula->AnnotatedFormulaUnion.AnnotatedTSTPFormula.Source);
+AnnotatedFormula->AnnotatedFormulaUnion.AnnotatedTSTPFormula.Source,Signature);
                 RemoveNameFromList(DischargeNames[DischargeNumber],
 ParentNames);
             }
-            RemoveNamedTermFromList(DischargeNames[DischargeNumber],
-DischargedNamesList,-1);
+            RemoveNamedTermFromList(DischargeNames[DischargeNumber],DischargedNamesList,-1,
+Signature);
         }
         if (AllDischargedNames != NULL) {
             Free((void **)&AllDischargedNames);
@@ -679,15 +679,14 @@ AnnotatedTSTPFormula.FormulaWithVariables->Formula,0);
     }
 }
 //-------------------------------------------------------------------------------------------------
-void EnsureShortForm(ANNOTATEDFORMULA AnnotatedFormula) {
+void EnsureShortForm(ANNOTATEDFORMULA AnnotatedFormula,SIGNATURE Signature) {
 
     if (ReallyAnAnnotatedFormula(AnnotatedFormula)) {
-        FreeTerm(&(AnnotatedFormula->AnnotatedFormulaUnion.
-AnnotatedTSTPFormula.Source),&(AnnotatedFormula->AnnotatedFormulaUnion.
-AnnotatedTSTPFormula.FormulaWithVariables->Variables));
-        FreeTerm(&(AnnotatedFormula->AnnotatedFormulaUnion.
-AnnotatedTSTPFormula.UsefulInfo),&(AnnotatedFormula->AnnotatedFormulaUnion.
-AnnotatedTSTPFormula.FormulaWithVariables->Variables));
+        FreeTerm(&(AnnotatedFormula->AnnotatedFormulaUnion.AnnotatedTSTPFormula.Source),Signature,
+&(AnnotatedFormula->AnnotatedFormulaUnion.AnnotatedTSTPFormula.FormulaWithVariables->Variables));
+        FreeTerm(&(AnnotatedFormula->AnnotatedFormulaUnion.AnnotatedTSTPFormula.UsefulInfo),
+Signature,
+&(AnnotatedFormula->AnnotatedFormulaUnion.AnnotatedTSTPFormula.FormulaWithVariables->Variables));
     }
 }
 //-------------------------------------------------------------------------------------------------
@@ -709,8 +708,8 @@ ParseStringTerm("[]",nontype,Signature,0);
     }
 }
 //-------------------------------------------------------------------------------------------------
-void DoUpdateRecordInList(TERM TheList,SIGNATURE Signature,
-char * UsefulInformation,int DoRemove,int DoAdd) {
+void DoUpdateRecordInList(TERM TheList,SIGNATURE Signature,char * UsefulInformation,int DoRemove,
+int DoAdd) {
 
     char * Open;
     String Symbol;
@@ -749,7 +748,7 @@ char * UsefulInformation,int DoRemove,int DoAdd) {
         if (!strcmp(Symbol,TheList->Arguments[Index]->
 TheSymbol.NonVariable->NameSymbol)) {
             if (DoRemove) {
-                FreeTerm(&(TheList->Arguments[Index]),NULL);
+                FreeTerm(&(TheList->Arguments[Index]),Signature,NULL);
                 if (DoAdd && NumberRemoved == 0) {
                     TheList->Arguments[Index] = ListTerm;
                     NumberAdded = 1;
@@ -780,7 +779,7 @@ TheList->FlexibleArity * sizeof(TERM));
     }
 }
 //-------------------------------------------------------------------------------------------------
-int RemoveNamedTermFromList(char * Name,TERM TheList,int MaxToRemove) {
+int RemoveNamedTermFromList(char * Name,TERM TheList,int MaxToRemove,SIGNATURE Signature) {
 
     int ListIndex;
     int NumberRemoved;
@@ -797,7 +796,7 @@ int RemoveNamedTermFromList(char * Name,TERM TheList,int MaxToRemove) {
 (NumberRemoved < MaxToRemove || MaxToRemove == -1)) {
 //----If found then free and shift up the rest and realloc for less memory
         if (!strcmp(Name,GetSymbol(TheList->Arguments[ListIndex]))) {
-            FreeTerm(&(TheList->Arguments[ListIndex]),NULL);
+            FreeTerm(&(TheList->Arguments[ListIndex]),Signature,NULL);
             while (ListIndex < TheList->FlexibleArity - 1) {
                 TheList->Arguments[ListIndex] = TheList->Arguments[ListIndex+1];
                 ListIndex++;
@@ -813,7 +812,7 @@ TheList->FlexibleArity * sizeof(TERM));
     return(NumberRemoved);
 }
 //-------------------------------------------------------------------------------------------------
-int RemoveParentFromInferenceTerm(char * ParentName,TERM Source) {
+int RemoveParentFromInferenceTerm(char * ParentName,TERM Source,SIGNATURE Signature) {
 
 //----Nothing if not an inference term
     if (strcmp(GetSymbol(Source),"inference") || GetArity(Source) != 3 ||
@@ -821,7 +820,7 @@ GetArity(Source->Arguments[2]) == -1) {
         return(0);
     }
 
-    return(RemoveNamedTermFromList(ParentName,Source->Arguments[2],-1) > 0);
+    return(RemoveNamedTermFromList(ParentName,Source->Arguments[2],-1,Signature) > 0);
 }
 //-------------------------------------------------------------------------------------------------
 int SetSourceFromString(ANNOTATEDFORMULA AnnotatedFormula,SIGNATURE Signature,
@@ -831,9 +830,8 @@ char * SourceString) {
 
     if (ReallyAnAnnotatedFormula(AnnotatedFormula) &&
 (Source = ParseStringTerm(SourceString,nontype,Signature,0)) != NULL) {
-        FreeTerm(&(AnnotatedFormula->AnnotatedFormulaUnion.
-AnnotatedTSTPFormula.Source),&(AnnotatedFormula->AnnotatedFormulaUnion.
-AnnotatedTSTPFormula.FormulaWithVariables->Variables));
+        FreeTerm(&(AnnotatedFormula->AnnotatedFormulaUnion.AnnotatedTSTPFormula.Source),Signature,
+&(AnnotatedFormula->AnnotatedFormulaUnion.AnnotatedTSTPFormula.FormulaWithVariables->Variables));
         AnnotatedFormula->AnnotatedFormulaUnion.AnnotatedTSTPFormula.Source =
 Source;
         return(1);

@@ -20,8 +20,8 @@ void StartSUMOProof(FILE * Stream) {
     fprintf(Stream,"    <proof>\n");
 }
 //-------------------------------------------------------------------------------------------------
-void SUMOPrintAnnotatedTSTPFormula(FILE * Stream,ANNOTATEDFORMULA
-AnnotatedFormula,LISTNODE Head) {
+void SUMOPrintAnnotatedTSTPFormula(FILE * Stream,ANNOTATEDFORMULA AnnotatedFormula,LISTNODE Head,
+SIGNATURE Signature) {
 
     LISTNODE Parents;
     LISTNODE Parent;
@@ -30,7 +30,7 @@ AnnotatedFormula,LISTNODE Head) {
     fprintf(Stream,"      <proofStep>\n");
     fprintf(Stream,"        <premises>\n");
 
-    if (!GetNodeParentList(AnnotatedFormula,Head, &Parents)) {
+    if (!GetNodeParentList(AnnotatedFormula,Head,&Parents,Signature)) {
         CodingError("Missing parents in derivation");
     }
     Parent = Parents;
@@ -47,7 +47,7 @@ AnnotatedTSTPFormula.FormulaWithVariables->Formula,14,0,1);
         fprintf(Stream,"          </premise>\n");
         Parent = Parent->Next;
     }
-    FreeListOfAnnotatedFormulae(&Parents);
+    FreeListOfAnnotatedFormulae(&Parents,Signature);
     fprintf(Stream,"        </premises>\n");
 
     SUMOFormulaType = GetSyntax(AnnotatedFormula) == tptp_fof?
@@ -71,7 +71,7 @@ void EndSUMOProof(FILE * Stream) {
     fprintf(Stream,"</queryResponse>\n");
 }
 //-------------------------------------------------------------------------------------------------
-void SUMOPrintListOfAnnotatedTSTPNodes(FILE * Stream,LISTNODE Head) {
+void SUMOPrintListOfAnnotatedTSTPNodes(FILE * Stream,LISTNODE Head,SIGNATURE Signature) {
     
     StartSUMOProof(Stream);
     LISTNODE Target;
@@ -89,8 +89,7 @@ void SUMOPrintListOfAnnotatedTSTPNodes(FILE * Stream,LISTNODE Head) {
                 break;
             case tptp_fof:
             case tptp_cnf:
-                SUMOPrintAnnotatedTSTPFormula(Stream,
-Target->AnnotatedFormula,Head);
+                SUMOPrintAnnotatedTSTPFormula(Stream,Target->AnnotatedFormula,Head,Signature);
                 break;
             default:
                 CodingError("Annotated formula syntax unknown for printing");

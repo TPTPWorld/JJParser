@@ -22,21 +22,19 @@ int NegateConjectures(LISTNODE Head,int Simplify);
 void UniqueifyVariableNames(ANNOTATEDFORMULA AnnotatedFormula);
 int RemoveVacuousQuantifiersFromAnnotatedFormula(
 ANNOTATEDFORMULA AnnotatedFormula);
-void QuantifyFormula(FORMULA * UnquantifiedFormula,
-ConnectiveType Quantifier,VARIABLENODE VariableNode);
+void QuantifyFormula(FORMULA * UnquantifiedFormula,ConnectiveType Quantifier,
+VARIABLENODE VariableNode);
 void Quantify(ANNOTATEDFORMULA AnnotatedFormula,ConnectiveType Quantifier);
 void QuantifyList(LISTNODE Head,ConnectiveType Quantifier);
 void FOFify(ANNOTATEDFORMULA AnnotatedFormula,ConnectiveType Quantifier);
 void FOFifyList(LISTNODE Head,ConnectiveType Quantifier);
-void RandomizeAnnotatedFormula(ANNOTATEDFORMULA AnnotatedFormula,
-unsigned int Seed);
-void EnsureShortForm(ANNOTATEDFORMULA AnnotatedFormula);
+void RandomizeAnnotatedFormula(ANNOTATEDFORMULA AnnotatedFormula,unsigned int Seed);
+void EnsureShortForm(ANNOTATEDFORMULA AnnotatedFormula,SIGNATURE Simplify);
 void DoUpdateRecordInList(TERM TheList,SIGNATURE Signature,
 char * UsefulInformation,int DoRemove,int DoAdd);
-int RemoveNamedTermFromList(char * Name,TERM TheList,int MaxToRemove);
-int RemoveParentFromInferenceTerm(char * ParentName,TERM Source);
-int SetSourceFromString(ANNOTATEDFORMULA AnnotatedFormula,SIGNATURE Signature,
-char * StringSource);
+int RemoveNamedTermFromList(char * Name,TERM TheList,int MaxToRemove,SIGNATURE Signature);
+int RemoveParentFromInferenceTerm(char * ParentName,TERM Source,SIGNATURE Signature);
+int SetSourceFromString(ANNOTATEDFORMULA AnnotatedFormula,SIGNATURE Signature,char * StringSource);
 void RemoveUsefulInformationFromAnnotatedFormula(
 ANNOTATEDFORMULA AnnotatedFormula,SIGNATURE Signature,char * PrincipleSymbol);
 void AddUsefulInformationToAnnotatedFormula(ANNOTATEDFORMULA AnnotatedFormula,
