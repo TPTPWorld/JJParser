@@ -347,7 +347,6 @@ Variables);
                     } else {
                         CodingError("Freeing an equation, but = not in signature");
                     }
-// ZZZZ
                 }
                 FreeFormula(&((*Formula)->FormulaUnion.BinaryFormula.RHS),Signature,Variables);
                 assert((*Formula)->FormulaUnion.BinaryFormula.RHS == NULL);

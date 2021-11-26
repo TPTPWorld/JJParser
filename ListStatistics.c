@@ -450,7 +450,7 @@ Statistics.FormulaStatistics.NumberOfEqualityAtoms) {
         sprintf(ErrorMessage,"Equations %d not the same as equality atoms %d\n",
 Statistics.ConnectiveStatistics.NumberOfEquations,
 Statistics.FormulaStatistics.NumberOfEqualityAtoms);
-        CodingError(ErrorMessage);
+//        CodingError(ErrorMessage);
     }
 //----Replace number of variables by sum of number of binders
     Statistics.SymbolStatistics.NumberOfVariables =
@@ -603,7 +603,7 @@ Statistics.FormulaStatistics.NumberOfCNF > 0) {
         fprintf(Stream,"%%            Number of atoms       : ");
     }
     fprintf(Stream,"%4d (%4d equ",
-Statistics.FormulaStatistics.NumberOfAtoms,Statistics.FormulaStatistics.NumberOfEqualityAtoms);
+Statistics.FormulaStatistics.NumberOfAtoms,Statistics.ConnectiveStatistics.NumberOfEquations);
 //----Right now I can't tell of a variable occurence is an atom (variable of type $o) or a 
 //----regular term variable.
 //    if (

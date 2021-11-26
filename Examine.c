@@ -2239,7 +2239,10 @@ Formula->FormulaUnion.UnaryFormula.Formula);
             ConnectiveStatistics = GetSimpleConnectiveStatisticsInTERMArray(
 GetArity(Formula->FormulaUnion.Atom),GetArguments(Formula->FormulaUnion.Atom),
 &GetArgumentConnectiveUsage);
-//----Count use of connectives as atoms
+//----Count use of connectives as atoms. Here's where FOF "equations" are counted, which
+//----I use instead of EqualityAtoms in ListStatistics. Equality atoms currently include @=
+//----which could be an overestimate. Need to clarify this business.
+//TODO
             if (!strcmp(GetSymbol(Formula->FormulaUnion.Atom),"=")) {
                 ConnectiveStatistics.NumberOfEquations++;
             } else if (!strcmp(GetSymbol(Formula->FormulaUnion.Atom),"@=")) {
