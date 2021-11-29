@@ -24,6 +24,7 @@ typedef enum {
 //----Within formulae
     atoms,
     equality_atoms,
+    connective_atoms,
     variable_atoms,
     terms,
     variables,
@@ -64,6 +65,7 @@ typedef struct {
     int NumberOfUnitFormulae;  //----Doubles as NumberOfUnitClauses;
     int NumberOfAtoms;  //----Doubles as NumberOfLiterals;
     int NumberOfEqualityAtoms;  //----Doubles as NumberOfEqualityLiterals
+    int NumberOfConnectiveAtoms;
     int NumberOfVariableAtoms;
     int NumberOfNestedFormulae;
 
@@ -117,8 +119,8 @@ typedef struct {
     int NumberOfMaparrows;
     int NumberOfXprods;
     int NumberOfUnions;
-    int NumberOfEquations;  //----Use of = as a term
-    int NumberOfTypedEquations;  //----Use of @= as a term
+    int NumberOfEqualitySymbols;  //----Use of = as a term
+    int NumberOfTypedEqualitySymbols;  //----Use of @= as a term
 
 //----Only TFF
     int NumberOfSubtypes;

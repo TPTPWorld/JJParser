@@ -93,8 +93,10 @@ GetListNodeFormula(List)->Type == sequent) {
                 case equality_atoms:
                     Counter += CountFormulaAtomsByPredicate(Signature,GetListNodeFormula(List),
 "=");
+                    break;
+                case connective_atoms:
                     Counter += CountFormulaAtomsByPredicate(Signature,GetListNodeFormula(List),
-"@=");
+"CONNECTIVE");
                     break;
                 case variable_atoms:
                     Counter += CountFormulaAtomsByPredicate(Signature,GetListNodeFormula(List),
@@ -429,6 +431,8 @@ printf("PROGRESS: counted formulae of type\n");
     Statistics.FormulaStatistics.NumberOfAtoms = HeadListCount(Signature,&HeadListNode,atoms);
     Statistics.FormulaStatistics.NumberOfEqualityAtoms = HeadListCount(Signature,&HeadListNode,
 equality_atoms);
+    Statistics.FormulaStatistics.NumberOfConnectiveAtoms = HeadListCount(Signature,&HeadListNode,
+connective_atoms);
     Statistics.FormulaStatistics.NumberOfVariableAtoms = HeadListCount(Signature,&HeadListNode,
 variable_atoms);
 printf("PROGRESS: counted atoms of type\n");
@@ -445,11 +449,13 @@ Statistics.FormulaStatistics.NumberOfTypeFormulae));
     }
 printf("PROGRESS: got formulae depth\n");
     Statistics.ConnectiveStatistics = GetListConnectiveUsageStatistics(&HeadListNode);
-    if (Statistics.ConnectiveStatistics.NumberOfEquations != 
+//----Equations counts use of = in any setting, binary connective or partial application
+    if (Statistics.ConnectiveStatistics.NumberOfEqualitySymbols != 
 Statistics.FormulaStatistics.NumberOfEqualityAtoms) {
-        sprintf(ErrorMessage,"Equations %d not the same as equality atoms %d\n",
-Statistics.ConnectiveStatistics.NumberOfEquations,
+        sprintf(ErrorMessage,"Equality symbols %d not the same as equality atoms %d\n",
+Statistics.ConnectiveStatistics.NumberOfEqualitySymbols,
 Statistics.FormulaStatistics.NumberOfEqualityAtoms);
+printf("PROGRESS WARNING: %s",ErrorMessage);
 //        CodingError(ErrorMessage);
     }
 //----Replace number of variables by sum of number of binders
@@ -602,8 +608,14 @@ Statistics.FormulaStatistics.NumberOfCNF > 0) {
     } else {
         fprintf(Stream,"%%            Number of atoms       : ");
     }
-    fprintf(Stream,"%4d (%4d equ",
-Statistics.FormulaStatistics.NumberOfAtoms,Statistics.ConnectiveStatistics.NumberOfEquations);
+    fprintf(Stream,"%4d (%4d equ",Statistics.FormulaStatistics.NumberOfAtoms,
+Statistics.FormulaStatistics.NumberOfEqualityAtoms);
+    if (Statistics.FormulaStatistics.NumberOfTHF > 0) {
+        fprintf(Stream,";%4d eqs;%4d cnn",
+Statistics.ConnectiveStatistics.NumberOfEqualitySymbols + 
+Statistics.ConnectiveStatistics.NumberOfTypedEqualitySymbols,
+Statistics.FormulaStatistics.NumberOfConnectiveAtoms);
+    }
 //----Right now I can't tell of a variable occurence is an atom (variable of type $o) or a 
 //----regular term variable.
 //    if (
@@ -762,8 +774,8 @@ Statistics.SymbolStatistics.MinPredicateArity,Statistics.SymbolStatistics.MinFun
         PrintMinMaxArity(Stream,MaximumOfInt(
 Statistics.SymbolStatistics.MaxPredicateArity,Statistics.SymbolStatistics.MaxFunctorArity));
         fprintf(Stream," aty");
-        if (Statistics.ConnectiveStatistics.NumberOfTypedEquations > 0) {
-            fprintf(Stream,";%4d  @=",Statistics.ConnectiveStatistics.NumberOfTypedEquations);
+        if (Statistics.ConnectiveStatistics.NumberOfTypedEqualitySymbols > 0) {
+            fprintf(Stream,";%4d  @=",Statistics.ConnectiveStatistics.NumberOfTypedEqualitySymbols);
         }
         fprintf(Stream,")\n");
         if (

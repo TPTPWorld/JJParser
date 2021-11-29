@@ -20,6 +20,7 @@ void InitializeFormulaStatistics(FormulaStatisticsType * FormulaStatistics) {
     FormulaStatistics->NumberOfUnitFormulae = 0;  
     FormulaStatistics->NumberOfAtoms = 0;
     FormulaStatistics->NumberOfEqualityAtoms = 0;
+    FormulaStatistics->NumberOfConnectiveAtoms = 0;
     FormulaStatistics->NumberOfVariableAtoms = 0;
     FormulaStatistics->NumberOfNestedFormulae = 0;
 
@@ -72,8 +73,8 @@ void InitializeConnectiveStatistics(ConnectiveStatisticsType * ConnectiveStatist
     ConnectiveStatistics->NumberOfChoices = 0;
     ConnectiveStatistics->NumberOfDescriptions = 0;
     ConnectiveStatistics->NumberOfApplications = 0;
-    ConnectiveStatistics->NumberOfEquations = 0;
-    ConnectiveStatistics->NumberOfTypedEquations = 0;
+    ConnectiveStatistics->NumberOfEqualitySymbols = 0;
+    ConnectiveStatistics->NumberOfTypedEqualitySymbols = 0;
     ConnectiveStatistics->NumberOfTypeConnectives = 0;
     ConnectiveStatistics->NumberOfMaparrows = 0;
     ConnectiveStatistics->NumberOfXprods = 0;
@@ -117,7 +118,8 @@ void AddOnConnectiveStatistics(ConnectiveStatisticsType * ConnectiveStatistics,
 ConnectiveStatisticsType MoreConnectiveStatistics) {
 
     ConnectiveStatistics->NumberOfConnectives += MoreConnectiveStatistics.NumberOfConnectives;
-    ConnectiveStatistics->NumberOfEquations += MoreConnectiveStatistics.NumberOfEquations;
+    ConnectiveStatistics->NumberOfEqualitySymbols += 
+MoreConnectiveStatistics.NumberOfEqualitySymbols;
     ConnectiveStatistics->NumberOfTypeConnectives += 
 MoreConnectiveStatistics.NumberOfTypeConnectives;
     ConnectiveStatistics->NumberOfPis += MoreConnectiveStatistics.NumberOfPis;
@@ -125,7 +127,8 @@ MoreConnectiveStatistics.NumberOfTypeConnectives;
     ConnectiveStatistics->NumberOfChoices += MoreConnectiveStatistics.NumberOfChoices;
     ConnectiveStatistics->NumberOfDescriptions += MoreConnectiveStatistics.NumberOfDescriptions;
     ConnectiveStatistics->NumberOfApplications += MoreConnectiveStatistics.NumberOfApplications;
-    ConnectiveStatistics->NumberOfTypedEquations += MoreConnectiveStatistics.NumberOfTypedEquations;
+    ConnectiveStatistics->NumberOfTypedEqualitySymbols += 
+MoreConnectiveStatistics.NumberOfTypedEqualitySymbols;
     ConnectiveStatistics->NumberOfMaparrows += MoreConnectiveStatistics.NumberOfMaparrows;
     ConnectiveStatistics->NumberOfXprods += MoreConnectiveStatistics.NumberOfXprods;
     ConnectiveStatistics->NumberOfUnions += MoreConnectiveStatistics.NumberOfUnions;

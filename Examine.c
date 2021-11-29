@@ -1963,8 +1963,9 @@ Formula->FormulaUnion.Atom,Predicate);
             if (
 (!strcmp(Predicate,"PREDICATE") && IsSymbolInSignatureList(Signature->Predicates,
 GetSymbol(Formula->FormulaUnion.Atom),GetArity(Formula->FormulaUnion.Atom))) || 
-//----It's the predicate I want
-!strcmp(Predicate,GetSymbol(Formula->FormulaUnion.Atom)) ||
+(!strcmp(Predicate,"CONNECTIVE") && Formula->FormulaUnion.Atom->Type == connective) ||
+//----It's the predicate I want, other than = which is dealt with as binary
+(!strcmp(Predicate,GetSymbol(Formula->FormulaUnion.Atom)) && strcmp(Predicate,"=")) ||
 //----A variable in THF
 (!strcmp(Predicate,"VARIABLE") && Formula->FormulaUnion.Atom->Type == variable) ||
 //----A math predicate (non-variable)
@@ -2006,6 +2007,121 @@ CountFormulaAtomsByPredicate(Signature,Formula->FormulaUnion.LetFormula.LetBody,
 FormulaTypeToString(Formula->Type));
             CodingError(ErrorMessage);
             return(0);
+            break;
+    }
+}
+//-------------------------------------------------------------------------------------------------
+void CountTheConnective(ConnectiveType Connective,
+ConnectiveStatisticsType * ConnectiveStatistics) {
+
+    String ErrorMessage;
+
+    switch(Connective) {
+//----Quantifiers and binders
+        case universal:
+            ConnectiveStatistics->NumberOfUniversals++;
+            break;
+        case existential:
+            ConnectiveStatistics->NumberOfExistentials++;
+            break;
+        case lambda:
+            ConnectiveStatistics->NumberOfLambdas++;
+            break;
+        case pibinder:
+            ConnectiveStatistics->NumberOfPiBinders++;
+            break;
+        case sigmabinder:
+            ConnectiveStatistics->NumberOfSigmaBinders++;
+            break;
+        case descriptionbinder:
+            ConnectiveStatistics->NumberOfDescriptionBinders++;
+            break;
+        case choicebinder:
+            ConnectiveStatistics->NumberOfChoiceBinders++;
+            break;
+//----True connectives
+        case disjunction:
+            ConnectiveStatistics->NumberOfDisjunctions++;
+            ConnectiveStatistics->NumberOfConnectives++;
+            break;
+        case conjunction:
+            ConnectiveStatistics->NumberOfConjunctions++;
+            ConnectiveStatistics->NumberOfConnectives++;
+            break;
+        case equivalence:
+            ConnectiveStatistics->NumberOfEquivalences++;
+            ConnectiveStatistics->NumberOfConnectives++;
+            break;
+        case implication:
+            ConnectiveStatistics->NumberOfImplications++;
+            ConnectiveStatistics->NumberOfConnectives++;
+            break;
+        case reverseimplication:
+            ConnectiveStatistics->NumberOfReverseImplications++;
+            ConnectiveStatistics->NumberOfConnectives++;
+            break;
+        case nonequivalence:
+            ConnectiveStatistics->NumberOfXors++;
+            ConnectiveStatistics->NumberOfConnectives++;
+            break;
+        case negateddisjunction:
+            ConnectiveStatistics->NumberOfNors++;
+            ConnectiveStatistics->NumberOfConnectives++;
+            break;
+        case negatedconjunction:
+            ConnectiveStatistics->NumberOfNands++;
+            ConnectiveStatistics->NumberOfConnectives++;
+            break;
+        case negation:
+            ConnectiveStatistics->NumberOfNegations++;
+            ConnectiveStatistics->NumberOfConnectives++;
+            break;
+        case equation:
+            ConnectiveStatistics->NumberOfEqualitySymbols++;
+            break;
+        case typedequation:
+            ConnectiveStatistics->NumberOfTypedEqualitySymbols++;
+            break;
+        case pi:
+            ConnectiveStatistics->NumberOfPis++;
+            ConnectiveStatistics->NumberOfConnectives++;
+            break;
+        case sigma:
+            ConnectiveStatistics->NumberOfSigmas++;
+            ConnectiveStatistics->NumberOfConnectives++;
+            break;
+        case choice:
+            ConnectiveStatistics->NumberOfChoices++;
+            ConnectiveStatistics->NumberOfConnectives++;
+            break;
+        case description:
+            ConnectiveStatistics->NumberOfDescriptions++;
+            ConnectiveStatistics->NumberOfConnectives++;
+            break;
+        case application:
+            ConnectiveStatistics->NumberOfApplications++;
+            ConnectiveStatistics->NumberOfConnectives++;
+            break;
+        case subtype:
+            ConnectiveStatistics->NumberOfSubtypes++;
+            ConnectiveStatistics->NumberOfTypeConnectives++;
+            break;
+        case maparrow:
+            ConnectiveStatistics->NumberOfMaparrows++;
+            ConnectiveStatistics->NumberOfTypeConnectives++;
+            break;
+        case xprodtype:
+            ConnectiveStatistics->NumberOfXprods++;
+            ConnectiveStatistics->NumberOfTypeConnectives++;
+            break;
+        case uniontype:
+            ConnectiveStatistics->NumberOfUnions++;
+            ConnectiveStatistics->NumberOfTypeConnectives++;
+            break;
+        default:
+            sprintf(ErrorMessage,"Unknown connective %s in counting",
+ConnectiveToString(Connective));
+            CodingError(ErrorMessage);
             break;
     }
 }
@@ -2075,6 +2191,7 @@ ConnectiveStatisticsType GetFormulaConnectiveUsage(FORMULA Formula) {
     ConnectiveStatisticsType MoreConnectiveStatistics;
     FormulaType * VariableType;
     String ErrorMessage;
+    char * AtomSymbol;
 
     InitializeConnectiveStatistics(&ConnectiveStatistics);
     InitializeConnectiveStatistics(&MoreConnectiveStatistics);
@@ -2119,32 +2236,8 @@ GetArity(VariableType->FormulaUnion.Atom) == 0 &&
             MoreConnectiveStatistics = GetFormulaConnectiveUsage(
 Formula->FormulaUnion.QuantifiedFormula.Formula);
             AddOnConnectiveStatistics(&ConnectiveStatistics,MoreConnectiveStatistics);
-            switch (Formula->FormulaUnion.QuantifiedFormula.Quantifier) {
-                case universal:
-                    ConnectiveStatistics.NumberOfUniversals++;
-                    break;
-                case existential:
-                    ConnectiveStatistics.NumberOfExistentials++;
-                    break;
-                case lambda:
-                    ConnectiveStatistics.NumberOfLambdas++;
-                    break;
-                case pibinder:
-                    ConnectiveStatistics.NumberOfPiBinders++;
-                    break;
-                case sigmabinder:
-                    ConnectiveStatistics.NumberOfSigmaBinders++;
-                    break;
-                case descriptionbinder:
-                    ConnectiveStatistics.NumberOfDescriptionBinders++;
-                    break;
-                case choicebinder:
-                    ConnectiveStatistics.NumberOfChoiceBinders++;
-                    break;
-                default:
-                    CodingError("Unknown quantifier type in counting");
-                    break;
-            }
+            CountTheConnective(Formula->FormulaUnion.QuantifiedFormula.Quantifier,
+&ConnectiveStatistics);
             break;
         case binary:
             ConnectiveStatistics = GetFormulaConnectiveUsage(
@@ -2152,68 +2245,8 @@ Formula->FormulaUnion.BinaryFormula.LHS);
             MoreConnectiveStatistics = GetFormulaConnectiveUsage(
 Formula->FormulaUnion.BinaryFormula.RHS);
             AddOnConnectiveStatistics(&ConnectiveStatistics,MoreConnectiveStatistics);
-            switch(Formula->FormulaUnion.BinaryFormula.Connective) {
-                case disjunction:
-                    ConnectiveStatistics.NumberOfDisjunctions++;
-                    ConnectiveStatistics.NumberOfConnectives++;
-                    break;
-                case conjunction:
-                    ConnectiveStatistics.NumberOfConjunctions++;
-                    ConnectiveStatistics.NumberOfConnectives++;
-                    break;
-                case equivalence:
-                    ConnectiveStatistics.NumberOfEquivalences++;
-                    ConnectiveStatistics.NumberOfConnectives++;
-                    break;
-                case implication:
-                    ConnectiveStatistics.NumberOfImplications++;
-                    ConnectiveStatistics.NumberOfConnectives++;
-                    break;
-                case reverseimplication:
-                    ConnectiveStatistics.NumberOfReverseImplications++;
-                    ConnectiveStatistics.NumberOfConnectives++;
-                    break;
-                case nonequivalence:
-                    ConnectiveStatistics.NumberOfXors++;
-                    ConnectiveStatistics.NumberOfConnectives++;
-                    break;
-                case negateddisjunction:
-                    ConnectiveStatistics.NumberOfNors++;
-                    ConnectiveStatistics.NumberOfConnectives++;
-                    break;
-                case negatedconjunction:
-                    ConnectiveStatistics.NumberOfNands++;
-                    ConnectiveStatistics.NumberOfConnectives++;
-                    break;
-                case application:
-                    ConnectiveStatistics.NumberOfApplications++;
-                    ConnectiveStatistics.NumberOfConnectives++;
-                    break;
-                case subtype:
-                    ConnectiveStatistics.NumberOfSubtypes++;
-                    ConnectiveStatistics.NumberOfTypeConnectives++;
-                    break;
-                case maparrow:
-                    ConnectiveStatistics.NumberOfMaparrows++;
-                    ConnectiveStatistics.NumberOfTypeConnectives++;
-                    break;
-                case xprodtype:
-                    ConnectiveStatistics.NumberOfXprods++;
-                    ConnectiveStatistics.NumberOfTypeConnectives++;
-                    break;
-                case uniontype:
-                    ConnectiveStatistics.NumberOfUnions++;
-                    ConnectiveStatistics.NumberOfTypeConnectives++;
-                    break;
-                case equation:
-                    ConnectiveStatistics.NumberOfEquations++;
-                    break;
-                default:
-                    sprintf(ErrorMessage,"Unknown binary connective %s in counting",
-ConnectiveToString(Formula->FormulaUnion.BinaryFormula.Connective));
-                    CodingError(ErrorMessage);
-                    break;
-            }
+            CountTheConnective(Formula->FormulaUnion.BinaryFormula.Connective,
+&ConnectiveStatistics);
             break;
         case unary:
             ConnectiveStatistics = GetFormulaConnectiveUsage(
@@ -2239,22 +2272,15 @@ Formula->FormulaUnion.UnaryFormula.Formula);
             ConnectiveStatistics = GetSimpleConnectiveStatisticsInTERMArray(
 GetArity(Formula->FormulaUnion.Atom),GetArguments(Formula->FormulaUnion.Atom),
 &GetArgumentConnectiveUsage);
-//----Count use of connectives as atoms. Here's where FOF "equations" are counted, which
-//----I use instead of EqualityAtoms in ListStatistics. Equality atoms currently include @=
-//----which could be an overestimate. Need to clarify this business.
-//TODO
-            if (!strcmp(GetSymbol(Formula->FormulaUnion.Atom),"=")) {
-                ConnectiveStatistics.NumberOfEquations++;
-            } else if (!strcmp(GetSymbol(Formula->FormulaUnion.Atom),"@=")) {
-                ConnectiveStatistics.NumberOfTypedEquations++;
-            } else if (!strcmp(GetSymbol(Formula->FormulaUnion.Atom),"!!")) {
-                ConnectiveStatistics.NumberOfPis++;
-            } else if (!strcmp(GetSymbol(Formula->FormulaUnion.Atom),"??")) {
-                ConnectiveStatistics.NumberOfSigmas++;
-            } else if (!strcmp(GetSymbol(Formula->FormulaUnion.Atom),"@@+")) {
-                ConnectiveStatistics.NumberOfChoices++;
-            } else if (!strcmp(GetSymbol(Formula->FormulaUnion.Atom),"@@-")) {
-                ConnectiveStatistics.NumberOfDescriptions++;
+//----Count use of connectives as atoms. 
+            AtomSymbol = GetSymbol(Formula->FormulaUnion.Atom);
+            if (Formula->FormulaUnion.Atom->Type == connective ||
+(Formula->FormulaUnion.Atom->Type == atom_as_term &&
+(!strcmp(AtomSymbol,"@=") ||
+ !strcmp(AtomSymbol,"!!") || !strcmp(AtomSymbol,"??") ||
+ !strcmp(AtomSymbol,"@@+") || !strcmp(AtomSymbol,"@@-")))) {
+                CountTheConnective(StringToConnective(GetSymbol(Formula->FormulaUnion.Atom)),
+&ConnectiveStatistics);
             }
             break;
         case tuple:
