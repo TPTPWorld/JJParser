@@ -867,10 +867,8 @@ Formula->FormulaUnion.QuantifiedFormula.Formula,Indent,Pretty,none,TSTPSyntaxFla
             if ((Associative(Connective) && !FullyAssociative(Connective) && 
 SideFormula->Type == binary &&
 RightAssociative(SideFormula->FormulaUnion.BinaryFormula.Connective)) ||
-//----Need ()s around equations and quantified formulae on LHS (and RHS - see below) of equations
-//----but not if the side formula is an equation becauyse it will get ()s itself.
+//----Need ()s around equations with complex LHS (also RHS, see below)
 (Equation(Formula,NULL,NULL) && !SymbolFormula(SideFormula) && !BinaryFormula(SideFormula))) {
-//OLD (Equation(Formula,NULL,NULL) && !SymbolFormula(SideFormula) && !Equation(SideFormula,NULL,NULL))) {
                 FakeConnective = brackets;
                 PFprintf(Stream,"( ");
                 SideIndent += 2;
@@ -913,7 +911,6 @@ Formula->Type != type_declaration && !TypeOrDefnFormula(Formula);
 SideFormula->Type == binary && 
 LeftAssociative(SideFormula->FormulaUnion.BinaryFormula.Connective)) ||
 (Equation(Formula,NULL,NULL) && !SymbolFormula(SideFormula) && !BinaryFormula(SideFormula))) {
-//OLD (Equation(Formula,NULL,NULL) && !SymbolFormula(SideFormula) && !Equation(SideFormula,NULL,NULL))) {
                     FakeConnective = brackets;
                     PFprintf(Stream,"( ");
                     SideIndent += 2;

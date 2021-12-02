@@ -61,7 +61,7 @@ int ListCount(SIGNATURE Signature,LISTNODE List,CountType WhatToCount) {
 //----Unit annotated fomula has just one atom
                 case unit_formulae:
                     if (CountFormulaAtomsByPredicate(Signature,GetListNodeFormula(List),
-"PREDICATE") == 1) {
+"PREDICATE",0) == 1) {
                         Counter += 1;
                     }
                     break;
@@ -88,19 +88,19 @@ GetListNodeFormula(List)->Type == sequent) {
                     break;
                 case atoms:
                     Counter += CountFormulaAtomsByPredicate(Signature,GetListNodeFormula(List),
-"PREDICATE");
+"PREDICATE",1);
                     break;
                 case equality_atoms:
                     Counter += CountFormulaAtomsByPredicate(Signature,GetListNodeFormula(List),
-"=");
+"=",1);
                     break;
                 case connective_atoms:
                     Counter += CountFormulaAtomsByPredicate(Signature,GetListNodeFormula(List),
-"CONNECTIVE");
+"CONNECTIVE",1);
                     break;
                 case variable_atoms:
                     Counter += CountFormulaAtomsByPredicate(Signature,GetListNodeFormula(List),
-"VARIABLE");
+"VARIABLE",1);
                     break;
                 case terms:
                     Counter += CountFormulaTerms(GetListNodeFormula(List));
@@ -121,23 +121,23 @@ GetSyntax(List->AnnotatedFormula) == tptp_tff) {
                     if (GetSyntax(List->AnnotatedFormula) == tptp_thf ||
 GetSyntax(List->AnnotatedFormula) == tptp_tff) {
                         Counter += CountFormulaAtomsByPredicate(Signature,GetListNodeFormula(List),
-"$ite");
+"$ite",1);
                     }
                     break;
                 case let_forms:
                     if (GetSyntax(List->AnnotatedFormula) == tptp_thf ||
 GetSyntax(List->AnnotatedFormula) == tptp_tff) {
                         Counter += CountFormulaAtomsByPredicate(Signature,GetListNodeFormula(List),
-"$let");
+"$let",1);
                     }
                     break;
                 case math_atoms:
                     Counter += CountFormulaAtomsByPredicate(Signature,GetListNodeFormula(List),
-"MATH_PREDICATE");
+"MATH_PREDICATE",1);
                     break;
                 case math_terms:
                     Counter += CountFormulaAtomsByPredicate(Signature,GetListNodeFormula(List),
-"MATH_FUNCTOR");
+"MATH_FUNCTOR",1);
                     break;
                 case math_variables:
                     Counter += CountVariablesInFormulaByType(GetListNodeFormula(List),"$int") +
@@ -146,7 +146,7 @@ CountVariablesInFormulaByType(GetListNodeFormula(List),"$real");
                     break;
                 case numbers:
                     Counter += CountFormulaAtomsByPredicate(Signature,GetListNodeFormula(List),
-"MATH_NUMBER");
+"MATH_NUMBER",1);
                     break;
                 case nested_formulae:
                     if (GetSyntax(List->AnnotatedFormula) == tptp_thf ||
@@ -202,7 +202,7 @@ int ListMaximal(SIGNATURE Signature,LISTNODE List,MaximizeType WhatToMaximize) {
             switch (WhatToMaximize) {
                 case literals:
                     Maximal = MaximumOfInt(Maximal,
-CountFormulaAtomsByPredicate(Signature,GetListNodeFormula(List),"PREDICATE"));
+CountFormulaAtomsByPredicate(Signature,GetListNodeFormula(List),"PREDICATE",0));
                     break;
                 case max_term_depth:
                     Maximal = MaximumOfInt(Maximal,MaxFormulaTermDepth(GetListNodeFormula(List)));
@@ -713,7 +713,7 @@ Statistics.FormulaStatistics.NumberOfTFF > 0 &&
 (Statistics.FormulaStatistics.NumberOfNestedFormulae > 0 ||
  Statistics.SymbolStatistics.NumberOfBooleanVariables > 0)) {
         fprintf(Stream,
-"%%            Number of $o terms    : %4d (%4d fml;%4d var)\n",
+"%%            Number of FOOLs       : %4d (%4d fml;%4d var)\n",
 Statistics.FormulaStatistics.NumberOfNestedFormulae +
 Statistics.SymbolStatistics.NumberOfBooleanVariables,
 Statistics.FormulaStatistics.NumberOfNestedFormulae,

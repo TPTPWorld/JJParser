@@ -250,7 +250,7 @@ SYMBOLNODE IsSymbolInSignatureList(SYMBOLNODE List,char * Name,int Arity) {
 //-------------------------------------------------------------------------------------------------
 int DefinedSymbol(char * Symbol) {
 
-    return(Symbol[0] == '$' || !strcmp(Symbol,"=") || LooksLikeANumber(Symbol));
+    return(Symbol[0] != '\'' && !islower(Symbol[0]));
 }
 //-------------------------------------------------------------------------------------------------
 SYMBOLNODE * IsSymbolInSignatureListPointer(SYMBOLNODE * List,char * Name,int Arity) {

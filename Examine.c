@@ -1581,7 +1581,11 @@ Formula->FormulaUnion.QuantifiedFormula.Formula,NestedYet));
         case binary:
 //DEBUG printf("Binary with connective %s\n",ConnectiveToString(Formula->FormulaUnion.BinaryFormula.Connective));
             Count = NestedYet;
-            NestedYet = 0;
+            if (Formula->FormulaUnion.BinaryFormula.Connective == equation) {
+                NestedYet = 1;
+            } else {
+                NestedYet = 0;
+            }
             return(Count + CountNestedFormulae(Signature,
 Formula->FormulaUnion.BinaryFormula.LHS,NestedYet) + CountNestedFormulae(Signature,
 Formula->FormulaUnion.BinaryFormula.RHS,NestedYet));
@@ -1869,7 +1873,7 @@ AnnotatedTSTPFormula.FormulaWithVariables->Formula));
 }
 //-------------------------------------------------------------------------------------------------
 int CountTupleFormulaeAtomsByPredicate(SIGNATURE Signature,int NumberOfElements,
-FORMULAArray TupleFormulae,char * Predicate) {
+FORMULAArray TupleFormulae,char * Predicate,int DoNested) {
 
     int ElementNumber;
     int TotalAtoms;
@@ -1877,7 +1881,7 @@ FORMULAArray TupleFormulae,char * Predicate) {
     TotalAtoms = 0;
     for (ElementNumber = 0;ElementNumber < NumberOfElements;ElementNumber++) {
         TotalAtoms += CountFormulaAtomsByPredicate(Signature,TupleFormulae[ElementNumber],
-Predicate);
+Predicate,DoNested);
     }
     return(TotalAtoms);
 }
@@ -1894,14 +1898,15 @@ int CountNestedFormulaAtomsByPredicate(SIGNATURE Signature,TERM Atom,char * Pred
 //----term that cannot have nested formulae.
             if (Atom->Arguments[Index]->Type == formula) {
                 Count += CountFormulaAtomsByPredicate(Signature,
-Atom->Arguments[Index]->TheSymbol.Formula,Predicate);
+Atom->Arguments[Index]->TheSymbol.Formula,Predicate,1);
             }
         }
     }
     return(Count);
 }
 //-------------------------------------------------------------------------------------------------
-int CountFormulaAtomsByPredicate(SIGNATURE Signature,FORMULA Formula,char * Predicate) {
+int CountFormulaAtomsByPredicate(SIGNATURE Signature,FORMULA Formula,char * Predicate,
+int DoNested) {
 
     int Count;
     String ErrorMessage;
@@ -1911,15 +1916,15 @@ int CountFormulaAtomsByPredicate(SIGNATURE Signature,FORMULA Formula,char * Pred
         case sequent:
             return(CountTupleFormulaeAtomsByPredicate(Signature,
 Formula->FormulaUnion.SequentFormula.NumberOfLHSElements,
-Formula->FormulaUnion.SequentFormula.LHS,Predicate) + 
+Formula->FormulaUnion.SequentFormula.LHS,Predicate,DoNested) + 
 CountTupleFormulaeAtomsByPredicate(Signature,
 Formula->FormulaUnion.SequentFormula.NumberOfRHSElements,
-Formula->FormulaUnion.SequentFormula.RHS,Predicate));
+Formula->FormulaUnion.SequentFormula.RHS,Predicate,DoNested));
             break;
         case assignment:
 //TODO - should I count the LHS?
             return(CountFormulaAtomsByPredicate(Signature,Formula->FormulaUnion.BinaryFormula.RHS,
-Predicate));
+Predicate,DoNested));
             break;
         case type_declaration:
             return(0);
@@ -1928,23 +1933,26 @@ Predicate));
 //----Add in RHS of : variables
 //            if (Formula->FormulaUnion.QuantifiedFormula.VariableType != NULL) {
 //                Count += CountFormulaAtomsByPredicate(
-//Formula->FormulaUnion.QuantifiedFormula.VariableType,Predicate);
+//Formula->FormulaUnion.QuantifiedFormula.VariableType,Predicate,DoNested);
 //            }
             Count += CountFormulaAtomsByPredicate(Signature,
-Formula->FormulaUnion.QuantifiedFormula.Formula,Predicate);
+Formula->FormulaUnion.QuantifiedFormula.Formula,Predicate,DoNested);
             return(Count);
             break;
         case binary:
-            Count += CountFormulaAtomsByPredicate(Signature,
-Formula->FormulaUnion.BinaryFormula.LHS,Predicate);
-//----Don't count RHS of typings
-            if (Formula->FormulaUnion.BinaryFormula.Connective != typecolon) {
+            if (Formula->FormulaUnion.BinaryFormula.Connective != equation || DoNested) {
+//----LHS and RHS of equations are nested
                 Count += CountFormulaAtomsByPredicate(Signature,
-Formula->FormulaUnion.BinaryFormula.RHS,Predicate);
+Formula->FormulaUnion.BinaryFormula.LHS,Predicate,DoNested);
+//----Don't count RHS of typings
+                if (Formula->FormulaUnion.BinaryFormula.Connective != typecolon) {
+                    Count += CountFormulaAtomsByPredicate(Signature,
+Formula->FormulaUnion.BinaryFormula.RHS,Predicate,DoNested);
+                }
             }
 //----Equality counts as an atom
             if (Formula->FormulaUnion.BinaryFormula.Connective == equation && 
-(strlen(Predicate) == 0 || !strcmp(Predicate,"=") || !strcmp(Predicate,"PREDICATE"))) {
+(!strcmp(Predicate,"=") || !strcmp(Predicate,"PREDICATE"))) {
 //DEBUG printf("--=-- matches --%s--\n",Predicate);
                 Count++;
             }
@@ -1952,12 +1960,16 @@ Formula->FormulaUnion.BinaryFormula.RHS,Predicate);
             break;
         case unary:
             return(CountFormulaAtomsByPredicate(Signature,
-Formula->FormulaUnion.UnaryFormula.Formula,Predicate));
+Formula->FormulaUnion.UnaryFormula.Formula,Predicate,DoNested));
             break;
         case atom:
+            if (DoNested) {
 //----Do nested for TFX (and first-order style THF, if it's ever used)
-            Count = CountNestedFormulaAtomsByPredicate(Signature,
+//DEBUG printf("Count nested of %s\n",GetSymbol(Formula->FormulaUnion.Atom));
+                Count = CountNestedFormulaAtomsByPredicate(Signature,
 Formula->FormulaUnion.Atom,Predicate);
+//DEBUG printf("Counted nested of %s gets %d\n",GetSymbol(Formula->FormulaUnion.Atom),Count);
+            }
 //DEBUG printf("Look if required ==%s== is the symbol here ==%s==\n",Predicate,GetSymbol(Formula->FormulaUnion.Atom));
 //----If nothing requested, take everything
             if (
@@ -1974,32 +1986,33 @@ GetArity(Formula->FormulaUnion.Atom))) ||
 (!strcmp(Predicate,"MATH_FUNCTOR") && IsMathFunctor(GetSymbol(Formula->FormulaUnion.Atom),
 GetArity(Formula->FormulaUnion.Atom))) ||
 (!strcmp(Predicate,"MATH_NUMBER") && LooksLikeANumber(GetSymbol(Formula->FormulaUnion.Atom))) ) {
-//DEBUG printf("--%s-- matches --%s--\n",GetSymbol(Formula->FormulaUnion.Atom),Predicate);
+//DEBUG printf("--%s-- matches --%s--, total is %d\n",GetSymbol(Formula->FormulaUnion.Atom),Predicate,Count+1);
                 return(Count + 1);
             } else {
+//DEBUG printf("--%s-- not matches --%s--, total is %d\n",GetSymbol(Formula->FormulaUnion.Atom),Predicate,Count);
                 return(Count + 0);
             }
             break;
         case tuple:
             return(CountTupleFormulaeAtomsByPredicate(Signature,
 Formula->FormulaUnion.TupleFormula.NumberOfElements,Formula->FormulaUnion.TupleFormula.Elements,
-Predicate));
+Predicate,DoNested));
             break;
         case ite_formula:
             Count = !strcmp(Predicate,"$ite") ? 1 : 0;
             Count += 
 CountFormulaAtomsByPredicate(Signature,Formula->FormulaUnion.ConditionalFormula.Condition,
-Predicate) +
+Predicate,DoNested) +
 CountFormulaAtomsByPredicate(Signature,Formula->FormulaUnion.ConditionalFormula.FormulaIfTrue,
-Predicate) +
+Predicate,DoNested) +
 CountFormulaAtomsByPredicate(Signature,Formula->FormulaUnion.ConditionalFormula.FormulaIfFalse,
-Predicate);
+Predicate,DoNested);
             return(Count);
             break;
         case let_formula:
             Count = !strcmp(Predicate,"$let") ? 1 : 0;
             Count += 
-CountFormulaAtomsByPredicate(Signature,Formula->FormulaUnion.LetFormula.LetBody,Predicate);
+CountFormulaAtomsByPredicate(Signature,Formula->FormulaUnion.LetFormula.LetBody,Predicate,DoNested);
             return(Count);
             break;
         default:

@@ -63,11 +63,11 @@ double TreeCount(SIGNATURE Signature,TREENODE Tree,CountType WhatToCount,int Exp
                 break;
             case atoms:
                 Counter = CountFormulaAtomsByPredicate(Signature,GetTreeNodeFormula(Tree),
-"PREDICATE");
+"PREDICATE",1);
                 break;
             case equality_atoms:
-                Counter = CountFormulaAtomsByPredicate(Signature,GetTreeNodeFormula(Tree),"=");
-                Counter += CountFormulaAtomsByPredicate(Signature,GetTreeNodeFormula(Tree),"@=");
+                Counter = CountFormulaAtomsByPredicate(Signature,GetTreeNodeFormula(Tree),"=",1);
+                Counter += CountFormulaAtomsByPredicate(Signature,GetTreeNodeFormula(Tree),"@=",1);
                 break;
             case terms:
                 Counter = CountFormulaTerms(GetTreeNodeFormula(Tree));
@@ -130,7 +130,8 @@ double TreeMaximal(SIGNATURE Signature,TREENODE Tree,MaximizeType WhatToMaximize
                 Maximal = 0;
                 break;
             case literals:
-                Maximal = CountFormulaAtomsByPredicate(Signature,GetTreeNodeFormula(Tree),"");
+                Maximal = CountFormulaAtomsByPredicate(Signature,GetTreeNodeFormula(Tree),
+"PREDICATE",0);
                 break;
             case max_term_depth:
                 Maximal = MaxFormulaTermDepth(GetTreeNodeFormula(Tree));

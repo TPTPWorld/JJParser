@@ -640,8 +640,9 @@ Signature,0);
     PrintAnnotatedTSTPNode(stdout,AnnotatedFormula,tptp,1);
     if (CountLiteralsOfPolarity(AnnotatedFormula,&Positive,&Negative)) {
         printf("The clause has %d literals, %d positive, %d negative\n",
-CountFormulaAtomsByPredicate(Signature,AnnotatedFormula->
-AnnotatedFormulaUnion.AnnotatedTSTPFormula.FormulaWithVariables->Formula,""),Positive,Negative);
+CountFormulaAtomsByPredicate(Signature,
+AnnotatedFormula->AnnotatedFormulaUnion.AnnotatedTSTPFormula.FormulaWithVariables->Formula,
+"PREDICATE",1),Positive,Negative);
     }
     if ((Literal = GetLiteralFromAnnotatedClauseByNumber(AnnotatedFormula,1))!= NULL) {
         printf("The literal is ");

@@ -812,8 +812,7 @@ PrefixSymbol,NumberOfArguments,Stream);
         Term->Type = variable;
         Term->TheSymbol.Variable = InsertVariable(Stream,Context.Signature,Context.Variables,
 EndOfScope,1,PrefixSymbol,VariableQuantifier,VariablesMustBeQuantified);
-//THF - this was Term->Type == variable, but I want to allow variable 
-//predicates. Will this work?
+//THF - this was Term->Type == variable, but I want to allow variable predicates. Will this work?
     } else if (((Language == tptp_thf || Language == tptp_tff) && TypeIfInfix == variable) || 
 Term->Type == variable) {
 //----Force the term type to variable
@@ -837,28 +836,29 @@ Term->Type == nested_fof || Term->Type == nested_cnf || Term->Type == nested_fot
 //----If is known to be a type from type declaration, fix this term type
         } else if (IsSymbolInSignatureList(Context.Signature->Types,PrefixSymbol,0) != NULL) {
             Term->Type = a_type;
-//----If is known to be a function from type declaration, fix this term type
-//----If type is known to be a predicate from type declaration, fix this term type and arity 
-//----(the search might have been done for THF with -1 as "don't care")
         } else if ((FoundSymbol = IsSymbolInSignatureList(Context.Signature->Functions,PrefixSymbol,
 SearchNumberOfArguments)) != NULL) {
+//DEBUG printf("Yes, known function, convert %s to function arity %d\n",PrefixSymbol,NumberOfArguments);
             Term->Type = function;
             NumberOfArguments = FoundSymbol->Arity;
-//DEBUG printf("Yes, known function, convert %s to function arity %d\n",PrefixSymbol,NumberOfArguments);
         } else if ((FoundSymbol = IsSymbolInSignatureList(Context.Signature->Predicates,
 PrefixSymbol,SearchNumberOfArguments)) != NULL) {
+//DEBUG printf("Yes, known predicate, convert %s to predicate arity %d\n",PrefixSymbol,NumberOfArguments);
             Term->Type = atom_as_term;
             NumberOfArguments = FoundSymbol->Arity;
-//DEBUG printf("Yes, known predicate, convert %s to predicate arity %d\n",PrefixSymbol,NumberOfArguments);
+//----By default things are type $i, i.e., function. But this makes undeclared predicates into
+//----functions too. EVil world!
+//        } else {
+//            Term->Type = function;
         }
 //----Some functions and types might get inserted as predicates here when they appear on the LHS
 //----of a type declaration, but that gets fixed later when the parsing of the declaration is
 //----completed in ParseFormula.
         Term->TheSymbol.NonVariable = InsertIntoSignature(Context.Signature,Term->Type,
 PrefixSymbol,NumberOfArguments,Stream);
-//----Note that if the term is a THF connective that is not a term, then the
-//----formula is deleted in ParseUnaryFormula and the NumberOfUses in the 
-//----signature will be decremented, possibly down to 0.
+//----Note that if the term is a THF connective that is not a term, then the formula is deleted in 
+//----ParseUnaryFormula and the NumberOfUses in the signature will be decremented, possibly down 
+//----to 0.
     }
 
 //----Free the saved symbol
@@ -1433,6 +1433,8 @@ ThisConnective == maparrow) {
                 NextToken(Stream);
                 BinaryFormula->FormulaUnion.BinaryFormula.RHS = ParseFormula(Stream,Language,
 Context,EndOfScope,AllowBinary,1,VariablesMustBeQuantified,ThisConnective);
+
+//----If it's a type declaration, then fix the symbol to be in the right part of the signature
                 if (BinaryFormula->Type == type_declaration) {
                     LHSSymbol = GetSymbol(BinaryFormula->FormulaUnion.BinaryFormula.LHS->
 FormulaUnion.Atom);
@@ -1473,6 +1475,8 @@ LHSSymbol,LHSSymbolArity)) != NULL) {
                             }
                         }
 //----If not just $o type, then it's a function (I hope!)
+//----If is known to be a function from type declaration, fix this term type
+//----If type is known to be a predicate from type declaration, fix this term type and arity 
                         NewTermType = (GetResultFromTyping(Stream,BinaryFormula->
 FormulaUnion.BinaryFormula.RHS)->Type != atom || strcmp("$o",GetSymbol(GetResultFromTyping(
 Stream,BinaryFormula->FormulaUnion.BinaryFormula.RHS)->FormulaUnion.Atom))) ? 
@@ -1485,6 +1489,7 @@ GetArityFromTyping(Stream,BinaryFormula->FormulaUnion.BinaryFormula.RHS),Stream)
 //DEBUG printf("Fixed atom symbol is %s and the arity is %d and the args are %s\n",GetSymbol(BinaryFormula->FormulaUnion.BinaryFormula.LHS->FormulaUnion.Atom),GetArity(BinaryFormula->FormulaUnion.BinaryFormula.LHS->FormulaUnion.Atom),GetArguments(BinaryFormula->FormulaUnion.BinaryFormula.LHS->FormulaUnion.Atom) == NULL ? "NULL" : "not NULL");
                     }
                 }
+
 //----If finished a binary, still need to allow another binary of low precedence, right now 
 //----that's :=
                 return(ParseLowPrecedenceBinary(Stream,Language,Context,EndOfScope,1,

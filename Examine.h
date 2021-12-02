@@ -67,7 +67,7 @@ int CountAnnotatedFormulaUniqueVariables(ANNOTATEDFORMULA AnnotatedFormula);
 int CountVariablesInFormulaByType(FORMULA Formula,char * Type);
 int CountFormulaTuples(FORMULA Formula);
 int CountAnnotatedFormulaTerms(ANNOTATEDFORMULA AnnotatedFormula);
-int CountFormulaAtomsByPredicate(SIGNATURE Signature,FORMULA Formula,char * Predicate);
+int CountFormulaAtomsByPredicate(SIGNATURE Signature,FORMULA Formula,char * Predicate,int DoNested);
 ConnectiveStatisticsType GetFormulaConnectiveUsage(FORMULA Formula);
 int FormulaDepth(FORMULA Formula);
 int MaxFormulaTermDepth(FORMULA Formula);
