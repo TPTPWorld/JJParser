@@ -105,8 +105,11 @@ GetListNodeFormula(List)->Type == sequent) {
                 case terms:
                     Counter += CountFormulaTerms(GetListNodeFormula(List));
                     break;
+//----Count only CNF variables. Bound variables are count by their binders.
                 case variables:
-                    Counter += CountAnnotatedFormulaUniqueVariables(List->AnnotatedFormula);
+                    if (List->AnnotatedFormula->Syntax == tptp_cnf) {
+                        Counter += CountAnnotatedFormulaUniqueVariables(List->AnnotatedFormula);
+                    }
                     break;
                 case singletons:
                     Counter += CountAnnotatedFormulaSingletons(List->AnnotatedFormula);
@@ -458,15 +461,6 @@ Statistics.FormulaStatistics.NumberOfEqualityAtoms);
 printf("PROGRESS WARNING: %s",ErrorMessage);
 //        CodingError(ErrorMessage);
     }
-//----Replace number of variables by sum of number of binders
-    Statistics.SymbolStatistics.NumberOfVariables =
-Statistics.ConnectiveStatistics.NumberOfUniversals +
-Statistics.ConnectiveStatistics.NumberOfExistentials +
-Statistics.ConnectiveStatistics.NumberOfLambdas +
-Statistics.ConnectiveStatistics.NumberOfPiBinders +
-Statistics.ConnectiveStatistics.NumberOfSigmaBinders +
-Statistics.ConnectiveStatistics.NumberOfDescriptionBinders +
-Statistics.ConnectiveStatistics.NumberOfChoiceBinders;
 
     Statistics.FormulaStatistics.NumberOfHornClauses = HeadListCount(Signature,&HeadListNode,
 horn_clauses);
@@ -511,10 +505,20 @@ printf("PROGRESS: Got type symbol statistics from signature\n");
         Statistics.SymbolStatistics = GetListSymbolUsageStatistics(&HeadListNode);
     }
 printf("PROGRESS: counted predicates and functions\n");
-//----This now gets replaced by the sum of all the binders because this captures quantified
-//----variables inside $let definitions
-//    Statistics.SymbolStatistics.NumberOfVariables = HeadListCount(Signature,&HeadListNode,
-//variables);
+//----This now counts only CNF variables. The rest get replaced by the sum of all the binders 
+//----because they captures quantified variables inside $let definitions. CNF variables are not
+//----inside binders of course.
+    Statistics.SymbolStatistics.NumberOfVariables = HeadListCount(Signature,&HeadListNode,
+variables);
+//----Add number of non-CNF variables by sum of number of binders
+    Statistics.SymbolStatistics.NumberOfVariables +=
+Statistics.ConnectiveStatistics.NumberOfUniversals +
+Statistics.ConnectiveStatistics.NumberOfExistentials +
+Statistics.ConnectiveStatistics.NumberOfLambdas +
+Statistics.ConnectiveStatistics.NumberOfPiBinders +
+Statistics.ConnectiveStatistics.NumberOfSigmaBinders +
+Statistics.ConnectiveStatistics.NumberOfDescriptionBinders +
+Statistics.ConnectiveStatistics.NumberOfChoiceBinders;
     Statistics.SymbolStatistics.NumberOfSingletons = HeadListCount(Signature,&HeadListNode,
 singletons);
 printf("PROGRESS: counted variables %d\n",Statistics.SymbolStatistics.NumberOfVariables);

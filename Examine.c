@@ -1468,7 +1468,6 @@ int MaxUse,ConnectiveType RequiredQuantification) {
     int Counter;
     VARIABLENODE VariableNode;
 
-//TODO    NEED BETTER ASSESSMENT OF VARIABLES. ALSO GO INTO ARGUMENTS FOR TFX AND THF
     if (LogicalAnnotatedFormula(AnnotatedFormula)) {
         Counter = 0;
         VariableNode = AnnotatedFormula->
@@ -1478,7 +1477,8 @@ AnnotatedFormulaUnion.AnnotatedTSTPFormula.FormulaWithVariables->Variables;
 //DEBUG printf("Variable %s %s\n",GetSignatureSymbol(VariableNode->VariableName),VariableNode->Quantification == universal ? "!" : VariableNode->Quantification == existential ? "?" : "DUNNO");
             if (
 //----Care only about quantified variables, not free, e.g., in $let
-VariableNode->Quantification != none && VariableNode->Quantification != free_variable &&
+//----Now only counting for CNF, so this doesn't apply
+// VariableNode->Quantification != none && VariableNode->Quantification != free_variable &&
 //----Usage constraint
 (MinUse < 0 || MaxUse < MinUse || 
  (VariableNode->NumberOfUses >= MinUse && VariableNode->NumberOfUses <= MaxUse)) && 
@@ -1988,14 +1988,15 @@ Formula->FormulaUnion.UnaryFormula.Formula,Predicate,DoNested));
 Formula->FormulaUnion.Atom,Predicate);
 //DEBUG printf("Counted nested of %s gets %d\n",GetSymbol(Formula->FormulaUnion.Atom),Count);
             }
-//DEBUG printf("Look if required ==%s== is the symbol here ==%s==\n",Predicate,GetSymbol(Formula->FormulaUnion.Atom));
+//DEBUG printf("Look if required %s is the symbol here %s\n",Predicate,GetSymbol(Formula->FormulaUnion.Atom));
 //----If nothing requested, take everything
             if (
 (!strcmp(Predicate,"PREDICATE") && IsSymbolInSignatureList(Signature->Predicates,
 GetSymbol(Formula->FormulaUnion.Atom),GetArity(Formula->FormulaUnion.Atom))) || 
 (!strcmp(Predicate,"CONNECTIVE") && Formula->FormulaUnion.Atom->Type == connective) ||
-//----It's the predicate I want, other than = which is dealt with as binary
-(!strcmp(Predicate,GetSymbol(Formula->FormulaUnion.Atom)) && strcmp(Predicate,"=")) ||
+//----It's the predicate I want (in CNF and FOF; in TFF and THF it's dealt with as binary). See
+//----comment "Check for an equality" in ParseFormula in Parsing.c
+!strcmp(Predicate,GetSymbol(Formula->FormulaUnion.Atom)) ||
 //----A variable in THF
 (!strcmp(Predicate,"VARIABLE") && Formula->FormulaUnion.Atom->Type == variable) ||
 //----A math predicate (non-variable)

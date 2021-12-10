@@ -1,5 +1,7 @@
-tff(ab_type,type, [a,b]: [$int,$int] ).
-    tff(p_type,type, p: [$int,$int] > $o ).
-    
-    tff(p,axiom,
-        p([a,b]) ).
+cnf(equality,axiom,
+    ( f(Y) = g(X,f(Y),Z)
+    | f(f(f(b))) != a
+    | X = f(Y) ) ).
+
+fof(an,axiom,
+    ! [X,Y] : p(X,X,Y)).
