@@ -1575,8 +1575,10 @@ Formula->FormulaUnion.BinaryFormula.RHS,NestedYet));
         case quantified:
             Count = NestedYet;
             NestedYet = 0;
-            return(Count + CountNestedFormulae(Signature,
-Formula->FormulaUnion.QuantifiedFormula.Formula,NestedYet));
+            Count += CountNestedFormulae(Signature,
+Formula->FormulaUnion.QuantifiedFormula.Formula,NestedYet);
+//DEBUG printf("After looking at quantified the count is %d\n",Count);
+            return(Count);
             break;
         case binary:
 //DEBUG printf("Binary with connective %s\n",ConnectiveToString(Formula->FormulaUnion.BinaryFormula.Connective));
@@ -1646,7 +1648,7 @@ int CountVariablesInFormulaeByType(int NumberOfElements,FORMULAArray Formulae,ch
     Count = 0;
     if (NumberOfElements > 0 && Formulae != NULL) {
         for (ElementNumber = 0;ElementNumber < NumberOfElements;ElementNumber++) {
-            CountVariablesInFormulaByType(Formulae[ElementNumber],Type);
+            Count += CountVariablesInFormulaByType(Formulae[ElementNumber],Type);
         }
     }
     return(Count);
@@ -1660,7 +1662,7 @@ int CountVariablesInTermsByType(int NumberOfElements,TERMArray Terms,char * Type
     Count = 0;
     if (NumberOfElements > 0 && Terms != NULL) {
         for (ElementNumber = 0;ElementNumber < NumberOfElements;ElementNumber++) {
-            CountArgumentVariablesByType(Terms[ElementNumber],Type);
+            Count += CountArgumentVariablesByType(Terms[ElementNumber],Type);
         }
     }
     return(Count);
@@ -1680,6 +1682,7 @@ int CountVariablesInFormulaByType(FORMULA Formula,char * Type) {
     int Count;
     String ErrorMessage;
 
+    Count = 0;
     switch (Formula->Type) {
         case sequent:
             return(CountVariablesInFormulaeByType(
@@ -1689,32 +1692,47 @@ Formula->FormulaUnion.SequentFormula.NumberOfRHSElements,Formula->FormulaUnion.S
 Type));
             break;
         case assignment:
+//TODO - should I count the LHS?
             return(CountVariablesInFormulaByType(Formula->FormulaUnion.BinaryFormula.RHS,Type));
             break;
         case type_declaration:
             return(0);
             break;
         case quantified:
+//DEBUG printf("Before content of %s it is %d\n",GetSymbol(Formula->FormulaUnion.QuantifiedFormula.Variable),Count);
             Count = CountVariablesInFormulaByType(Formula->FormulaUnion.QuantifiedFormula.Formula,
 Type);
+//DEBUG printf("After content of %s it is %d\n",GetSymbol(Formula->FormulaUnion.QuantifiedFormula.Variable),Count);
             if (Formula->FormulaUnion.QuantifiedFormula.VariableType != NULL &&
 Formula->FormulaUnion.QuantifiedFormula.VariableType->Type == atom &&
 !strcmp(GetSymbol(Formula->FormulaUnion.QuantifiedFormula.VariableType->FormulaUnion.Atom),Type)) {
-                return(Count + 1);
+//DEBUG printf("Add %d uses of %s\n",Formula->FormulaUnion.QuantifiedFormula.Variable->TheSymbol.Variable->NumberOfUses - 1,GetSymbol(Formula->FormulaUnion.QuantifiedFormula.Variable));
+                Count += 
+//----One less because quantification use doesn't count
+Formula->FormulaUnion.QuantifiedFormula.Variable->TheSymbol.Variable->NumberOfUses - 1;
+//DEBUG printf("After %s it is %d\n",GetSymbol(Formula->FormulaUnion.QuantifiedFormula.Variable),Count);
+                return(Count);
             } else {
                 return(Count + 0);
             }
             break;
         case binary:
-            return(CountVariablesInFormulaByType(Formula->FormulaUnion.BinaryFormula.LHS,Type)
-+ CountVariablesInFormulaByType(Formula->FormulaUnion.BinaryFormula.RHS,Type));
+//DEBUG printf("Before LHS of %s it is %d\n",ConnectiveToString(Formula->FormulaUnion.BinaryFormula.Connective),Count);
+            Count = CountVariablesInFormulaByType(Formula->FormulaUnion.BinaryFormula.LHS,Type);
+//DEBUG printf("After LHS of %s it is %d\n",ConnectiveToString(Formula->FormulaUnion.BinaryFormula.Connective),Count);
+            Count += CountVariablesInFormulaByType(Formula->FormulaUnion.BinaryFormula.RHS,Type);
+//DEBUG printf("After RHS of %s it is %d\n",ConnectiveToString(Formula->FormulaUnion.BinaryFormula.Connective),Count);
+            return(Count);
             break;
         case unary:
             return(CountVariablesInFormulaByType(Formula->FormulaUnion.UnaryFormula.Formula,Type));
             break;
         case atom:
-            return(CountVariablesInTermsByType(GetArity(Formula->FormulaUnion.Atom),
-GetArguments(Formula->FormulaUnion.Atom),Type));
+//DEBUG printf("Going to do an atom %s with %d args\n",GetSymbol(Formula->FormulaUnion.Atom),GetArity(Formula->FormulaUnion.Atom));
+            Count = CountVariablesInTermsByType(GetArity(Formula->FormulaUnion.Atom),
+GetArguments(Formula->FormulaUnion.Atom),Type);
+//DEBUG printf("After doing atom %s it is %d\n",GetSymbol(Formula->FormulaUnion.Atom),Count);
+            return(Count);
             break;
         case tuple:
             return(CountVariablesInFormulaeByType(
@@ -1944,7 +1962,7 @@ Formula->FormulaUnion.QuantifiedFormula.Formula,Predicate,DoNested);
 //----LHS and RHS of equations are nested
                 Count += CountFormulaAtomsByPredicate(Signature,
 Formula->FormulaUnion.BinaryFormula.LHS,Predicate,DoNested);
-//----Don't count RHS of typings
+//----Don't count RHS of typings. Why aren't these type_declaration?
                 if (Formula->FormulaUnion.BinaryFormula.Connective != typecolon) {
                     Count += CountFormulaAtomsByPredicate(Signature,
 Formula->FormulaUnion.BinaryFormula.RHS,Predicate,DoNested);

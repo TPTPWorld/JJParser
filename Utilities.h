@@ -3,10 +3,12 @@
 //-------------------------------------------------------------------------------------------------
 #define STRINGLENGTH 1024
 #define SUPERSTRINGLENGTH 40960
+#define SUPERSUPERSTRINGLENGTH 1048576
 #define MAX_STRING_PARTS 10240
 
 typedef char String[STRINGLENGTH];
 typedef char SuperString[SUPERSTRINGLENGTH];
+typedef char SuperSuperString[SUPERSUPERSTRINGLENGTH];
 typedef char * StringParts[MAX_STRING_PARTS];
 //-------------------------------------------------------------------------------------------------
 int GetSZSStatusReporting(void);

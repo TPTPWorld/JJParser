@@ -74,20 +74,29 @@ int main(int argc, char *argv[]) {
     SetWarnings(1);
 
     SetNeedForNonLogicTokens(0);
+printf("TESTING: Initialized\n");
     if (argc > 1) {
         Head = ParseFileOfFormulae(argv[1],NULL,Signature,1,NULL);
     } else {
         Head = ParseFILEOfFormulae("--",stdin,Signature,1,NULL);
     }
+printf("TESTING: Parsed\n");
     PrintListOfAnnotatedTSTPNodes(stdout,Signature,Head,tptp,1);
+printf("TESTING: Printed\n");
     RemovedUnusedSymbols(Signature);
+printf("TESTING: Cleaned signature\n");
     PrintSignature(Signature);
+printf("TESTING: Printed signature\n");
     ListStatistics = GetListStatistics(Head,Signature);
+printf("TESTING: Got statistics\n");
     PrintListStatistics(stdout,ListStatistics);
+printf("TESTING: Printed statistics\n");
 
     FreeListOfAnnotatedFormulae(&Head,Signature);
+printf("TESTING: Freed formulae\n");
     assert(Head == NULL);
     FreeSignature(&Signature);
+printf("TESTING: Freed signature\n");
     assert(Signature == NULL);
     return(EXIT_SUCCESS);
 

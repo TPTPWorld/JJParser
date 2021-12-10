@@ -962,14 +962,13 @@ void FreeToken(TOKEN * Pointer) {
 void IncrementTokenIndex(READFILE Stream,int* Index) {
 
     (*Index)++;
-    if (*Index >= SUPERSTRINGLENGTH) {
+    if (*Index >= SUPERSUPERSTRINGLENGTH) {
         ReportError("InputError","Token too long",0);
         CharacterError(Stream);
     }
 }
 //-------------------------------------------------------------------------------------------------
-int NumberToken(READFILE Stream,char PreviousChar,char CurrentChar,
-SuperString LocalValue) {
+int NumberToken(READFILE Stream,char PreviousChar,char CurrentChar,SuperSuperString LocalValue) {
 
     int Index;
 
@@ -1044,7 +1043,8 @@ SuperString LocalValue) {
 //-------------------------------------------------------------------------------------------------
 TOKEN QuotedToken(READFILE Stream,char OpeningQuote,TokenType Type) {
 
-    static SuperString LocalValue;
+//----static so it doesn't have to get allocated everytime (very often!)
+    static SuperSuperString LocalValue;
     int Index;
 
     Index = 0;
@@ -1089,7 +1089,7 @@ TOKEN GetNextToken(READFILE Stream) {
     int CurrentChar,PreviousChar;
     int Index;
 //----static so it doesn't have to get allocated everytime (very often!)
-    static SuperString LocalValue;
+    static SuperSuperString LocalValue;
 
 //DEBUG printf("char was ==%c==\n",CurrentCharacter(Stream));
     if (Stream->Overshot) {

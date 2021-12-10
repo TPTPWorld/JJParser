@@ -500,7 +500,6 @@ TERM DuplicateTerm(TERM Original,ContextType Context,int ForceNewVariables) {
 //DEBUG printf("Duplicating term with symbol %s, arity %d, arguments are %s \n",GetSymbol(Term),GetArity(Term),Original->Arguments == NULL ? "NULL" : "not NULL");
             Term->TheSymbol.NonVariable = InsertIntoSignature(Context.Signature,Term->Type,
 Original->TheSymbol.NonVariable->NameSymbol,Original->TheSymbol.NonVariable->Arity,NULL);
-//DEBUG printf("HERE 2 %s %d\n",GetSymbol(Term),GetArity(Term));
             Term->Arguments = DuplicateArguments(GetArity(Term),Original->Arguments,Context,
 ForceNewVariables);
             break;
@@ -1413,6 +1412,11 @@ AllowBinary &&
   ( ( Language == tptp_thf || Language == tptp_tff  || Language == tptp_tcf ) &&
     CheckToken(Stream,punctuation,":")
   ) ) ) {
+//----Make sure it's a legitimate type declaration
+        if (CheckToken(Stream,punctuation,":") && Formula->Type != atom) {
+            TokenError(Stream,"Type declaration for non-atomic symbol");
+            return(NULL);
+        }
         ThisConnective = StringToConnective(CurrentToken(Stream)->NameToken);
 //DEBUG printf("do infix because connective is %s (last was %s)\n",ConnectiveToString(ThisConnective),ConnectiveToString(LastConnective));
         if (LastConnective == none || (Associative(ThisConnective) &&
