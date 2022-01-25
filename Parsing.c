@@ -597,7 +597,8 @@ TermType KnownTermTypeOrError(READFILE Stream,SyntaxType Language) {
         } else {
 //----Connectives are terms in THF
             if (Language == tptp_thf && 
-(CheckTokenType(Stream,binary_connective) || CheckTokenType(Stream,unary_connective))) {
+(CheckTokenType(Stream,binary_connective) || CheckTokenType(Stream,unary_connective) ||
+CheckToken(Stream,lower_word,"$ite"))) {
                 return(function);
             } else {
 //----Force an error

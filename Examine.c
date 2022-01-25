@@ -285,11 +285,15 @@ FormulaTypeToString(TypeFormula->Type));
 int LooksLikeAReal(char * RealString) {
 
     int NumberScanned;
-    float TheFloat;
+    double TheDouble;
 
-    NumberScanned = sscanf(RealString,"%f",&TheFloat);
-//DEBUG printf("%s scanned %d as %f\n",Term,NumberScanned,TheFloat);
-    return(NumberScanned);
+    if (strncmp("inf",RealString,3) && strncmp("nan",RealString,3)) {
+        NumberScanned = sscanf(RealString,"%lf",&TheDouble);
+//DEBUG printf("%s float scanned %d characters as %lf\n",RealString,NumberScanned,TheDouble);
+        return(NumberScanned);
+    } else {
+        return(0);
+    }
 
 //----Doing it by hand
 //     char * Dot;
@@ -324,7 +328,7 @@ int LooksLikeAnInteger(char * IntegerString) {
     long TheLong;
 
     NumberScanned = sscanf(IntegerString,"%ld",&TheLong);
-//DEBUG printf("%s scanned %d as %f\n",Term,NumberScanned,TheFloat);
+//DEBUG printf("%s long scanned %d characters as %ld\n",IntegerString,NumberScanned,TheLong);
     return(NumberScanned && !LooksLikeAReal(IntegerString));
 
 //----Doing it by hand
