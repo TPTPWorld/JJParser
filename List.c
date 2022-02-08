@@ -778,8 +778,7 @@ void ResetBTreeVisited(BTREENODE Root) {
 }
 //-------------------------------------------------------------------------------------------------
 //----Search in binary tree by annotated formula name
-BTREENODE * GetNodeFromBTreeByAnnotatedFormulaName(BTREENODE * Root,
-char * Name) {
+BTREENODE * GetNodeFromBTreeByAnnotatedFormulaName(BTREENODE * Root,char * Name) {
 
     int Comparison;
         
@@ -791,11 +790,9 @@ AnnotatedTSTPFormula.Name,Name);
         if (Comparison == 0) {
             return(Root);
         } else if (Comparison > 0) {
-            return(GetNodeFromBTreeByAnnotatedFormulaName(&((*Root)->Last),
-Name));
+            return(GetNodeFromBTreeByAnnotatedFormulaName(&((*Root)->Last),Name));
         } else {
-            return(GetNodeFromBTreeByAnnotatedFormulaName(&((*Root)->Next),
-Name));
+            return(GetNodeFromBTreeByAnnotatedFormulaName(&((*Root)->Next),Name));
         }
     }
 } 

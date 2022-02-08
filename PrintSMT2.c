@@ -267,7 +267,7 @@ void SMT2PrintComment(FILE* Stream,const char * s){
 
 void SMT2PrintAnnotatedTSTPNode(FILE * Stream,ANNOTATEDFORMULA AnnotatedFormula){
     String Name;
-    StatusType SubStatus;
+    TERM SubStatus;
 
     switch (AnnotatedFormula->Syntax) {
         case comment:

@@ -106,7 +106,7 @@ char * GetName(ANNOTATEDFORMULA AnnotatedFormula,char * PutNameHere) {
     }
 }
 //-------------------------------------------------------------------------------------------------
-StatusType GetRole(ANNOTATEDFORMULA AnnotatedFormula,StatusType * SubStatus) {
+StatusType GetRole(ANNOTATEDFORMULA AnnotatedFormula,TERM * SubStatus) {
 
     if (AnnotatedFormula == NULL) {
         CodingError("No formula in GetRole");

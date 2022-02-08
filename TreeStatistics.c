@@ -6,6 +6,7 @@
 #include "Utilities.h"
 #include "Examine.h"
 #include "Parsing.h"
+#include "ListStatistics.h"
 #include "Tree.h"
 #include "TreeStatistics.h"
 //-------------------------------------------------------------------------------------------------
@@ -229,108 +230,191 @@ int RootListHasCycle(ROOTLIST RootListHead) {
     return(0);
 }
 //-------------------------------------------------------------------------------------------------
-TreeStatisticsRecordType * GetTreeStatistics(SIGNATURE Signature,ROOTLIST RootListHead,
-TreeStatisticsRecordType * Statistics) {
+SolutionStatisticsType CombinedTreeStatistics(SolutionStatisticsType TreeStatistics1,
+SolutionStatisticsType TreeStatistics2) {
+
+ZZZZZZZ
+
+}
+//-------------------------------------------------------------------------------------------------
+SolutionStatisticsType GetTreeStatistics(TREENODE Root,SIGNATURE Signature) {
+
+    StatisticsType TreeStatistics;
+    StatisticsType ParentTreeStatistics;
+    ListNodeType OneNodeList;
+
+	OneNodeList.Last = NULL;
+    OneNodeList.Next = NULL;
+    OneNodeList.Visited = 0;
+    OneNodeList.AnnotatedFormula = Root->AnnotatedFormula;
+    TreeStatistics = GetListStatistics(&OneNodeList,Signature);
+    for (index = 0;index < Root->NumberOfParents;index++) {
+        OneNodeList.AnnotatedFormula = Root->Parents[index];
+        ParentTreeStatistics = GetListStatistics(&OneNodeList,Signature);
+        TreeStatistics = CombinedTreeStatistics(TreeStatistics,ParentTreeStatistics);
+    }
+    return(TreeStatistics);
+}
+//-------------------------------------------------------------------------------------------------
+SolutionStatisticsType GetForestStatistics(ROOTLIST Head,SIGNATURE Signature) {
+
+    SolutionStatisticsType Statistics;
+    SolutionStatisticsType TreeStatistics;
+    StatisticsType FormulaeStatistics;
+    StatisticsType ExpandedFormulaeStatistics;
 
     if (RootListHead == NULL) {
-        return(NULL);
+        Statistics.Type = nonszsoutput;
+        return(Statistics);
     }
 
     if (RootListHasCycle(RootListHead)) {
         ReportError("SemanticError","Cycle in a tree",0);
-        return(NULL);
+        Statistics.Type = nonszsoutput;
+        return(Statistics);
     }
 
-    Statistics->NumberOfFormulae = RootListCount(Signature,RootListHead,nodes,0);
-    Statistics->NumberOfFormulaeExpanded = RootListCount(Signature,RootListHead,nodes,1);
-    Statistics->NumberOfLeaves = RootListCount(Signature,RootListHead,leaves,0);
-    Statistics->NumberOfLeavesExpanded = RootListCount(Signature,RootListHead,leaves,1);
-    Statistics->TreeDepth = RootListMaximal(Signature,RootListHead,depth);
-    Statistics->NumberOfAtoms = RootListCount(Signature,RootListHead,atoms,0);
-    Statistics->NumberOfAtomsExpanded = RootListCount(Signature,RootListHead,atoms,1);
-    Statistics->NumberOfEqualityAtoms = RootListCount(Signature,RootListHead,
-equality_atoms,0);
-    Statistics->NumberOfEqualityAtomsExpanded = RootListCount(Signature,RootListHead,
-equality_atoms,1);
-    Statistics->MaxFormulaDepth = RootListMaximal(Signature,RootListHead,max_formula_depth);
-    Statistics->AverageFormulaDepth = RootListCount(Signature,RootListHead,
-formula_depth,0) / Statistics->NumberOfFormulae;
-
-    Statistics->NumberOfTHF = RootListCount(Signature,RootListHead,thf_nodes,0);
-    Statistics->NumberOfTFF = RootListCount(Signature,RootListHead,tff_nodes,0);
-    Statistics->NumberOfTCF = RootListCount(Signature,RootListHead,tcf_nodes,0);
-    Statistics->NumberOfFOF = RootListCount(Signature,RootListHead,fof_nodes,0);
-    Statistics->NumberOfCNF = RootListCount(Signature,RootListHead,cnf_nodes,0);
-    if (Statistics->NumberOfCNF > 0) {
-        Statistics->NumberOfCNFExpanded = RootListCount(Signature,RootListHead,
-cnf_nodes,1);
+    while (Head != NULL) {
+        TreeStatistics = GetTreeStatistics(Head->TheTree,Signature);
     }
-    if (Statistics->NumberOfTCF > 0) {
-        Statistics->NumberOfTCFExpanded = RootListCount(Signature,RootListHead,
-tcf_nodes,1);
-    }
-    if (Statistics->NumberOfCNF > 0 || Statistics->NumberOfTCF > 0) {
-        Statistics->MaxClauseSize = RootListMaximal(Signature,RootListHead,literals);
-        Statistics->AverageClauseSize = Statistics->NumberOfAtoms /
-(Statistics->NumberOfCNF + Statistics->NumberOfTCF);
-    }
-
-    Statistics->MaxTermDepth = RootListMaximal(Signature,RootListHead,max_term_depth);
-    Statistics->AverageTermDepth = RootListCount(Signature,RootListHead,term_depth,0) / 
-RootListCount(Signature,RootListHead,terms,0);
+//TODO Get each tree statistics and combine
 
     return(Statistics);
 }
 //-------------------------------------------------------------------------------------------------
-void PrintTreeStatistics(FILE * Stream,TreeStatisticsRecordType Statistics) {
+void PrintForestStatistics(FILE * Stream,SolutionStatisticsType Statistics) {
 
-//----Check if there are some FOF (NumberOfFormulae includes NumberOfCNF)
-    if (Statistics.NumberOfFormulae > Statistics.NumberOfCNF) {
-        fprintf(Stream,
-"%% Statistics : Number of formulae       : %4.0f (%4.0f expanded)\n",
-Statistics.NumberOfFormulae,Statistics.NumberOfFormulaeExpanded);
-    }
-    if (Statistics.NumberOfCNF > 0 || Statistics.NumberOfTCF > 0) {
-        if (Statistics.NumberOfFormulae > (Statistics.NumberOfCNF + Statistics.NumberOfTCF)) {
-            fprintf(Stream,"%%              ");
+    fprintf(Stream,
+"%%              Maximal term depth       : xxxxx\n");
+}
+//-------------------------------------------------------------------------------------------------
+void PrintFiniteModelStatistics(FILE * Stream,SolutionStatisticsType Statistics) {
+
+    fprintf(Stream,"%% Syntax   : Domain size           : %4d\n",Statistics.FiniteDomainSize);
+}
+//-------------------------------------------------------------------------------------------------
+int ExtractFiniteDomainSize(FORMULA Formula) {
+
+    int LHSize,RHSize;
+
+//----If an equality atom, return 1
+    if (Formula->Type == atom && !strcmp("=",GetSymbol(Formula->FormulaUnion.Atom)) &&
+GetArity(Formula->FormulaUnion.Atom) == 2) {
+        return(1);
+    } else if (Formula->Type == binary && Formula->FormulaUnion.BinaryFormula.Connective ==
+disjunction) {
+        if ((LHSize = ExtractFiniteDomainSize(Formula->FormulaUnion.BinaryFormula.LHS)) == -1 ||
+(RHSize = ExtractFiniteDomainSize(Formula->FormulaUnion.BinaryFormula.RHS)) == -1) {
+            return(-1);
         } else {
-            fprintf(Stream,"%% Statistics : ");
+            return(LHSize + RHSize);
         }
-        fprintf(Stream,
-"Number of clauses        : %4.0f (%4.0f expanded)\n",
-Statistics.NumberOfCNF+Statistics.NumberOfTCF,
-Statistics.NumberOfCNFExpanded+Statistics.NumberOfTCFExpanded);
+    } else {
+        return(-1);
     }
+}
+//-------------------------------------------------------------------------------------------------
+int HasAFiniteDomain(LISTNODE Head,int * FiniteDomainSize) {
 
-    fprintf(Stream,
-"%%              Number of leaves         : %4.0f (%4.0f expanded)\n",
-Statistics.NumberOfLeaves,Statistics.NumberOfLeavesExpanded);
-    fprintf(Stream,
-"%%              Depth                    : %4.0f\n",Statistics.TreeDepth);
+    FORMULA Formula;
 
-    fprintf(Stream,
-"%%              Number of atoms          : %4.0f (%4.0f expanded)\n",
-Statistics.NumberOfAtoms,Statistics.NumberOfAtomsExpanded);
-    fprintf(Stream,
-"%%              Number of equality atoms : %4.0f (%4.0f expanded)\n",
-Statistics.NumberOfEqualityAtoms,Statistics.NumberOfEqualityAtomsExpanded);
-    if (Statistics.NumberOfFormulae > 
-(Statistics.NumberOfCNF + Statistics.NumberOfTCF)) {
-        fprintf(Stream,
-"%%              Maximal formula depth    : %4.0f (%4.0f average)\n",
-Statistics.MaxFormulaDepth,Statistics.AverageFormulaDepth);
+    while (Head != NULL) {
+        if (GetRole(Head->AnnotatedFormula,NULL) == fi_domain) {
+            *FiniteDomainSize = 0;
+            Formula = GetListNodeFormula(Head);
+//----Check that it's a FOF universal 
+            if (Head->AnnotatedFormula->Syntax != tptp_fof || Formula->Type != quantified || 
+Formula->FormulaUnion.QuantifiedFormula.Quantifier != universal) {
+                return(-1);
+            }
+//----Top level equality is size 1
+            return(ExtractFiniteDomainSize(Formula->FormulaUnion.QuantifiedFormula.Formula));
+        }
+        Head = Head->Next;
     }
-    if (Statistics.NumberOfCNF > 0 || Statistics.NumberOfTCF > 0) {
-        fprintf(Stream,
-"%%              Maximal clause size      : %4.0f (%4.0f average)\n",
-Statistics.MaxClauseSize,Statistics.AverageClauseSize);
-    }
+    return(0);
+}
+//-------------------------------------------------------------------------------------------------
+int IsARefutation(ROOTLIST Head) {
 
-    if (Statistics.NumberOfTFF > 0 || Statistics.NumberOfTCF > 0 ||
-Statistics.NumberOfFOF > 0 || Statistics.NumberOfCNF > 0) {
-        fprintf(Stream,
-"%%              Maximal term depth       : %4.0f (%4.0f average)\n",
-Statistics.MaxTermDepth,Statistics.AverageTermDepth);
+    FORMULA Formula;
+
+    while (Head != NULL) {
+        Formula = GetTreeNodeFormula(Head->TheTree);
+        if (Formula->Type != atom || strcmp("$false",GetSymbol(Formula->FormulaUnion.Atom))) {
+            return(0);
+        }
+        Head = Head->Next;
+    }
+    return(1);
+}
+//-------------------------------------------------------------------------------------------------
+SZSOutputType GetSZSOutputType(LISTNODE Head,ROOTLIST * RootListHead,int * FiniteDomainSize,
+SIGNATURE Signature) {
+
+    *RootListHead = NULL;
+    if (Head == NULL) {
+        return(Non);
+    } else if ((*RootListHead = BuildRootList(Head,Signature)) != NULL) {
+        if (IsARefutation(*RootListHead)) {
+            return(Ref);
+        } else {
+            return(Der);
+        }
+    } else if (HasAFiniteDomain(Head,FiniteDomainSize) > 0) {
+        return(FMo);
+    } else {
+//TODO check it is a nice list of formulae
+        return(Sat);
+    }
+}
+//-------------------------------------------------------------------------------------------------
+//----If the signature is non-NULL use it for symbols
+SolutionStatisticsType GetSolutionStatistics(LISTNODE Head,SIGNATURE Signature,
+ROOTLIST * RootListHead) {
+
+    SolutionStatisticsType Statistics;
+
+    Statistics.Type = GetSZSOutputType(Head,RootListHead,&Statistics.FiniteDomainSize,Signature);
+    switch (Statistics.Type) {
+        case Ref:
+        case Der:
+            Statistics = GetForestStatistics(*RootListHead,Signature);
+            break;
+        case FMo:
+            break;
+        case Sat:
+            Statistics.FormulaeStatistics = GetListStatistics(Head,Signature);
+            break;
+        case Non:
+        case nonszsoutput:
+            break;
+        default:
+            break;
+    }
+    return(Statistics);
+}
+//-------------------------------------------------------------------------------------------------
+void PrintSolutionStatistics(FILE * Stream,SolutionStatisticsType Statistics) {
+
+    fprintf(Stream,"%% Structure  : %s\n",SZSOutputToUserString(Statistics.Type));
+
+    switch (Statistics.Type) {
+        case Ref:
+        case Der:
+            PrintForestStatistics(Stream,Statistics);
+            break;
+        case FMo:
+            PrintFiniteModelStatistics(Stream,Statistics);
+            break;
+        case Sat:
+            PrintListStatistics(Stream,Statistics.FormulaeStatistics);
+            break;
+        case Non:
+        case nonszsoutput:
+            break;
+        default:
+            break;
     }
 }
 //-------------------------------------------------------------------------------------------------

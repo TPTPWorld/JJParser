@@ -29,16 +29,11 @@ ANNOTATEDFORMULA NewAnnotatedTSTPFormula(SyntaxType Syntax) {
 
     AnnotatedFormula = NewAnnotatedFormula(Syntax);
     AnnotatedFormula->AnnotatedFormulaUnion.AnnotatedTSTPFormula.Name = NULL;
-    AnnotatedFormula->AnnotatedFormulaUnion.AnnotatedTSTPFormula.Status = 
-nonstatus;
-    AnnotatedFormula->AnnotatedFormulaUnion.AnnotatedTSTPFormula.SubStatus = 
-nonstatus;
-    AnnotatedFormula->
-AnnotatedFormulaUnion.AnnotatedTSTPFormula.FormulaWithVariables = NULL;
-    AnnotatedFormula->
-AnnotatedFormulaUnion.AnnotatedTSTPFormula.Source = NULL;
-    AnnotatedFormula->
-AnnotatedFormulaUnion.AnnotatedTSTPFormula.UsefulInfo = NULL;
+    AnnotatedFormula->AnnotatedFormulaUnion.AnnotatedTSTPFormula.Status = nonstatus;
+    AnnotatedFormula->AnnotatedFormulaUnion.AnnotatedTSTPFormula.SubStatus = NULL;
+    AnnotatedFormula-> AnnotatedFormulaUnion.AnnotatedTSTPFormula.FormulaWithVariables = NULL;
+    AnnotatedFormula-> AnnotatedFormulaUnion.AnnotatedTSTPFormula.Source = NULL;
+    AnnotatedFormula-> AnnotatedFormulaUnion.AnnotatedTSTPFormula.UsefulInfo = NULL;
     return(AnnotatedFormula);
 }
 //-------------------------------------------------------------------------------------------------
@@ -46,6 +41,8 @@ void FreeAnnotatedTSTPFormula(ANNOTATEDFORMULA * AnnotatedFormula,SIGNATURE Sign
 
     Free((void **)&((*AnnotatedFormula)->AnnotatedFormulaUnion.AnnotatedTSTPFormula.Name));
     assert((*AnnotatedFormula)->AnnotatedFormulaUnion.AnnotatedTSTPFormula.Name == NULL);
+    FreeTerm(&((*AnnotatedFormula)->AnnotatedFormulaUnion.AnnotatedTSTPFormula.SubStatus),Signature,
+NULL);
     FreeFormulaWithVariables(&((*AnnotatedFormula)->
 AnnotatedFormulaUnion.AnnotatedTSTPFormula.FormulaWithVariables),Signature);
     assert((*AnnotatedFormula)->
@@ -57,8 +54,8 @@ Signature,NULL);
     Free((void **)AnnotatedFormula);
 }
 //-------------------------------------------------------------------------------------------------
-ANNOTATEDFORMULA DuplicateAnnotatedTSTPFormula(ANNOTATEDFORMULA Original,
-SIGNATURE Signature,int ForceNewVariables) {
+ANNOTATEDFORMULA DuplicateAnnotatedTSTPFormula(ANNOTATEDFORMULA Original,SIGNATURE Signature,
+int ForceNewVariables) {
 
     ContextType Context;
     ANNOTATEDFORMULA AnnotatedFormula;
@@ -67,27 +64,25 @@ SIGNATURE Signature,int ForceNewVariables) {
         CodingError("Duplicating a NULL formula");
     }
     AnnotatedFormula = NewAnnotatedTSTPFormula(Original->Syntax);
+//----Create context for duplicating non-logical stuff
+    Context.Variables = NULL;
+    Context.Signature = Signature;
 
     AnnotatedFormula->AnnotatedFormulaUnion.AnnotatedTSTPFormula.Name = 
 CopyHeapString(Original->AnnotatedFormulaUnion.AnnotatedTSTPFormula.Name);
     AnnotatedFormula->AnnotatedFormulaUnion.AnnotatedTSTPFormula.Status = 
 Original->AnnotatedFormulaUnion.AnnotatedTSTPFormula.Status;
     AnnotatedFormula->AnnotatedFormulaUnion.AnnotatedTSTPFormula.SubStatus = 
-Original->AnnotatedFormulaUnion.AnnotatedTSTPFormula.SubStatus;
+DuplicateTerm(Original->AnnotatedFormulaUnion.AnnotatedTSTPFormula.SubStatus,Context,0);
     AnnotatedFormula->AnnotatedFormulaUnion.AnnotatedTSTPFormula.FormulaWithVariables =
 DuplicateFormulaWithVariables(
 Original->AnnotatedFormulaUnion.AnnotatedTSTPFormula.FormulaWithVariables,Signature,
 ForceNewVariables);
 
-//----Create context for duplicating non-logical stuff
-    Context.Variables = NULL;
-    Context.Signature = Signature;
     AnnotatedFormula->AnnotatedFormulaUnion.AnnotatedTSTPFormula.Source =
-DuplicateTerm(Original->AnnotatedFormulaUnion.AnnotatedTSTPFormula.Source,
-Context,0);
+DuplicateTerm(Original->AnnotatedFormulaUnion.AnnotatedTSTPFormula.Source,Context,0);
     AnnotatedFormula->AnnotatedFormulaUnion.AnnotatedTSTPFormula.UsefulInfo =
-DuplicateTerm(Original->AnnotatedFormulaUnion.AnnotatedTSTPFormula.UsefulInfo,
-Context,0);
+DuplicateTerm(Original->AnnotatedFormulaUnion.AnnotatedTSTPFormula.UsefulInfo,Context,0);
 
     return(AnnotatedFormula);
 }
@@ -99,6 +94,10 @@ ANNOTATEDFORMULA ParseAnnotatedTSTPFormula(READFILE Stream,SIGNATURE Signature) 
     int VariablesMustBeQuantifiedAlready;
     VARIABLENODE EndOfScope;
     SyntaxType Language;
+
+//----Create context for duplicating non-logical stuff
+    Context.Variables = NULL;
+    Context.Signature = Signature;
 
     if (CheckToken(Stream,lower_word,"tpi")) {
         AcceptToken(Stream,lower_word,"tpi");
@@ -146,18 +145,15 @@ StringToStatus(CurrentToken(Stream)->NameToken)) == nonstatus) {
 //----Check for substatus
     if (CheckToken(Stream,punctuation,"-")) {
         AcceptToken(Stream,punctuation,"-");
-        AnnotatedFormula->AnnotatedFormulaUnion.AnnotatedTSTPFormula.SubStatus =
-StringToStatus(CurrentToken(Stream)->NameToken);
-        AcceptTokenType(Stream,lower_word);
+//----Local scope for subrole
+        EndOfScope = NULL;
+        AnnotatedFormula->AnnotatedFormulaUnion.AnnotatedTSTPFormula.SubStatus = ParseTerm(Stream,
+nontype,Context,&EndOfScope,non_logical_data,none,NULL,0);
     }
     AcceptToken(Stream,punctuation,",");
-    AnnotatedFormula->
-AnnotatedFormulaUnion.AnnotatedTSTPFormula.FormulaWithVariables = ParseFormulaWithVariables(Stream,
-Language,Signature,VariablesMustBeQuantifiedAlready);
+    AnnotatedFormula->AnnotatedFormulaUnion.AnnotatedTSTPFormula.FormulaWithVariables = 
+ParseFormulaWithVariables(Stream,Language,Signature,VariablesMustBeQuantifiedAlready);
 
-//----Create context for duplicating non-logical stuff
-    Context.Variables = NULL;
-    Context.Signature = Signature;
 //----Check if source and useful info are there
     if (CheckToken(Stream,punctuation,",")) {
         AcceptToken(Stream,punctuation,",");

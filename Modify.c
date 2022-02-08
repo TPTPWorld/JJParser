@@ -17,10 +17,8 @@ int SetName(ANNOTATEDFORMULA AnnotatedFormula,char * Name) {
 
     assert(AnnotatedFormula != NULL);
     if (ReallyAnAnnotatedFormula(AnnotatedFormula)) {
-        Free((void **)&(AnnotatedFormula->AnnotatedFormulaUnion.
-AnnotatedTSTPFormula.Name));
-        AnnotatedFormula->AnnotatedFormulaUnion.AnnotatedTSTPFormula.Name =
-CopyHeapString(Name);
+        Free((void **)&(AnnotatedFormula->AnnotatedFormulaUnion.AnnotatedTSTPFormula.Name));
+        AnnotatedFormula->AnnotatedFormulaUnion.AnnotatedTSTPFormula.Name = CopyHeapString(Name);
         return(1);
     } else {
         return(0);
@@ -40,15 +38,12 @@ int SetSyntax(ANNOTATEDFORMULA AnnotatedFormula,SyntaxType Syntax) {
     }   
 }
 //-------------------------------------------------------------------------------------------------
-int SetStatus(ANNOTATEDFORMULA AnnotatedFormula,StatusType Status,
-StatusType SubStatus) {
+int SetStatus(ANNOTATEDFORMULA AnnotatedFormula,StatusType Status,TERM SubStatus) {
 
     assert(AnnotatedFormula != NULL);
     if (ReallyAnAnnotatedFormula(AnnotatedFormula)) {
-        AnnotatedFormula->AnnotatedFormulaUnion.AnnotatedTSTPFormula.Status =
-Status;
-        AnnotatedFormula->AnnotatedFormulaUnion.AnnotatedTSTPFormula.SubStatus =
-SubStatus;
+        AnnotatedFormula->AnnotatedFormulaUnion.AnnotatedTSTPFormula.Status = Status;
+        AnnotatedFormula->AnnotatedFormulaUnion.AnnotatedTSTPFormula.SubStatus = SubStatus;
         return(1);
     } else {
         return(0);

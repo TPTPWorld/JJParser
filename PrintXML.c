@@ -339,25 +339,23 @@ tptp,1);
     
     status[0]='\0';
     strncat(status,StatusToString(AnnotatedTSTPFormula.Status),sizeof(status)-1);
-    if (AnnotatedTSTPFormula.SubStatus != nonstatus) {
+    if (AnnotatedTSTPFormula.SubStatus != NULL) {
         strncat(status,"-",sizeof(status)-1);
-        strncat(status,StatusToString(AnnotatedTSTPFormula.SubStatus),sizeof(status)-1);
+        XMLPrintTSTPTerm(Out,AnnotatedTSTPFormula.SubStatus);
+//TODO        strncat(status,StatusToString(AnnotatedTSTPFormula.SubStatus),sizeof(status)-1);
     }
     values[2]=status;
     StartTag(Out,"formula",names,values,FALSE);
     
-    if ((Out->FormulaeContent == CONTENT_XML) || (Out->FormulaeContent ==
-CONTENT_BOTH)) {
-        XMLPrintTSTPFormula(Out,AnnotatedTSTPFormula.FormulaWithVariables->
-Formula);
+    if ((Out->FormulaeContent == CONTENT_XML) || (Out->FormulaeContent == CONTENT_BOTH)) {
+        XMLPrintTSTPFormula(Out,AnnotatedTSTPFormula.FormulaWithVariables->Formula);
     }
-    if ((Out->FormulaeContent == CONTENT_TSTP) || (Out->FormulaeContent ==
-CONTENT_BOTH)) {
+    if ((Out->FormulaeContent == CONTENT_TSTP) || (Out->FormulaeContent == CONTENT_BOTH)) {
         Indent(Out);
         fprintf(Out->Stream,"<tstp-logic-formula><![CDATA[");
 //TODO: Silently we hope that ]]> never occurs in the formula
-        PrintTSTPFormula(Out->Stream,Syntax,
-AnnotatedTSTPFormula.FormulaWithVariables->Formula,6,1,outermost,1);
+        PrintTSTPFormula(Out->Stream,Syntax,AnnotatedTSTPFormula.FormulaWithVariables->Formula,6,1,
+outermost,1);
         fprintf(Out->Stream,"]]></tstp-logic-formula>\n");
     }
 

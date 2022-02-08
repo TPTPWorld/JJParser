@@ -185,19 +185,17 @@ void OtterPrintAnnotatedTSTPNode(FILE * Stream,ANNOTATEDFORMULA
 AnnotatedFormula) {
 
     String Name;
-    StatusType SubStatus;
 
     switch (AnnotatedFormula->Syntax) {
         case comment:
-            fprintf(Stream,"%s\n",
-AnnotatedFormula->AnnotatedFormulaUnion.Comment);
+            fprintf(Stream,"%s\n",AnnotatedFormula->AnnotatedFormulaUnion.Comment);
             break;
         case blank_line:
             fprintf(Stream,"\n");
             break;
         case tptp_cnf:
             fprintf(Stream,"%% %s, %s\n",GetName(AnnotatedFormula,Name),
-StatusToString(GetRole(AnnotatedFormula,&SubStatus)));
+StatusToString(GetRole(AnnotatedFormula,NULL)));
             fprintf(Stream,"( ");
             OtterPrintFormula(Stream,tptp_cnf,AnnotatedFormula->
 AnnotatedFormulaUnion.AnnotatedTSTPFormula.FormulaWithVariables->Formula,
@@ -206,7 +204,7 @@ AnnotatedFormulaUnion.AnnotatedTSTPFormula.FormulaWithVariables->Formula,
             break;
         case tptp_fof:
             fprintf(Stream,"%% %s, %s\n",GetName(AnnotatedFormula,Name),
-StatusToString(GetRole(AnnotatedFormula,&SubStatus)));
+StatusToString(GetRole(AnnotatedFormula,NULL)));
             OtterPrintFormula(Stream,tptp_fof,AnnotatedFormula->
 AnnotatedFormulaUnion.AnnotatedTSTPFormula.FormulaWithVariables->Formula,
 0,0,1,outermost,outermost);

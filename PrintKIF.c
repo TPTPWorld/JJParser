@@ -173,7 +173,6 @@ AnnotatedFormula) {
 
     String Name;
     String Comment;
-    StatusType SubStatus;
 
     switch (AnnotatedFormula->Syntax) {
         case comment:
@@ -186,7 +185,7 @@ AnnotatedFormula) {
             break;
         case tptp_cnf:
             fprintf(Stream,"; %s, %s\n",GetName(AnnotatedFormula,Name),
-StatusToString(GetRole(AnnotatedFormula,&SubStatus)));
+StatusToString(GetRole(AnnotatedFormula,NULL)));
             fprintf(Stream,"( ");
             KIFPrintFormula(Stream,AnnotatedFormula->AnnotatedFormulaUnion.
 AnnotatedTSTPFormula.FormulaWithVariables->Formula,0,0,1);
@@ -194,7 +193,7 @@ AnnotatedTSTPFormula.FormulaWithVariables->Formula,0,0,1);
             break;
         case tptp_fof:
             fprintf(Stream,"; %s, %s\n",GetName(AnnotatedFormula,Name),
-StatusToString(GetRole(AnnotatedFormula,&SubStatus)));
+StatusToString(GetRole(AnnotatedFormula,NULL)));
             KIFPrintFormula(Stream,AnnotatedFormula->AnnotatedFormulaUnion.
 AnnotatedTSTPFormula.FormulaWithVariables->Formula,0,0,1);
             fprintf(Stream,".\n");

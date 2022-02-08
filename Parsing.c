@@ -890,8 +890,8 @@ VariableQuantifier,NULL,VariablesMustBeQuantified);
     }
 }
 //-------------------------------------------------------------------------------------------------
-TERMWITHVARIABLES ParseTermWithVariables(READFILE Stream,SyntaxType Language,
-SIGNATURE Signature,int VariablesMustBeQuantified) {
+TERMWITHVARIABLES ParseTermWithVariables(READFILE Stream,SyntaxType Language,SIGNATURE Signature,
+int VariablesMustBeQuantified) {
 
     ContextType Context;
     TERMWITHVARIABLES TermWithVariables;

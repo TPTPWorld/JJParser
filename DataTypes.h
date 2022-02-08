@@ -367,7 +367,7 @@ typedef enum {
 typedef struct {
     char * Name;
     StatusType Status;
-    StatusType SubStatus;
+    TERM SubStatus;
     FORMULAWITHVARIABLES FormulaWithVariables;
     TERM Source;
     TERM UsefulInfo;
@@ -398,7 +398,7 @@ typedef struct TreeNodeTag {
     int NumberOfParents;
     struct TreeNodeTag ** Parents;
     int Visited;
-    double StatisticsCache;
+    StatisticsType StatisticsCache;
     void * UserData;
 } TreeNodeType;
 
@@ -422,7 +422,8 @@ typedef struct ListNodeTag {
 //----For binary trees the Last comes before and the Next comes after.
     struct ListNodeTag * Last;
     struct ListNodeTag * Next;
-    int Visited;
+    int Visited;  //----Never used???
+//TODO check if it is ever used
 } ListNodeType;
 
 typedef ListNodeType * LISTNODE;

@@ -11,7 +11,7 @@ int GetArity(TERM Term);
 TERMArray GetArguments(TERM Term);
 SyntaxType GetSyntax(ANNOTATEDFORMULA AnnotatedFormula);
 char * GetName(ANNOTATEDFORMULA AnnotatedFormula,String PutNameHere);
-StatusType GetRole(ANNOTATEDFORMULA AnnotatedFormula,StatusType * SubStatus);
+StatusType GetRole(ANNOTATEDFORMULA AnnotatedFormula,TERM * SubStatus);
 AnnotatedTSTPFormulaType * GetAnnotatedTSTPFormula(ANNOTATEDFORMULA AnnotatedFormula);
 AnnotatedTSTPFormulaType * GetListNodeAnnotatedTSTPFormula(LISTNODE List);
 StatusType GetListNodeStatus(LISTNODE List);

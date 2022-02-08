@@ -274,8 +274,7 @@ SZSOutputIsA(OutputIsaPairs[Index][1],DesiredOutput)) {
     return(0);
 }
 //-------------------------------------------------------------------------------------------------
-void SystemOnTPTPFileName(char * Directory,char * BaseName,char * Extension,
-String FileName) {
+void SystemOnTPTPFileName(char * Directory,char * BaseName,char * Extension,String FileName) {
 
     String InternalFileName;
     int FD;
@@ -297,8 +296,7 @@ String FileName) {
 //----Playing safe - open and create the file rather than making a name
         if ((FD = mkstemp(InternalFileName)) == -1) {
             perror("Making unique filename");
-            ReportError("OSError",
-"Could not make a unique file name with mkstemp\n",1);
+            ReportError("OSError","Could not make a unique file name with mkstemp\n",1);
         } else {
             close(FD);
         }
@@ -312,9 +310,8 @@ String FileName) {
     strcpy(FileName,InternalFileName);
 }
 //-------------------------------------------------------------------------------------------------
-int MakeProblemFile(char * FilesDirectory,char * BaseName,char * Extension,
-String ProblemFileName,LISTNODE Head,StatusType AxiomsStatus,
-ANNOTATEDFORMULA Conjecture,StatusType ConjectureStatus) {
+int MakeProblemFile(char * FilesDirectory,char * BaseName,char * Extension,String ProblemFileName,
+LISTNODE Head,StatusType AxiomsStatus,ANNOTATEDFORMULA Conjecture,StatusType ConjectureStatus) {
 
     FILE * ProblemFileHandle;
 
@@ -325,12 +322,10 @@ ANNOTATEDFORMULA Conjecture,StatusType ConjectureStatus) {
     }
 //----Why did I check for NULL here?
     if (Head != NULL) {
-        PrintListOfAnnotatedTSTPNodesWithStatus(ProblemFileHandle,NULL,Head,
-tptp,1,AxiomsStatus);
+        PrintListOfAnnotatedTSTPNodesWithStatus(ProblemFileHandle,NULL,Head,tptp,1,AxiomsStatus);
     }
     if (Conjecture != NULL) {
-        PrintAnnotatedTSTPNodeWithStatus(ProblemFileHandle,Conjecture,
-tptp,1,ConjectureStatus);
+        PrintAnnotatedTSTPNodeWithStatus(ProblemFileHandle,Conjecture,tptp,1,ConjectureStatus);
     }
     fclose(ProblemFileHandle);
 
@@ -362,10 +357,9 @@ int SystemOnTPTPAvailable(void) {
     }
 }
 //-------------------------------------------------------------------------------------------------
-int SystemOnTPTPGetResult(int QuietnessLevel,char * ProblemFileName,
-char * ATPSystem,int TimeLimit,char * X2TSTPFlag,char * SystemOutputPrefix,
-char * OptionalFlags,int KeepOutputFiles,char * FilesDirectory,
-char * UsersOutputFileName,char * OutputFileName,char * PutResultHere,
+int SystemOnTPTPGetResult(int QuietnessLevel,char * ProblemFileName,char * ATPSystem,
+int TimeLimit,char * X2TSTPFlag,char * SystemOutputPrefix,char * OptionalFlags,int KeepOutputFiles,
+char * FilesDirectory,char * UsersOutputFileName,char * OutputFileName,char * PutResultHere,
 char * PutOutputHere) {
 
     String UNIXCommand;
@@ -391,12 +385,11 @@ char * PutOutputHere) {
 //----First look if user has a TPTP_HOME environment variable
     if ((TPTPHome = getenv("TPTP_HOME")) != NULL) {
         sprintf(UNIXCommand,"%s/%s %s%d %s %s %d %s %s",TPTPHome,SYSTEM_ON_TPTP,
-QuietnessFlag,QuietnessLevel,OptionalFlags,ATPSystem,TimeLimit,X2TSTPFlag,
-ProblemFileName);
+QuietnessFlag,QuietnessLevel,OptionalFlags,ATPSystem,TimeLimit,X2TSTPFlag,ProblemFileName);
 //----If not, use the macro from compile time
     } else {
-        sprintf(UNIXCommand,"%s/%s -q%d %s %d %s %s",TPTP_HOME,SYSTEM_ON_TPTP,
-QuietnessLevel,ATPSystem,TimeLimit,X2TSTPFlag,ProblemFileName);
+        sprintf(UNIXCommand,"%s/%s -q%d %s %d %s %s",TPTP_HOME,SYSTEM_ON_TPTP,QuietnessLevel,
+ATPSystem,TimeLimit,X2TSTPFlag,ProblemFileName);
     }
     if ((SystemPipe = popen(UNIXCommand,"r")) == NULL) {
         perror("Running SystemOnTPTP");
@@ -410,10 +403,8 @@ QuietnessLevel,ATPSystem,TimeLimit,X2TSTPFlag,ProblemFileName);
         if (!strcmp(UsersOutputFileName,"stdout")) {
             OutputFileHandle = stdout;
         } else {
-            SystemOnTPTPFileName(FilesDirectory,UsersOutputFileName,NULL,
-InternalOutputFileName);
-            if ((OutputFileHandle = OpenFileInMode(InternalOutputFileName,
-"w")) == NULL) {
+            SystemOnTPTPFileName(FilesDirectory,UsersOutputFileName,NULL,InternalOutputFileName);
+            if ((OutputFileHandle = OpenFileInMode(InternalOutputFileName,"w")) == NULL) {
                 pclose(SystemPipe);
                 return(0);
             } else {
@@ -557,11 +548,10 @@ OutputFileName,SystemResult,NULL)) {
     return(Correct);
 }
 //-------------------------------------------------------------------------------------------------
-SZSResultType SZSSystemOnTPTP(LISTNODE Axioms,ANNOTATEDFORMULA Conjecture,
-char * System,SZSResultType DesiredResult,int QuietnessLevel,int TimeLimit,
-char * X2TSTPFlag,char * SystemOutputPrefix,char * OptionalFlags,
-int KeepOutputFiles,char * FilesDirectory,char * UsersOutputFileName,
-String OutputFileName,SZSOutputType * SZSOutput) {
+SZSResultType SZSSystemOnTPTP(LISTNODE Axioms,ANNOTATEDFORMULA Conjecture,char * System,
+SZSResultType DesiredResult,int QuietnessLevel,int TimeLimit,char * X2TSTPFlag,
+char * SystemOutputPrefix,char * OptionalFlags,int KeepOutputFiles,char * FilesDirectory,
+char * UsersOutputFileName,String OutputFileName,SZSOutputType * SZSOutput) {
 
     StatusType ConjectureRole;
     String ProblemFileName;
@@ -579,8 +569,7 @@ String OutputFileName,SZSOutputType * SZSOutput) {
 //----Negate conjecture to prove CTH. This is likely broken for full SZS
 //----compliance, but'll do for now.
     NegatedConjecture = 0;
-    if (Conjecture != NULL && SZSIsA(DesiredResult,CTH) && 
-!SZSIsA(DesiredResult,THM)) {
+    if (Conjecture != NULL && SZSIsA(DesiredResult,CTH) && !SZSIsA(DesiredResult,THM)) {
         if (!Negate(Conjecture,1)) {
             CodingError("Trying to negate for CTH");
         }
@@ -595,8 +584,8 @@ String OutputFileName,SZSOutputType * SZSOutput) {
     }
 
 //----Make the problem file
-    if (!MakeProblemFile(FilesDirectory,UsersOutputFileName,".p",
-ProblemFileName,Axioms,axiom,Conjecture,ConjectureRole)) {
+    if (!MakeProblemFile(FilesDirectory,UsersOutputFileName,".p",ProblemFileName,Axioms,axiom,
+Conjecture,ConjectureRole)) {
         SZSResult = ERR;
     }
 
@@ -608,10 +597,9 @@ ProblemFileName,Axioms,axiom,Conjecture,ConjectureRole)) {
         } else {
             strcpy(CopyUsersOutputFileName,UsersOutputFileName);
         }
-        if (SystemOnTPTPGetResult(QuietnessLevel,ProblemFileName,System,
-TimeLimit,X2TSTPFlag,SystemOutputPrefix,OptionalFlags,KeepOutputFiles,
-FilesDirectory,CopyUsersOutputFileName,OutputFileName,SystemResult,
-SystemOutput)) {
+        if (SystemOnTPTPGetResult(QuietnessLevel,ProblemFileName,System,TimeLimit,X2TSTPFlag,
+SystemOutputPrefix,OptionalFlags,KeepOutputFiles,FilesDirectory,CopyUsersOutputFileName,
+OutputFileName,SystemResult,SystemOutput)) {
             SZSResult = StringToSZSResult(SystemResult);
 //----Promote to desired result if it is one
             if (SZSIsA(SZSResult,DesiredResult)) {
@@ -642,43 +630,38 @@ SystemOutput)) {
     return(SZSResult);
 }
 //-------------------------------------------------------------------------------------------------
-SZSResultType SZSSystemOnTPTPWithAlternate(LISTNODE Axioms,
-ANNOTATEDFORMULA Conjecture,char * System,SZSResultType DesiredResult,
-int QuietnessLevel,char * OptionalFlags,int TimeLimit,char * X2TSTPFlag,
-int SystemTrustedForAlternate,char * AlternateSystem,
-SZSResultType AlternateDesiredResult, int AlternateTimeLimit,
-char * SystemOutputPrefix,int KeepOutputFiles,char * FilesDirectory,
-char * UsersOutputFileName,String OutputFileName,SZSOutputType * SZSOutput) {
+SZSResultType SZSSystemOnTPTPWithAlternate(LISTNODE Axioms,ANNOTATEDFORMULA Conjecture,
+char * System,SZSResultType DesiredResult,int QuietnessLevel,char * OptionalFlags,int TimeLimit,
+char * X2TSTPFlag,int SystemTrustedForAlternate,char * AlternateSystem,
+SZSResultType AlternateDesiredResult, int AlternateTimeLimit,char * SystemOutputPrefix,
+int KeepOutputFiles,char * FilesDirectory,char * UsersOutputFileName,String OutputFileName,
+SZSOutputType * SZSOutput) {
 
     SZSResultType SZSResult;
 
-    SZSResult = SZSSystemOnTPTP(Axioms,Conjecture,System,DesiredResult,
-QuietnessLevel,TimeLimit,X2TSTPFlag,SystemOutputPrefix,OptionalFlags,
-KeepOutputFiles,FilesDirectory,UsersOutputFileName,OutputFileName,SZSOutput);
+    SZSResult = SZSSystemOnTPTP(Axioms,Conjecture,System,DesiredResult,QuietnessLevel,TimeLimit,
+X2TSTPFlag,SystemOutputPrefix,OptionalFlags,KeepOutputFiles,FilesDirectory,UsersOutputFileName,
+OutputFileName,SZSOutput);
 
 //----Check if really not provable
-    if (SZSResult != DesiredResult && (SystemTrustedForAlternate ||
-AlternateSystem != NULL)) {
+    if (SZSResult != DesiredResult && (SystemTrustedForAlternate || AlternateSystem != NULL)) {
 //----Check if the positive system is trusted
-        if (SystemTrustedForAlternate && SZSIsA(SZSResult,
-AlternateDesiredResult)) {
+        if (SystemTrustedForAlternate && SZSIsA(SZSResult,AlternateDesiredResult)) {
             SZSResult = AlternateDesiredResult;
         } 
         if (SZSResult != AlternateDesiredResult && AlternateSystem != NULL) {
             strcat(OutputFileName,"_not");
-            SZSResult = SZSSystemOnTPTP(Axioms,Conjecture,AlternateSystem,
-AlternateDesiredResult,QuietnessLevel,AlternateTimeLimit,X2TSTPFlag,
-SystemOutputPrefix,OptionalFlags,KeepOutputFiles,FilesDirectory,OutputFileName,
-OutputFileName,SZSOutput);
+            SZSResult = SZSSystemOnTPTP(Axioms,Conjecture,AlternateSystem,AlternateDesiredResult,
+QuietnessLevel,AlternateTimeLimit,X2TSTPFlag,SystemOutputPrefix,OptionalFlags,KeepOutputFiles,
+FilesDirectory,OutputFileName,OutputFileName,SZSOutput);
         }
     }
 
     return(SZSResult);
 }
 //-------------------------------------------------------------------------------------------------
-LISTNODE ApplyExternalProgram(LISTNODE Head,StatusType AsStatus,
-ANNOTATEDFORMULA Conjecture,const char * ExecuteFormatString,
-SIGNATURE Signature) {
+LISTNODE ApplyExternalProgram(LISTNODE Head,StatusType AsStatus,ANNOTATEDFORMULA Conjecture,
+const char * ExecuteFormatString,SIGNATURE Signature) {
 
     String ProblemFileName;
     String ExecuteCommand;
@@ -686,8 +669,7 @@ SIGNATURE Signature) {
     LISTNODE AppliedHead;
     String ErrorMessage;
 
-    if(!MakeProblemFile("/tmp",NULL,NULL,ProblemFileName,Head,AsStatus,
-Conjecture,conjecture)) {
+    if(!MakeProblemFile("/tmp",NULL,NULL,ProblemFileName,Head,AsStatus,Conjecture,conjecture)) {
         return(NULL);
     }
     if (sprintf(ExecuteCommand,ExecuteFormatString,ProblemFileName) == -1) {

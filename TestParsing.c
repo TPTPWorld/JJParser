@@ -43,7 +43,7 @@ int main(int argc, char *argv[]) {
     char * TypeUsage;
     int SymbolUsageLength = STRINGLENGTH;
     int VarCount,QuantCount;
-    StatusType SubStatus;
+    TERM SubStatus;
     TERM ANewTerm;
     int Positive,Negative;
     READFILE Stream;
@@ -632,10 +632,9 @@ Signature,0);
     AnnotatedFormula = GetAnnotatedFormulaFromListByNumber(Head,20);
     GetName(AnnotatedFormula,PutNamesHere);
     printf("Got the node for clause named %s\n",PutNamesHere);
-    printf("The status is %s\n",StatusToString(GetRole(AnnotatedFormula,
-&SubStatus)));
-    if (SubStatus != nonstatus) {
-        printf("The substatus is %s\n",StatusToString(SubStatus));
+    printf("The status is %s\n",StatusToString(GetRole(AnnotatedFormula,&SubStatus)));
+    if (SubStatus != NULL) {
+        printf("The substatus is not empty\n");
     } else {
         printf("It has no substatus\n");
     }

@@ -5,39 +5,15 @@
 #include "Statistics.h"
 
 typedef struct {
-    double NumberOfFormulae;
-    double NumberOfFormulaeExpanded;
-    double NumberOfLeaves;
-    double NumberOfLeavesExpanded;
-    double TreeDepth;
-    double NumberOfAtoms; 
-    double NumberOfAtomsExpanded;
-    double NumberOfEqualityAtoms; 
-    double NumberOfEqualityAtomsExpanded;
-
-    double NumberOfTHF;
-    double NumberOfTFF;
-    double NumberOfTCF;
-    double NumberOfTCFExpanded;
-    double NumberOfFOF;
-    double NumberOfCNF;
-    double NumberOfCNFExpanded;
-
-//----Not for pure CNF
-    double MaxFormulaDepth;
-    double AverageFormulaDepth;
-
-//----Not for pure FOF
-    double MaxClauseSize;
-    double AverageClauseSize;
-
-    double MaxTermDepth;
-    double AverageTermDepth;
-    double NumberOfLiterals;
-} TreeStatisticsRecordType;
+    SZSOutputType Type;
+    StatisticsType FormulaeStatistics;
+    StatisticsType ExpandedFormulaeStatistics;
+    double ForestDepth;
+    int FiniteDomainSize;
+} SolutionStatisticsType;
 //-------------------------------------------------------------------------------------------------
-TreeStatisticsRecordType * GetTreeStatistics(SIGNATURE Signature,ROOTLIST RootListHead,
-TreeStatisticsRecordType * Statistics);
-void PrintTreeStatistics(FILE * Stream,TreeStatisticsRecordType Statistics);
+SolutionStatisticsType GetSolutionStatistics(LISTNODE Head,SIGNATURE Signature,
+ROOTLIST * RootListHead);
+void PrintSolutionStatistics(FILE * Stream,SolutionStatisticsType Statistics);
 //-------------------------------------------------------------------------------------------------
 #endif

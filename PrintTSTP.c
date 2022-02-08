@@ -1104,8 +1104,9 @@ AnnotatedTSTPFormulaType AnnotatedTSTPFormula,PrintFormatType Format,int Pretty)
             break;
     }
     PFprintf(Stream,"(%s,%s",AnnotatedTSTPFormula.Name,StatusToString(AnnotatedTSTPFormula.Status));
-    if (Format == tptp && AnnotatedTSTPFormula.SubStatus != nonstatus) {
-        PFprintf(Stream,"-%s",StatusToString(AnnotatedTSTPFormula.SubStatus));
+    if (Format == tptp && AnnotatedTSTPFormula.SubStatus != NULL) {
+        PFprintf(Stream,"-");
+        PrintFileTSTPTerm(Stream,Language,AnnotatedTSTPFormula.SubStatus,0,0,outermost,1);
     }
     PFprintf(Stream,",");
 
@@ -1118,8 +1119,7 @@ AnnotatedTSTPFormulaType AnnotatedTSTPFormula,PrintFormatType Format,int Pretty)
             PrintSpaces(Stream,4);
 //----Things that start on a new line alone
             if (OutermostWithoutBrackets(AnnotatedTSTPFormula.FormulaWithVariables->Formula)) {
-                PrintFileTSTPFormula(Stream,Language,
-AnnotatedTSTPFormula.FormulaWithVariables->Formula,4,Pretty,outermost,1);
+                PrintFileTSTPFormula(Stream,Language, AnnotatedTSTPFormula.FormulaWithVariables->Formula,4,Pretty,outermost,1);
             } else {
 //----Things that need ()s on the new line
                 PrintFileTSTPFormula(Stream,Language,
@@ -1337,7 +1337,7 @@ void PrintFileAnnotatedTSTPNodeWithStatus(PRINTFILE Stream,ANNOTATEDFORMULA Anno
 PrintFormatType Format,int Pretty,StatusType Role) {
 
     StatusType OldRole;
-    StatusType OldSubRole;
+    TERM OldSubRole;
     StatusType DesiredRole;
 
     if (!ReallyAnAnnotatedFormula(AnnotatedFormula)) {
@@ -1348,7 +1348,7 @@ PrintFormatType Format,int Pretty,StatusType Role) {
     
 //----Only set if not nonstatus, not type (hack), and not what we want
     if (Role != nonstatus && OldRole != type && !CheckRole(OldRole,DesiredRole)) {
-        SetStatus(AnnotatedFormula,Role,nonstatus);
+        SetStatus(AnnotatedFormula,Role,OldSubRole);
     }
     PrintFileAnnotatedTSTPNode(Stream,AnnotatedFormula,Format,Pretty);
     SetStatus(AnnotatedFormula,OldRole,OldSubRole);
