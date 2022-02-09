@@ -7,8 +7,7 @@ void ResetListVisited(LISTNODE Head);
 int ListLength(LISTNODE Head);
 LISTNODE GetLogicNode(LISTNODE Head);
 LISTNODE NewListNode(ANNOTATEDFORMULA AnnotatedFormula);
-void AddListNode(LISTNODE * From,LISTNODE Next,ANNOTATEDFORMULA
-AnnotatedFormulae);
+void AddListNode(LISTNODE * From,LISTNODE Next,ANNOTATEDFORMULA AnnotatedFormulae);
 LISTNODE DuplicateListOfNodes(LISTNODE Head,int KeepNonLogicNodes);
 LISTNODE DuplicateListOfAnnotatedFormulae(LISTNODE Head,SIGNATURE Signature);
 void FreeAListNode(LISTNODE * ToDelete,SIGNATURE Signature);

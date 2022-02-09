@@ -394,7 +394,6 @@ TREENODE NewTreeNode(ANNOTATEDFORMULA AnnotatedFormula) {
     TreeNode->NumberOfParents = 0;
     TreeNode->Parents = NULL;
     TreeNode->Visited = 0;
-    TreeNode->StatisticsCache = 0;
     TreeNode->UserData = NULL;
     return(TreeNode);
 }

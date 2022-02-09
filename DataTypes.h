@@ -398,7 +398,6 @@ typedef struct TreeNodeTag {
     int NumberOfParents;
     struct TreeNodeTag ** Parents;
     int Visited;
-    StatisticsType StatisticsCache;
     void * UserData;
 } TreeNodeType;
 

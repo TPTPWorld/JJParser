@@ -57,8 +57,7 @@ LISTNODE NewListNode(ANNOTATEDFORMULA AnnotatedFormula) {
 }
 //-------------------------------------------------------------------------------------------------
 //----Pushes new node onto the front
-void AddListNode(LISTNODE * From,LISTNODE Next,ANNOTATEDFORMULA
-AnnotatedFormulae) {
+void AddListNode(LISTNODE * From,LISTNODE Next,ANNOTATEDFORMULA AnnotatedFormulae) {
 
     LISTNODE NewNode;
 

@@ -7,8 +7,8 @@
 typedef struct {
     SZSOutputType Type;
     StatisticsType FormulaeStatistics;
-    StatisticsType ExpandedFormulaeStatistics;
-    double ForestDepth;
+    int ForestDepth;
+    int ForestLeaves;
     int FiniteDomainSize;
 } SolutionStatisticsType;
 //-------------------------------------------------------------------------------------------------

@@ -7,192 +7,17 @@
 #include "Examine.h"
 #include "Parsing.h"
 #include "ListStatistics.h"
+#include "List.h"
 #include "Tree.h"
 #include "TreeStatistics.h"
 //-------------------------------------------------------------------------------------------------
-double TreeCount(SIGNATURE Signature,TREENODE Tree,CountType WhatToCount,int Expand) {
+void InitializeSolutionStatistics(SolutionStatisticsType * Statistics) {
 
-    double Counter = 0;
-    int Index;
-
-    if (!Tree->Visited) {
-        switch (WhatToCount) {
-            case nodes:
-                Counter = 1;
-                break;
-            case thf_nodes:
-                if (GetSyntax(Tree->AnnotatedFormula) == tptp_thf) {
-                    Counter = 1;
-                } else {
-                    Counter = 0;
-                }
-                break;
-            case tff_nodes:
-                if (GetSyntax(Tree->AnnotatedFormula) == tptp_tff) {
-                    Counter = 1;
-                } else {
-                    Counter = 0;
-                }
-                break;
-            case tcf_nodes:
-                if (GetSyntax(Tree->AnnotatedFormula) == tptp_tcf) {
-                    Counter = 1;
-                } else {
-                    Counter = 0;
-                }
-                break;
-            case fof_nodes:
-                if (GetSyntax(Tree->AnnotatedFormula) == tptp_fof) {
-                    Counter = 1;
-                } else {
-                    Counter = 0;
-                }
-                break;
-            case cnf_nodes:
-                if (GetSyntax(Tree->AnnotatedFormula) == tptp_cnf) {
-                    Counter = 1;
-                } else {
-                    Counter = 0;
-                }
-                break;
-            case leaves:
-                if (Tree->NumberOfParents == 0) {
-                    Counter = 1;
-                } else {
-                    Counter = 0;
-                }
-                break;
-            case atoms:
-                Counter = CountFormulaAtomsByPredicate(Signature,GetTreeNodeFormula(Tree),
-"PREDICATE",1);
-                break;
-            case equality_atoms:
-                Counter = CountFormulaAtomsByPredicate(Signature,GetTreeNodeFormula(Tree),"=",1);
-                Counter += CountFormulaAtomsByPredicate(Signature,GetTreeNodeFormula(Tree),"@=",1);
-                break;
-            case terms:
-                Counter = CountFormulaTerms(GetTreeNodeFormula(Tree));
-                break;
-            case formula_depth:
-                Counter = FormulaDepth(GetTreeNodeFormula(Tree));
-                break;
-            case term_depth:
-                Counter = SumFormulaTermDepth(GetTreeNodeFormula(Tree));
-                break;
-            default:
-                CodingError("Don't know what to count in tree");
-                break;
-        }
-    
-        for (Index = 0; Index < Tree->NumberOfParents; Index++) {
-            Counter += TreeCount(Signature,Tree->Parents[Index],WhatToCount,Expand);
-        }
-//----Save value for future visits
-        Tree->StatisticsCache = Counter;
-        Tree->Visited = 1;
-
-    } else {
-        if (Expand) {
-            Counter = Tree->StatisticsCache;
-        } else {
-            Counter = 0;
-        }
-    }
-
-    return(Counter);
-}
-//-------------------------------------------------------------------------------------------------
-double RootListCount(SIGNATURE Signature,ROOTLIST RootListHead,CountType WhatToCount,int Expand) {
-
-    double Counter;
-
-    Counter = 0;
-    ResetRootListVisited(RootListHead);
-    while (RootListHead != NULL) {
-        if (RootListHead->TheTree != NULL) {
-            Counter += TreeCount(Signature,RootListHead->TheTree,WhatToCount,Expand);
-        }
-        RootListHead = RootListHead->Next;
-    }
-
-    return(Counter);
-}
-//-------------------------------------------------------------------------------------------------
-double TreeMaximal(SIGNATURE Signature,TREENODE Tree,MaximizeType WhatToMaximize) {
-
-    double Maximal = 0;
-    int Index;
-    double NextMaximal;
-
-//----Check if known value. his relies on never having a value of 0.
-    if (!Tree->Visited) {
-        switch (WhatToMaximize) {
-            case depth:
-                Maximal = 0;
-                break;
-            case literals:
-                Maximal = CountFormulaAtomsByPredicate(Signature,GetTreeNodeFormula(Tree),
-"PREDICATE",0);
-                break;
-            case max_term_depth:
-                Maximal = MaxFormulaTermDepth(GetTreeNodeFormula(Tree));
-                break;
-            case max_formula_depth:
-                Maximal = FormulaDepth(GetTreeNodeFormula(Tree));
-                break;
-            default:
-                CodingError("Unknown thing to maximize in tree");
-                break;
-        }
-
-        for (Index = 0; Index < Tree->NumberOfParents; Index++) {
-            NextMaximal = TreeMaximal(Signature,Tree->Parents[Index],WhatToMaximize);
-            Maximal = MaximumOfDouble(NextMaximal,Maximal);
-        }
-        switch (WhatToMaximize) {
-            case depth:
-//----Only count depth if there are some parents
-                if (Tree->NumberOfParents > 0) {
-                    Maximal++;
-                }
-                break;
-            case literals:
-                break;
-            case max_term_depth:
-                break;
-            case max_formula_depth:
-                break;
-            default:
-                CodingError("Unknown thing to maximize in tree");
-                break;
-        }
-        Tree->StatisticsCache = Maximal;
-        Tree->Visited = 1;
-    } else {
-        Maximal = Tree->StatisticsCache;
-    }
-
-    return(Maximal);
-}
-//-------------------------------------------------------------------------------------------------
-double RootListMaximal(SIGNATURE Signature,ROOTLIST RootListHead,MaximizeType WhatToMaximize) {
-
-    double Maximal;
-    double NextMaximal;
-
-    Maximal = 0;
-    ResetRootListVisited(RootListHead);
-    while (RootListHead != NULL) {
-        if (RootListHead->TheTree != NULL) {
-            NextMaximal = TreeMaximal(Signature,RootListHead->TheTree,WhatToMaximize);
-        } else {
-            NextMaximal = -1;
-        }
-        Maximal = MaximumOfDouble(NextMaximal,Maximal);
-        RootListHead = RootListHead->Next;
-    }   
-    
-    return(Maximal);
+    Statistics->Type = nonszsoutput;
+    InitializeStatistics(&(Statistics->FormulaeStatistics));
+    Statistics->ForestDepth = 0;
+    Statistics->ForestLeaves = 0;
+    Statistics->FiniteDomainSize = 0;
 }
 //-------------------------------------------------------------------------------------------------
 int TreeHasCycle(TREENODE Root) {
@@ -230,67 +55,113 @@ int RootListHasCycle(ROOTLIST RootListHead) {
     return(0);
 }
 //-------------------------------------------------------------------------------------------------
-SolutionStatisticsType CombinedTreeStatistics(SolutionStatisticsType TreeStatistics1,
-SolutionStatisticsType TreeStatistics2) {
+int GetTreeDepth(TREENODE Tree) {
 
-ZZZZZZZ
+    int Depth;
+    int index;
 
-}
-//-------------------------------------------------------------------------------------------------
-SolutionStatisticsType GetTreeStatistics(TREENODE Root,SIGNATURE Signature) {
-
-    StatisticsType TreeStatistics;
-    StatisticsType ParentTreeStatistics;
-    ListNodeType OneNodeList;
-
-	OneNodeList.Last = NULL;
-    OneNodeList.Next = NULL;
-    OneNodeList.Visited = 0;
-    OneNodeList.AnnotatedFormula = Root->AnnotatedFormula;
-    TreeStatistics = GetListStatistics(&OneNodeList,Signature);
-    for (index = 0;index < Root->NumberOfParents;index++) {
-        OneNodeList.AnnotatedFormula = Root->Parents[index];
-        ParentTreeStatistics = GetListStatistics(&OneNodeList,Signature);
-        TreeStatistics = CombinedTreeStatistics(TreeStatistics,ParentTreeStatistics);
+    Depth = 0;
+    for (index = 0;index < Tree->NumberOfParents;index++) {
+        Depth = MaximumOfInt(Depth,GetTreeDepth(Tree->Parents[index]));
     }
-    return(TreeStatistics);
+    Depth++;
+    return(Depth);
 }
 //-------------------------------------------------------------------------------------------------
-SolutionStatisticsType GetForestStatistics(ROOTLIST Head,SIGNATURE Signature) {
+int NewLeavesInTree(TREENODE Tree) {
+
+    int NewLeaves;
+    int index;
+
+    if (Tree->Visited) {
+        return(0);
+    } else {
+        Tree->Visited = 1;
+        if (Tree->NumberOfParents == 0) {
+            return(1);
+        } else {
+            NewLeaves = 0;
+            for (index = 0;index < Tree->NumberOfParents;index++) {
+                NewLeaves += NewLeavesInTree(Tree->Parents[index]);
+            }
+            return(NewLeaves);
+        }
+    }
+}
+//-------------------------------------------------------------------------------------------------
+LISTNODE MakeListOfTreeAnnotatedFormulae(TREENODE Tree) {
+
+    LISTNODE NewNodesInThisTree;
+    int index;
+
+    if (Tree->Visited) {
+        return(NULL);
+    } else {
+        Tree->Visited = 1;
+        NewNodesInThisTree = NULL;
+        AddListNode(&NewNodesInThisTree,NULL,Tree->AnnotatedFormula);
+        for (index = 0;index < Tree->NumberOfParents;index++) {
+            NewNodesInThisTree = AppendListsOfAnnotatedTSTPNodes(MakeListOfTreeAnnotatedFormulae(
+Tree->Parents[index]),NewNodesInThisTree);
+        }
+        return(NewNodesInThisTree);
+    }
+}
+//-------------------------------------------------------------------------------------------------
+SolutionStatisticsType GetForestStatistics(SZSOutputType SolutionType,ROOTLIST Head,
+SIGNATURE Signature) {
 
     SolutionStatisticsType Statistics;
-    SolutionStatisticsType TreeStatistics;
-    StatisticsType FormulaeStatistics;
-    StatisticsType ExpandedFormulaeStatistics;
+    LISTNODE ListOfForestNodes;
+    ROOTLIST MovingHead;
 
-    if (RootListHead == NULL) {
+    InitializeSolutionStatistics(&Statistics);
+    Statistics.Type = SolutionType;
+
+    if (Head == NULL) {
         Statistics.Type = nonszsoutput;
         return(Statistics);
     }
 
-    if (RootListHasCycle(RootListHead)) {
+    if (RootListHasCycle(Head)) {
         ReportError("SemanticError","Cycle in a tree",0);
         Statistics.Type = nonszsoutput;
         return(Statistics);
     }
 
-    while (Head != NULL) {
-        TreeStatistics = GetTreeStatistics(Head->TheTree,Signature);
+    ResetRootListVisited(Head);
+    MovingHead = Head;
+    while (MovingHead != NULL) {
+        Statistics.ForestDepth = MaximumOfInt(Statistics.ForestDepth,GetTreeDepth(
+MovingHead->TheTree));
+        Statistics.ForestLeaves += NewLeavesInTree(MovingHead->TheTree);
+        MovingHead = MovingHead->Next;
     }
-//TODO Get each tree statistics and combine
 
+    ListOfForestNodes = NULL;
+    ResetRootListVisited(Head);
+    MovingHead = Head;
+    while (MovingHead != NULL) {
+        ListOfForestNodes = AppendListsOfAnnotatedTSTPNodes(ListOfForestNodes,
+MakeListOfTreeAnnotatedFormulae(MovingHead->TheTree));
+        MovingHead = MovingHead->Next;
+    }
+    Statistics.FormulaeStatistics = GetListStatistics(ListOfForestNodes,Signature);
+
+    FreeListOfAnnotatedFormulae(&ListOfForestNodes,Signature);
     return(Statistics);
 }
 //-------------------------------------------------------------------------------------------------
 void PrintForestStatistics(FILE * Stream,SolutionStatisticsType Statistics) {
 
-    fprintf(Stream,
-"%%              Maximal term depth       : xxxxx\n");
+    fprintf(Stream,"%%            Derivation depth      : %4d\n",Statistics.ForestDepth);
+    fprintf(Stream,"%%            Number of leaves      : %4d\n",Statistics.ForestLeaves);
+    PrintListStatistics(Stream,Statistics.FormulaeStatistics);
 }
 //-------------------------------------------------------------------------------------------------
 void PrintFiniteModelStatistics(FILE * Stream,SolutionStatisticsType Statistics) {
 
-    fprintf(Stream,"%% Syntax   : Domain size           : %4d\n",Statistics.FiniteDomainSize);
+    fprintf(Stream,"%%            Domain size           : %4d\n",Statistics.FiniteDomainSize);
 }
 //-------------------------------------------------------------------------------------------------
 int ExtractFiniteDomainSize(FORMULA Formula) {
@@ -300,38 +171,44 @@ int ExtractFiniteDomainSize(FORMULA Formula) {
 //----If an equality atom, return 1
     if (Formula->Type == atom && !strcmp("=",GetSymbol(Formula->FormulaUnion.Atom)) &&
 GetArity(Formula->FormulaUnion.Atom) == 2) {
+printf("Size 1\n");
         return(1);
     } else if (Formula->Type == binary && Formula->FormulaUnion.BinaryFormula.Connective ==
 disjunction) {
-        if ((LHSize = ExtractFiniteDomainSize(Formula->FormulaUnion.BinaryFormula.LHS)) == -1 ||
-(RHSize = ExtractFiniteDomainSize(Formula->FormulaUnion.BinaryFormula.RHS)) == -1) {
-            return(-1);
+        if (!(LHSize = ExtractFiniteDomainSize(Formula->FormulaUnion.BinaryFormula.LHS)) ||
+!(RHSize = ExtractFiniteDomainSize(Formula->FormulaUnion.BinaryFormula.RHS))) {
+printf("Not a disjunction\n");
+            return(0);
         } else {
+printf("Yay its %d plus %d\n",LHSize,RHSize);
             return(LHSize + RHSize);
         }
     } else {
-        return(-1);
+printf("Does not look good\n");
+        return(0);
     }
 }
 //-------------------------------------------------------------------------------------------------
-int HasAFiniteDomain(LISTNODE Head,int * FiniteDomainSize) {
+int HasAFiniteDomain(LISTNODE Head) {
 
     FORMULA Formula;
 
     while (Head != NULL) {
         if (GetRole(Head->AnnotatedFormula,NULL) == fi_domain) {
-            *FiniteDomainSize = 0;
             Formula = GetListNodeFormula(Head);
+printf("found a finite domain\n");
 //----Check that it's a FOF universal 
             if (Head->AnnotatedFormula->Syntax != tptp_fof || Formula->Type != quantified || 
 Formula->FormulaUnion.QuantifiedFormula.Quantifier != universal) {
-                return(-1);
+printf("failed basic test\n");
+                return(0);
             }
 //----Top level equality is size 1
             return(ExtractFiniteDomainSize(Formula->FormulaUnion.QuantifiedFormula.Formula));
         }
         Head = Head->Next;
     }
+printf("No finite domain\n");
     return(0);
 }
 //-------------------------------------------------------------------------------------------------
@@ -355,13 +232,14 @@ SIGNATURE Signature) {
     *RootListHead = NULL;
     if (Head == NULL) {
         return(Non);
+//TODO BuildRootList works for a FMo
     } else if ((*RootListHead = BuildRootList(Head,Signature)) != NULL) {
         if (IsARefutation(*RootListHead)) {
             return(Ref);
         } else {
             return(Der);
         }
-    } else if (HasAFiniteDomain(Head,FiniteDomainSize) > 0) {
+    } else if ((*FiniteDomainSize = HasAFiniteDomain(Head)) > 0) {
         return(FMo);
     } else {
 //TODO check it is a nice list of formulae
@@ -377,11 +255,13 @@ ROOTLIST * RootListHead) {
 
     Statistics.Type = GetSZSOutputType(Head,RootListHead,&Statistics.FiniteDomainSize,Signature);
     switch (Statistics.Type) {
+        case CRf:
         case Ref:
         case Der:
-            Statistics = GetForestStatistics(*RootListHead,Signature);
+            Statistics = GetForestStatistics(Statistics.Type,*RootListHead,Signature);
             break;
         case FMo:
+//----Got the size in GetSZSOutputType
             break;
         case Sat:
             Statistics.FormulaeStatistics = GetListStatistics(Head,Signature);
@@ -397,9 +277,10 @@ ROOTLIST * RootListHead) {
 //-------------------------------------------------------------------------------------------------
 void PrintSolutionStatistics(FILE * Stream,SolutionStatisticsType Statistics) {
 
-    fprintf(Stream,"%% Structure  : %s\n",SZSOutputToUserString(Statistics.Type));
+    fprintf(Stream,"%% SZS Type : %s\n",SZSOutputToUserString(Statistics.Type));
 
     switch (Statistics.Type) {
+        case CRf:
         case Ref:
         case Der:
             PrintForestStatistics(Stream,Statistics);
