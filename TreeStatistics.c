@@ -171,20 +171,16 @@ int ExtractFiniteDomainSize(FORMULA Formula) {
 //----If an equality atom, return 1
     if (Formula->Type == atom && !strcmp("=",GetSymbol(Formula->FormulaUnion.Atom)) &&
 GetArity(Formula->FormulaUnion.Atom) == 2) {
-printf("Size 1\n");
         return(1);
     } else if (Formula->Type == binary && Formula->FormulaUnion.BinaryFormula.Connective ==
 disjunction) {
         if (!(LHSize = ExtractFiniteDomainSize(Formula->FormulaUnion.BinaryFormula.LHS)) ||
 !(RHSize = ExtractFiniteDomainSize(Formula->FormulaUnion.BinaryFormula.RHS))) {
-printf("Not a disjunction\n");
             return(0);
         } else {
-printf("Yay its %d plus %d\n",LHSize,RHSize);
             return(LHSize + RHSize);
         }
     } else {
-printf("Does not look good\n");
         return(0);
     }
 }
@@ -196,11 +192,9 @@ int HasAFiniteDomain(LISTNODE Head) {
     while (Head != NULL) {
         if (GetRole(Head->AnnotatedFormula,NULL) == fi_domain) {
             Formula = GetListNodeFormula(Head);
-printf("found a finite domain\n");
 //----Check that it's a FOF universal 
             if (Head->AnnotatedFormula->Syntax != tptp_fof || Formula->Type != quantified || 
 Formula->FormulaUnion.QuantifiedFormula.Quantifier != universal) {
-printf("failed basic test\n");
                 return(0);
             }
 //----Top level equality is size 1
@@ -208,7 +202,6 @@ printf("failed basic test\n");
         }
         Head = Head->Next;
     }
-printf("No finite domain\n");
     return(0);
 }
 //-------------------------------------------------------------------------------------------------
@@ -216,6 +209,7 @@ int IsARefutation(ROOTLIST Head) {
 
     FORMULA Formula;
 
+//----All roots must be false for a refutation
     while (Head != NULL) {
         Formula = GetTreeNodeFormula(Head->TheTree);
         if (Formula->Type != atom || strcmp("$false",GetSymbol(Formula->FormulaUnion.Atom))) {
@@ -232,18 +226,22 @@ SIGNATURE Signature) {
     *RootListHead = NULL;
     if (Head == NULL) {
         return(Non);
-//TODO BuildRootList works for a FMo
-    } else if ((*RootListHead = BuildRootList(Head,Signature)) != NULL) {
-        if (IsARefutation(*RootListHead)) {
-            return(Ref);
-        } else {
-            return(Der);
-        }
+//----Check for a finite domain
     } else if ((*FiniteDomainSize = HasAFiniteDomain(Head)) > 0) {
         return(FMo);
-    } else {
+//----Build a root list, but it might not really be one
+    } else if ((*RootListHead = BuildRootList(Head,Signature)) != NULL) {
+//----Refutation is a good root list
+        if (IsARefutation(*RootListHead)) {
+            return(Ref);
+//----One tree in the forest is good
+        } else if ((*RootListHead)->Next == NULL) {
+            return(Der);
+        } else {
 //TODO check it is a nice list of formulae
-        return(Sat);
+            FreeRootList(RootListHead,1,Signature);
+            return(Sat);
+        }
     }
 }
 //-------------------------------------------------------------------------------------------------
