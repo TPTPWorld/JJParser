@@ -669,7 +669,8 @@ const char * ExecuteFormatString,SIGNATURE Signature) {
     LISTNODE AppliedHead;
     String ErrorMessage;
 
-    if(!MakeProblemFile("/tmp",NULL,NULL,ProblemFileName,Head,AsStatus,Conjecture,conjecture)) {
+    if(!MakeProblemFile((char *)"/tmp",NULL,NULL,ProblemFileName,Head,AsStatus,Conjecture,
+conjecture)) {
         return(NULL);
     }
     if (sprintf(ExecuteCommand,ExecuteFormatString,ProblemFileName) == -1) {

@@ -594,7 +594,8 @@ Statistics.FormulaStatistics.NumberOfFOF > 0) {
             fprintf(Stream,";%4d def",Statistics.FormulaStatistics.NumberOfDefnFormulae);
         }
     fprintf(Stream,")\n");
-    } else if (
+    } 
+    if (
 Statistics.FormulaStatistics.NumberOfTCF > 0 ||
 Statistics.FormulaStatistics.NumberOfCNF > 0) {
         if (

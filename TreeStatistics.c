@@ -205,17 +205,22 @@ Formula->FormulaUnion.QuantifiedFormula.Quantifier != universal) {
     return(0);
 }
 //-------------------------------------------------------------------------------------------------
-int IsARefutation(ROOTLIST Head) {
+int IsARefutation(ROOTLIST RootListHead) {
 
     FORMULA Formula;
+    AnnotatedTSTPFormulaType * AnnotatedTSTPFormula;
 
 //----All roots must be false for a refutation
-    while (Head != NULL) {
-        Formula = GetTreeNodeFormula(Head->TheTree);
-        if (Formula->Type != atom || strcmp("$false",GetSymbol(Formula->FormulaUnion.Atom))) {
-            return(0);
+    while (RootListHead != NULL) {
+        AnnotatedTSTPFormula = GetTreeNodeAnnotatedTSTPFormula(RootListHead->TheTree);
+        if (CheckRole((*AnnotatedTSTPFormula).Status,axiom_like) ||
+RootListHead->TheTree->NumberOfParents > 0) {
+            Formula = GetTreeNodeFormula(RootListHead->TheTree);
+            if (Formula->Type != atom || strcmp("$false",GetSymbol(Formula->FormulaUnion.Atom))) {
+                return(0);
+            }
         }
-        Head = Head->Next;
+        RootListHead = RootListHead->Next;
     }
     return(1);
 }
@@ -243,6 +248,7 @@ SIGNATURE Signature) {
             return(Sat);
         }
     }
+    return(nonszsoutput);
 }
 //-------------------------------------------------------------------------------------------------
 //----If the signature is non-NULL use it for symbols

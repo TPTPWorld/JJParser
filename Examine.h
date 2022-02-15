@@ -17,6 +17,7 @@ AnnotatedTSTPFormulaType * GetListNodeAnnotatedTSTPFormula(LISTNODE List);
 StatusType GetListNodeStatus(LISTNODE List);
 FORMULA GetListNodeFormula(LISTNODE List);
 VARIABLENODE GetListNodeVariables(LISTNODE List);
+AnnotatedTSTPFormulaType * GetTreeNodeAnnotatedTSTPFormula(TREENODE Tree);
 FORMULA GetTreeNodeFormula(TREENODE Tree);
 VARIABLENODE GetTreeNodeVariables(TREENODE Tree);
 FORMULA GetResultFromTyping(READFILE Stream,FORMULA TypeFormula);
