@@ -1,2 +1,1 @@
-tff(f2889,plain,
-    $false).
+thf(1,axiom,$ite($true,$true,$true)).

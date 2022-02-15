@@ -1169,8 +1169,8 @@ Context,EndOfScope,AllowBinary,VariablesMustBeQuantified,LastConnective,
     return(TupleOrSequent);
 }
 //-------------------------------------------------------------------------------------------------
-FORMULA ParseITEFormula(READFILE Stream,SyntaxType Language,
-ContextType Context,VARIABLENODE * EndOfScope,int VariablesMustBeQuantified) {
+FORMULA ParseITEFormula(READFILE Stream,SyntaxType Language,ContextType Context,
+VARIABLENODE * EndOfScope,int VariablesMustBeQuantified) {
 
     FORMULA ITEFormula;
 
@@ -1364,7 +1364,10 @@ none,NULL,VariablesMustBeQuantified);
 VariablesMustBeQuantified);
             break;
         default:
-            if (!strcmp(CurrentToken(Stream)->NameToken,"$ite")) {
+//----For THF $ite are parsed as binary formulae, because the application might be partial.
+//----Luckily ListStatistics counts $ite by looking at the symbol, not the FormulaTypeType.
+            if (!strcmp(CurrentToken(Stream)->NameToken,"$ite") && 
+(Language == tptp_tff || Language == tptp_tcf)) {
                 Formula = ParseITEFormula(Stream,Language,Context,EndOfScope,
 VariablesMustBeQuantified);
             } else if (!strcmp(CurrentToken(Stream)->NameToken,"$let")) {
@@ -1769,8 +1772,7 @@ ANNOTATEDFORMULA ParseAnnotatedFormula(READFILE Stream,SIGNATURE Signature) {
 }
 //-------------------------------------------------------------------------------------------------
 //----Use this entry point if you want the count updated
-ANNOTATEDFORMULA ParseAndUseAnnotatedFormula(READFILE Stream,SIGNATURE 
-Signature) {
+ANNOTATEDFORMULA ParseAndUseAnnotatedFormula(READFILE Stream,SIGNATURE Signature) {
 
     ANNOTATEDFORMULA AnnotatedFormula;
 
@@ -2043,8 +2045,8 @@ LISTNODE ParseFileOfHeader(char * FileName) {
 //-------------------------------------------------------------------------------------------------
 //----Send NULL as the CurrentFileName when starting. It's used for resolving
 //----includes. Send NULL as the NameFilter if no filtering required.
-LISTNODE ParseFileOfFormulae(char * FileName,char * CurrentFileName,
-SIGNATURE Signature,int ExpandIncludes,char * NameFilter) {
+LISTNODE ParseFileOfFormulae(char * FileName,char * CurrentFileName,SIGNATURE Signature,
+int ExpandIncludes,char * NameFilter) {
 
     READFILE Stream; 
     LISTNODE Head;
@@ -2053,15 +2055,14 @@ SIGNATURE Signature,int ExpandIncludes,char * NameFilter) {
         return(NULL);
     }
 
-    Head = ParseREADFILEOfFormulae(Stream,Signature,ExpandIncludes,
-NameFilter);
+    Head = ParseREADFILEOfFormulae(Stream,Signature,ExpandIncludes,NameFilter);
     CloseReadFile(Stream);
 
     return(Head);
 }
 //-------------------------------------------------------------------------------------------------
-LISTNODE ParseStringOfFormulae(char * Content,SIGNATURE Signature,
-int ExpandIncludes,char * NameFilter) {
+LISTNODE ParseStringOfFormulae(char * Content,SIGNATURE Signature,int ExpandIncludes,
+char * NameFilter) {
 
     READFILE Stream;
     LISTNODE Head;
@@ -2070,8 +2071,7 @@ int ExpandIncludes,char * NameFilter) {
         return(NULL);
     }
     
-    Head = ParseREADFILEOfFormulae(Stream,Signature,ExpandIncludes,
-NameFilter);
+    Head = ParseREADFILEOfFormulae(Stream,Signature,ExpandIncludes,NameFilter);
     CloseReadFile(Stream);
     
     return(Head);
@@ -2097,5 +2097,52 @@ VariablesMustBeQuantified);
     CloseReadFile(Stream);
 
     return(Term);
+}
+//-------------------------------------------------------------------------------------------------
+int ParseFileForSZSResults(char * FileName,SZSResultType * SZSResult,SZSOutputType * SZSOutput) {
+
+    SIGNATURE Signature;
+    LISTNODE Head,MovingHead;
+    char * Comment;
+    char * SZSComment;
+    int Index;
+
+    Signature = NewSignatureWithTypes();
+    SetNeedForNonLogicTokens(1);
+    SetAllowFreeVariables(1);
+    *SZSResult = nonszsresult;
+    *SZSOutput = nonszsoutput;
+    if ((Head = ParseFileOfFormulae(FileName,NULL,Signature,1,NULL)) != NULL) {
+        RemovedUnusedSymbols(Signature);
+        MovingHead = Head;
+        while (MovingHead != NULL && (*SZSResult == nonszsresult || *SZSOutput == nonszsoutput)) {
+            if (MovingHead->AnnotatedFormula->Syntax == comment) {
+                Comment = MovingHead->AnnotatedFormula->AnnotatedFormulaUnion.Comment;
+                if ((SZSComment = strstr(Comment,"SZS status ")) != NULL &&
+strlen(SZSComment) > strlen("SZS status ")) {
+                    SZSComment += + strlen("SZS status ");
+                    Index = 0;
+                    while (Index < strlen(SZSComment) && isalpha(SZSComment[Index])) {
+                        Index++;
+                    }
+                    SZSComment[Index] = '\0';
+                    *SZSResult = StringToSZSResult(SZSComment);
+                } else if ((SZSComment = strstr(Comment,"SZS output end ")) != NULL &&
+strlen(SZSComment) > strlen("SZS output end ")) {
+                    SZSComment += + strlen("SZS output end ");
+                    Index = 0;
+                    while (Index < strlen(SZSComment) && isalpha(SZSComment[Index])) {
+                        Index++;
+                    }
+                    SZSComment[Index] = '\0';
+                    *SZSOutput = StringToSZSOutput(SZSComment);
+                }
+            }
+            MovingHead = MovingHead->Next;
+        }
+    }
+    FreeListOfAnnotatedFormulae(&Head,Signature);
+    FreeSignature(&Signature);
+    return(*SZSResult != nonszsresult && *SZSOutput != nonszsoutput);
 }
 //-------------------------------------------------------------------------------------------------

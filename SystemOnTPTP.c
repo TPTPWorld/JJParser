@@ -158,6 +158,7 @@ static SZSOutputType OutputIsaPairs[][2] = {
 SZSResultType StringToSZSResult(char * SZSResult) {
 
     int Index;
+    String ErrorMessage;
 
     for (Index = 0;Index < sizeof(ResultTriples)/sizeof(SZSResultTripleType);Index++) {
         if (!strcasecmp(SZSResult,ResultTriples[Index].TLAString) ||
@@ -166,7 +167,8 @@ SZSResultType StringToSZSResult(char * SZSResult) {
         }
     }
 
-    CodingError("String not an SZSResultType");
+    sprintf(ErrorMessage,"String %s not an SZSResultType",SZSResult);
+    CodingError(ErrorMessage);
     return(nonszsresult);
 }
 //-------------------------------------------------------------------------------------------------
@@ -202,6 +204,7 @@ char * SZSResultToString(SZSResultType SZSResult) {
 SZSOutputType StringToSZSOutput(char * SZSOutput) {
 
     int Index;
+    String ErrorMessage;
 
     for (Index = 0;Index < sizeof(OutputTriples)/sizeof(SZSOutputTripleType);Index++) {
         if (!strcasecmp(SZSOutput,OutputTriples[Index].TLAString) ||
@@ -210,7 +213,8 @@ SZSOutputType StringToSZSOutput(char * SZSOutput) {
         }
     }
 
-    CodingError("String not an SZSOutputType");
+    sprintf(ErrorMessage,"String %s not an SZSOutputType",SZSOutput);
+    CodingError(ErrorMessage);
     return(nonszsoutput);
 }
 //-------------------------------------------------------------------------------------------------

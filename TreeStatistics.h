@@ -13,7 +13,7 @@ typedef struct {
 } SolutionStatisticsType;
 //-------------------------------------------------------------------------------------------------
 SolutionStatisticsType GetSolutionStatistics(LISTNODE Head,SIGNATURE Signature,
-ROOTLIST * RootListHead);
+ROOTLIST * RootListHead,SZSResultType ClaimedSZSResult,SZSOutputType ClaimedSZSOutput);
 void PrintSolutionStatistics(FILE * Stream,SolutionStatisticsType Statistics);
 //-------------------------------------------------------------------------------------------------
 #endif

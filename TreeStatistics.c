@@ -226,26 +226,48 @@ RootListHead->TheTree->NumberOfParents > 0) {
 }
 //-------------------------------------------------------------------------------------------------
 SZSOutputType GetSZSOutputType(LISTNODE Head,ROOTLIST * RootListHead,int * FiniteDomainSize,
-SIGNATURE Signature) {
+SIGNATURE Signature,SZSOutputType ClaimedSZSOuput) {
+
+    String ErrorMessage;
 
     *RootListHead = NULL;
     if (Head == NULL) {
-        return(Non);
+        return(nonszsoutput);
 //----Check for a finite domain
     } else if ((*FiniteDomainSize = HasAFiniteDomain(Head)) > 0) {
+//----If not more specialised than FMo, some shit going on
+        if (!SZSOutputIsA(ClaimedSZSOuput,FMo) && !SZSOutputIsA(FMo,ClaimedSZSOuput)) {
+            sprintf(ErrorMessage,"SZS output says it's a %s, but found a finite domain model",
+SZSOutputToUserString(ClaimedSZSOuput));
+            ReportError(NULL,ErrorMessage,0);
+        }
         return(FMo);
 //----Build a root list, but it might not really be one
     } else if ((*RootListHead = BuildRootList(Head,Signature)) != NULL) {
 //----Refutation is a good root list
         if (IsARefutation(*RootListHead)) {
+            if (!SZSOutputIsA(ClaimedSZSOuput,Ref) && !SZSOutputIsA(Ref,ClaimedSZSOuput)) {
+                sprintf(ErrorMessage,"SZS output says it's a %s, but found a refutation",
+SZSOutputToUserString(ClaimedSZSOuput));
+                ReportError(NULL,ErrorMessage,0);
+            }
             return(Ref);
 //----One tree in the forest is good
         } else if ((*RootListHead)->Next == NULL) {
+            if (!SZSOutputIsA(ClaimedSZSOuput,Der) && !SZSOutputIsA(Der,ClaimedSZSOuput)) {
+                sprintf(ErrorMessage,"SZS output says it's a %s, but found a derivation",
+SZSOutputToUserString(ClaimedSZSOuput));
+                ReportError(NULL,ErrorMessage,0);
+            }
             return(Der);
         } else {
-//TODO check it is a nice list of formulae
             FreeRootList(RootListHead,1,Signature);
-            return(Sat);
+            if (SZSOutputIsA(ClaimedSZSOuput,Sat)) {
+//TODO check it is a nice list of formulae
+                return(Sat);
+            } else {
+                return(nonszsoutput);
+            }
         }
     }
     return(nonszsoutput);
@@ -253,11 +275,12 @@ SIGNATURE Signature) {
 //-------------------------------------------------------------------------------------------------
 //----If the signature is non-NULL use it for symbols
 SolutionStatisticsType GetSolutionStatistics(LISTNODE Head,SIGNATURE Signature,
-ROOTLIST * RootListHead) {
+ROOTLIST * RootListHead,SZSResultType ClaimedSZSResult,SZSOutputType ClaimedSZSOutput) {
 
     SolutionStatisticsType Statistics;
 
-    Statistics.Type = GetSZSOutputType(Head,RootListHead,&Statistics.FiniteDomainSize,Signature);
+    Statistics.Type = GetSZSOutputType(Head,RootListHead,&Statistics.FiniteDomainSize,Signature,
+ClaimedSZSOutput);
     switch (Statistics.Type) {
         case CRf:
         case Ref:
