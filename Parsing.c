@@ -2118,7 +2118,8 @@ int ParseFileForSZSResults(char * FileName,SZSResultType * SZSResult,SZSOutputTy
         while (MovingHead != NULL && (*SZSResult == nonszsresult || *SZSOutput == nonszsoutput)) {
             if (MovingHead->AnnotatedFormula->Syntax == comment) {
                 Comment = MovingHead->AnnotatedFormula->AnnotatedFormulaUnion.Comment;
-                if ((SZSComment = strstr(Comment,"SZS status ")) != NULL &&
+                if (*SZSResult == nonszsresult && 
+(SZSComment = strstr(Comment,"SZS status ")) != NULL &&
 strlen(SZSComment) > strlen("SZS status ")) {
                     SZSComment += + strlen("SZS status ");
                     Index = 0;
@@ -2126,8 +2127,11 @@ strlen(SZSComment) > strlen("SZS status ")) {
                         Index++;
                     }
                     SZSComment[Index] = '\0';
-                    *SZSResult = StringToSZSResult(SZSComment);
-                } else if ((SZSComment = strstr(Comment,"SZS output end ")) != NULL &&
+                    if (StringIsASZSResult(SZSComment)) {
+                        *SZSResult = StringToSZSResult(SZSComment);
+                    }
+                } else if (*SZSOutput == nonszsoutput &&
+(SZSComment = strstr(Comment,"SZS output end ")) != NULL &&
 strlen(SZSComment) > strlen("SZS output end ")) {
                     SZSComment += + strlen("SZS output end ");
                     Index = 0;
@@ -2135,7 +2139,9 @@ strlen(SZSComment) > strlen("SZS output end ")) {
                         Index++;
                     }
                     SZSComment[Index] = '\0';
-                    *SZSOutput = StringToSZSOutput(SZSComment);
+                    if (StringIsASZSOutput(SZSComment)) {
+                        *SZSOutput = StringToSZSOutput(SZSComment);
+                    }
                 }
             }
             MovingHead = MovingHead->Next;

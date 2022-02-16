@@ -25,8 +25,8 @@ typedef SZSResultType * SZSResultArray;
 typedef enum {LDa,
               Sol,
               Prf,Der,Ref,CRf,
-              Int,DIn,FIn,IIn,HIn,
-              Mod,DMo,FMo,IMo,HMo,Sat,
+              Int,HIn,DIn,FIn,IIn,RIn,TIn,
+              Mod,DMo,HMo,FMo,IMo,RMo,TMo,Sat,
               Lof,Lth,Lfo,Lcn,
               NSo,IPr,IRf,ICf,Ass,
               Non,
@@ -54,10 +54,11 @@ typedef struct {
 SZSResultType StringToSZSResult(char * SZSResult);
 char * SZSResultToUserString(SZSResultType SZSResult);
 char * SZSResultToString(SZSResultType SZSResult);
-
+int StringIsASZSResult(char * PossibleResult);
 SZSOutputType StringToSZSOutput(char * SZSOutput);
 char * SZSOutputToUserString(SZSOutputType SZSOutput);
 char * SZSOutputToString(SZSOutputType SZSOutput);
+int StringIsASZSOutput(char * PossibleOutput);
 int SZSIsA(SZSResultType SZSResult,SZSResultType DesiredResult);
 int SZSOutputIsA(SZSOutputType SZSOutput,SZSOutputType DesiredOutput);
 

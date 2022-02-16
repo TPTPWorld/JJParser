@@ -216,13 +216,13 @@ int IsARefutation(ROOTLIST RootListHead) {
         if (CheckRole((*AnnotatedTSTPFormula).Status,axiom_like) ||
 RootListHead->TheTree->NumberOfParents > 0) {
             Formula = GetTreeNodeFormula(RootListHead->TheTree);
-            if (Formula->Type != atom || strcmp("$false",GetSymbol(Formula->FormulaUnion.Atom))) {
-                return(0);
+            if (Formula->Type == atom && !strcmp("$false",GetSymbol(Formula->FormulaUnion.Atom))) {
+                return(1);
             }
         }
         RootListHead = RootListHead->Next;
     }
-    return(1);
+    return(0);
 }
 //-------------------------------------------------------------------------------------------------
 SZSOutputType GetSZSOutputType(LISTNODE Head,ROOTLIST * RootListHead,int * FiniteDomainSize,
@@ -235,8 +235,9 @@ SIGNATURE Signature,SZSOutputType ClaimedSZSOuput) {
         return(nonszsoutput);
 //----Check for a finite domain
     } else if ((*FiniteDomainSize = HasAFiniteDomain(Head)) > 0) {
-//----If not more specialised than FMo, some shit going on
-        if (!SZSOutputIsA(ClaimedSZSOuput,FMo) && !SZSOutputIsA(FMo,ClaimedSZSOuput)) {
+//DEBUG printf("Found a finite domain\n");
+        if (ClaimedSZSOuput != nonszsoutput && !SZSOutputIsA(ClaimedSZSOuput,FMo) && 
+!SZSOutputIsA(FMo,ClaimedSZSOuput)) {
             sprintf(ErrorMessage,"SZS output says it's a %s, but found a finite domain model",
 SZSOutputToUserString(ClaimedSZSOuput));
             ReportError(NULL,ErrorMessage,0);
@@ -244,9 +245,12 @@ SZSOutputToUserString(ClaimedSZSOuput));
         return(FMo);
 //----Build a root list, but it might not really be one
     } else if ((*RootListHead = BuildRootList(Head,Signature)) != NULL) {
+//DEBUG printf("Built rootlist\n");
 //----Refutation is a good root list
         if (IsARefutation(*RootListHead)) {
-            if (!SZSOutputIsA(ClaimedSZSOuput,Ref) && !SZSOutputIsA(Ref,ClaimedSZSOuput)) {
+//DEBUG printf("Rootlist is a refutation\n");
+            if (ClaimedSZSOuput != nonszsoutput && !SZSOutputIsA(ClaimedSZSOuput,Ref) && 
+!SZSOutputIsA(Ref,ClaimedSZSOuput)) {
                 sprintf(ErrorMessage,"SZS output says it's a %s, but found a refutation",
 SZSOutputToUserString(ClaimedSZSOuput));
                 ReportError(NULL,ErrorMessage,0);
@@ -254,17 +258,22 @@ SZSOutputToUserString(ClaimedSZSOuput));
             return(Ref);
 //----One tree in the forest is good
         } else if ((*RootListHead)->Next == NULL) {
-            if (!SZSOutputIsA(ClaimedSZSOuput,Der) && !SZSOutputIsA(Der,ClaimedSZSOuput)) {
+//DEBUG printf("Rootlist not a refutation\n");
+            if (ClaimedSZSOuput != nonszsoutput && !SZSOutputIsA(ClaimedSZSOuput,Der) && 
+!SZSOutputIsA(Der,ClaimedSZSOuput)) {
                 sprintf(ErrorMessage,"SZS output says it's a %s, but found a derivation",
 SZSOutputToUserString(ClaimedSZSOuput));
                 ReportError(NULL,ErrorMessage,0);
             }
             return(Der);
         } else {
+//DEBUG printf("Some kind of list\n");
             FreeRootList(RootListHead,1,Signature);
             if (SZSOutputIsA(ClaimedSZSOuput,Sat)) {
 //TODO check it is a nice list of formulae
                 return(Sat);
+            } else if (SZSOutputIsA(ClaimedSZSOuput,Mod)) {
+                return(TMo);
             } else {
                 return(nonszsoutput);
             }
@@ -281,6 +290,7 @@ ROOTLIST * RootListHead,SZSResultType ClaimedSZSResult,SZSOutputType ClaimedSZSO
 
     Statistics.Type = GetSZSOutputType(Head,RootListHead,&Statistics.FiniteDomainSize,Signature,
 ClaimedSZSOutput);
+//DEBUG printf("Soln is a %s\n",SZSOutputToUserString(Statistics.Type));
     switch (Statistics.Type) {
         case CRf:
         case Ref:
@@ -290,6 +300,7 @@ ClaimedSZSOutput);
         case FMo:
 //----Got the size in GetSZSOutputType
             break;
+        case TMo:
         case Sat:
             Statistics.FormulaeStatistics = GetListStatistics(Head,Signature);
             break;
@@ -315,6 +326,7 @@ void PrintSolutionStatistics(FILE * Stream,SolutionStatisticsType Statistics) {
         case FMo:
             PrintFiniteModelStatistics(Stream,Statistics);
             break;
+        case TMo:
         case Sat:
             PrintListStatistics(Stream,Statistics.FormulaeStatistics);
             break;

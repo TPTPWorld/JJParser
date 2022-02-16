@@ -116,14 +116,18 @@ static SZSOutputTripleType OutputTriples[] = {
     {CRf,"CRf","CNFRefutation"},
     {Int,"Int","Interpretation"},
     {DIn,"DIn","DomainInterpretation"},
-    {FIn,"FIn","FiniteInterpretation"},
-    {IIn,"IIn","InfiniteInterpretation"},
     {HIn,"HIn","HerbrandInterpretation"},
+    {FIn,"FIn","FiniteInterpretation"},
+    {IIn,"IIn","IntegerInterpretation"},
+    {RIn,"RIn","RealInterpretation"},
+    {TIn,"TIn","FormulaInterpretation"},
     {Mod,"Mod","Model"},
     {DMo,"DMo","DomainModel"},
-    {FMo,"FMo","FiniteModel"},
-    {IMo,"IMo","InfiniteModel"},
     {HMo,"HMo","HerbrandModel"},
+    {FMo,"FMo","FiniteModel"},
+    {IMo,"IMo","IntegerModel"},
+    {RMo,"RMo","RealModel"},
+    {TMo,"TMo","FormulaModel"},
     {Sat,"Sat","Saturation"},
     {Lof,"Lof","ListOfFormulae"},
     {Lth,"Lth","ListOfTHF"},
@@ -142,13 +146,13 @@ static SZSOutputType OutputIsaPairs[][2] = {
     {Prf,Sol},{Int,Sol},{Lof,Sol},
     {Der,Prf},{Ref,Prf},
     {CRf,Ref},
-    {DIn,Int},{Mod,Int},
-    {FIn,DIn},{IIn,DIn},{HIn,DIn},{DMo,DIn},
-    {FMo,FIn},
-    {IMo,IIn},
-    {HMo,HIn},
-    {DMo,Mod},{Sat,Mod},
-    {FMo,DMo},{IMo,DMo},{HMo,DMo},
+    {DIn,Int},{HIn,Int},
+    {FIn,DIn},{IIn,DIn},{RIn,DIn},
+    {TIn,HIn},
+    {Mod,Int},
+    {DMo,Mod},{HMo,Mod},
+    {FMo,DMo},{IMo,DMo},{RMo,DMo},
+    {TMo,HMo},{Sat,HMo},
     {Lth,Lof},{Lfo,Lof},{Lcn,Lof},
     {IPr,NSo},{Ass,NSo},
     {IRf,IPr},
@@ -201,6 +205,18 @@ char * SZSResultToString(SZSResultType SZSResult) {
     return(NULL);
 }
 //-------------------------------------------------------------------------------------------------
+int StringIsASZSResult(char * PossibleResult) {
+
+    int Index;
+
+    for (Index = 0;Index < sizeof(ResultTriples)/sizeof(SZSResultTripleType);Index++) {
+        if (!strcmp(PossibleResult,ResultTriples[Index].UserString)) {
+            return(1);
+        }
+    }
+    return(0);
+}
+//-------------------------------------------------------------------------------------------------
 SZSOutputType StringToSZSOutput(char * SZSOutput) {
 
     int Index;
@@ -244,6 +260,18 @@ char * SZSOutputToString(SZSOutputType SZSOutput) {
 
     CodingError("Not a SZSOutputType to convert to string");
     return(NULL);
+}
+//-------------------------------------------------------------------------------------------------
+int StringIsASZSOutput(char * PossibleOutput) {
+
+    int Index;
+
+    for (Index = 0;Index < sizeof(OutputTriples)/sizeof(SZSOutputTripleType);Index++) {
+        if (!strcmp(PossibleOutput,OutputTriples[Index].UserString)) {
+            return(1);
+        }
+    }
+    return(0);
 }
 //-------------------------------------------------------------------------------------------------
 int SZSIsA(SZSResultType SZSResult,SZSResultType DesiredResult) {
