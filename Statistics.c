@@ -24,6 +24,8 @@ void InitializeFormulaStatistics(FormulaStatisticsType * FormulaStatistics) {
     FormulaStatistics->NumberOfVariableAtoms = 0;
     FormulaStatistics->NumberOfNestedFormulae = 0;
 
+    FormulaStatistics->MaxFormulaAtoms = 0;
+    FormulaStatistics->AverageFormulaAtoms = 0;
     FormulaStatistics->MaxFormulaDepth = 0;
     FormulaStatistics->AverageFormulaDepth = 0;
     FormulaStatistics->MaxTermDepth = 0;
@@ -38,8 +40,6 @@ void InitializeFormulaStatistics(FormulaStatisticsType * FormulaStatistics) {
 
     FormulaStatistics->NumberOfHornClauses = 0;
     FormulaStatistics->NumberOfRRClauses = 0;
-    FormulaStatistics->MaxClauseSize = 0;
-    FormulaStatistics->AverageClauseSize = 0;
 }
 //-------------------------------------------------------------------------------------------------
 void InitializeSymbolStatistics(SymbolStatisticsType * SymbolStatistics) {

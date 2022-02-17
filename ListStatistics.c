@@ -480,16 +480,15 @@ horn_clauses);
     Statistics.FormulaStatistics.NumberOfRRClauses = HeadListCount(Signature,&HeadListNode,
 rr_clauses);
 //DEBUG printf("PROGRESS: counted RR clauses\n");
-    Statistics.FormulaStatistics.MaxClauseSize = HeadListMaximal(Signature,&HeadListNode,literals);
+    Statistics.FormulaStatistics.MaxFormulaAtoms = HeadListMaximal(Signature,&HeadListNode,literals);
 //DEBUG printf("PROGRESS: got max clause size\n");
     if (
 Statistics.FormulaStatistics.NumberOfTCF > 0 ||
 Statistics.FormulaStatistics.NumberOfCNF > 0) {
-        Statistics.FormulaStatistics.AverageClauseSize = 
-Statistics.FormulaStatistics.NumberOfAtoms / 
-(Statistics.FormulaStatistics.NumberOfTCF + Statistics.FormulaStatistics.NumberOfCNF);
+        Statistics.FormulaStatistics.AverageFormulaAtoms = 
+Statistics.FormulaStatistics.NumberOfAtoms / Statistics.FormulaStatistics.NumberOfFormulae;
     } else {
-        Statistics.FormulaStatistics.AverageClauseSize = 0.0;
+        Statistics.FormulaStatistics.AverageFormulaAtoms = 0.0;
     }
 //DEBUG printf("PROGRESS: counted THF and CNF formula types\n");
 
@@ -593,46 +592,42 @@ Statistics.FormulaStatistics.NumberOfTFF > 0 ||
 Statistics.FormulaStatistics.NumberOfFOF > 0) {
             fprintf(Stream,";%4d def",Statistics.FormulaStatistics.NumberOfDefnFormulae);
         }
-    fprintf(Stream,")\n");
-    } 
-    if (
+        fprintf(Stream,")\n");
+        fprintf(Stream,"%%            Number of atoms       : ");
+        fprintf(Stream,"%4d (%4d equ",Statistics.FormulaStatistics.NumberOfAtoms,
+Statistics.FormulaStatistics.NumberOfEqualityAtoms);
+        if (Statistics.FormulaStatistics.NumberOfTHF > 0) {
+            fprintf(Stream,";%4d eqs;%4d cnn",
+Statistics.ConnectiveStatistics.NumberOfEqualitySymbols + 
+Statistics.ConnectiveStatistics.NumberOfTypedEqualitySymbols,
+Statistics.FormulaStatistics.NumberOfConnectiveAtoms);
+        }
+        fprintf(Stream,")\n");
+        fprintf(Stream,"%%            Maximal formula atoms : %4d (%4.0f avg)\n",
+Statistics.FormulaStatistics.MaxFormulaAtoms,Statistics.FormulaStatistics.AverageFormulaAtoms);
+    } else if (
 Statistics.FormulaStatistics.NumberOfTCF > 0 ||
 Statistics.FormulaStatistics.NumberOfCNF > 0) {
-        if (
-Statistics.FormulaStatistics.NumberOfTHF > 0 || 
-Statistics.FormulaStatistics.NumberOfTFF > 0 ||
-Statistics.FormulaStatistics.NumberOfFOF > 0) {
-            fprintf(Stream,"%%            ");
-        } else {
-            fprintf(Stream,"%% Syntax   : ");
-        }
+        fprintf(Stream,"%% Syntax   : ");
         fprintf(Stream,"Number of clauses     : %4d (%4d unt;%4d nHn;%4d RR)\n",
 Statistics.FormulaStatistics.NumberOfTCF + Statistics.FormulaStatistics.NumberOfCNF,
 Statistics.FormulaStatistics.NumberOfUnitFormulae,
 Statistics.FormulaStatistics.NumberOfTCF + Statistics.FormulaStatistics.NumberOfCNF -
 Statistics.FormulaStatistics.NumberOfHornClauses,
 Statistics.FormulaStatistics.NumberOfRRClauses);
+        fprintf(Stream,"%%            Number of literals    : ");
+        fprintf(Stream,"%4d (%4d equ",Statistics.FormulaStatistics.NumberOfAtoms,
+Statistics.FormulaStatistics.NumberOfEqualityAtoms);
+        fprintf(Stream,";%4d neg",Statistics.ConnectiveStatistics.NumberOfNegations);
+        fprintf(Stream,")\n");
+        fprintf(Stream,"%%            Maximal clause size   : %4d (%4.0f avg)\n",
+Statistics.FormulaStatistics.MaxFormulaAtoms,Statistics.FormulaStatistics.AverageFormulaAtoms);
     }
     if (Statistics.ConnectiveStatistics.NumberOfGlobalDefns > 0) {
         fprintf(Stream,"%%            Number of defns       : %4d\n",
 Statistics.ConnectiveStatistics.NumberOfGlobalDefns);
     }
 
-    if (
-Statistics.FormulaStatistics.NumberOfTCF > 0 ||
-Statistics.FormulaStatistics.NumberOfCNF > 0) {
-        fprintf(Stream,"%%            Number of literals    : ");
-    } else {
-        fprintf(Stream,"%%            Number of atoms       : ");
-    }
-    fprintf(Stream,"%4d (%4d equ",Statistics.FormulaStatistics.NumberOfAtoms,
-Statistics.FormulaStatistics.NumberOfEqualityAtoms);
-    if (Statistics.FormulaStatistics.NumberOfTHF > 0) {
-        fprintf(Stream,";%4d eqs;%4d cnn",
-Statistics.ConnectiveStatistics.NumberOfEqualitySymbols + 
-Statistics.ConnectiveStatistics.NumberOfTypedEqualitySymbols,
-Statistics.FormulaStatistics.NumberOfConnectiveAtoms);
-    }
 //----Right now I can't tell of a variable occurence is an atom (variable of type $o) or a 
 //----regular term variable.
 //    if (
@@ -641,12 +636,6 @@ Statistics.FormulaStatistics.NumberOfConnectiveAtoms);
 // Statistics.FormulaStatistics.NumberOfVariableAtoms > 0)) {
 //        fprintf(Stream,";%4d var",Statistics.FormulaStatistics.NumberOfVariableAtoms);
 //    }
-    if (
-Statistics.FormulaStatistics.NumberOfTCF > 0 ||
-Statistics.FormulaStatistics.NumberOfCNF > 0) {
-        fprintf(Stream,";%4d neg",Statistics.ConnectiveStatistics.NumberOfNegations);
-    }
-    fprintf(Stream,")\n");
 
     if (
 Statistics.FormulaStatistics.NumberOfTHF > 0 || 
@@ -691,13 +680,7 @@ Statistics.FormulaStatistics.MaxFormulaDepth,Statistics.FormulaStatistics.Averag
             fprintf(Stream,";%4d nst",Statistics.ConnectiveStatistics.NumberOfApplications);
         }
         fprintf(Stream,")\n");
-    }
-    if (
-Statistics.FormulaStatistics.NumberOfTCF > 0 ||
-Statistics.FormulaStatistics.NumberOfCNF > 0) {
-        fprintf(Stream,"%%            Maximal clause size   : %4d (%4.0f avg)\n",
-Statistics.FormulaStatistics.MaxClauseSize,Statistics.FormulaStatistics.AverageClauseSize);
-    }
+    } 
 
     if (
 Statistics.FormulaStatistics.NumberOfTFF > 0 ||

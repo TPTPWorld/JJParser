@@ -61,10 +61,12 @@ int GetTreeDepth(TREENODE Tree) {
     int index;
 
     Depth = 0;
-    for (index = 0;index < Tree->NumberOfParents;index++) {
-        Depth = MaximumOfInt(Depth,GetTreeDepth(Tree->Parents[index]));
+    if (Tree->NumberOfParents > 0) {
+        for (index = 0;index < Tree->NumberOfParents;index++) {
+            Depth = MaximumOfInt(Depth,GetTreeDepth(Tree->Parents[index]));
+        }
+        Depth++;
     }
-    Depth++;
     return(Depth);
 }
 //-------------------------------------------------------------------------------------------------

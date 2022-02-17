@@ -69,6 +69,8 @@ typedef struct {
     int NumberOfVariableAtoms;
     int NumberOfNestedFormulae;
 
+    int MaxFormulaAtoms;
+    double AverageFormulaAtoms;
     int MaxFormulaDepth;
     double AverageFormulaDepth;
     int MaxTermDepth;
@@ -83,8 +85,6 @@ typedef struct {
 //----Only for CNF
     int NumberOfHornClauses;
     int NumberOfRRClauses;
-    int MaxClauseSize;
-    double AverageClauseSize;
 } FormulaStatisticsType;
 
 typedef struct {
