@@ -454,7 +454,8 @@ variable_atoms);
 
     Statistics.FormulaStatistics.MaxFormulaDepth = HeadListMaximal(Signature,&HeadListNode,
 max_formula_depth);
-    if (Statistics.FormulaStatistics.NumberOfFormulae > 0) {
+    if (Statistics.FormulaStatistics.NumberOfFormulae - 
+Statistics.FormulaStatistics.NumberOfTypeFormulae> 0) {
         Statistics.FormulaStatistics.AverageFormulaDepth = (int)round(
 HeadListCount(Signature,&HeadListNode,formula_depth) / 
 (double)(Statistics.FormulaStatistics.NumberOfFormulae - 
@@ -482,9 +483,7 @@ rr_clauses);
 //DEBUG printf("PROGRESS: counted RR clauses\n");
     Statistics.FormulaStatistics.MaxFormulaAtoms = HeadListMaximal(Signature,&HeadListNode,literals);
 //DEBUG printf("PROGRESS: got max clause size\n");
-    if (
-Statistics.FormulaStatistics.NumberOfTCF > 0 ||
-Statistics.FormulaStatistics.NumberOfCNF > 0) {
+    if (Statistics.FormulaStatistics.NumberOfFormulae > 0) {
         Statistics.FormulaStatistics.AverageFormulaAtoms = 
 Statistics.FormulaStatistics.NumberOfAtoms / Statistics.FormulaStatistics.NumberOfFormulae;
     } else {
@@ -593,14 +592,15 @@ Statistics.FormulaStatistics.NumberOfFOF > 0) {
             fprintf(Stream,";%4d def",Statistics.FormulaStatistics.NumberOfDefnFormulae);
         }
         fprintf(Stream,")\n");
-        fprintf(Stream,"%%            Number of atoms       : ");
-        fprintf(Stream,"%4d (%4d equ",Statistics.FormulaStatistics.NumberOfAtoms,
-Statistics.FormulaStatistics.NumberOfEqualityAtoms);
+        fprintf(Stream,"%%            Number of atoms       : %4d",
+Statistics.FormulaStatistics.NumberOfAtoms);
         if (Statistics.FormulaStatistics.NumberOfTHF > 0) {
-            fprintf(Stream,";%4d eqs;%4d cnn",
+            fprintf(Stream," (%4d equ;%4d cnn",
 Statistics.ConnectiveStatistics.NumberOfEqualitySymbols + 
 Statistics.ConnectiveStatistics.NumberOfTypedEqualitySymbols,
 Statistics.FormulaStatistics.NumberOfConnectiveAtoms);
+        } else {
+            fprintf(Stream," (%4d equ",Statistics.FormulaStatistics.NumberOfEqualityAtoms);
         }
         fprintf(Stream,")\n");
         fprintf(Stream,"%%            Maximal formula atoms : %4d (%4.0f avg)\n",
@@ -692,23 +692,6 @@ Statistics.FormulaStatistics.MaxTermDepth,Statistics.FormulaStatistics.AverageTe
     }
 
     if (
-Statistics.FormulaStatistics.NumberOfMathAtoms > 0 ||
-Statistics.FormulaStatistics.NumberOfMathTerms > 0 ||
-Statistics.FormulaStatistics.NumberOfNumbers > 0 ||
-Statistics.ConnectiveStatistics.NumberOfMathVariables > 0 ) {
-        fprintf(Stream,
-"%%            Number arithmetic     : %4d (%4d atm;%4d fun;%4d num;%4d var)\n",
-Statistics.FormulaStatistics.NumberOfMathAtoms + 
-Statistics.FormulaStatistics.NumberOfMathTerms +
-Statistics.FormulaStatistics.NumberOfNumbers +
-Statistics.ConnectiveStatistics.NumberOfMathVariables,
-Statistics.FormulaStatistics.NumberOfMathAtoms,
-Statistics.FormulaStatistics.NumberOfMathTerms,
-Statistics.FormulaStatistics.NumberOfNumbers,
-Statistics.ConnectiveStatistics.NumberOfMathVariables);
-    }
-
-    if (
 Statistics.FormulaStatistics.NumberOfTFF > 0 &&
 (Statistics.FormulaStatistics.NumberOfNestedFormulae > 0 ||
  Statistics.SymbolStatistics.NumberOfBooleanVariables > 0)) {
@@ -730,6 +713,23 @@ Statistics.FormulaStatistics.NumberOfTuples +
 Statistics.FormulaStatistics.NumberOfITEs + Statistics.FormulaStatistics.NumberOfLets,
 Statistics.FormulaStatistics.NumberOfTuples,Statistics.FormulaStatistics.NumberOfITEs,
 Statistics.FormulaStatistics.NumberOfLets);
+    }
+
+    if (
+Statistics.FormulaStatistics.NumberOfMathAtoms > 0 ||
+Statistics.FormulaStatistics.NumberOfMathTerms > 0 ||
+Statistics.FormulaStatistics.NumberOfNumbers > 0 ||
+Statistics.ConnectiveStatistics.NumberOfMathVariables > 0 ) {
+        fprintf(Stream,
+"%%            Number arithmetic     : %4d (%4d atm;%4d fun;%4d num;%4d var)\n",
+Statistics.FormulaStatistics.NumberOfMathAtoms + 
+Statistics.FormulaStatistics.NumberOfMathTerms +
+Statistics.FormulaStatistics.NumberOfNumbers +
+Statistics.ConnectiveStatistics.NumberOfMathVariables,
+Statistics.FormulaStatistics.NumberOfMathAtoms,
+Statistics.FormulaStatistics.NumberOfMathTerms,
+Statistics.FormulaStatistics.NumberOfNumbers,
+Statistics.ConnectiveStatistics.NumberOfMathVariables);
     }
 
     if (

@@ -970,7 +970,7 @@ VARIABLENODE * EndOfScope,int VariablesMustBeQuantified) {
     Formula->Type = atom;
     Formula->FormulaUnion.Atom = ParseTerm(Stream,Language,Context,EndOfScope,atom_as_term,none,
 &InfixNegatedAtom,VariablesMustBeQuantified);
-//DEBUG printf("Atom symbol is %s and the arity is %d and the args are %s\n",GetSymbol(Formula->FormulaUnion.Atom),GetArity(Formula->FormulaUnion.Atom),GetArguments(Formula->FormulaUnion.Atom) == NULL ? "NULL" : "not NULL");
+//DEBUG printf("Atom symbol is %s and the arity is %d and the args are %s and the sig has %d uses\n",GetSymbol(Formula->FormulaUnion.Atom),GetArity(Formula->FormulaUnion.Atom),GetArguments(Formula->FormulaUnion.Atom) == NULL ? "NULL" : "not NULL",Formula->FormulaUnion.Atom->TheSymbol.NonVariable->NumberOfUses);
 //DEBUG printf("Parsed an atom: ");PrintTSTPTerm(stdout,Language,Formula->FormulaUnion.Atom,0,1,1);printf("\n");
 
 //----Hack to fix negated infix equality
@@ -1331,6 +1331,7 @@ ConnectiveType LastConnective) {
     String ErrorMessage;
     TermType NewTermType;
     SYMBOLNODE * ToDeletePtr;
+    SYMBOLNODE ExistingType;
     char * LHSSymbol;
     int LHSSymbolArity;
 
@@ -1449,19 +1450,25 @@ FormulaUnion.Atom);
                     LHSSymbolArity = GetArity(BinaryFormula->FormulaUnion.BinaryFormula.LHS->
 FormulaUnion.Atom);
 //----If a declaration of a type in THF or TFF, move the LHS to Types in signature
-                    if (BinaryFormula->FormulaUnion.BinaryFormula.RHS->Type == atom &&
+//TODO What about TH1 with constructors?
+                    if (LHSSymbolArity == 0 && 
+BinaryFormula->FormulaUnion.BinaryFormula.RHS->Type == atom &&
 BinaryFormula->FormulaUnion.BinaryFormula.RHS->FormulaUnion.Atom->Type == a_type &&
 !strcmp("$tType",GetSymbol(BinaryFormula->FormulaUnion.BinaryFormula.RHS->FormulaUnion.Atom))) {
-                        if (IsSymbolInSignatureList(Context.Signature->Types,LHSSymbol,0)) {
-                            sprintf(ErrorMessage,"Duplicate type declaration for %s",LHSSymbol);
-                            TokenError(Stream,ErrorMessage);
-                            return(NULL);
-                        }
-                        if (MoveSignatureNode(&(Context.Signature->Predicates),
+//----No no no. Duplicate type declarations are allowed! Only one instance of the type is kept
+//----in the signature. Symbols that are known to be types are detected as such up above.
+//DEBUG printf("DEBUG Checking for existing type %s\n",GetSymbol(BinaryFormula->FormulaUnion.BinaryFormula.LHS->FormulaUnion.Atom));
+                        if ((ExistingType = IsSymbolInSignatureList(
+Context.Signature->Types,LHSSymbol,0)) == NULL) {
+//DEBUG printf("DEBUG Do not have existing type %s\n",GetSymbol(BinaryFormula->FormulaUnion.BinaryFormula.LHS->FormulaUnion.Atom));
+                            if (MoveSignatureNode(&(Context.Signature->Predicates),
 &(Context.Signature->Types),LHSSymbol,0,Stream) == NULL) {
-                            sprintf(ErrorMessage,"Could not move %s to types",LHSSymbol);
-                            TokenError(Stream,ErrorMessage);
-                            return(NULL);
+                                sprintf(ErrorMessage,"Could not move %s to types",LHSSymbol);
+                                TokenError(Stream,ErrorMessage);
+                                return(NULL);
+                            }
+                        } else {
+//DEBUG printf("DEBUG We have existing type %s\n",GetSymbol(BinaryFormula->FormulaUnion.BinaryFormula.LHS->FormulaUnion.Atom));
                         }
 //----In TFF a declared function might have been put in predicates, in both arity might be wrong
                     } else {

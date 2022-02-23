@@ -6,6 +6,7 @@
 
 #include "DataTypes.h"
 #include "Utilities.h"
+#include "FileUtilities.h"
 #include "Signature.h"
 #include "Parsing.h"
 #include "List.h"
@@ -390,7 +391,7 @@ int IsMathPredicate(char * Symbol,int Arity) {
         "$greatereq/2",
         "$is_int/1",
         "$is_rat/1" };
-    String LookFor;
+    SuperString LookFor;
     int Index;
 
     sprintf(LookFor,"%s/%d",Symbol,Arity);
@@ -423,7 +424,7 @@ int IsMathFunctor(char * Symbol,int Arity) {
         "$to_int/1",
         "$to_rat/1",
         "$to_real/1" };
-    String LookFor;
+    SuperString LookFor;
     int Index;
 
     sprintf(LookFor,"%s/%d",Symbol,Arity);
@@ -1933,6 +1934,8 @@ int DoNested) {
     int Count;
     String ErrorMessage;
 
+//DEBUG printf("Counting %s in\n",Predicate);
+//DEBUG PrintFileTSTPFormula(OpenFILEPrintFile(stdout,NULL),tptp_thf,Formula,0,1,outermost,1);
     Count = 0;
     switch(Formula->Type) {
         case sequent:

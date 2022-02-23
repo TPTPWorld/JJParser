@@ -28,6 +28,8 @@ void PrintTSTPTerm(FILE * Stream,SyntaxType Language,TERM Term,int Indent,int Pr
 int TSTPSyntaxFlag);
 void PrintFileTermList(PRINTFILE Stream,SyntaxType Language,TERM Term,int Pretty,int Indent,
 char OpeningBracket,char ClosingBracket,int TSTPSyntaxFlag);
+void PrintFileTSTPFormula(PRINTFILE Stream,SyntaxType Language,FORMULA Formula,
+int Indent,int Pretty,ConnectiveType LastConnective,int TSTPSyntaxFlag);
 void PrintTSTPFormula(FILE * Stream,SyntaxType Language,FORMULA Formula,int Indent,int Pretty,
 ConnectiveType LastConnective,int TSTPSyntaxFlag);
 void PrintAnnotatedTSTPFormula(FILE * Stream,SyntaxType Syntax,

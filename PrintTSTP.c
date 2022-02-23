@@ -19,11 +19,6 @@
 #include "PrintSMT2.h"
 #include "PrintSUMO.h"
 //-------------------------------------------------------------------------------------------------
-void PrintFileTSTPFormula(PRINTFILE Stream,SyntaxType Language,FORMULA Formula,
-int Indent,int Pretty,ConnectiveType LastConnective,int TSTPSyntaxFlag);
-//----Pretty = 0 means one line, lots of ()s
-//----Pretty = 1 means nicest human readable
-
 static int PrintShortSymbols = 0;
 //-------------------------------------------------------------------------------------------------
 void SetPrintShortSymbols(int Choice) {
@@ -1119,7 +1114,8 @@ AnnotatedTSTPFormulaType AnnotatedTSTPFormula,PrintFormatType Format,int Pretty)
             PrintSpaces(Stream,4);
 //----Things that start on a new line alone
             if (OutermostWithoutBrackets(AnnotatedTSTPFormula.FormulaWithVariables->Formula)) {
-                PrintFileTSTPFormula(Stream,Language, AnnotatedTSTPFormula.FormulaWithVariables->Formula,4,Pretty,outermost,1);
+                PrintFileTSTPFormula(Stream,Language,
+AnnotatedTSTPFormula.FormulaWithVariables->Formula,4,Pretty,outermost,1);
             } else {
 //----Things that need ()s on the new line
                 PrintFileTSTPFormula(Stream,Language,
