@@ -820,7 +820,10 @@ Statistics.SymbolStatistics.NumberOfVariables);
 Statistics.FormulaStatistics.NumberOfTCF > 0 ||
 Statistics.FormulaStatistics.NumberOfCNF > 0) {
         fprintf(Stream,"%4d sgn",Statistics.SymbolStatistics.NumberOfSingletons);
-    } else if (
+    } else if (Statistics.FormulaStatistics.NumberOfTHF > 0) {
+        fprintf(Stream,"%4d   ^",Statistics.ConnectiveStatistics.NumberOfLambdas);
+    } 
+    if (
 Statistics.FormulaStatistics.NumberOfTHF > 0 ||
 Statistics.FormulaStatistics.NumberOfTFF > 0 ||
 Statistics.FormulaStatistics.NumberOfFOF > 0 ||
@@ -834,17 +837,11 @@ Statistics.FormulaStatistics.NumberOfTFF > 0 ||
 Statistics.FormulaStatistics.NumberOfTCF > 0) {
             fprintf(Stream,";%4d   :",Statistics.ConnectiveStatistics.NumberOfTypedVariables);
         }
-        if (Statistics.FormulaStatistics.NumberOfTHF > 0) {
-            fprintf(Stream,";%4d   ^",Statistics.ConnectiveStatistics.NumberOfLambdas);
-        } else if (
-Statistics.FormulaStatistics.NumberOfTFF > 0 &&
-Statistics.ConnectiveStatistics.NumberOfPiBinders > 0) {
-            fprintf(Stream,";%4d  !>",Statistics.ConnectiveStatistics.NumberOfPiBinders);
-        }
     }
     fprintf(Stream,")\n");
     if (
-Statistics.FormulaStatistics.NumberOfTHF > 0 &&
+(Statistics.FormulaStatistics.NumberOfTHF > 0 ||
+ Statistics.FormulaStatistics.NumberOfTFF > 0) &&
 (Statistics.ConnectiveStatistics.NumberOfPiBinders > 0 ||
  Statistics.ConnectiveStatistics.NumberOfSigmaBinders > 0 ||
  Statistics.ConnectiveStatistics.NumberOfDescriptionBinders > 0 ||
