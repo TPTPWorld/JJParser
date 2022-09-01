@@ -116,20 +116,21 @@ GetListNodeFormula(List)->Type == sequent) {
                     break;
                 case tuples:
                     if (GetSyntax(List->AnnotatedFormula) == tptp_thf ||
-GetSyntax(List->AnnotatedFormula) == tptp_tff) {
+GetSyntax(List->AnnotatedFormula) == tptp_tff ||
+GetSyntax(List->AnnotatedFormula) == tptp_tcf) {
                         Counter += CountFormulaTuples(GetListNodeFormula(List));
                     }
                     break;
                 case ite_forms:
                     if (GetSyntax(List->AnnotatedFormula) == tptp_thf ||
-GetSyntax(List->AnnotatedFormula) == tptp_tff) {
+GetSyntax(List->AnnotatedFormula) == tptp_tff || GetSyntax(List->AnnotatedFormula) == tptp_tcf) {
                         Counter += CountFormulaAtomsByPredicate(Signature,GetListNodeFormula(List),
 "$ite",1);
                     }
                     break;
                 case let_forms:
                     if (GetSyntax(List->AnnotatedFormula) == tptp_thf ||
-GetSyntax(List->AnnotatedFormula) == tptp_tff) {
+GetSyntax(List->AnnotatedFormula) == tptp_tff || GetSyntax(List->AnnotatedFormula) == tptp_tcf) {
                         Counter += CountFormulaAtomsByPredicate(Signature,GetListNodeFormula(List),
 "$let",1);
                     }
@@ -165,13 +166,13 @@ GetSyntax(List->AnnotatedFormula) == tptp_tff || GetSyntax(List->AnnotatedFormul
                     break;
                 case nested_formulae:
                     if (GetSyntax(List->AnnotatedFormula) == tptp_thf ||
-GetSyntax(List->AnnotatedFormula) == tptp_tff) {
+GetSyntax(List->AnnotatedFormula) == tptp_tff || GetSyntax(List->AnnotatedFormula) == tptp_tcf) {
                         Counter += CountNestedFormulae(Signature,GetListNodeFormula(List),0);
                     }
                     break;
                 case boolean_variables:
                     if (GetSyntax(List->AnnotatedFormula) == tptp_thf ||
-GetSyntax(List->AnnotatedFormula) == tptp_tff) {
+GetSyntax(List->AnnotatedFormula) == tptp_tff || GetSyntax(List->AnnotatedFormula) == tptp_tcf) {
                         Counter += CountVariablesInFormulaByType(GetListNodeFormula(List),"$o");
                     }
                     break;
@@ -485,7 +486,8 @@ rr_clauses);
 //DEBUG printf("PROGRESS: got max clause size\n");
     if (Statistics.FormulaStatistics.NumberOfFormulae > 0) {
         Statistics.FormulaStatistics.AverageFormulaAtoms = 
-Statistics.FormulaStatistics.NumberOfAtoms / Statistics.FormulaStatistics.NumberOfFormulae;
+Statistics.FormulaStatistics.NumberOfAtoms / 
+(Statistics.FormulaStatistics.NumberOfFormulae - Statistics.FormulaStatistics.NumberOfTypeFormulae);
     } else {
         Statistics.FormulaStatistics.AverageFormulaAtoms = 0.0;
     }
@@ -674,12 +676,8 @@ Statistics.ConnectiveStatistics.NumberOfNands);
 Statistics.FormulaStatistics.NumberOfTHF > 0 || 
 Statistics.FormulaStatistics.NumberOfTFF > 0 ||
 Statistics.FormulaStatistics.NumberOfFOF > 0) {
-        fprintf(Stream,"%%            Maximal formula depth : %4d (%4.0f avg",
+        fprintf(Stream,"%%            Maximal formula depth : %4d (%4.0f avg)\n",
 Statistics.FormulaStatistics.MaxFormulaDepth,Statistics.FormulaStatistics.AverageFormulaDepth);
-        if (Statistics.ConnectiveStatistics.NumberOfApplications) {
-            fprintf(Stream,";%4d nst",Statistics.ConnectiveStatistics.NumberOfApplications);
-        }
-        fprintf(Stream,")\n");
     } 
 
     if (
@@ -814,31 +812,38 @@ Statistics.SymbolStatistics.NumberOfConstants);
     }
 
 //----Variables
-    fprintf(Stream,"%%            Number of variables   : %4d (",
-Statistics.SymbolStatistics.NumberOfVariables);
-    if (
-Statistics.FormulaStatistics.NumberOfTCF > 0 ||
-Statistics.FormulaStatistics.NumberOfCNF > 0) {
-        fprintf(Stream,"%4d sgn",Statistics.SymbolStatistics.NumberOfSingletons);
-    } else if (Statistics.FormulaStatistics.NumberOfTHF > 0) {
-        fprintf(Stream,"%4d   ^",Statistics.ConnectiveStatistics.NumberOfLambdas);
-    } 
     if (
 Statistics.FormulaStatistics.NumberOfTHF > 0 ||
 Statistics.FormulaStatistics.NumberOfTFF > 0 ||
 Statistics.FormulaStatistics.NumberOfFOF > 0 ||
-Statistics.FormulaStatistics.NumberOfTCF > 0) {
-        fprintf(Stream,"%4d   !;%4d   ?",
-Statistics.ConnectiveStatistics.NumberOfUniversals,
-Statistics.ConnectiveStatistics.NumberOfExistentials);
+Statistics.FormulaStatistics.NumberOfTCF > 0 ||
+Statistics.FormulaStatistics.NumberOfCNF > 0) {
+        fprintf(Stream,"%%            Number of variables   : %4d (",
+Statistics.SymbolStatistics.NumberOfVariables);
+        if (
+Statistics.FormulaStatistics.NumberOfTCF > 0 ||
+Statistics.FormulaStatistics.NumberOfCNF > 0) {
+            fprintf(Stream,"%4d sgn",Statistics.SymbolStatistics.NumberOfSingletons);
+        } else if (Statistics.FormulaStatistics.NumberOfTHF > 0) {
+            fprintf(Stream,"%4d   ^",Statistics.ConnectiveStatistics.NumberOfLambdas);
+        } 
         if (
 Statistics.FormulaStatistics.NumberOfTHF > 0 ||
 Statistics.FormulaStatistics.NumberOfTFF > 0 ||
+Statistics.FormulaStatistics.NumberOfFOF > 0 ||
 Statistics.FormulaStatistics.NumberOfTCF > 0) {
-            fprintf(Stream,";%4d   :",Statistics.ConnectiveStatistics.NumberOfTypedVariables);
+            fprintf(Stream,"%4d   !;%4d   ?",
+Statistics.ConnectiveStatistics.NumberOfUniversals,
+Statistics.ConnectiveStatistics.NumberOfExistentials);
+            if (
+Statistics.FormulaStatistics.NumberOfTHF > 0 ||
+Statistics.FormulaStatistics.NumberOfTFF > 0 ||
+Statistics.FormulaStatistics.NumberOfTCF > 0) {
+                fprintf(Stream,";%4d   :",Statistics.ConnectiveStatistics.NumberOfTypedVariables);
+            }
         }
+        fprintf(Stream,")\n");
     }
-    fprintf(Stream,")\n");
     if (
 (Statistics.FormulaStatistics.NumberOfTHF > 0 ||
  Statistics.FormulaStatistics.NumberOfTFF > 0) &&

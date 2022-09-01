@@ -377,6 +377,7 @@ int Negate(ANNOTATEDFORMULA AnnotatedFormula,int Simplify) {
     FORMULA NegatedFormula;
 
     if (CheckAnnotatedFormula(AnnotatedFormula,tptp_fof) ||
+CheckAnnotatedFormula(AnnotatedFormula,tptp_tcf) ||
 CheckAnnotatedFormula(AnnotatedFormula,tptp_tff) ||
 CheckAnnotatedFormula(AnnotatedFormula,tptp_thf)) {
 //----Check if already negated when simplifying
@@ -581,6 +582,7 @@ Quantifier != lambda) {
     }
 
     if (CheckAnnotatedFormula(AnnotatedFormula,tptp_thf) ||
+CheckAnnotatedFormula(AnnotatedFormula,tptp_tcf) ||
 CheckAnnotatedFormula(AnnotatedFormula,tptp_tff) ||
 CheckAnnotatedFormula(AnnotatedFormula,tptp_fof)) {
         QuantifyFormula(&(AnnotatedFormula->AnnotatedFormulaUnion.

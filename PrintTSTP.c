@@ -264,7 +264,7 @@ int AtomicallyFlatTerm(TERM Term) {
     return(0);
 }
 //-------------------------------------------------------------------------------------------------
-int Variable(FORMULA Formula) {
+int VariableFormula(FORMULA Formula) {
 
     return(Formula->Type == atom && Formula->FormulaUnion.Atom->Type == variable);
 }
@@ -287,6 +287,11 @@ int AtomicallyFlatSymbolFormula(FORMULA Formula) {
     return(Formula->Type == atom && AtomicallyFlatTermList(GetArity(Formula->FormulaUnion.Atom),
 Formula->FormulaUnion.Atom->Arguments));
 }
+// ->Type == formula &&
+// !FlatITEFormula(Term->Arguments[ElementNumber]->TheSymbol.Formula) &&
+// !FlatSymbolOrUnaryFormula(Term->Arguments[ElementNumber]->TheSymbol.Formula) &&
+// !FlatTuple(Term->Arguments[ElementNumber]->TheSymbol.Formula) &&
+// !FlatEquation(Term->Arguments[ElementNumber]->TheSymbol.Formula)) {
 //-------------------------------------------------------------------------------------------------
 int FlatITEFormula(FORMULA Formula) {
 
@@ -333,7 +338,8 @@ int AtomicallyFlatLiteralFormula(FORMULA Formula) {
 //-------------------------------------------------------------------------------------------------
 int FlatSymbolOrUnaryFormula(FORMULA Formula) {
 
-    return(FlatSymbolFormula(Formula) || FlatUnarySymbolFormula(Formula));
+    return(VariableFormula(Formula) || FlatSymbolFormula(Formula) || 
+FlatUnarySymbolFormula(Formula));
 }
 //-------------------------------------------------------------------------------------------------
 int UnitaryFormula(FORMULA Formula) {
@@ -547,7 +553,8 @@ ConnectiveType LastConnective,int TSTPSyntaxFlag) {
 
 //DEBUG printf("Printing term of type %s last connective %s indent %d\n",TermTypeToString(Term->Type),ConnectiveToString(LastConnective),Indent);
 //----All THF and TFF (because of TFX) terms are formulae
-    if ((Language == tptp_thf || Language == tptp_tff) && Term->Type == formula) {
+    if ((Language == tptp_thf || Language == tptp_tff || Language == tptp_tcf) && 
+Term->Type == formula) {
         PrintFileTSTPFormula(Stream,Language,Term->TheSymbol.Formula,Indent,Pretty,
 LastConnective,1);
 //----Check if a nested formula - no symbol
@@ -640,7 +647,8 @@ void PrintFileTermList(PRINTFILE Stream,SyntaxType Language,TERM Term,int Pretty
 char OpeningBracket,char ClosingBracket,int TSTPSyntaxFlag) {
 
     int Arity,ElementNumber;
-    ConnectiveType LastConnective = none;
+    ConnectiveType LastConnective = outermost;
+    int NeedNewLine = 0;
 
 //----Need to check the args exist, because for type declarations they don't
     if (((Arity = GetArity(Term)) > 0  && Term->Arguments != NULL) || OpeningBracket == '[') {
@@ -652,27 +660,25 @@ char OpeningBracket,char ClosingBracket,int TSTPSyntaxFlag) {
                 PFprintf(Stream,",");
             }
 //----Only some formula arguments stay on the same line
-            if (Pretty && Term->Arguments[ElementNumber]->Type == formula &&
-!FlatITEFormula(Term->Arguments[ElementNumber]->TheSymbol.Formula) &&
-!FlatSymbolOrUnaryFormula(Term->Arguments[ElementNumber]->TheSymbol.Formula) &&
-!FlatTuple(Term->Arguments[ElementNumber]->TheSymbol.Formula) &&
-!FlatEquation(Term->Arguments[ElementNumber]->TheSymbol.Formula)) {
+            if (Pretty && !AtomicallyFlatTerm(Term->Arguments[ElementNumber])) {
                 PFprintf(Stream,"\n");
                 PrintSpaces(Stream,Indent);
-                if (Term->Arguments[ElementNumber]->TheSymbol.Formula->Type == quantified) {
+                NeedNewLine = 1;
+                if (OutermostWithoutBrackets(Term->Arguments[ElementNumber]->TheSymbol.Formula)) {
                     LastConnective = outermost;
                 } else {
-                    LastConnective = brackets;
+                    LastConnective = none;
                 }
             } else {
-                if (LastConnective == brackets || LastConnective == outermost) {
+//----If we did if part last time, that means another newline please
+                if (NeedNewLine) {
                     PFprintf(Stream,"\n");
                     PrintSpaces(Stream,Indent);
                 }
-                LastConnective = none;
+                NeedNewLine = 0;
             }
             PrintFileTSTPTerm(Stream,Language,Term->Arguments[ElementNumber],Pretty,Indent,
-brackets,TSTPSyntaxFlag);
+LastConnective,TSTPSyntaxFlag);
         }
         PFprintf(Stream,"%c",ClosingBracket);
     }
@@ -842,9 +848,11 @@ Formula->FormulaUnion.QuantifiedFormula.Formula,Indent,Pretty,none,TSTPSyntaxFla
             if (LastConnective == outermost || 
 (Connective == LastConnective && Associative(Connective)) ||
 (LastConnective == brackets && Associative(Connective))) {
+//DEBUG printf("*4*");
                 NeedBrackets = 0;
                 ConnectiveIndent = Indent - strlen(ConnectiveToString(Connective)) - 1;
             } else {
+//DEBUG printf("*5*");
                 NeedBrackets = 1;
                 ConnectiveIndent = Indent - strlen(ConnectiveToString(Connective)) + 1;
                 PFprintf(Stream,"( ");
@@ -864,12 +872,15 @@ SideFormula->Type == binary &&
 RightAssociative(SideFormula->FormulaUnion.BinaryFormula.Connective)) ||
 //----Need ()s around equations with complex LHS (also RHS, see below)
 (Equation(Formula,NULL,NULL) && !SymbolFormula(SideFormula) && !BinaryFormula(SideFormula))) {
+//DEBUG printf("*1*");
                 FakeConnective = brackets;
                 PFprintf(Stream,"( ");
                 SideIndent += 2;
             } else if (Formula->Type == assignment) {
+//DEBUG printf("*2*");
                 FakeConnective = outermost;
             } else {
+//DEBUG printf("*3*");
                 FakeConnective = Connective;
             }
             PrintFileTSTPFormula(Stream,Language,SideFormula,SideIndent,Pretty,FakeConnective,

@@ -217,6 +217,18 @@ int StringIsASZSResult(char * PossibleResult) {
     return(0);
 }
 //-------------------------------------------------------------------------------------------------
+int StringIsASZSResultTLA(char * PossibleResultTLA) {
+
+    int Index;
+
+    for (Index = 0;Index < sizeof(ResultTriples)/sizeof(SZSResultTripleType);Index++) {
+        if (!strcmp(PossibleResultTLA,ResultTriples[Index].TLAString)) {
+            return(1);
+        }
+    }
+    return(0);
+}
+//-------------------------------------------------------------------------------------------------
 SZSOutputType StringToSZSOutput(char * SZSOutput) {
 
     int Index;
@@ -260,6 +272,18 @@ char * SZSOutputToString(SZSOutputType SZSOutput) {
 
     CodingError("Not a SZSOutputType to convert to string");
     return(NULL);
+}
+//-------------------------------------------------------------------------------------------------
+int StringIsASZSOutputTLA(char * PossibleOutputTLA) {
+
+    int Index;
+
+    for (Index = 0;Index < sizeof(OutputTriples)/sizeof(SZSOutputTripleType);Index++) {
+        if (!strcmp(PossibleOutputTLA,OutputTriples[Index].TLAString)) {
+            return(1);
+        }
+    }
+    return(0);
 }
 //-------------------------------------------------------------------------------------------------
 int StringIsASZSOutput(char * PossibleOutput) {

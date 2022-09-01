@@ -52,9 +52,8 @@ int OtterAssociative(ConnectiveType Connective) {
     return(Connective == disjunction || Connective == conjunction);
 }
 //-------------------------------------------------------------------------------------------------
-void OtterPrintFormula(FILE * Stream,SyntaxType Language,FORMULA Formula,
-int Indent,int AlreadyIndented,int Pretty,ConnectiveType LastConnective,
-ConnectiveType NextConnective) {
+void OtterPrintFormula(FILE * Stream,SyntaxType Language,FORMULA Formula,int Indent,
+int AlreadyIndented,int Pretty,ConnectiveType LastConnective,ConnectiveType NextConnective) {
 
     int NoIndent;
     int NoUndent;
@@ -65,8 +64,7 @@ ConnectiveType NextConnective) {
             PrintIndent(Stream,Indent,AlreadyIndented,Pretty);
             fprintf(Stream,"( %s ",OtterConnectiveToString(
 Formula->FormulaUnion.QuantifiedFormula.Quantifier));
-            fprintf(Stream,"%s",
-GetSymbol(Formula->FormulaUnion.QuantifiedFormula.Variable));
+            fprintf(Stream,"%s",GetSymbol(Formula->FormulaUnion.QuantifiedFormula.Variable));
 //----Here's where types will be printed, in a future TSTP
 //----List variables for same quantifiers
             while (Pretty && 
@@ -88,13 +86,11 @@ Formula->FormulaUnion.QuantifiedFormula.Quantifier,none);
 //----Otherwise on the next line
                 fprintf(Stream,"%s",(Pretty?"\n":""));
 //----If another quantified, no extra indent
-                if (Formula->FormulaUnion.QuantifiedFormula.Formula->Type !=
-quantified) {
+                if (Formula->FormulaUnion.QuantifiedFormula.Formula->Type != quantified) {
                     Indent += 2;
                 }
-                OtterPrintFormula(Stream,Language,Formula->
-FormulaUnion.QuantifiedFormula.Formula,Indent,0,Pretty,
-Formula->FormulaUnion.QuantifiedFormula.Quantifier,none);
+                OtterPrintFormula(Stream,Language,Formula->FormulaUnion.QuantifiedFormula.Formula,
+Indent,0,Pretty,Formula->FormulaUnion.QuantifiedFormula.Quantifier,none);
             }
             fprintf(Stream," ) )");
             break;
@@ -120,9 +116,8 @@ Formula->FormulaUnion.BinaryFormula.Connective)) + 1;
 Formula->FormulaUnion.BinaryFormula.Connective)) + 1;
                 Indent = AlreadyIndented = Indent + 2;
             }
-            OtterPrintFormula(Stream,Language,
-Formula->FormulaUnion.BinaryFormula.LHS,Indent,AlreadyIndented,Pretty,none,
-Formula->FormulaUnion.BinaryFormula.Connective);
+            OtterPrintFormula(Stream,Language,Formula->FormulaUnion.BinaryFormula.LHS,Indent,
+AlreadyIndented,Pretty,none,Formula->FormulaUnion.BinaryFormula.Connective);
             fprintf(Stream,"%s",(Pretty?"\n":" "));
             PrintIndent(Stream,ConnectiveIndent,0,Pretty);
             fprintf(Stream,"%s ",OtterConnectiveToString(

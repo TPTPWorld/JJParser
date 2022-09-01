@@ -19,17 +19,16 @@ char * GetAllNames(LISTNODE Head,char ** Names);
 int UniquelyNamed(LISTNODE Head);
 LISTNODE * GetNodeFromListByNumber(LISTNODE * Head,int Number);
 ANNOTATEDFORMULA GetAnnotatedFormulaFromListByNumber(LISTNODE Head,int Number);
-LISTNODE * GetNodeFromListByAnnotatedFormulaName(LISTNODE * Head,
-char * Name);
+LISTNODE * GetNodeFromListByAnnotatedFormulaName(LISTNODE * Head,char * Name);
 ANNOTATEDFORMULA GetAnnotatedFormulaFromListByName(LISTNODE Head, char * Name);
 int GetNodesForNames(LISTNODE Head,StringParts ParentNames,int NumberOfParents,
 LISTNODE * ParentList,SIGNATURE Signature);
-LISTNODE * GetNodeFromListByAnnotatedFormula(LISTNODE * Head,ANNOTATEDFORMULA
-AnnotatedFormula);
+LISTNODE * GetNodeFromListByAnnotatedFormula(LISTNODE * Head,ANNOTATEDFORMULA AnnotatedFormula);
 
-LISTNODE SelectListOfAnnotatedFormulaeWithType(LISTNODE * Head,StatusType DesiredStatus,
+void RemoveAnnotatedFormulaWithRole(LISTNODE * Head,SIGNATURE Signature,StatusType Role);
+LISTNODE SelectListOfAnnotatedFormulaeWithRole(LISTNODE * Head,StatusType DesiredStatus,
 int DeletedSelected,SIGNATURE Signature);
-LISTNODE GetListOfAnnotatedFormulaeWithType(LISTNODE Head,StatusType DesiredStatus,
+LISTNODE GetListOfAnnotatedFormulaeWithRole(LISTNODE Head,StatusType DesiredStatus,
 SIGNATURE Signature);
 LISTNODE GetListWithSyntaxType(LISTNODE Head,SyntaxType DesiredSyntax);
 LISTNODE SelectListOfAnnotatedFormulaeWithParents(LISTNODE * Head,int DeletedSelected,

@@ -292,6 +292,7 @@ ROOTLIST * RootListHead,SZSResultType ClaimedSZSResult,SZSOutputType ClaimedSZSO
 
     Statistics.Type = GetSZSOutputType(Head,RootListHead,&Statistics.FiniteDomainSize,Signature,
 ClaimedSZSOutput);
+//DEBUG printf("Soln type index is %d\n",Statistics.Type);
 //DEBUG printf("Soln is a %s\n",SZSOutputToUserString(Statistics.Type));
     switch (Statistics.Type) {
         case CRf:

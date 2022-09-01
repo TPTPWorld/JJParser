@@ -287,6 +287,13 @@ int LooksLikeAReal(char * RealString) {
 
     int NumberScanned;
     double TheDouble;
+    int Index;
+
+    for (Index = 0;Index < strlen(RealString);Index++) {
+        if (isalpha(RealString[Index])) {
+            RealString[Index] = tolower(RealString[Index]);
+        }
+    }
 
     if (strncmp("inf",RealString,3) && strncmp("nan",RealString,3)) {
         NumberScanned = sscanf(RealString,"%lf",&TheDouble);
@@ -327,10 +334,21 @@ int LooksLikeAnInteger(char * IntegerString) {
 
     int NumberScanned;
     long TheLong;
+    int Index;
 
-    NumberScanned = sscanf(IntegerString,"%ld",&TheLong);
+    for (Index = 0;Index < strlen(IntegerString);Index++) {
+        if (isalpha(IntegerString[Index])) {
+            IntegerString[Index] = tolower(IntegerString[Index]);
+        }
+    }
+
+    if (strncmp("inf",IntegerString,3) && strncmp("nan",IntegerString,3)) {
+        NumberScanned = sscanf(IntegerString,"%ld",&TheLong);
 //DEBUG printf("%s long scanned %d characters as %ld\n",IntegerString,NumberScanned,TheLong);
-    return(NumberScanned && !LooksLikeAReal(IntegerString));
+        return(NumberScanned && !LooksLikeAReal(IntegerString));
+    } else {
+        return(0);
+    }
 
 //----Doing it by hand
 //     unsigned int Index;

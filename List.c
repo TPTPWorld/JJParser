@@ -253,8 +253,8 @@ NULL) {
 //----to the node were received, as then it would be in a local variable and
 //----not be anything in the data structure.
 //----Set SameFormula to 2 to allow commutation of = & | => <= <=> <~>
-LISTNODE * GetNodeFromListByAnnotatedFormulaFields(LISTNODE * Head,
-ANNOTATEDFORMULA Target,int SameName,int SameRole,int SameFormula) {
+LISTNODE * GetNodeFromListByAnnotatedFormulaFields(LISTNODE * Head,ANNOTATEDFORMULA Target,
+int SameName,int SameRole,int SameFormula) {
 
     String FormulaName;
     String TargetName;
@@ -266,19 +266,15 @@ ANNOTATEDFORMULA Target,int SameName,int SameRole,int SameFormula) {
 //----Search down the list for the one that I want, oo, oo, ooo
     do {
 //----Skip non-formula records
-        while ((*Head) != NULL && !ReallyAnAnnotatedFormula((*Head)->
-AnnotatedFormula)) {
+        while ((*Head) != NULL && !ReallyAnAnnotatedFormula((*Head)->AnnotatedFormula)) {
             Head = &((*Head)->Next);
         }
 //----Is it the one we want?
         if ((*Head) != NULL) {
             if (
-(!SameName || !strcmp(GetName((*Head)->AnnotatedFormula,FormulaName),
-GetName(Target,TargetName))) &&
-(!SameRole || GetRole(Target,NULL) == GetRole((*Head)->AnnotatedFormula,
-NULL)) &&
-(!SameFormula || SameFormulaInAnnotatedFormulae(Target,(*Head)->
-AnnotatedFormula,1,SameFormula))) {
+(!SameName || !strcmp(GetName((*Head)->AnnotatedFormula,FormulaName),GetName(Target,TargetName))) &&
+(!SameRole || GetRole(Target,NULL) == GetRole((*Head)->AnnotatedFormula,NULL)) &&
+(!SameFormula || SameFormulaInAnnotatedFormulae(Target,(*Head)->AnnotatedFormula,1,SameFormula))) {
                 return(Head);
             } else {
 //----If not, move on
@@ -290,8 +286,7 @@ AnnotatedFormula,1,SameFormula))) {
     return(NULL);
 }
 //-------------------------------------------------------------------------------------------------
-LISTNODE * GetNodeFromListByAnnotatedFormulaName(LISTNODE * Head,
-char * Name) {
+LISTNODE * GetNodeFromListByAnnotatedFormulaName(LISTNODE * Head,char * Name) {
 
     AnnotatedFormulaType AnnotatedFormula;
     FormulaWithVariablesType FakeFormula;
@@ -300,24 +295,20 @@ char * Name) {
     AnnotatedFormula.NumberOfUses = 0;
     AnnotatedFormula.Syntax = tptp_fof;
     AnnotatedFormula.AnnotatedFormulaUnion.AnnotatedTSTPFormula.Name = Name;
-    AnnotatedFormula.AnnotatedFormulaUnion.AnnotatedTSTPFormula.Status = 
-nonstatus;
-    AnnotatedFormula.AnnotatedFormulaUnion.AnnotatedTSTPFormula.
-FormulaWithVariables = &FakeFormula;
+    AnnotatedFormula.AnnotatedFormulaUnion.AnnotatedTSTPFormula.Status = nonstatus;
+    AnnotatedFormula.AnnotatedFormulaUnion.AnnotatedTSTPFormula.FormulaWithVariables = 
+&FakeFormula;
     AnnotatedFormula.AnnotatedFormulaUnion.AnnotatedTSTPFormula.Source = NULL;
-    AnnotatedFormula.AnnotatedFormulaUnion.AnnotatedTSTPFormula.UsefulInfo = 
-NULL;
+    AnnotatedFormula.AnnotatedFormulaUnion.AnnotatedTSTPFormula.UsefulInfo = NULL;
 
-    return(GetNodeFromListByAnnotatedFormulaFields(Head,&AnnotatedFormula,
-1,0,0));
+    return(GetNodeFromListByAnnotatedFormulaFields(Head,&AnnotatedFormula,1,0,0));
 }
 //-------------------------------------------------------------------------------------------------
 ANNOTATEDFORMULA GetAnnotatedFormulaFromListByName(LISTNODE Head, char * Name) {
 
     LISTNODE * NodePointer;
 
-    if ((NodePointer = GetNodeFromListByAnnotatedFormulaName(&Head,Name)) !=
-NULL) {
+    if ((NodePointer = GetNodeFromListByAnnotatedFormulaName(&Head,Name)) != NULL) {
         assert((*NodePointer) != NULL);
         return((*NodePointer)->AnnotatedFormula);
     } else {
@@ -358,8 +349,20 @@ AnnotatedFormula) {
     return(NULL);
 }
 //-------------------------------------------------------------------------------------------------
+void RemoveAnnotatedFormulaWithRole(LISTNODE * Head,SIGNATURE Signature,StatusType Role) {
+
+    while (*Head != NULL) {
+        if (GetRole((*Head)->AnnotatedFormula,NULL) == Role) {
+// printf("Removing %s",GetName((*Head)->AnnotatedFormula,NULL));
+            FreeAListNode(Head,Signature);
+        } else {
+            Head = &((*Head)->Next);
+        }
+    }
+}
+//-------------------------------------------------------------------------------------------------
 //----This one can remove those with the desired type
-LISTNODE SelectListOfAnnotatedFormulaeWithType(LISTNODE * Head,StatusType DesiredRole,
+LISTNODE SelectListOfAnnotatedFormulaeWithRole(LISTNODE * Head,StatusType DesiredRole,
 int DeletedSelected,SIGNATURE Signature) {
 
     LISTNODE ListWithRole;
@@ -394,10 +397,10 @@ int DeletedSelected,SIGNATURE Signature) {
 }
 //-------------------------------------------------------------------------------------------------
 //----For backwards compatitibility
-LISTNODE GetListOfAnnotatedFormulaeWithType(LISTNODE Head,StatusType DesiredRole,SIGNATURE 
+LISTNODE GetListOfAnnotatedFormulaeWithRole(LISTNODE Head,StatusType DesiredRole,SIGNATURE 
 Signature) {
 
-    return(SelectListOfAnnotatedFormulaeWithType(&Head,DesiredRole,0,Signature));
+    return(SelectListOfAnnotatedFormulaeWithRole(&Head,DesiredRole,0,Signature));
 }
 //-------------------------------------------------------------------------------------------------
 LISTNODE GetListWithSyntaxType(LISTNODE Head,SyntaxType DesiredSyntax) {

@@ -55,10 +55,12 @@ SZSResultType StringToSZSResult(char * SZSResult);
 char * SZSResultToUserString(SZSResultType SZSResult);
 char * SZSResultToString(SZSResultType SZSResult);
 int StringIsASZSResult(char * PossibleResult);
+int StringIsASZSResultTLA(char * PossibleResultTLA);
 SZSOutputType StringToSZSOutput(char * SZSOutput);
 char * SZSOutputToUserString(SZSOutputType SZSOutput);
 char * SZSOutputToString(SZSOutputType SZSOutput);
 int StringIsASZSOutput(char * PossibleOutput);
+int StringIsASZSOutputTLA(char * PossibleOutputTLA);
 int SZSIsA(SZSResultType SZSResult,SZSResultType DesiredResult);
 int SZSOutputIsA(SZSOutputType SZSOutput,SZSOutputType DesiredOutput);
 

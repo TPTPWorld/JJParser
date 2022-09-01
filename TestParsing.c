@@ -394,20 +394,19 @@ AnnotatedFormulaUnion.AnnotatedTSTPFormula.FormulaWithVariables->Variables,NULL)
     return(EXIT_SUCCESS);
 
 //----Test selection of nodes with status
-    Axioms = GetListOfAnnotatedFormulaeWithType(Head,axiom_like,Signature);
+    Axioms = GetListOfAnnotatedFormulaeWithRole(Head,axiom_like,Signature);
     PrintListOfAnnotatedTSTPNodes(stdout,Signature,Axioms,tptp,1);
     return(EXIT_SUCCESS);
 
 //----Test use of SystemOnTPTP
     if (SystemOnTPTPAvailable()) {
-        Axioms = GetListOfAnnotatedFormulaeWithType(Head,axiom_like,Signature);
+        Axioms = GetListOfAnnotatedFormulaeWithRole(Head,axiom_like,Signature);
         printf("Axioms are ...\n");
         PrintListOfAnnotatedTSTPNodes(stdout,Signature,Axioms,tptp,1);
-        Conjectures = GetListOfAnnotatedFormulaeWithType(Head,conjecture,Signature);
+        Conjectures = GetListOfAnnotatedFormulaeWithRole(Head,conjecture,Signature);
         Target = Conjectures;
         while (Target != NULL) {
-            printf("Trying to prove %s\n",GetName(Target->AnnotatedFormula,
-FormulaName));
+            printf("Trying to prove %s\n",GetName(Target->AnnotatedFormula,FormulaName));
 //            strcpy(OutputFileName,FormulaName);
 //            strcat(OutputFileName,".result");
 //            Result = SystemOnTPTP(Axioms,Conjectures->AnnotatedFormula,

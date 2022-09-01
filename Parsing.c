@@ -432,7 +432,7 @@ VARIABLENODE * EndOfScope,TermType DesiredType,int VariablesMustBeQuantified) {
 
 //----THF and TFF have formulae as arguments. Type is formula if looking for arguments of a
 //----predicate or function in THF and TFF.
-    if ((Language == tptp_thf || Language == tptp_tff) &&
+    if ((Language == tptp_thf || Language == tptp_tff || Language == tptp_tcf) &&
 (DesiredType == function || DesiredType == atom_as_term) ) {
         FormulaArgument = NewTerm();
         FormulaArgument->Type = formula;
@@ -465,7 +465,6 @@ int VariablesMustBeQuantified) {
         Arguments[0] = ParseArgument(Stream,Language,Context,EndOfScope,DesiredType,
 VariablesMustBeQuantified);
         while (CheckToken(Stream,punctuation,",")) {
-//DEBUG printf("and another argument\n");
             AcceptToken(Stream,punctuation,",");
             (*Arity)++;
             Arguments = (TERMArray)Realloc((void *)Arguments,*Arity * sizeof(TERM));
@@ -615,7 +614,8 @@ TermType * ExpectedRHSTermType) {
 //DEBUG printf("Checking for infix, syntax %s, expected %s\n",SyntaxToString(Language),TermTypeToString(OriginallyExpectedType));
 //----For THF and TFF equality is dealt with as a binary operator. That means here it's a regular
 //----first-order situation, and equality is between terms (variables of functions).
-    if (Language != tptp_thf && Language != tptp_tff && OriginallyExpectedType == atom_as_term && 
+    if (Language != tptp_thf && Language != tptp_tff && Language != tptp_tcf && 
+OriginallyExpectedType == atom_as_term && 
 (CheckToken(Stream,lower_word,"=") || CheckToken(Stream,lower_word,"!="))) {
         *ExpectedRHSTermType = term;
         return(1);
@@ -786,7 +786,8 @@ Context.Signature,0);
 
 //----Check for infix predicate
     if ((DoInfixProcessing = InfixOperatorParsing(Stream,Language,DesiredType,&InfixRHSType))) {
-        if (DesiredType == atom_as_term && Language != tptp_thf && Language != tptp_tff) {
+        if (DesiredType == atom_as_term && Language != tptp_thf && Language != tptp_tff &&
+Language != tptp_tcf) {
             Term->Type = TypeIfInfix;
         }
 //----If a term is expected, then if a variable it must be free here (infix =)
@@ -798,8 +799,8 @@ Context.Signature,0);
         InfixRHSType = nonterm;
 //----Cannot have a variable if a predicate was expected, unless in a typed
 //----language, where variables can be types in polymorphic cases.
-        if (Language != tptp_thf && Language != tptp_tff && DesiredType == atom_as_term && 
-TypeIfInfix == variable) {
+        if (Language != tptp_thf && Language != tptp_tff && Language != tptp_tcf &&
+DesiredType == atom_as_term && TypeIfInfix == variable) {
             TokenError(Stream,"Variables cannot be used as predicates except in THF and TFX");
         }
     }
@@ -813,8 +814,8 @@ PrefixSymbol,NumberOfArguments,Stream);
         Term->TheSymbol.Variable = InsertVariable(Stream,Context.Signature,Context.Variables,
 EndOfScope,1,PrefixSymbol,VariableQuantifier,VariablesMustBeQuantified);
 //THF - this was Term->Type == variable, but I want to allow variable predicates. Will this work?
-    } else if (((Language == tptp_thf || Language == tptp_tff) && TypeIfInfix == variable) || 
-Term->Type == variable) {
+    } else if (((Language == tptp_thf || Language == tptp_tff || Language == tptp_tcf) && 
+TypeIfInfix == variable) || Term->Type == variable) {
 //----Force the term type to variable
         Term->Type = variable;
         Term->TheSymbol.Variable = InsertVariable(Stream,Context.Signature,Context.Variables,
@@ -915,15 +916,13 @@ non_logical_data,none,NULL,VariablesMustBeQuantified);
 //-------------------------------------------------------------------------------------------------
 int RightAssociative(ConnectiveType Connective) {
 
-    return(Connective == disjunction || Connective == conjunction ||
-Connective == maparrow);
+    return(Connective == disjunction || Connective == conjunction || Connective == maparrow);
 }
 //-------------------------------------------------------------------------------------------------
 int LeftAssociative(ConnectiveType Connective) {
 
-    return(Connective == disjunction || Connective == conjunction ||
-Connective == application || Connective == xprodtype ||
-Connective == uniontype);
+    return(Connective == disjunction || Connective == conjunction || Connective == application || 
+Connective == xprodtype || Connective == uniontype);
 }
 //-------------------------------------------------------------------------------------------------
 int Associative(ConnectiveType Connective) {
@@ -1384,7 +1383,8 @@ VariablesMustBeQuantified);
 
 //----Check for an equality
 //DEBUG printf("check equality with token %s and allow is %d\n",CurrentToken(Stream)->NameToken,AllowInfixEquality);
-    if (AllowInfixEquality && ( Language == tptp_thf || Language == tptp_tff ) && 
+    if (AllowInfixEquality && 
+(Language == tptp_thf || Language == tptp_tff || Language == tptp_tcf) && 
 (CheckToken(Stream,lower_word,"=") || CheckToken(Stream,lower_word,"!="))) {
         BinaryFormula = NewFormula();
         BinaryFormula->Type = binary;
@@ -2113,6 +2113,7 @@ int ParseFileForSZSResults(char * FileName,SZSResultType * SZSResult,SZSOutputTy
     char * Comment;
     char * SZSComment;
     int Index;
+    String FileNameCopy;
 
     Signature = NewSignatureWithTypes();
     SetNeedForNonLogicTokens(1);
@@ -2156,6 +2157,28 @@ strlen(SZSComment) > strlen("SZS output end ")) {
     }
     FreeListOfAnnotatedFormulae(&Head,Signature);
     FreeSignature(&Signature);
+//----Look at solution file name if could not find in output
+    if (*SZSResult == nonszsresult || *SZSOutput == nonszsoutput) {
+        strcpy(FileNameCopy,FileName);
+//----Looking for .CSA-Sat.s style name
+        if (strlen(FileNameCopy) > 10 && 
+FileNameCopy[strlen(FileNameCopy) - 10] == '.' &&
+FileNameCopy[strlen(FileNameCopy) - 6] == '-' &&
+!strcmp(FileNameCopy + strlen(FileNameCopy) - 2,".s")) {  
+            FileNameCopy[strlen(FileNameCopy) - 2] = '\0';
+            if (StringIsASZSOutputTLA(FileNameCopy + strlen(FileNameCopy) - 3)) {
+                if (*SZSOutput == nonszsoutput) {
+                    *SZSOutput = StringToSZSOutput(FileNameCopy + strlen(FileNameCopy) - 3);
+                }
+                FileNameCopy[strlen(FileNameCopy) - 4] = '\0';
+                if (StringIsASZSResultTLA(FileNameCopy + strlen(FileNameCopy) - 3)) {
+                    if (*SZSResult == nonszsresult) {
+                        *SZSResult = StringToSZSResult(FileNameCopy + strlen(FileNameCopy) - 3);
+                    }
+                }
+            }
+        }
+    }
     return(*SZSResult != nonszsresult && *SZSOutput != nonszsoutput);
 }
 //-------------------------------------------------------------------------------------------------
