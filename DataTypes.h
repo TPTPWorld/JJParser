@@ -106,7 +106,7 @@ typedef enum {
     typecolon,
     application,
     equation,
-    negequation,
+    negequation,  //----Never ends up in data structure - just a hacky thing
     typedequation,
     pi,
     sigma,
@@ -321,10 +321,11 @@ typedef enum {
     answer,
 //----For typed logics
     type,
-//----For finite interpretations
+//----For interpretations
     fi_domain,
     fi_functors,
     fi_predicates,
+    interpretation,
     unknown,
 //----Collections
     axiom_like,

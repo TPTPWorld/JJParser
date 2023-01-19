@@ -747,8 +747,7 @@ DesiredType == non_logical_data ? non_logical_data : function,MatchingBracket,
 VariablesMustBeQuantified);
         AcceptToken(Stream,punctuation,MatchingBracket);
 //----Is it a nested formula?
-    } else if (DesiredType == nested_thf || DesiredType == nested_tff ||
-DesiredType == nested_tcf || DesiredType == nested_fof || DesiredType == nested_cnf) {
+    } else if (NestedFormulaType(DesiredType,0)) {
         NumberOfArguments = 0;
         Term->Arguments = NULL;
         AcceptToken(Stream,punctuation,"(");
@@ -764,8 +763,7 @@ DesiredType == nested_fof ? tptp_fof : tptp_cnf,Context.Signature,0);
         NumberOfArguments = 0;
         Term->Arguments = NULL;
         AcceptToken(Stream,punctuation,"(");
-        Term->TheSymbol.NestedTerm = ParseTermWithVariables(Stream,Language,
-Context.Signature,0);
+        Term->TheSymbol.NestedTerm = ParseTermWithVariables(Stream,Language,Context.Signature,0);
         AcceptToken(Stream,punctuation,")");
 //----Otherwise no list (roughly, no arguments to a predicate or function)
     } else {
@@ -820,8 +818,7 @@ TypeIfInfix == variable) || Term->Type == variable) {
         Term->Type = variable;
         Term->TheSymbol.Variable = InsertVariable(Stream,Context.Signature,Context.Variables,
 EndOfScope,0,PrefixSymbol,free_variable,VariablesMustBeQuantified);
-    } else if (Term->Type == nested_thf || Term->Type == nested_tff || Term->Type == nested_tcf ||
-Term->Type == nested_fof || Term->Type == nested_cnf || Term->Type == nested_fot) {
+    } else if (NestedFormulaType(Term->Type,1)) {
 //----Do nothing
     } else {
 //----Need to note connectives used as terms in THF

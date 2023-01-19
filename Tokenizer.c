@@ -207,6 +207,9 @@ StatusType StringToStatus(char * StatusString) {
     if (!strcmp(StatusString,"fi_predicates")) {
         return(fi_predicates);
     }
+    if (!strcmp(StatusString,"interpretation")) {
+        return(interpretation);
+    }
     if (!strcmp(StatusString,"unknown")) {
         return(unknown);
     }
@@ -354,6 +357,9 @@ char * StatusToString(StatusType Status) {
             break;
         case fi_predicates:
             return("fi_predicates");
+            break;
+        case interpretation:
+            return("interpretation");
             break;
         case unknown:
             return("unknown");

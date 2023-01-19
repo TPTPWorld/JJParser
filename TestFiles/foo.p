@@ -1,154 +1,175 @@
-%----Taken from https://link.springer.com/content/pdf/10.1007%2FBF00370836.pdf
+%------------------------------------------------------------------------------
+%----Formulae as terms
+tff(p1_type,type,
+    p1: ( $i * $o * $int ) > $o ).
 
-tff(futureWillBe_decl,type,
-    futureWillBe: $o > $o ).
+tff(q1_type,type,
+    q1: ( $int * $i ) > $o ).
 
-tff(pastHasBeen_decl,type,
-    pastHasBeen: $o > $o ).
+tff(me_type,type,
+    me: $i ).
 
-tff(futureWillAlwaysBe_decl,type,
-    futureWillAlwaysBe: $o > $o ).
+tff(fool_1,axiom,
+    ! [X: $int] :
+      p1(me,
+        ! [Y: $i] : q1(X,Y),
+        27) ).
 
-tff(pastHasAlwaysBeen_decl,type,
-    pastHasAlwaysBeen: $o > $o ).
+tff(p2_type,type,
+    p2: $i > $o ).
 
-tff(since_decl,type,
-    since: ( $o * $o ) > $o ).
+tff(q2_type,type,
+    q2: $o > $o ).
 
-tff(until_decl,type,
-    until: ( $o * $o ) > $o ).
+tff(fool_2,axiom,
+    q2(
+      ( ( ~ p2(me) )
+     != q2($true) )) ).
 
-tff(futureWillAlwaysBe_futureWillBe,axiom,
-    ! [Alpha: $o] :
-      ( futureWillAlwaysBe(Alpha)
-    <=> ~ futureWillBe( ~Alpha ) ) ).
+%----Tuples
+tff(tt_type,type,
+    tt: $tType ).
 
-tff(pastHasAlwaysBeen_pastHasBeen,axiom,
-    ! [Alpha: $o] :
-      ( pastHasAlwaysBeen(Alpha)
-    <=> ~ pastHasBeen( ~Alpha ) ) ).
+tff(a_type,type,
+    a: $i ).
 
-tff(future_A7,axiom,
-    ! [U: $i,V: $i] :
-      ( ( U = V )
-     => futureWillAlwaysBe( U = V ) ) ).
+tff(at_type,type,
+    at: tt ).
 
-tff(past_A7,axiom,
-    ! [U: $i,V: $i] :
-      ( ( U = V )
-     => pastHasAlwaysBeen( U = V ) ) ).
+tff(dt_type,type,
+    dt: [$i,tt,$i] ).
 
-tff(until_UBF,axiom,
-    ! [Gamma: $o,Beta: $o] :
-      ( until(
-          ? [X] : Gamma,
-          Beta)
-     => ? [X] : until(Gamma,Beta) ) ).
+tff(pt_type,type,
+    pt: [tt,$i] > $o ).
 
-tff(since_UBF,axiom,
-    ! [Gamma: $o,Beta: $o] :
-      ( until(
-          ? [X] : Gamma,
-          Beta)
-     => ? [X] : since(Gamma,Beta) ) ).
+tff(ft_type,type,
+    ft: ( $i * [$i,tt,$i] ) > [tt,$i] ).
 
-tff(future_B1,axiom,
-    ! [Alpha: $o,Beta: $o,Delta: $o] :
-      ( futureWillAlwaysBe(
-          Alpha => Beta )
-     => ( until(Alpha,Delta)
-       => until(Beta,Delta) ) ) ).
+tff(tuple_1,axiom,
+    pt(ft(a,dt)) ).
 
-tff(past_B1,axiom,
-    ! [Alpha: $o,Beta: $o,Delta: $o] :
-      ( pastHasAlwaysBeen(
-          Alpha => Beta )
-     => ( since(Alpha,Delta)
-       => since(Beta,Delta) ) ) ).
+tff(tuple_2,axiom,
+    pt(ft(a,[a,at,a])) ).
 
-tff(future_B2,axiom,
-    ! [Alpha: $o,Beta: $o,Delta: $o] :
-      ( futureWillAlwaysBe(
-          Alpha => Beta )
-     => ( until(Delta,Alpha)
-       => until(Delta,Beta) ) ) ).
+%----Tuples with Booleans
+tff(pt1_type,type,
+    pt1: ( [$int,$i,$o] * $o * $int ) > $o ).
 
-tff(past_B2,axiom,
-    ! [Alpha: $o,Beta: $o,Delta: $o] :
-      ( pastHasAlwaysBeen(
-          Alpha => Beta )
-     => ( since(Delta,Alpha)
-       => since(Delta,Beta) ) ) ).
+tff(qt1_type,type,
+    qt1: ( $int * $i ) > $o ).
 
-tff(future_B3,axiom,
-    ! [Alpha: $o,Beta: $o,Delta: $o] :
-      ( ( Alpha
-        & until(Beta,Delta) )
-     => until(
-          Beta & since(Alpha,Delta),
-          Delta) ) ).
+tff(tuples_1,axiom,
+    ! [X: $int] :
+      pt1([33,me,$true],
+        ! [Y: $i] : qt1(X,Y),
+        27) ).
 
-tff(past_B3,axiom,
-    ! [Alpha: $o,Beta: $o,Delta: $o] :
-      ( ( Alpha
-        & since(Beta,Delta) )
-     => since(
-          Beta & until(Alpha,Delta),
-          Delta) ) ).
+%----Conditional expressions
+tff(pc1_type,type,
+    pc1: $int > $o ).
 
-tff(future_B4,axiom,
-    ! [Alpha: $o,Beta: $o] :
-      ( until(Alpha,Beta)
-     => until(
-          Alpha,
-          Beta & until(Alpha,Beta)) ) ).
+tff(qc1_type,type,
+    qc1: $int > $o ).
 
-tff(past_B4,axiom,
-    ! [Alpha: $o,Beta: $o] :
-      ( since(Alpha,Beta)
-     => since(
-          Alpha,
-          Beta & since(Alpha,Beta)) ) ).
+tff(max_type,type,
+    max: ( $int * $int ) > $int ).
 
-tff(future_B5,axiom,
-    ! [Alpha: $o,Beta: $o] :
-      ( until(
-          Beta & until(Alpha,Beta),
-          Beta)
-     => until(Alpha,Beta) ) ).
+tff(ite_1,axiom,
+    ! [X: $int,Y: $int] :
+      $ite($greater(X,Y),pc1(X),pc1(Y)) ).
 
-tff(past_B5,axiom,
-    ! [Alpha: $o,Beta: $o] :
-      ( since(
-          Beta & since(Alpha,Beta),
-          Beta)
-     => since(Alpha,Beta) ) ).
+tff(ite_2,axiom,
+    ! [X: $int,Y: $int] :
+      qc1(
+        $ite($greater(X,Y),X,Y)) ).
 
-tff(future_B6,axiom,
-    ! [Alpha: $o,Beta: $o,Delta: $o,Theta: $o] :
-      ( ( until(Alpha,Beta)
-        & until(Delta,Theta) )
-     => ( until(
-            Alpha & Delta,
-            Beta & Theta)
-        | until(
-            Alpha & Theta,
-            Beta & Theta)
-        | until(
-            Beta & Delta,
-            Beta & Theta) ) ) ).
+tff(max_defn,axiom,
+    ! [X: $int,Y: $int] :
+      ( max(X,Y)
+      = $ite($greatereq(X,Y),X,Y) ) ).
 
-tff(past_B6,axiom,
-    ! [Alpha: $o,Beta: $o,Delta: $o,Theta: $o] :
-      ( ( since(Alpha,Beta)
-        & since(Delta,Theta) )
-     => ( since(
-            Alpha & Delta,
-            Beta & Theta)
-        | since(
-            Alpha & Theta,
-            Beta & Theta)
-        | since(
-            Beta & Delta,
-            Beta & Theta) ) ) ).
+tff(max_property,axiom,
+    ! [X: $int,Y: $int] :
+      $ite(max(X,Y) = X,$greatereq(X,Y),$greatereq(Y,X)) ).
 
+%----Conditional expressions with tuples
+tff(pct1_type,type,
+    pct1: [$int,$int] > $o ).
+
+tff(dct1_type,type,
+    dct1: [$int,$int] ).
+
+tff(ite_3,axiom,
+    ! [X: $int,Y: $int] :
+      pct1(
+        $ite($greater(X,Y),[X,Y],[Y,X])) ).
+
+tff(ite_4,axiom,
+    ! [X: $int,Y: $int] :
+      ( dct1
+      = $ite($greater(X,Y),[X,Y],[Y,X]) ) ).
+
+%----Let expressions
+tff(pl1_type,type,
+    pl1: $int > $o ).
+
+tff(let_1,axiom,
+    $let(
+      c: $int,
+      c := 27,
+      pl1(c) ) ).
+
+tff(il2_type,type,
+    il2: $int ).
+
+tff(jl2_type,type,
+    jl2: $int ).
+
+tff(fl2_type,type,
+    fl2: ( $int * $int * $int * $int ) > $rat ).
+
+tff(pl2_type,type,
+    pl2: $rat > $o ).
+
+tff(let_2,axiom,
+    $let(
+      ff: ( $int * $int ) > $rat,
+      ff(X,Y) := fl2(X,X,Y,Y),
+      pl2(ff(il2,jl2)) ) ).
+
+%----Let expression with tuples (and shadowing)
+tff(al3_type,type,
+    al3: $int ).
+
+tff(bl3_type,type,
+    bl3: $int ).
+
+tff(pl3_type,type,
+    pl3: ( $int * $int ) > $o ).
+
+tff(let_tuple_1,axiom,
+    $let(
+      [ al3: $int,
+        bl3: $int ],
+      [ al3 := bl3,
+        bl3 := al3 ],
+      pl3(al3,bl3) ) ).
+
+tff(il4_type,type,
+    il4: $int ).
+
+tff(fl4_type,type,
+    fl4: ( $int * $int * $int * $int ) > $int ).
+
+tff(pl4_type,type,
+    pl4: $int > $o ).
+
+tff(let_tuple_2,axiom,
+    $let(
+      [ ff: ( $int * $int ) > $int,
+        gg: $int > $int ],
+      [ ff(X,Y) := fl4(X,X,Y,Y),
+        gg(Z) := fl4(Z,Z,Z,Z) ],
+      pl4(ff(il4,gg(il4))) ) ).
+
+%-------------------------------------------------------------------------------

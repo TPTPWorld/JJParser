@@ -562,6 +562,13 @@ int DerivedAnnotatedFormula(ANNOTATEDFORMULA AnnotatedFormula) {
     return(CopiedAnnotatedFormula(AnnotatedFormula) || InferredAnnotatedFormula(AnnotatedFormula));
 }
 //-------------------------------------------------------------------------------------------------
+int NestedFormulaType(TermType TheType,int IncludeNestedTerms) {
+
+    return(TheType == nested_thf || TheType == nested_tff || TheType == nested_tcf ||
+TheType == nested_fof || TheType == nested_cnf || 
+(IncludeNestedTerms && TheType == nested_fot));
+}
+//-------------------------------------------------------------------------------------------------
 //----Extract the contents of a term (wot's in the ()s)
 int ExtractTermArguments(String Term) {
 
@@ -956,7 +963,8 @@ char * GetLiteralSymbolUsage(FORMULA Literal,char ** PutUsageHere,char ** Variab
 Literal->FormulaUnion.UnaryFormula.Connective == negation) {
         Sign = '~';
         Literal = Literal->FormulaUnion.UnaryFormula.Formula;
-    } else if (Literal->Type == atom) {
+    } else if (Literal->Type == atom || 
+(Literal->Type == binary && Literal->FormulaUnion.BinaryFormula.Connective == equation)) {
         Sign = ' ';
     } else {
         return(NULL);
@@ -1296,18 +1304,19 @@ int * PositivesLength,char ** PutNegativesHere,int * NegativesLength) {
 PutPositivesHere,PositivesLength,PutNegativesHere,NegativesLength);
             break;
         case binary:
-            CollectVariablesOfPolarity(DisjunctionOrLiteral->FormulaUnion.BinaryFormula.LHS,
+            if (DisjunctionOrLiteral->FormulaUnion.BinaryFormula.Connective != equation) {
+                CollectVariablesOfPolarity(DisjunctionOrLiteral->FormulaUnion.BinaryFormula.LHS,
 PutPositivesHere,PositivesLength,PutNegativesHere,NegativesLength);
-            CollectVariablesOfPolarity(DisjunctionOrLiteral->FormulaUnion.BinaryFormula.RHS,
+                CollectVariablesOfPolarity(DisjunctionOrLiteral->FormulaUnion.BinaryFormula.RHS,
 PutPositivesHere,PositivesLength,PutNegativesHere,NegativesLength);
-            break;
+//----Oh my goodness, what a bit of trickery for TXF. If an equation then head on down to atom
+                break;
+            }
         case unary:
         case atom:
             LiteralSymbols = (char *)Malloc(sizeof(String));
             if (GetLiteralSymbolUsage(DisjunctionOrLiteral,&LiteralSymbols,&LiteralVariables) !=
 NULL) {
-//DEBUG printf("Literal symbols are \n%s\n",LiteralSymbols);
-//DEBUG printf("Literal variables are \n%s\n",LiteralVariables);
                 if (DisjunctionOrLiteral->Type == unary) {
                     ExtendString(PutNegativesHere,LiteralVariables,NegativesLength);
                 } else {

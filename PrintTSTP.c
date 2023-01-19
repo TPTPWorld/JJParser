@@ -397,6 +397,14 @@ int Equation(FORMULA Formula,FORMULA * LHS,FORMULA * RHS) {
     }
 }
 //-------------------------------------------------------------------------------------------------
+int PreUnitEquation(FORMULA Formula) {
+    
+    FORMULA LHS;
+    FORMULA RHS;
+
+    return(Equation(Formula,&LHS,&RHS) && LiteralFormula(LHS) && LiteralFormula(RHS));
+}
+//-------------------------------------------------------------------------------------------------
 int FlatEquation(FORMULA Formula) {
     
     FORMULA LHS;
@@ -541,7 +549,8 @@ FlatTypeOrDefnFormula(Formula) || FlatTuple(Formula));
 //-------------------------------------------------------------------------------------------------
 int OutermostWithoutBrackets(FORMULA Formula) {
 
-    return(QuantifiedFormula(Formula) || UnaryFormula(Formula) || TypeOrDefnFormula(Formula) ||
+    return(QuantifiedFormula(Formula) || 
+(UnaryFormula(Formula) && !NegatedEquation(Formula,NULL,NULL)) || TypeOrDefnFormula(Formula) ||
 LiteralFormula(Formula) || FlatFormula(Formula));
 }
 //-------------------------------------------------------------------------------------------------
@@ -660,7 +669,9 @@ char OpeningBracket,char ClosingBracket,int TSTPSyntaxFlag) {
                 PFprintf(Stream,",");
             }
 //----Only some formula arguments stay on the same line
-            if (Pretty && !AtomicallyFlatTerm(Term->Arguments[ElementNumber])) {
+            if (Pretty && !AtomicallyFlatTerm(Term->Arguments[ElementNumber]) &&
+Term->Arguments[ElementNumber]->Type != non_logical_data && 
+!NestedFormulaType(Term->Arguments[ElementNumber]->Type,1)) {
                 PFprintf(Stream,"\n");
                 PrintSpaces(Stream,Indent);
                 NeedNewLine = 1;
@@ -846,6 +857,10 @@ Formula->FormulaUnion.QuantifiedFormula.Formula,Indent,Pretty,none,TSTPSyntaxFla
 //DEBUG printf("Printing %s with connective %s, last connective was %s, indent %d\n",FormulaTypeToString(Formula->Type),ConnectiveToString(Connective),ConnectiveToString(LastConnective),Indent);
 //----No brackets for sequences of associative formulae and top level
             if (LastConnective == outermost || 
+//----Sadly the old BNF required ()s around equations on the side of a binary, and too many
+//----systems (E and Leo-III at least) have encoded that. Shitto, because new BNF does not
+//----require them (but accepts them).
+// (LastConnective != none && PreUnitEquation(Formula)) ||
 (Connective == LastConnective && Associative(Connective)) ||
 (LastConnective == brackets && Associative(Connective))) {
 //DEBUG printf("*4*");
@@ -866,21 +881,26 @@ Formula->FormulaUnion.QuantifiedFormula.Formula,Indent,Pretty,none,TSTPSyntaxFla
             } 
 //----Need to force brackets for right associative operators
             SideFormula = Formula->FormulaUnion.BinaryFormula.LHS;
+//DEBUG printf("Printing side %s with connective %s, last connective was %s, indent %d\n",FormulaTypeToString(SideFormula->Type),ConnectiveToString(Connective),ConnectiveToString(LastConnective),Indent);
             SideIndent = Indent;
             if ((Associative(Connective) && !FullyAssociative(Connective) && 
 SideFormula->Type == binary &&
 RightAssociative(SideFormula->FormulaUnion.BinaryFormula.Connective)) ||
-//----Need ()s around equations with complex LHS (also RHS, see below)
-(Equation(Formula,NULL,NULL) && !SymbolFormula(SideFormula) && !BinaryFormula(SideFormula))) {
-//DEBUG printf("*1*");
+//----Need ()s around complex sides of equations. The BNF says negations are complex.
+//----Binary gets dealt with in recursion regarding associativity. But negated equations have
+//----to be dealt with here because later they are kinda binary with TSTPSyntaxFlag = 2.
+(Equation(Formula,NULL,NULL) && !SymbolFormula(SideFormula) && 
+!NegatedEquation(SideFormula,NULL,NULL) && !BinaryFormula(SideFormula))) {
+// (Equation(SideFormula,NULL,NULL) || !BinaryFormula(SideFormula)))) {
+// printf("*1*");
                 FakeConnective = brackets;
                 PFprintf(Stream,"( ");
                 SideIndent += 2;
             } else if (Formula->Type == assignment) {
-//DEBUG printf("*2*");
+// printf("*2*");
                 FakeConnective = outermost;
             } else {
-//DEBUG printf("*3*");
+// printf("*3*");
                 FakeConnective = Connective;
             }
             PrintFileTSTPFormula(Stream,Language,SideFormula,SideIndent,Pretty,FakeConnective,
@@ -916,7 +936,10 @@ Formula->Type != type_declaration && !TypeOrDefnFormula(Formula);
                 if ((Associative(Connective) && !FullyAssociative(Connective) && 
 SideFormula->Type == binary && 
 LeftAssociative(SideFormula->FormulaUnion.BinaryFormula.Connective)) ||
-(Equation(Formula,NULL,NULL) && !SymbolFormula(SideFormula) && !BinaryFormula(SideFormula))) {
+(Equation(Formula,NULL,NULL) && !SymbolFormula(SideFormula) && 
+!NegatedEquation(SideFormula,NULL,NULL) && !BinaryFormula(SideFormula))) {
+// (Equation(SideFormula,NULL,NULL) || !BinaryFormula(SideFormula)))) {
+// printf("*4*");
                     FakeConnective = brackets;
                     PFprintf(Stream,"( ");
                     SideIndent += 2;
@@ -1281,7 +1304,7 @@ PrintFormatType Format,int Pretty) {
         switch (AnnotatedFormula->Syntax) {
             case include:
                 PrintFileTSTPTerm(Stream,AnnotatedFormula->Syntax,
-AnnotatedFormula->AnnotatedFormulaUnion.Include,Pretty,-1,outermost,0);
+AnnotatedFormula->AnnotatedFormulaUnion.Include,0,-1,outermost,0);
                 PFprintf(Stream,".\n");
                 break;
             case comment:

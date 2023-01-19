@@ -30,6 +30,7 @@ int ReallyAnAnnotatedFormula(ANNOTATEDFORMULA AnnotatedFormula);
 int CopiedAnnotatedFormula(ANNOTATEDFORMULA AnnotatedFormula);
 int InferredAnnotatedFormula(ANNOTATEDFORMULA AnnotatedFormula);
 int DerivedAnnotatedFormula(ANNOTATEDFORMULA AnnotatedFormula);
+int NestedFormulaType(TermType TheType,int IncludeNestedTerms);
 int LooksLikeANumber(char * NumberString);
 int IsMathType(char * Symbol);
 int LooksLikeAList(TERM Term,int MinElements,int MaxElements);
