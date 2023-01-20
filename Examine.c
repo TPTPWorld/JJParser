@@ -63,7 +63,7 @@ int GetArity(TERM Term) {
         case function:
         case a_type:
         case non_logical_data:
-            if (!strcmp(GetSymbol(Term),"[]")) {
+            if (!strcmp(GetSymbol(Term),"[]") || !strcmp(GetSymbol(Term),"()")) {
                 return(Term->FlexibleArity);
             } else {
                 return(GetSignatureArity(Term->TheSymbol.NonVariable));
@@ -245,6 +245,7 @@ int GetArityFromTyping(READFILE Stream,FORMULA TypeFormula) {
         case atom:
             return(0);
             break;
+        case connective_atom:
         case tuple:
             return(1);
             break;
@@ -793,6 +794,7 @@ Formula->FormulaUnion.BinaryFormula.RHS,Variable,&LocalQuantifiedOccurrences2);
 Formula->FormulaUnion.UnaryFormula.Formula,Variable,&LocalQuantifiedOccurrences);
             break;
         case atom:
+        case connective_atom:
             LocalCount = CountVariableUsageInTerm(Formula->FormulaUnion.Atom,Variable);
             break;
         case ite_formula:
@@ -1073,6 +1075,7 @@ VariableCollectorLength,TypeCollector,TypeCollectorLength);
 //DEBUG printf("unary:\nP:%sF:%sV:%s\n",*PredicateCollector,*FunctorCollector,*VariableCollector);
             break;
         case atom:
+        case connective_atom:
 //            if (strcmp(GetSymbol(Formula->FormulaUnion.Atom),"$true") &&
 //strcmp(GetSymbol(Formula->FormulaUnion.Atom),"$false")) {
             CollectSymbolsInTerm(Formula->FormulaUnion.Atom,PredicateCollector,
@@ -1314,6 +1317,7 @@ PutPositivesHere,PositivesLength,PutNegativesHere,NegativesLength);
             }
         case unary:
         case atom:
+        case connective_atom:
             LiteralSymbols = (char *)Malloc(sizeof(String));
             if (GetLiteralSymbolUsage(DisjunctionOrLiteral,&LiteralSymbols,&LiteralVariables) !=
 NULL) {
@@ -1415,6 +1419,7 @@ CountFormulaLiteralsOfPolarity(DisjunctionOrLiteral->FormulaUnion.BinaryFormula.
             }
             break;
         case atom:
+        case connective_atom:
             if (Sign ==  1) {
                  return(1);
             } else {
@@ -1631,6 +1636,7 @@ Formula->FormulaUnion.BinaryFormula.RHS,NestedYet));
 Formula->FormulaUnion.UnaryFormula.Formula,NestedYet));
             break;
         case atom:
+        case connective_atom:
 //DEBUG printf("It's an atom with symbol %s\n",GetSymbol(Formula->FormulaUnion.Atom));
             if (IsSymbolInSignatureList(Signature->Predicates,
 GetSymbol(Formula->FormulaUnion.Atom),GetArity(Formula->FormulaUnion.Atom)) != NULL) {
@@ -1760,6 +1766,7 @@ Formula->FormulaUnion.QuantifiedFormula.Variable->TheSymbol.Variable->NumberOfUs
             return(CountVariablesInFormulaByType(Formula->FormulaUnion.UnaryFormula.Formula,Type));
             break;
         case atom:
+        case connective_atom:
 //DEBUG printf("Going to do an atom %s with %d args\n",GetSymbol(Formula->FormulaUnion.Atom),GetArity(Formula->FormulaUnion.Atom));
             Count = CountVariablesInTermsByType(GetArity(Formula->FormulaUnion.Atom),
 GetArguments(Formula->FormulaUnion.Atom),Type);
@@ -1816,6 +1823,7 @@ CountFormulaTuples(Formula->FormulaUnion.BinaryFormula.RHS));
             return(CountFormulaTuples(Formula->FormulaUnion.UnaryFormula.Formula));
             break;
         case atom:
+        case connective_atom:
             return(CountSimpleUsageInFORMULATERMArray(GetArity(Formula->FormulaUnion.Atom),
 GetArguments(Formula->FormulaUnion.Atom),&CountFormulaTuples));
             break;
@@ -1890,6 +1898,7 @@ CountFormulaTerms(Formula->FormulaUnion.BinaryFormula.RHS));
             return(CountFormulaTerms(Formula->FormulaUnion.UnaryFormula.Formula));
             break;
         case atom:
+        case connective_atom:
 //DEBUG printf("The number of terms in %s is %d\n",GetSymbol(Formula->FormulaUnion.Atom),CountTermTerms(Formula->FormulaUnion.Atom));
             return(CountTermTerms(Formula->FormulaUnion.Atom));
             break;
@@ -1961,8 +1970,7 @@ int DoNested) {
     int Count;
     String ErrorMessage;
 
-//DEBUG printf("Counting %s in\n",Predicate);
-//DEBUG PrintFileTSTPFormula(OpenFILEPrintFile(stdout,NULL),tptp_thf,Formula,0,1,outermost,1);
+//DEBUG printf("Counting %s in\n",Predicate); PrintFileTSTPFormula(OpenFILEPrintFile(stdout,NULL),tptp_thf,Formula,0,1,outermost,1);
     Count = 0;
     switch(Formula->Type) {
         case sequent:
@@ -2015,6 +2023,7 @@ Formula->FormulaUnion.BinaryFormula.RHS,Predicate,DoNested);
 Formula->FormulaUnion.UnaryFormula.Formula,Predicate,DoNested));
             break;
         case atom:
+        case connective_atom:
             if (DoNested) {
 //----Do nested for TFX (and first-order style THF, if it's ever used)
 //DEBUG printf("Count nested of %s\n",GetSymbol(Formula->FormulaUnion.Atom));
@@ -2335,6 +2344,7 @@ Formula->FormulaUnion.UnaryFormula.Formula);
             ConnectiveStatistics.NumberOfConnectives++;
             break;
         case atom:
+        case connective_atom:
             ConnectiveStatistics = GetSimpleConnectiveStatisticsInTERMArray(
 GetArity(Formula->FormulaUnion.Atom),GetArguments(Formula->FormulaUnion.Atom),
 &GetArgumentConnectiveUsage);
@@ -2420,6 +2430,7 @@ FormulaDepth(Formula->FormulaUnion.BinaryFormula.RHS)));
             return(1 + FormulaDepth(Formula->FormulaUnion.UnaryFormula.Formula));
             break;
         case atom:
+        case connective_atom:
             return(1);
             break;
         case tuple:
@@ -2518,6 +2529,7 @@ MaxFormulaTermDepth(Formula->FormulaUnion.BinaryFormula.RHS)));
             return(MaxFormulaTermDepth(Formula->FormulaUnion.UnaryFormula.Formula));
             break;
         case atom:
+        case connective_atom:
             return(MaxTermDepth(Formula->FormulaUnion.Atom));
             break;
         case tuple:
@@ -2618,6 +2630,7 @@ SumFormulaTermDepth(Formula->FormulaUnion.BinaryFormula.RHS));
             return(SumFormulaTermDepth(Formula->FormulaUnion.UnaryFormula.Formula));
             break;
         case atom:
+        case connective_atom:
             return(SumTermDepth(Formula->FormulaUnion.Atom));
             break;
         case tuple:

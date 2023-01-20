@@ -11,8 +11,7 @@
 #include "Parsing.h"
 #include "ParseTSTP.h"
 //-------------------------------------------------------------------------------------------------
-FORMULA ParseLiterals(READFILE Stream,ContextType Context,
-VARIABLENODE * EndOfScope) {
+FORMULA ParseLiterals(READFILE Stream,ContextType Context,VARIABLENODE * EndOfScope) {
 
     FORMULA Formula;
     FORMULA BinaryFormula;

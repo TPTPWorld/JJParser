@@ -169,6 +169,7 @@ Formula2->FormulaUnion.UnaryFormula,AllowVariableRenaming,AllowCommutation,
 RenamedVariables));
             break;
         case atom:
+        case connective_atom:
             return(SameTerm(Formula1->FormulaUnion.Atom,Formula2->
 FormulaUnion.Atom,AllowVariableRenaming,AllowCommutation,RenamedVariables));
             break;

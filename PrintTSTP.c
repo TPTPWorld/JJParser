@@ -133,8 +133,7 @@ char * PrintFormatToString(PrintFormatType Format) {
     }
 }
 //-------------------------------------------------------------------------------------------------
-void PrintFileIndent(PRINTFILE Stream,int Indent,int AlreadyIndented,
-int Pretty) {
+void PrintFileIndent(PRINTFILE Stream,int Indent,int AlreadyIndented,int Pretty) {
 
     int Index;
 
@@ -602,8 +601,11 @@ TSTPSyntaxFlag);
         if (GetSymbol(Term)[0] == '[') {
             OpeningBracket = '[';
             ClosingBracket = ']';
-//----Otherwise assume an atom
+        } else if (GetSymbol(Term)[0] == '(') {
+            OpeningBracket = '(';
+            ClosingBracket = ')';
         } else {
+//----Otherwise assume an atom
             StartOfSymbol = GetPrintSymbol(Term);
 //DEBUG printf("Print atomic, symbol %s arity %d\n",StartOfSymbol,GetArity(Term));
 //----Skip past the $ if not in full TSTP mode, e.g., oldtptp
@@ -659,10 +661,9 @@ char OpeningBracket,char ClosingBracket,int TSTPSyntaxFlag) {
     ConnectiveType LastConnective = outermost;
     int NeedNewLine = 0;
 
+//DEBUG printf("Printing term list, arity %d opening bracket %c\n",GetArity(Term),OpeningBracket);
 //----Need to check the args exist, because for type declarations they don't
     if (((Arity = GetArity(Term)) > 0  && Term->Arguments != NULL) || OpeningBracket == '[') {
-//----Pretty printing of []ed lists - used for outmost lists, e.g., multiple
-//----inference() terms.
         PFprintf(Stream,"%c",OpeningBracket);
         for (ElementNumber=0;ElementNumber < Arity;ElementNumber++) {
             if (ElementNumber > 0) {
@@ -1002,6 +1003,7 @@ Indent,Pretty,FakeConnective,TSTPSyntaxFlag);
             break;
 
         case atom:
+        case connective_atom:
 //DEBUG printf("Printing atom (last connective was %s) indent %d\n",ConnectiveToString(LastConnective),Indent);
 //----THF connectives in ()s are atoms
             NeedBrackets = Formula->FormulaUnion.Atom->Type == connective || 
@@ -1018,8 +1020,15 @@ Indent,Pretty,FakeConnective,TSTPSyntaxFlag);
                 }
                 FakeConnective = brackets;
             }
+//----New {}ed connective symbols for NXF
+            if (Formula->Type == connective_atom) {
+                PFprintf(Stream,"{");
+            }
             PrintFileTSTPTerm(Stream,Language,Formula->FormulaUnion.Atom,Pretty,Indent+2,
 FakeConnective,TSTPSyntaxFlag);
+            if (Formula->Type == connective_atom) {
+                PFprintf(Stream,"}");
+            }
             if (NeedBrackets) {
                 if (LastConnective == brackets) {
                     PFprintf(Stream," ");
@@ -1207,6 +1216,7 @@ Formula->FormulaUnion.QuantifiedFormula.Quantifier == universal) {
 //-----Print the literals
     switch (Formula->Type) {
         case atom:
+        case connective_atom:
 //----Print nothing for an empty clause
             if (strcmp(GetSymbol(Formula->FormulaUnion.Atom),"$false")) {
                 PFprintf(Stream,"++");

@@ -356,6 +356,7 @@ Variables);
                 assert((*Formula)->FormulaUnion.UnaryFormula.Formula == NULL);
                 break; 
             case atom:
+            case connective_atom:
                 FreeTerm(&((*Formula)->FormulaUnion.Atom),Signature,Variables);
                 assert((*Formula)->FormulaUnion.Atom == NULL);
                 break;
@@ -586,7 +587,8 @@ TermType KnownTermTypeOrError(READFILE Stream,SyntaxType Language) {
         return(variable);
     } else {
 //DEBUG printf("Found a function with functor %s\n",CurrentToken(Stream)->NameToken);
-        if (CheckTokenType(Stream,functor) || CheckToken(Stream,punctuation,"[")) {
+        if (CheckTokenType(Stream,functor) || CheckToken(Stream,punctuation,"[") ||
+CheckToken(Stream,punctuation,"(")) {
 //DEBUG printf("%s parsed as a function\n",CurrentToken(Stream)->NameToken);
 //----Numbers not allowed in CNF or FOF
             if (!AllowFOFNumbers && (Language == tptp_cnf || Language == tptp_fof)) {
@@ -598,6 +600,8 @@ TermType KnownTermTypeOrError(READFILE Stream,SyntaxType Language) {
             if (Language == tptp_thf && 
 (CheckTokenType(Stream,binary_connective) || CheckTokenType(Stream,unary_connective) ||
 CheckToken(Stream,lower_word,"$ite"))) {
+                return(function);
+            } else if (Language == tptp_tff && CheckToken(Stream,punctuation,"{")) {
                 return(function);
             } else {
 //----Force an error
@@ -673,12 +677,12 @@ int VariablesMustBeQuantified) {
 //----Can't check it's a predicate because it might be infix with var first
 //----      EnsureTokenType(Stream,predicate_symbol);
 //DEBUG printf("Found a predicate with symbol %s %s (want %s)\n",CurrentToken(Stream)->NameToken,TokenTypeToString(CurrentToken(Stream)->KindToken),TokenTypeToString(lower_word));
-//----Guess that it's a variable or function for infix predicate
             if (IsSymbolInSignatureList(Context.Signature->Types,CurrentToken(Stream)->NameToken,
 0) != NULL) {
                 DesiredType = a_type;
                 TypeIfInfix = nonterm;
             } else {
+//----Guess that it's a variable or function for infix predicate
                 TypeIfInfix = KnownTermTypeOrError(Stream,Language);
 //DEBUG printf("%s could be a %s\n",CurrentToken(Stream)->NameToken,TermTypeToString(TypeIfInfix));
             }
@@ -716,7 +720,8 @@ int VariablesMustBeQuantified) {
 
 //----Save the symbol for inserting in signature later
     PrefixSymbol = CopyHeapString(CurrentToken(Stream)->NameToken);
-//----Eat the symbol if not a list WHAT IS ( USED FOR?
+//DEBUG printf("PrefixSymbol is %s\n",PrefixSymbol);
+//----Eat the symbol if not a list in []s (tuple) or ()s (NXF arguments)
     if (strcmp(PrefixSymbol,"[") && strcmp(PrefixSymbol,"(")) {
         NextToken(Stream);
     }
@@ -728,7 +733,7 @@ int VariablesMustBeQuantified) {
 //----Now we can check that expected predicates look like predicates
 //----Variables, distinct objects and numbers cannot have arguments
 //THF TO FIX - Currently only allows ground predicates with arguments
-        if (!CheckToken(Stream,punctuation,"[") &&
+        if (!CheckToken(Stream,punctuation,"[") && !CheckToken(Stream,punctuation,"(") &&
 (FunctorType == upper_word || FunctorType == distinct_object || FunctorType == number ||
 ((DesiredType == atom_as_term || DesiredType == function) && FunctorType != lower_word))) {
             sprintf(ErrorMessage,
@@ -776,8 +781,15 @@ DesiredType == nested_fof ? tptp_fof : tptp_cnf,Context.Signature,0);
     if (!strcmp(PrefixSymbol,"[")) {
 //----Need an extra byte :-)
         Free((void **)&PrefixSymbol);
-//DEBUG printf("SHOULD NOT GET HERE UNLESS IN NON-LOGICAL DATA\n");
         PrefixSymbol = CopyHeapString("[]");
+        Term->FlexibleArity = NumberOfArguments;
+        NumberOfArguments = -1;
+    }
+    if (!strcmp(PrefixSymbol,"(")) {
+//DEBUG printf("It is a (\n");
+//----Need an extra byte :-)
+        Free((void **)&PrefixSymbol);
+        PrefixSymbol = CopyHeapString("()");
         Term->FlexibleArity = NumberOfArguments;
         NumberOfArguments = -1;
     }
@@ -981,8 +993,8 @@ VARIABLENODE * EndOfScope,int VariablesMustBeQuantified) {
     return(Formula);
 }
 //-------------------------------------------------------------------------------------------------
-FORMULA ParseUnaryFormula(READFILE Stream,SyntaxType Language,
-ContextType Context,VARIABLENODE * EndOfScope,int VariablesMustBeQuantified) {
+FORMULA ParseUnaryFormula(READFILE Stream,SyntaxType Language,ContextType Context,
+VARIABLENODE * EndOfScope,int VariablesMustBeQuantified) {
 
     FORMULA Formula;
     ConnectiveType Connective;
@@ -996,6 +1008,7 @@ ContextType Context,VARIABLENODE * EndOfScope,int VariablesMustBeQuantified) {
             CodingError("Could not open string stream");
             return(NULL);
         }
+//TODO connective_atom
 //----Unary connective as a term in THF
         Formula = ParseAtom(StringStream,Language,Context,EndOfScope,VariablesMustBeQuantified);
         CloseReadFile(StringStream);
@@ -1263,6 +1276,7 @@ Original->FormulaUnion.BinaryFormula.RHS,Context,ForceNewVariables);
 Original->FormulaUnion.UnaryFormula.Formula,Context,ForceNewVariables);
                 break; 
             case atom:
+            case connective_atom:
                 Formula->FormulaUnion.Atom = DuplicateTerm(Original->FormulaUnion.Atom,Context,
 ForceNewVariables);
                 break;
@@ -1331,18 +1345,31 @@ ConnectiveType LastConnective) {
     char * LHSSymbol;
     int LHSSymbolArity;
 
-//DEBUG printf("ParseFormula with token %s, allow binary %d, last connective %s\n",CurrentToken(Stream)->NameToken,AllowBinary,ConnectiveToString(LastConnective));
+//DEBUG printf("ParseFormula for %s, with token %s, allow binary %d, last connective %s\n",SyntaxToString(Language),CurrentToken(Stream)->NameToken,AllowBinary,ConnectiveToString(LastConnective));
     switch (CurrentToken(Stream)->KindToken) {
-//----Two types of punctuation - ( for ()ed, [ for tuple
+//----Three types of punctuation - ( for ()ed, [ for tuple, { for non-classical
         case punctuation:
             if (CheckToken(Stream,punctuation,"[")) {
                 Formula = ParseTupleOrSequentFormula(Stream,Language,Context,
 EndOfScope,AllowBinary,VariablesMustBeQuantified,LastConnective);
-            } else {
-                AcceptToken(Stream,punctuation,"(");
-                Formula = ParseFormula(Stream,Language,Context,EndOfScope,1,1,
+            } else if (CheckToken(Stream,punctuation,"(")) {
+                if (Language == tptp_tff && LastConnective == application) {
+//DEBUG printf("Parsing a ()ed atom %s\n",CurrentToken(Stream)->NameToken);
+                Formula = ParseAtom(Stream,Language,Context,EndOfScope,VariablesMustBeQuantified);
+//DEBUG printf("Parsed as a ()ed atom with functor %s and arity %d\n",GetSymbol(Formula->FormulaUnion.Atom),GetArity(Formula->FormulaUnion.Atom));
+                } else {
+                    AcceptToken(Stream,punctuation,"(");
+                    Formula = ParseFormula(Stream,Language,Context,EndOfScope,1,1,
 VariablesMustBeQuantified,none);
-                AcceptToken(Stream,punctuation,")");
+                    AcceptToken(Stream,punctuation,")");
+                }
+            } else if (CheckToken(Stream,punctuation,"{")) {
+                AcceptToken(Stream,punctuation,"{");
+                Formula = NewFormula();
+                Formula->Type = connective_atom;
+                Formula->FormulaUnion.Atom = ParseTerm(Stream,Language,Context,EndOfScope,
+atom_as_term,none,NULL,VariablesMustBeQuantified);
+                AcceptToken(Stream,punctuation,"}");
             }
             break;
         case quantifier:
@@ -1407,7 +1434,7 @@ Context,EndOfScope,0,0,VariablesMustBeQuantified,ThisConnective);
 //----Check for a binary formula
 //DEBUG printf("check infix with token %s and allow is %d and type is %s\n",CurrentToken(Stream)->NameToken,AllowBinary,TokenTypeToString(CurrentToken(Stream)->KindToken));
     if (
-//----THF and TFX allow formulae as arguments of equality 
+//----THF and TXF allow formulae as arguments of equality and application. 
 AllowBinary &&
 ( CheckTokenType(Stream,binary_connective) ||
 //----THF and TFF have types. Should this be allowed independent of AllowBinary?

@@ -263,8 +263,7 @@ FILE * OpenFileInMode(String FileName,char * Mode) {
     
     if ((Stream = fopen(FileName,Mode)) == NULL) {
         perror("Opening file");
-        sprintf(ErrorMessage,"Could not open file %s in %s mode",FileName,
-Mode);
+        sprintf(ErrorMessage,"Could not open file %s in %s mode",FileName,Mode);
         ReportError("OSError",ErrorMessage,0);
         return(NULL);
     } else {

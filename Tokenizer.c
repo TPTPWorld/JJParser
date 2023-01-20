@@ -920,6 +920,9 @@ char * FormulaTypeToString(FormulaTypeType Type) {
         case atom:
             return("atom");
             break;
+        case connective_atom:
+            return("connective_atom");
+            break;
         case tuple:
             return("tuple");
             break;
@@ -1194,6 +1197,12 @@ TOKEN GetNextToken(READFILE Stream) {
             break;
         case ']':
             return(BuildToken(punctuation,"]"));
+            break;
+        case '{':
+            return(BuildToken(punctuation,"{"));
+            break;
+        case '}':
+            return(BuildToken(punctuation,"}"));
             break;
         case '!':
             CurrentChar = NextCharacter(Stream);

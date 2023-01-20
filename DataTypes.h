@@ -131,7 +131,7 @@ typedef enum {
 typedef enum {
 //----A variable or a function, for requests not used after parsing has resolved it.
     term,   
-//----Arguments in THF and TFX are formulae, which are terms of type atom
+//----Arguments in THF and TXF are formulae, which are terms of type atom
     atom_as_term,
 //----Set TheSymbol = "[]" for a tuple "function"
     function,
@@ -144,7 +144,7 @@ typedef enum {
     nested_fot,   // Used to record variable bindings in proofs
 //----Types are stored as terms too
     a_type,
-//----For formulae arguments in THF and TFX
+//----For formulae arguments in THF and TXF
     formula,
 //----For connectives used as terms in THF
     connective,
@@ -171,7 +171,7 @@ typedef union {
     VARIABLENODE Variable;
     struct FormulaWithVariablesTag * NestedFormula;
     struct TermWithVariablesTag * NestedTerm;
-//----For nested THF and TFX formulae
+//----For nested THF and TXF formulae
     struct FormulaTypetag * Formula;
 } TermUnionType;
 
@@ -197,6 +197,7 @@ typedef enum {
     binary,
     unary,
     atom,
+    connective_atom,
     tuple,
     ite_formula,
     let_formula,

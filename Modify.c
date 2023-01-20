@@ -520,6 +520,7 @@ FormulaUnion.BinaryFormula.RHS),TheVariables));
 FormulaUnion.UnaryFormula.Formula),TheVariables));
             break;
         case atom:
+        case connective_atom:
             return(0);
             break;
         default:
@@ -651,6 +652,7 @@ Formula->FormulaUnion.BinaryFormula.Connective));
             RandomizeFormula(Formula->FormulaUnion.UnaryFormula.Formula,0);
             break;
         case atom:
+        case connective_atom:
 //----Switch equalities
             if (!strcmp(GetSymbol(Formula->FormulaUnion.Atom),"=") && 
 GetArity(Formula->FormulaUnion.Atom) == 2 && rand() % 2) {
@@ -942,6 +944,7 @@ Formula = *Formula;
 Formula));
             break;
         case atom:
+        case connective_atom:
             break;
         default:
             CodingError("ERROR: Not a formula type for standardization");
