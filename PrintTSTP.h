@@ -27,7 +27,7 @@ int TSTPSyntaxFlag);
 void PrintTSTPTerm(FILE * Stream,SyntaxType Language,TERM Term,int Indent,int Pretty,
 int TSTPSyntaxFlag);
 void PrintFileTermList(PRINTFILE Stream,SyntaxType Language,TERM Term,int Pretty,int Indent,
-char OpeningBracket,char ClosingBracket,int TSTPSyntaxFlag);
+char OpeningBracket,char ClosingBracket,ConnectiveType LastConnective,int TSTPSyntaxFlag);
 void PrintFileTSTPFormula(PRINTFILE Stream,SyntaxType Language,FORMULA Formula,
 int Indent,int Pretty,ConnectiveType LastConnective,int TSTPSyntaxFlag);
 void PrintTSTPFormula(FILE * Stream,SyntaxType Language,FORMULA Formula,int Indent,int Pretty,

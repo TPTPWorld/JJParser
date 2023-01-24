@@ -538,6 +538,9 @@ ConnectiveType StringToConnective(char * ConnectiveString) {
     if (!strcmp(ConnectiveString,":=")) {
         return(assignmentsym);
     }
+    if (!strcmp(ConnectiveString,"==")) {
+        return(identicalsym);
+    }
     if (!strcmp(ConnectiveString,"<<")) {
         return(subtype);
     }
@@ -640,6 +643,9 @@ char * ConnectiveToString(ConnectiveType Connective) {
             break;
         case assignmentsym:
             return(":=");
+            break;
+        case identicalsym:
+            return("==");
             break;
         case subtype:
             return(" <<");
@@ -1158,8 +1164,22 @@ TOKEN GetNextToken(READFILE Stream) {
                 CharacterError(Stream);
             }
             break;
-        case '%':
+//----# as the first character is still a comment, to make E happy. This is nasty code.
         case '#':
+            if (Stream->Character > 1) {
+//----Copied from default case below
+                Index = 0;
+                do {
+                    LocalValue[Index] = CurrentChar;
+                    CurrentChar = NextCharacter(Stream);
+                    IncrementTokenIndex(Stream,&Index);
+                } while (isalnum(CurrentChar) || CurrentChar=='_');
+                LocalValue[Index] = '\0';
+                Stream->Overshot = 1;
+                return(BuildToken(lower_word,LocalValue));
+            }
+//----Otherwise continue to comment processing
+        case '%':
             if (Stream->NeedNonLogicTokens) {
                 Index = 0;
                 do {
@@ -1178,7 +1198,8 @@ TOKEN GetNextToken(READFILE Stream) {
                         CurrentChar = NextCharacter(Stream);
                     }
                     CurrentChar = NextCharacter(Stream);
-                } while (CurrentChar == '%' || CurrentChar == '#');
+//----# comments from E start at column 1
+                } while (CurrentChar == '%' || (Stream->Character == 1 && CurrentChar == '#'));
                 Stream->Overshot = 1;
                 return(GetNextToken(Stream));
             }
@@ -1273,6 +1294,8 @@ TOKEN GetNextToken(READFILE Stream) {
             CurrentChar = NextCharacter(Stream);
             if (CurrentChar == '>') {
                 return(BuildToken(binary_connective,"=>"));
+            } else if (CurrentChar == '=') {
+                return(BuildToken(binary_connective,"=="));
             } else {
                 Stream->Overshot = 1;
                 return(BuildToken(lower_word,"="));

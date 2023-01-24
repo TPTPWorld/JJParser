@@ -163,10 +163,11 @@ void PrintSpaces(PRINTFILE Stream,int Spaces) {
 }
 //-------------------------------------------------------------------------------------------------
 //----Local mutual recursion
-int AtomicallyFlatFormula(FORMULA Formula);
 int FlatFormula(FORMULA Formula);
-int AtomicallyFlatTerm(TERM Term);
+int AtomicallyFlatFormula(FORMULA Formula);
+int AtomFlatFormula(FORMULA Formula);
 int FlatTerm(TERM Term);
+int AtomicallyFlatTerm(TERM Term);
 //-------------------------------------------------------------------------------------------------
 int TypeConnective(ConnectiveType Connective) {
 
@@ -178,9 +179,14 @@ int DefnConnective(ConnectiveType Connective) {
     return(Connective == assignmentsym);
 }
 //-------------------------------------------------------------------------------------------------
-int TypeOrDefnConnective(ConnectiveType Connective) {
+int IdConnective(ConnectiveType Connective) {
 
-    return(TypeConnective(Connective) || DefnConnective(Connective));
+    return(Connective == identicalsym);
+}
+//-------------------------------------------------------------------------------------------------
+int TypeDefnIdConnective(ConnectiveType Connective) {
+
+    return(TypeConnective(Connective) || DefnConnective(Connective) || IdConnective(Connective));
 }
 //-------------------------------------------------------------------------------------------------
 int FlatBinaryConnective(ConnectiveType Connective) {
@@ -427,34 +433,34 @@ int TypeFormula(FORMULA Formula) {
 TypeConnective(Formula->FormulaUnion.BinaryFormula.Connective));
 }
 //-------------------------------------------------------------------------------------------------
-int FlatTypeFormula(FORMULA Formula) {
-
-    return(TypeFormula(Formula) &&
-FlatFormula(Formula->FormulaUnion.BinaryFormula.LHS) &&
-FlatFormula(Formula->FormulaUnion.BinaryFormula.RHS));
-}
-//-------------------------------------------------------------------------------------------------
 int DefnFormula(FORMULA Formula) {
 
     return(Formula->Type == assignment && 
 DefnConnective(Formula->FormulaUnion.BinaryFormula.Connective));
 }
 //-------------------------------------------------------------------------------------------------
-int FlatDefnFormula(FORMULA Formula) {
+int IdFormula(FORMULA Formula) {
 
-    return(DefnFormula(Formula) &&
-FlatFormula(Formula->FormulaUnion.BinaryFormula.LHS) &&
+    return(Formula->Type == assignment && 
+IdConnective(Formula->FormulaUnion.BinaryFormula.Connective));
+}
+//-------------------------------------------------------------------------------------------------
+int TypeDefnIdFormula(FORMULA Formula) {
+
+    return(TypeFormula(Formula) || DefnFormula(Formula) || IdFormula(Formula));
+}
+//-------------------------------------------------------------------------------------------------
+int FlatTypeDefnIdFormula(FORMULA Formula) {
+
+    return(TypeDefnIdFormula(Formula) && FlatFormula(Formula->FormulaUnion.BinaryFormula.LHS) &&
 FlatFormula(Formula->FormulaUnion.BinaryFormula.RHS));
 }
 //-------------------------------------------------------------------------------------------------
-int TypeOrDefnFormula(FORMULA Formula) {
+int AtomicallyFlatTypeDefnIdFormula(FORMULA Formula) {
 
-    return(TypeFormula(Formula) || DefnFormula(Formula));
-}
-//-------------------------------------------------------------------------------------------------
-int FlatTypeOrDefnFormula(FORMULA Formula) {
-
-    return(FlatTypeFormula(Formula) || FlatDefnFormula(Formula));
+    return(TypeDefnIdFormula(Formula) && 
+AtomicallyFlatFormula(Formula->FormulaUnion.BinaryFormula.LHS) &&
+AtomicallyFlatFormula(Formula->FormulaUnion.BinaryFormula.RHS));
 }
 //-------------------------------------------------------------------------------------------------
 int ApplicationFormula(FORMULA Formula) {
@@ -487,6 +493,18 @@ int AtomicallyFlatFormulaList(int NumberOfElements,FORMULAArray Elements) {
     return(1);
 }
 //-------------------------------------------------------------------------------------------------
+int AtomFlatFormulaList(int NumberOfElements,FORMULAArray Elements) {
+
+    int ElementNumber;
+
+    for (ElementNumber = 0; ElementNumber < NumberOfElements; ElementNumber++) {
+        if (!AtomFlatFormula(Elements[ElementNumber])) {
+            return(0);
+        }
+    }
+    return(1);
+}
+//-------------------------------------------------------------------------------------------------
 int FlatTuple(FORMULA Formula) {
 
     return(Formula->Type == tuple && FlatFormulaList(
@@ -495,7 +513,7 @@ Formula->FormulaUnion.TupleFormula.NumberOfElements,Formula->FormulaUnion.TupleF
 //-------------------------------------------------------------------------------------------------
 int AtomicallyFlatTuple(FORMULA Formula) {
 
-    return(Formula->Type == tuple && AtomicallyFlatFormulaList(
+    return(Formula->Type == tuple && AtomFlatFormulaList(
 Formula->FormulaUnion.TupleFormula.NumberOfElements,Formula->FormulaUnion.TupleFormula.Elements));
 }
 //-------------------------------------------------------------------------------------------------
@@ -534,22 +552,28 @@ int QuantifiedFormula(FORMULA Formula) {
     return(Formula->Type == quantified);
 }
 //-------------------------------------------------------------------------------------------------
-int AtomicallyFlatFormula(FORMULA Formula) {
-
-    return(AtomicallyFlatLiteralFormula(Formula) || FlatEquation(Formula) || 
-AtomicallyFlatTuple(Formula));
-}
-//-------------------------------------------------------------------------------------------------
 int FlatFormula(FORMULA Formula) {
 
     return(AtomicallyFlatFormula(Formula) || FlatBinaryFormula(Formula) || 
-FlatTypeOrDefnFormula(Formula) || FlatTuple(Formula));
+FlatTypeDefnIdFormula(Formula) || FlatTuple(Formula));
+}
+//-------------------------------------------------------------------------------------------------
+int AtomicallyFlatFormula(FORMULA Formula) {
+
+//----Was just FlatEquation(Formula) ... maybe that was better
+    return(AtomicallyFlatLiteralFormula(Formula) || AtomicallyFlatEquation(Formula) || 
+AtomicallyFlatTypeDefnIdFormula(Formula) || AtomicallyFlatTuple(Formula));
+}
+//-------------------------------------------------------------------------------------------------
+int AtomFlatFormula(FORMULA Formula) {
+
+    return(AtomicallyFlatLiteralFormula(Formula));
 }
 //-------------------------------------------------------------------------------------------------
 int OutermostWithoutBrackets(FORMULA Formula) {
 
     return(QuantifiedFormula(Formula) || 
-(UnaryFormula(Formula) && !NegatedEquation(Formula,NULL,NULL)) || TypeOrDefnFormula(Formula) ||
+(UnaryFormula(Formula) && !NegatedEquation(Formula,NULL,NULL)) || TypeDefnIdFormula(Formula) ||
 LiteralFormula(Formula) || FlatFormula(Formula));
 }
 //-------------------------------------------------------------------------------------------------
@@ -604,6 +628,8 @@ TSTPSyntaxFlag);
         } else if (GetSymbol(Term)[0] == '(') {
             OpeningBracket = '(';
             ClosingBracket = ')';
+//----Weird case for () functor, no indent before the opening (
+            Indent--;
         } else {
 //----Otherwise assume an atom
             StartOfSymbol = GetPrintSymbol(Term);
@@ -628,7 +654,7 @@ TSTPSyntaxFlag);
             ClosingBracket = ')';
         }
         PrintFileTermList(Stream,Language,Term,Pretty,Indent,OpeningBracket,ClosingBracket,
-TSTPSyntaxFlag);
+OpeningBracket == '(' ? brackets : outermost,TSTPSyntaxFlag);
     }
 }
 //-------------------------------------------------------------------------------------------------
@@ -655,10 +681,9 @@ int TSTPSyntaxFlag) {
 }
 //-------------------------------------------------------------------------------------------------
 void PrintFileTermList(PRINTFILE Stream,SyntaxType Language,TERM Term,int Pretty,int Indent,
-char OpeningBracket,char ClosingBracket,int TSTPSyntaxFlag) {
+char OpeningBracket,char ClosingBracket,ConnectiveType LastConnective,int TSTPSyntaxFlag) {
 
     int Arity,ElementNumber;
-    ConnectiveType LastConnective = outermost;
     int NeedNewLine = 0;
 
 //DEBUG printf("Printing term list, arity %d opening bracket %c\n",GetArity(Term),OpeningBracket);
@@ -670,17 +695,13 @@ char OpeningBracket,char ClosingBracket,int TSTPSyntaxFlag) {
                 PFprintf(Stream,",");
             }
 //----Only some formula arguments stay on the same line
-            if (Pretty && !AtomicallyFlatTerm(Term->Arguments[ElementNumber]) &&
+            if (Pretty && LastConnective != brackets &&
+!AtomicallyFlatTerm(Term->Arguments[ElementNumber]) &&
 Term->Arguments[ElementNumber]->Type != non_logical_data && 
 !NestedFormulaType(Term->Arguments[ElementNumber]->Type,1)) {
                 PFprintf(Stream,"\n");
                 PrintSpaces(Stream,Indent);
                 NeedNewLine = 1;
-                if (OutermostWithoutBrackets(Term->Arguments[ElementNumber]->TheSymbol.Formula)) {
-                    LastConnective = outermost;
-                } else {
-                    LastConnective = none;
-                }
             } else {
 //----If we did if part last time, that means another newline please
                 if (NeedNewLine) {
@@ -688,6 +709,11 @@ Term->Arguments[ElementNumber]->Type != non_logical_data &&
                     PrintSpaces(Stream,Indent);
                 }
                 NeedNewLine = 0;
+            }
+            if (OutermostWithoutBrackets(Term->Arguments[ElementNumber]->TheSymbol.Formula)) {
+                LastConnective = outermost;
+            } else {
+                LastConnective = none;
             }
             PrintFileTSTPTerm(Stream,Language,Term->Arguments[ElementNumber],Pretty,Indent,
 LastConnective,TSTPSyntaxFlag);
@@ -704,7 +730,7 @@ FORMULAArray FormulaTuple,int Pretty,int Indent,int TSTPSyntaxFlag) {
     ConnectiveType LastConnective;
 
     PFprintf(Stream,"[");
-    if ((NeedSpace = !AtomicallyFlatFormulaList(NumberOfElements,FormulaTuple))) {
+    if ((NeedSpace = !AtomFlatFormulaList(NumberOfElements,FormulaTuple))) {
         PFprintf(Stream," ");
     }
 //----Need to () nested formula that are not flat, e.g., binaries.
@@ -717,10 +743,10 @@ FORMULAArray FormulaTuple,int Pretty,int Indent,int TSTPSyntaxFlag) {
 TSTPSyntaxFlag);
     for (ElementNumber=1;ElementNumber < NumberOfElements;ElementNumber++) {
         PFprintf(Stream,",");
-        if (Pretty && (!AtomicallyFlatFormula(FormulaTuple[ElementNumber-1]) ||
-!AtomicallyFlatFormula(FormulaTuple[ElementNumber]))) {
+        if (Pretty && (!AtomFlatFormula(FormulaTuple[ElementNumber-1]) ||
+!AtomFlatFormula(FormulaTuple[ElementNumber]))) {
             PFprintf(Stream,"\n");
-            PrintSpaces(Stream,Indent+2);
+            PrintSpaces(Stream,Indent+4);
         }
         if (FlatFormula(FormulaTuple[ElementNumber])) {
             LastConnective = outermost;
@@ -864,11 +890,9 @@ Formula->FormulaUnion.QuantifiedFormula.Formula,Indent,Pretty,none,TSTPSyntaxFla
 // (LastConnective != none && PreUnitEquation(Formula)) ||
 (Connective == LastConnective && Associative(Connective)) ||
 (LastConnective == brackets && Associative(Connective))) {
-//DEBUG printf("*4*");
                 NeedBrackets = 0;
                 ConnectiveIndent = Indent - strlen(ConnectiveToString(Connective)) - 1;
             } else {
-//DEBUG printf("*5*");
                 NeedBrackets = 1;
                 ConnectiveIndent = Indent - strlen(ConnectiveToString(Connective)) + 1;
                 PFprintf(Stream,"( ");
@@ -893,15 +917,12 @@ RightAssociative(SideFormula->FormulaUnion.BinaryFormula.Connective)) ||
 (Equation(Formula,NULL,NULL) && !SymbolFormula(SideFormula) && 
 !NegatedEquation(SideFormula,NULL,NULL) && !BinaryFormula(SideFormula))) {
 // (Equation(SideFormula,NULL,NULL) || !BinaryFormula(SideFormula)))) {
-// printf("*1*");
                 FakeConnective = brackets;
                 PFprintf(Stream,"( ");
                 SideIndent += 2;
             } else if (Formula->Type == assignment) {
-// printf("*2*");
                 FakeConnective = outermost;
             } else {
-// printf("*3*");
                 FakeConnective = Connective;
             }
             PrintFileTSTPFormula(Stream,Language,SideFormula,SideIndent,Pretty,FakeConnective,
@@ -911,23 +932,25 @@ TSTPSyntaxFlag);
             }
 //----No new line for sequences of @ and >, and flat equations. Seems redundant here.
             NeedNewLine = !FlatFormula(Formula) && Formula->Type != assignment && 
-Formula->Type != type_declaration && !TypeOrDefnFormula(Formula);
+Formula->Type != type_declaration && !TypeDefnIdFormula(Formula);
             if (NeedNewLine && Pretty) {
                 PFprintf(Stream,"\n");
                 PrintSpaces(Stream,ConnectiveIndent);
-            } else if (Connective != typecolon) {
+            } else if (Connective != typecolon && Connective != assignmentsym) {
                 PFprintf(Stream," ");
             }
             PFprintf(Stream,"%s ",ConnectiveToString(Connective));
             SideFormula = Formula->FormulaUnion.BinaryFormula.RHS;
 //----If didn't need a new line, and a type dec or defn then new line if not flat RHS
-            if (!NeedNewLine && (Formula->Type == assignment || TypeOrDefnFormula(Formula)) && 
-!FlatFormula(SideFormula) && Pretty) {
+            if (!NeedNewLine && 
+TypeDefnIdFormula(Formula) && 
+!AtomicallyFlatFormula(SideFormula) && 
+Pretty) {
                 PFprintf(Stream,"\n");
                 PrintSpaces(Stream,Indent + 2);
             }
 //----If a : or := then no ()s required on RHS except if @ constructor
-            if (TypeOrDefnConnective(Connective) && FlatFormula(SideFormula)) {
+            if (TypeDefnIdConnective(Connective) && FlatFormula(SideFormula)) {
 //----Why? := is very low precedence
 //      && !ApplicationFormula(SideFormula)) {
                 FakeConnective = outermost;
@@ -1004,7 +1027,7 @@ Indent,Pretty,FakeConnective,TSTPSyntaxFlag);
 
         case atom:
         case connective_atom:
-//DEBUG printf("Printing atom (last connective was %s) indent %d\n",ConnectiveToString(LastConnective),Indent);
+//DEBUG printf("Printing atom with symbol %s, last connective was %s, indent %d\n",GetSymbol(Formula->FormulaUnion.Atom),ConnectiveToString(LastConnective),Indent);
 //----THF connectives in ()s are atoms
             NeedBrackets = Formula->FormulaUnion.Atom->Type == connective || 
 //----Boolean variables need to be ()ed to when I read them I know they are formulae not terms

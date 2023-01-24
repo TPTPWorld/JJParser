@@ -1315,11 +1315,16 @@ FORMULA PossibleLHSFormula) {
 
     FORMULA BinaryFormula = NULL;
 
-    if (AllowBinary && CheckToken(Stream,binary_connective,":=")) {
+    if (AllowBinary && 
+(CheckToken(Stream,binary_connective,":=") || CheckToken(Stream,binary_connective,"=="))) {
         BinaryFormula = NewFormula();
         BinaryFormula->Type = assignment;
         BinaryFormula->FormulaUnion.BinaryFormula.LHS = PossibleLHSFormula;
-        BinaryFormula->FormulaUnion.BinaryFormula.Connective = assignmentsym;
+        if (CheckToken(Stream,binary_connective,":=")) {
+            BinaryFormula->FormulaUnion.BinaryFormula.Connective = assignmentsym;
+        } else {
+            BinaryFormula->FormulaUnion.BinaryFormula.Connective = identicalsym;
+        }
         AcceptTokenType(Stream,binary_connective);
 //----Set the last connective to be none so that the RHS is parsed as a top level formula
         BinaryFormula->FormulaUnion.BinaryFormula.RHS =
@@ -1453,7 +1458,8 @@ LastConnective == ThisConnective)) {
             if ((LastConnective == none && !LeftAssociative(ThisConnective)) || 
 RightAssociative(ThisConnective)) {
                 BinaryFormula = NewFormula();
-                BinaryFormula->Type = ThisConnective == assignmentsym ?  assignment : 
+                BinaryFormula->Type = 
+(ThisConnective == assignmentsym || ThisConnective == identicalsym) ?  assignment : 
 ThisConnective == typecolon ? type_declaration : binary;
                 BinaryFormula->FormulaUnion.BinaryFormula.LHS = Formula;
                 BinaryFormula->FormulaUnion.BinaryFormula.Connective = ThisConnective;
@@ -1536,7 +1542,8 @@ AllowInfixEquality,VariablesMustBeQuantified,BinaryFormula));
             } else if (LeftAssociative(ThisConnective)) {
                 while (LastConnective == none || LastConnective == ThisConnective) {
                     BinaryFormula = NewFormula();
-                    BinaryFormula->Type = ThisConnective == assignmentsym ? assignment : binary;
+                    BinaryFormula->Type = 
+(ThisConnective == assignmentsym || ThisConnective == identicalsym) ? assignment : binary;
                     BinaryFormula->FormulaUnion.BinaryFormula.LHS = Formula;
                     BinaryFormula->FormulaUnion.BinaryFormula.Connective = ThisConnective;
 //----Only binary connectives are left associative, so I can "AcceptToken"

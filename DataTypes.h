@@ -118,6 +118,7 @@ typedef enum {
     uniontype,
     gentzenarrow,
     assignmentsym,
+    identicalsym,
 //----Special for unknown quantification
     free_variable,
 //----Specials for output formatting
@@ -191,7 +192,7 @@ typedef TERM * TERMArray;
 //----Formula types
 typedef enum {
     sequent,
-    assignment,
+    assignment,  //----For := and ==
     type_declaration,
     quantified,
     binary,
