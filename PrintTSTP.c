@@ -710,7 +710,8 @@ Term->Arguments[ElementNumber]->Type != non_logical_data &&
                 }
                 NeedNewLine = 0;
             }
-            if (OutermostWithoutBrackets(Term->Arguments[ElementNumber]->TheSymbol.Formula)) {
+            if (Term->Arguments[ElementNumber]->Type == formula &&
+OutermostWithoutBrackets(Term->Arguments[ElementNumber]->TheSymbol.Formula)) {
                 LastConnective = outermost;
             } else {
                 LastConnective = none;
@@ -906,7 +907,7 @@ Formula->FormulaUnion.QuantifiedFormula.Formula,Indent,Pretty,none,TSTPSyntaxFla
             } 
 //----Need to force brackets for right associative operators
             SideFormula = Formula->FormulaUnion.BinaryFormula.LHS;
-//DEBUG printf("Printing side %s with connective %s, last connective was %s, indent %d\n",FormulaTypeToString(SideFormula->Type),ConnectiveToString(Connective),ConnectiveToString(LastConnective),Indent);
+//DEBUG printf("Printing LHS %s with connective %s, last connective was %s, indent %d\n",FormulaTypeToString(SideFormula->Type),ConnectiveToString(Connective),ConnectiveToString(LastConnective),Indent);
             SideIndent = Indent;
             if ((Associative(Connective) && !FullyAssociative(Connective) && 
 SideFormula->Type == binary &&
@@ -941,9 +942,11 @@ Formula->Type != type_declaration && !TypeDefnIdFormula(Formula);
             }
             PFprintf(Stream,"%s ",ConnectiveToString(Connective));
             SideFormula = Formula->FormulaUnion.BinaryFormula.RHS;
+//DEBUG printf("Printing RHS %s with connective %s, last connective was %s, indent %d\n",FormulaTypeToString(SideFormula->Type),ConnectiveToString(Connective),ConnectiveToString(LastConnective),Indent);
 //----If didn't need a new line, and a type dec or defn then new line if not flat RHS
             if (!NeedNewLine && 
 TypeDefnIdFormula(Formula) && 
+!FlatTypeDefnIdFormula(Formula) &&
 !AtomicallyFlatFormula(SideFormula) && 
 Pretty) {
                 PFprintf(Stream,"\n");
@@ -963,7 +966,6 @@ LeftAssociative(SideFormula->FormulaUnion.BinaryFormula.Connective)) ||
 (Equation(Formula,NULL,NULL) && !SymbolFormula(SideFormula) && 
 !NegatedEquation(SideFormula,NULL,NULL) && !BinaryFormula(SideFormula))) {
 // (Equation(SideFormula,NULL,NULL) || !BinaryFormula(SideFormula)))) {
-// printf("*4*");
                     FakeConnective = brackets;
                     PFprintf(Stream,"( ");
                     SideIndent += 2;

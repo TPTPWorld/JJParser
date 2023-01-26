@@ -911,11 +911,14 @@ int * VariableCollectorLength,char ** TypeCollector,int * TypeCollectorLength) {
             break;
         case atom_as_term:
         case function:
-            sprintf(TermData,"%s/%d/1\n",GetSymbol(Term),GetArity(Term));
-            if (Term->Type == atom_as_term) {
-                ExtendString(PredicateCollector,TermData,PredicateCollectorLength);
-            } else {
-                ExtendString(FunctorCollector,TermData,FunctorCollectorLength);
+ZZZZZZ
+            if (strcmp(GetSymbol(Term),"()")) {
+                sprintf(TermData,"%s/%d/1\n",GetSymbol(Term),GetArity(Term));
+                if (Term->Type == atom_as_term) {
+                    ExtendString(PredicateCollector,TermData,PredicateCollectorLength);
+                } else {
+                    ExtendString(FunctorCollector,TermData,FunctorCollectorLength);
+                }
             }
 //DEBUG printf("principle:\nP:%sF:%sV:%s\n",*PredicateCollector,*FunctorCollector,*VariableCollector);
             CollectSymbolsInArguments(GetArity(Term),Term->Arguments,PredicateCollector,
