@@ -25,6 +25,8 @@ typedef enum {
     atoms,
     equality_atoms,
     connective_atoms,
+    applied_connectives,
+    indexed_connectives,
     variable_atoms,
     terms,
     variables,
@@ -66,6 +68,8 @@ typedef struct {
     int NumberOfAtoms;  //----Doubles as NumberOfLiterals;
     int NumberOfEqualityAtoms;  //----Doubles as NumberOfEqualityLiterals
     int NumberOfConnectiveAtoms;
+    int NumberOfAppliedConnectives;
+    int NumberOfIndexedConnectives;
     int NumberOfVariableAtoms;
     int NumberOfNestedFormulae;
 

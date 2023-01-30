@@ -200,7 +200,7 @@ typedef enum {
     binary,
     unary,
     atom,
-    connective_atom,
+    applied_connective,
     tuple,
     ite_formula,
     let_formula,

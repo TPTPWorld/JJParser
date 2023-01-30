@@ -926,8 +926,8 @@ char * FormulaTypeToString(FormulaTypeType Type) {
         case atom:
             return("atom");
             break;
-        case connective_atom:
-            return("connective_atom");
+        case applied_connective:
+            return("applied_connective");
             break;
         case tuple:
             return("tuple");

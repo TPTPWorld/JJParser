@@ -98,6 +98,14 @@ GetListNodeFormula(List)->Type == sequent) {
                     Counter += CountFormulaAtomsByPredicate(Signature,GetListNodeFormula(List),
 "CONNECTIVE",1);
                     break;
+                case applied_connectives:
+                    Counter += CountFormulaAtomsByPredicate(Signature,GetListNodeFormula(List),
+"APPLIED_CONNECTIVE",1);
+                    break;
+                case indexed_connectives:
+                    Counter += CountFormulaAtomsByPredicate(Signature,GetListNodeFormula(List),
+"INDEXED_CONNECTIVE",1);
+                    break;
                 case variable_atoms:
                     Counter += CountFormulaAtomsByPredicate(Signature,GetListNodeFormula(List),
 "VARIABLE",1);
@@ -449,6 +457,10 @@ sequent_formulae);
 equality_atoms);
     Statistics.FormulaStatistics.NumberOfConnectiveAtoms = HeadListCount(Signature,&HeadListNode,
 connective_atoms);
+    Statistics.FormulaStatistics.NumberOfAppliedConnectives = HeadListCount(Signature,&HeadListNode,
+applied_connectives);
+    Statistics.FormulaStatistics.NumberOfIndexedConnectives = HeadListCount(Signature,&HeadListNode,
+indexed_connectives);
     Statistics.FormulaStatistics.NumberOfVariableAtoms = HeadListCount(Signature,&HeadListNode,
 variable_atoms);
 //DEBUG printf("PROGRESS: counted atoms of type\n");
@@ -669,6 +681,13 @@ Statistics.ConnectiveStatistics.NumberOfNands > 0) {
 "%%                                         (%4d  ~|;%4d  ~&}\n",
 Statistics.ConnectiveStatistics.NumberOfNors,
 Statistics.ConnectiveStatistics.NumberOfNands);
+        }
+//----Fourth connectives line
+        if (Statistics.FormulaStatistics.NumberOfAppliedConnectives > 0) {
+            fprintf(Stream,
+"%%                                         (%4d  {};%4d   #}\n",
+Statistics.FormulaStatistics.NumberOfAppliedConnectives,
+Statistics.FormulaStatistics.NumberOfIndexedConnectives);
         }
     }
 

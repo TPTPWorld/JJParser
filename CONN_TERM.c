@@ -14,7 +14,7 @@ ConnectiveToString(Connective))) == NULL) {
                             return(NULL);
                         }
 //DEBUG NOW printf("unary_connective term\n");
-                        Formula = ParseAtom(StringStream,Language,Context,connective_atom,
+                        Formula = ParseAtom(StringStream,Language,Context,applied_connective,
 EndOfScope,VariablesMustBeQuantified);
                         CloseReadFile(StringStream);
                     } else {
@@ -31,7 +31,7 @@ none);
                     }
                 } else if (CheckTokenType(Stream,binary_connective)) {
 //DEBUG NOW printf("binary_connective term\n");
-                    Formula = ParseAtom(Stream,Language,Context,connective_atom,EndOfScope,
+                    Formula = ParseAtom(Stream,Language,Context,applied_connective,EndOfScope,
 VariablesMustBeQuantified);
                 } else {
 //DEBUG NOW printf("bracketed formula\n");

@@ -1034,7 +1034,7 @@ Indent,Pretty,FakeConnective,TSTPSyntaxFlag);
             break;
 
         case atom:
-        case connective_atom:
+        case applied_connective:
 //DEBUG printf("Printing atom with symbol %s, last connective was %s, indent %d\n",GetSymbol(Formula->FormulaUnion.Atom),ConnectiveToString(LastConnective),Indent);
 //----THF connectives in ()s are atoms
             NeedBrackets = Formula->FormulaUnion.Atom->Type == connective || 
@@ -1052,12 +1052,12 @@ Indent,Pretty,FakeConnective,TSTPSyntaxFlag);
                 FakeConnective = brackets;
             }
 //----New {}ed connective symbols for NXF
-            if (Formula->Type == connective_atom) {
+            if (Formula->Type == applied_connective) {
                 PFprintf(Stream,"{");
             }
             PrintFileTSTPTerm(Stream,Language,Formula->FormulaUnion.Atom,Pretty,Indent+2,
 FakeConnective,TSTPSyntaxFlag);
-            if (Formula->Type == connective_atom) {
+            if (Formula->Type == applied_connective) {
                 PFprintf(Stream,"}");
             }
             if (NeedBrackets) {
@@ -1247,7 +1247,7 @@ Formula->FormulaUnion.QuantifiedFormula.Quantifier == universal) {
 //-----Print the literals
     switch (Formula->Type) {
         case atom:
-        case connective_atom:
+        case applied_connective:
 //----Print nothing for an empty clause
             if (strcmp(GetSymbol(Formula->FormulaUnion.Atom),"$false")) {
                 PFprintf(Stream,"++");

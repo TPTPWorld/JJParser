@@ -245,7 +245,7 @@ int GetArityFromTyping(READFILE Stream,FORMULA TypeFormula) {
         case atom:
             return(0);
             break;
-        case connective_atom:
+        case applied_connective:
         case tuple:
             return(1);
             break;
@@ -802,7 +802,7 @@ Formula->FormulaUnion.BinaryFormula.RHS,Variable,&LocalQuantifiedOccurrences2);
 Formula->FormulaUnion.UnaryFormula.Formula,Variable,&LocalQuantifiedOccurrences);
             break;
         case atom:
-        case connective_atom:
+        case applied_connective:
             LocalCount = CountVariableUsageInTerm(Formula->FormulaUnion.Atom,Variable);
             break;
         case ite_formula:
@@ -1086,7 +1086,7 @@ VariableCollectorLength,TypeCollector,TypeCollectorLength);
 //DEBUG printf("unary:\nP:%sF:%sV:%s\n",*PredicateCollector,*FunctorCollector,*VariableCollector);
             break;
         case atom:
-        case connective_atom:
+        case applied_connective:
 //            if (strcmp(GetSymbol(Formula->FormulaUnion.Atom),"$true") &&
 //strcmp(GetSymbol(Formula->FormulaUnion.Atom),"$false")) {
             CollectSymbolsInTerm(Formula->FormulaUnion.Atom,PredicateCollector,
@@ -1328,7 +1328,7 @@ PutPositivesHere,PositivesLength,PutNegativesHere,NegativesLength);
             }
         case unary:
         case atom:
-        case connective_atom:
+        case applied_connective:
             LiteralSymbols = (char *)Malloc(sizeof(String));
             if (GetLiteralSymbolUsage(DisjunctionOrLiteral,&LiteralSymbols,&LiteralVariables) !=
 NULL) {
@@ -1430,7 +1430,7 @@ CountFormulaLiteralsOfPolarity(DisjunctionOrLiteral->FormulaUnion.BinaryFormula.
             }
             break;
         case atom:
-        case connective_atom:
+        case applied_connective:
             if (Sign ==  1) {
                  return(1);
             } else {
@@ -1647,7 +1647,7 @@ Formula->FormulaUnion.BinaryFormula.RHS,NestedYet));
 Formula->FormulaUnion.UnaryFormula.Formula,NestedYet));
             break;
         case atom:
-        case connective_atom:
+        case applied_connective:
 //DEBUG printf("It's an atom with symbol %s\n",GetSymbol(Formula->FormulaUnion.Atom));
             if (IsSymbolInSignatureList(Signature->Predicates,
 GetSymbol(Formula->FormulaUnion.Atom),GetArity(Formula->FormulaUnion.Atom),NULL) != NULL) {
@@ -1777,7 +1777,7 @@ Formula->FormulaUnion.QuantifiedFormula.Variable->TheSymbol.Variable->NumberOfUs
             return(CountVariablesInFormulaByType(Formula->FormulaUnion.UnaryFormula.Formula,Type));
             break;
         case atom:
-        case connective_atom:
+        case applied_connective:
 //DEBUG printf("Going to do an atom %s with %d args\n",GetSymbol(Formula->FormulaUnion.Atom),GetArity(Formula->FormulaUnion.Atom));
             Count = CountVariablesInTermsByType(GetArity(Formula->FormulaUnion.Atom),
 GetArguments(Formula->FormulaUnion.Atom),Type);
@@ -1834,7 +1834,7 @@ CountFormulaTuples(Formula->FormulaUnion.BinaryFormula.RHS));
             return(CountFormulaTuples(Formula->FormulaUnion.UnaryFormula.Formula));
             break;
         case atom:
-        case connective_atom:
+        case applied_connective:
             return(CountSimpleUsageInFORMULATERMArray(GetArity(Formula->FormulaUnion.Atom),
 GetArguments(Formula->FormulaUnion.Atom),&CountFormulaTuples));
             break;
@@ -1909,7 +1909,7 @@ CountFormulaTerms(Formula->FormulaUnion.BinaryFormula.RHS));
             return(CountFormulaTerms(Formula->FormulaUnion.UnaryFormula.Formula));
             break;
         case atom:
-        case connective_atom:
+        case applied_connective:
 //DEBUG printf("The number of terms in %s is %d\n",GetSymbol(Formula->FormulaUnion.Atom),CountTermTerms(Formula->FormulaUnion.Atom));
             return(CountTermTerms(Formula->FormulaUnion.Atom));
             break;
@@ -2034,7 +2034,7 @@ Formula->FormulaUnion.BinaryFormula.RHS,Predicate,DoNested);
 Formula->FormulaUnion.UnaryFormula.Formula,Predicate,DoNested));
             break;
         case atom:
-        case connective_atom:
+        case applied_connective:
             if (DoNested) {
 //----Do nested for TFX (and first-order style THF, if it's ever used)
 //DEBUG printf("Count nested of %s\n",GetSymbol(Formula->FormulaUnion.Atom));
@@ -2048,6 +2048,8 @@ Formula->FormulaUnion.Atom,Predicate);
 (!strcmp(Predicate,"PREDICATE") && IsSymbolInSignatureList(Signature->Predicates,
 GetSymbol(Formula->FormulaUnion.Atom),GetArity(Formula->FormulaUnion.Atom),NULL)) || 
 (!strcmp(Predicate,"CONNECTIVE") && Formula->FormulaUnion.Atom->Type == connective) ||
+(!strcmp(Predicate,"APPLIED_CONNECTIVE") && Formula->Type == applied_connective) ||
+(!strcmp(Predicate,"INDEXED_CONNECTIVE") && GetSymbol(Formula->FormulaUnion.Atom)[0] == '#') ||
 //----It's the predicate I want (in CNF and FOF; in TFF and THF it's dealt with as binary). See
 //----comment "Check for an equality" in ParseFormula in Parsing.c
 !strcmp(Predicate,GetSymbol(Formula->FormulaUnion.Atom)) ||
@@ -2355,7 +2357,7 @@ Formula->FormulaUnion.UnaryFormula.Formula);
             ConnectiveStatistics.NumberOfConnectives++;
             break;
         case atom:
-        case connective_atom:
+        case applied_connective:
             ConnectiveStatistics = GetSimpleConnectiveStatisticsInTERMArray(
 GetArity(Formula->FormulaUnion.Atom),GetArguments(Formula->FormulaUnion.Atom),
 &GetArgumentConnectiveUsage);
@@ -2441,7 +2443,7 @@ FormulaDepth(Formula->FormulaUnion.BinaryFormula.RHS)));
             return(1 + FormulaDepth(Formula->FormulaUnion.UnaryFormula.Formula));
             break;
         case atom:
-        case connective_atom:
+        case applied_connective:
             return(1);
             break;
         case tuple:
@@ -2540,7 +2542,7 @@ MaxFormulaTermDepth(Formula->FormulaUnion.BinaryFormula.RHS)));
             return(MaxFormulaTermDepth(Formula->FormulaUnion.UnaryFormula.Formula));
             break;
         case atom:
-        case connective_atom:
+        case applied_connective:
             return(MaxTermDepth(Formula->FormulaUnion.Atom));
             break;
         case tuple:
@@ -2641,7 +2643,7 @@ SumFormulaTermDepth(Formula->FormulaUnion.BinaryFormula.RHS));
             return(SumFormulaTermDepth(Formula->FormulaUnion.UnaryFormula.Formula));
             break;
         case atom:
-        case connective_atom:
+        case applied_connective:
             return(SumTermDepth(Formula->FormulaUnion.Atom));
             break;
         case tuple:

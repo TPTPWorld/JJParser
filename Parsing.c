@@ -357,7 +357,7 @@ NULL) {
                 assert((*Formula)->FormulaUnion.UnaryFormula.Formula == NULL);
                 break; 
             case atom:
-            case connective_atom:
+            case applied_connective:
                 FreeTerm(&((*Formula)->FormulaUnion.Atom),Signature,Variables);
                 assert((*Formula)->FormulaUnion.Atom == NULL);
                 break;
@@ -1018,7 +1018,7 @@ VARIABLENODE * EndOfScope,int VariablesMustBeQuantified) {
             CodingError("Could not open string stream");
             return(NULL);
         }
-//TODO connective_atom
+//TODO applied_connective
 //----Unary connective as a term in THF
         Formula = ParseAtom(StringStream,Language,Context,EndOfScope,VariablesMustBeQuantified);
         CloseReadFile(StringStream);
@@ -1286,7 +1286,7 @@ Original->FormulaUnion.BinaryFormula.RHS,Context,ForceNewVariables);
 Original->FormulaUnion.UnaryFormula.Formula,Context,ForceNewVariables);
                 break; 
             case atom:
-            case connective_atom:
+            case applied_connective:
                 Formula->FormulaUnion.Atom = DuplicateTerm(Original->FormulaUnion.Atom,Context,
 ForceNewVariables);
                 break;
@@ -1381,7 +1381,7 @@ VariablesMustBeQuantified,none);
             } else if (CheckToken(Stream,punctuation,"{")) {
                 AcceptToken(Stream,punctuation,"{");
                 Formula = NewFormula();
-                Formula->Type = connective_atom;
+                Formula->Type = applied_connective;
                 Formula->FormulaUnion.Atom = ParseTerm(Stream,Language,Context,EndOfScope,
 atom_as_term,none,NULL,VariablesMustBeQuantified);
                 AcceptToken(Stream,punctuation,"}");
@@ -1562,6 +1562,15 @@ AllowInfixEquality,VariablesMustBeQuantified,BinaryFormula));
 Context,EndOfScope,0,1,VariablesMustBeQuantified,ThisConnective);
                     Formula = BinaryFormula;
                     LastConnective = ThisConnective;
+//----If a connective atom applied to a ()ed list, save AppliedArity
+                    if (Formula->FormulaUnion.BinaryFormula.LHS->Type == applied_connective &&
+ThisConnective == application &&
+Formula->FormulaUnion.BinaryFormula.RHS->Type == atom &&
+!strcmp(GetSymbol(Formula->FormulaUnion.BinaryFormula.RHS->FormulaUnion.Atom),"()")) {
+                        SetSignatureAppliedArity(
+Formula->FormulaUnion.BinaryFormula.LHS->FormulaUnion.Atom->TheSymbol.NonVariable,
+GetArity(Formula->FormulaUnion.BinaryFormula.RHS->FormulaUnion.Atom));
+                    }
 //----Check if we should continue a stream of binary. If a binary connective then keep it and the 
 //----while loop will check, else nope.
                     if (CheckTokenType(Stream,binary_connective)) {

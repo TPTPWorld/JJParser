@@ -347,13 +347,13 @@ SYMBOLNODE IsSymbolInSignatureList(SYMBOLNODE List,char * Name,int Arity,READFIL
         } else {
             if (Stream != NULL && List->NumberOfUses > 0 && GetStreamWarnings(Stream)) {
 //----Warning if symbol overloading is not allowed
-                sprintf(DuplicateArity,"Multiple arity symbol %s, arity %d and now %d",
+                sprintf(DuplicateArity,"Multiple arity symbol %s, arity %d and looking for %d",
 Name,GetSignatureArity(List),Arity);
-                TokenError(Stream,DuplicateArity);
+                TokenWarning(Stream,DuplicateArity);
             }
-            return(List);
         }
-    } else if (strcmp(Name,GetSignatureSymbol(List)) < 0 ||
+    } 
+    if (strcmp(Name,GetSignatureSymbol(List)) < 0 ||
 (strcmp(Name,GetSignatureSymbol(List)) == 0 && Arity < GetSignatureArity(List))) {
         return(IsSymbolInSignatureList(List->LastSymbol,Name,Arity,Stream));
     } else {
@@ -381,13 +381,13 @@ READFILE Stream) {
         } else {
             if (Stream != NULL && (*List)->NumberOfUses > 0 && GetStreamWarnings(Stream)) {
 //----Warning if symbol overloading is not allowed
-                sprintf(DuplicateArity,"Multiple arity symbol %s, arity %d and now %d",
+                sprintf(DuplicateArity,"Multiple arity symbol %s, arity %d and looking for %d",
 Name,GetSignatureArity(*List),Arity);
-                TokenError(Stream,DuplicateArity);
+                TokenWarning(Stream,DuplicateArity);
             }
-            return(List);
         }
-    } else if (strcmp(Name,GetSignatureSymbol(*List)) < 0 ||
+    } 
+    if (strcmp(Name,GetSignatureSymbol(*List)) < 0 ||
 (strcmp(Name,GetSignatureSymbol(*List)) == 0 && Arity < GetSignatureArity(*List))) {
         return(IsSymbolInSignatureListPointer(&((*List)->LastSymbol),Name,Arity,Stream));
     } else {
@@ -424,7 +424,7 @@ int InternalSymbol,READFILE Stream) {
             } else {
                 if (Stream != NULL && (*Current)->NumberOfUses > 0 && GetStreamWarnings(Stream)) {
 //----Warning if symbol overloading is not allowed
-                    sprintf(DuplicateArity,"Multiple arity symbol %s, arity %d and now %d",
+                    sprintf(DuplicateArity,"Multiple arity symbol %s, arity %d and now also %d",
 Name,GetSignatureArity(*Current),Arity);
                     TokenWarning(Stream,DuplicateArity);
                 }
@@ -695,23 +695,27 @@ char ** FunctorUsageStartsHere) {
 void DoGetSignatureSymbolUsageStatistics(SYMBOLNODE SignatureNode,int * NumberOfSymbols,
 int * NumberOfSymbolsArity0,int * NumberOfUserSymbols,int * MinSymbolArity,int * MaxSymbolArity) {
 
+    int TheArityToUse;
+
 //----Exclude the fake
     if (SignatureNode != NULL) {
-//DEBUG printf("Look at %s/%d/%d which is %s\n",GetSignatureSymbol(SignatureNode),GetSignatureArity(SignatureNode),GetSignatureAppliedArity(SignatureNode),SignatureNode->InternalSymbol ? "internal" : "external");
+//DEBUG printf("Look at %s/%d/%d/%c(%d)\n",GetSignatureSymbol(SignatureNode),GetSignatureArity(SignatureNode),GetSignatureAppliedArity(SignatureNode),SignatureNode->InternalSymbol ? 'I' : 'X',GetSignatureUses(SignatureNode));
         if (!InternalSymbolNode(SignatureNode) && GetSignatureUses(SignatureNode) > 0) {
-//DEBUG printf("    and it is used\n");
             (*NumberOfSymbols)++;
             if (!DefinedSymbol(GetSignatureSymbol(SignatureNode))) { 
                 (*NumberOfUserSymbols)++;
             }
-            if (GetSignatureArity(SignatureNode) == 0) {
+            if ((TheArityToUse = GetSignatureAppliedArity(SignatureNode)) == -1) {
+                TheArityToUse = GetSignatureArity(SignatureNode);
+            }
+            if (TheArityToUse == 0) {
                 (*NumberOfSymbolsArity0)++;
             }
-            if (GetSignatureArity(SignatureNode) < *MinSymbolArity) {
-                *MinSymbolArity = SignatureNode->Arity;
+            if (TheArityToUse < *MinSymbolArity) {
+                *MinSymbolArity = TheArityToUse;
             }
-            if (GetSignatureArity(SignatureNode) > *MaxSymbolArity) {
-                *MaxSymbolArity = SignatureNode->Arity;
+            if (TheArityToUse > *MaxSymbolArity) {
+                *MaxSymbolArity = TheArityToUse;
             }
         }
         DoGetSignatureSymbolUsageStatistics(SignatureNode->LastSymbol,NumberOfSymbols,

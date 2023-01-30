@@ -21,6 +21,8 @@ void InitializeFormulaStatistics(FormulaStatisticsType * FormulaStatistics) {
     FormulaStatistics->NumberOfAtoms = 0;
     FormulaStatistics->NumberOfEqualityAtoms = 0;
     FormulaStatistics->NumberOfConnectiveAtoms = 0;
+    FormulaStatistics->NumberOfAppliedConnectives = 0;
+    FormulaStatistics->NumberOfIndexedConnectives = 0;
     FormulaStatistics->NumberOfVariableAtoms = 0;
     FormulaStatistics->NumberOfNestedFormulae = 0;
 

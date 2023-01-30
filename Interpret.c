@@ -71,7 +71,7 @@ UnaryFormula.Formula,Interpretation));
             }
             break;
         case atom:
-        case connective_atom:
+        case applied_connective:
             if (!strcmp(GetSymbol(Formula->FormulaUnion.Atom),"$true")) {
                 return(1);
             } else if (!strcmp(GetSymbol(Formula->FormulaUnion.Atom),"$false")) {
