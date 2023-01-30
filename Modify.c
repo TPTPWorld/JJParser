@@ -462,7 +462,7 @@ void UniqueifyVariableNames(ANNOTATEDFORMULA AnnotatedFormula) {
                 sprintf(NewName,"%s_NN_%d",
 GetSignatureSymbol(VariableNode->VariableName),UniqueIndex++);
                 SameNameNode->VariableName = InsertIntoSignatureList(
-&(VariableNode->VariableName->NextSymbol),NewName,0,NULL);
+&(VariableNode->VariableName->NextSymbol),NewName,0,-1,0,NULL);
                 IncreaseSymbolUseCount(VariableNode->VariableName,-1);
             }
            SameNameNode = SameNameNode->NextVariable;

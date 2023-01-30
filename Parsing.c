@@ -143,7 +143,7 @@ Quantification == free_variable && FoundVariable == NULL) {
         Variable->NumberOfUses = 1;
         Variable->Quantification = Quantification;
         Variable->Instantiation = NULL;
-        Variable->VariableName = InsertIntoSignature(Signature,variable,VariableName,0,NULL);
+        Variable->VariableName = InsertIntoSignature(Signature,variable,VariableName,0,-1,0,NULL);
 
 //----If a tolerated free variable, add at top and don't change context
         if (FoundVariable == NULL && Quantification == free_variable && AllowFreeVariables) {
@@ -342,7 +342,8 @@ Variables);
                 FreeFormula(&((*Formula)->FormulaUnion.BinaryFormula.LHS),Signature,Variables);
                 assert((*Formula)->FormulaUnion.BinaryFormula.LHS == NULL);
                 if ((*Formula)->FormulaUnion.BinaryFormula.Connective == equation) {
-                    if ((Symbol = IsSymbolInSignatureList(Signature->Predicates,"=",2)) != NULL) {
+                    if ((Symbol = IsSymbolInSignatureList(Signature->Predicates,"=",2,NULL)) != 
+NULL) {
                         IncreaseSymbolUseCount(Symbol,-1);
                     } else {
                         CodingError("Freeing an equation, but = not in signature");
@@ -499,7 +500,9 @@ TERM DuplicateTerm(TERM Original,ContextType Context,int ForceNewVariables) {
         case non_logical_data:
 //DEBUG printf("Duplicating term with symbol %s, arity %d, arguments are %s \n",GetSymbol(Term),GetArity(Term),Original->Arguments == NULL ? "NULL" : "not NULL");
             Term->TheSymbol.NonVariable = InsertIntoSignature(Context.Signature,Term->Type,
-Original->TheSymbol.NonVariable->NameSymbol,Original->TheSymbol.NonVariable->Arity,NULL);
+Original->TheSymbol.NonVariable->NameSymbol,Original->TheSymbol.NonVariable->Arity,
+Original->TheSymbol.NonVariable->AppliedArity,Original->TheSymbol.NonVariable->InternalSymbol,
+NULL);
             Term->Arguments = DuplicateArguments(GetArity(Term),Original->Arguments,Context,
 ForceNewVariables);
             break;
@@ -678,7 +681,7 @@ int VariablesMustBeQuantified) {
 //----      EnsureTokenType(Stream,predicate_symbol);
 //DEBUG printf("Found a predicate with symbol %s %s (want %s)\n",CurrentToken(Stream)->NameToken,TokenTypeToString(CurrentToken(Stream)->KindToken),TokenTypeToString(lower_word));
             if (IsSymbolInSignatureList(Context.Signature->Types,CurrentToken(Stream)->NameToken,
-0) != NULL) {
+0,Stream) != NULL) {
                 DesiredType = a_type;
                 TypeIfInfix = nonterm;
             } else {
@@ -818,7 +821,7 @@ DesiredType == atom_as_term && TypeIfInfix == variable) {
 //----Insert symbol into signature. Could be LHS of infix.
     if (Term->Type == non_logical_data) {
         Term->TheSymbol.NonVariable = InsertIntoSignature(Context.Signature,Term->Type,
-PrefixSymbol,NumberOfArguments,Stream);        
+PrefixSymbol,NumberOfArguments,-1,0,Stream);        
     } else if (Term->Type == new_variable) {
         Term->Type = variable;
         Term->TheSymbol.Variable = InsertVariable(Stream,Context.Signature,Context.Variables,
@@ -840,22 +843,29 @@ EndOfScope,0,PrefixSymbol,free_variable,VariablesMustBeQuantified);
         if (FunctorType == unary_connective || FunctorType == binary_connective ||
 (FunctorType == lower_word && !strcmp(PrefixSymbol,"="))) {
             Term->Type = connective;
-//----Numbers and distinct objects are known to be functions
-        } else if (FunctorType == number || FunctorType == distinct_object) {
+//----Numbers and distinct objects and NTF indices are known to be functions
+        } else if (FunctorType == number || FunctorType == distinct_object || 
+(FunctorType == lower_word && PrefixSymbol[0] == '#')) {
             Term->Type = function;
 //----If is known to be a type from type declaration, fix this term type
-        } else if (IsSymbolInSignatureList(Context.Signature->Types,PrefixSymbol,0) != NULL) {
+        } else if (IsSymbolInSignatureList(Context.Signature->Types,PrefixSymbol,0,Stream) != 
+NULL) {
             Term->Type = a_type;
         } else if ((FoundSymbol = IsSymbolInSignatureList(Context.Signature->Functions,PrefixSymbol,
-SearchNumberOfArguments)) != NULL) {
+SearchNumberOfArguments,Stream)) != NULL) {
 //DEBUG printf("Yes, known function, convert %s to function arity %d\n",PrefixSymbol,NumberOfArguments);
             Term->Type = function;
-            NumberOfArguments = FoundSymbol->Arity;
+//----If it has -1 arity in signature, then need to set it from arguments
+            if (GetSignatureArity(FoundSymbol) != -1) {
+                NumberOfArguments = GetSignatureArity(FoundSymbol);
+            }
         } else if ((FoundSymbol = IsSymbolInSignatureList(Context.Signature->Predicates,
-PrefixSymbol,SearchNumberOfArguments)) != NULL) {
+PrefixSymbol,SearchNumberOfArguments,Stream)) != NULL) {
 //DEBUG printf("Yes, known predicate, convert %s to predicate arity %d\n",PrefixSymbol,NumberOfArguments);
             Term->Type = atom_as_term;
-            NumberOfArguments = FoundSymbol->Arity;
+            if (GetSignatureArity(FoundSymbol) != -1) {
+                NumberOfArguments = GetSignatureArity(FoundSymbol);
+            }
 //----By default things are type $i, i.e., function. But this makes undeclared predicates into
 //----functions too. EVil world!
 //        } else {
@@ -865,7 +875,7 @@ PrefixSymbol,SearchNumberOfArguments)) != NULL) {
 //----of a type declaration, but that gets fixed later when the parsing of the declaration is
 //----completed in ParseFormula.
         Term->TheSymbol.NonVariable = InsertIntoSignature(Context.Signature,Term->Type,
-PrefixSymbol,NumberOfArguments,Stream);
+PrefixSymbol,NumberOfArguments,-1,0,Stream);
 //----Note that if the term is a THF connective that is not a term, then the formula is deleted in 
 //----ParseUnaryFormula and the NumberOfUses in the signature will be decremented, possibly down 
 //----to 0.
@@ -886,7 +896,7 @@ PrefixSymbol,NumberOfArguments,Stream);
             InfixToken = CurrentToken(Stream)->NameToken;
         }
         InfixTerm->TheSymbol.NonVariable = InsertIntoSignature(Context.Signature,InfixTerm->Type,
-InfixToken,2,Stream);
+InfixToken,2,-1,0,Stream);
         InfixTerm->Arguments = NewArguments(2);
         InfixTerm->Arguments[0] = Term;
 //----Move on only after saving the infix operator
@@ -1261,8 +1271,8 @@ Original->FormulaUnion.QuantifiedFormula.Formula,Context,ForceNewVariables);
                 Formula->FormulaUnion.BinaryFormula.LHS = DuplicateFormula(
 Original->FormulaUnion.BinaryFormula.LHS,Context,ForceNewVariables);
                 if (Formula->FormulaUnion.BinaryFormula.Connective == equation) {
-                    if ((Symbol = IsSymbolInSignatureList(Context.Signature->Predicates,"=",2)) != 
-NULL) {
+                    if ((Symbol = IsSymbolInSignatureList(Context.Signature->Predicates,"=",2,
+NULL)) != NULL) {
                         IncreaseSymbolUseCount(Symbol,1);
                     } else {
                         CodingError("Duplicating an equation, but = not in signature");
@@ -1420,7 +1430,7 @@ VariablesMustBeQuantified);
         BinaryFormula->FormulaUnion.BinaryFormula.LHS = Formula;
         ThisConnective = StringToConnective(CurrentToken(Stream)->NameToken);
         BinaryFormula->FormulaUnion.BinaryFormula.Connective = ThisConnective;
-        InsertIntoSignatureList(&(Context.Signature->Predicates),"=",2,Stream);
+        InsertIntoSignatureList(&(Context.Signature->Predicates),"=",2,-1,0,Stream);
         NextToken(Stream);
         BinaryFormula->FormulaUnion.BinaryFormula.RHS = ParseFormula(Stream,Language,
 Context,EndOfScope,0,0,VariablesMustBeQuantified,ThisConnective);
@@ -1489,7 +1499,7 @@ BinaryFormula->FormulaUnion.BinaryFormula.RHS->FormulaUnion.Atom->Type == a_type
 //----in the signature. Symbols that are known to be types are detected as such up above.
 //DEBUG printf("DEBUG Checking for existing type %s\n",GetSymbol(BinaryFormula->FormulaUnion.BinaryFormula.LHS->FormulaUnion.Atom));
                         if ((ExistingType = IsSymbolInSignatureList(
-Context.Signature->Types,LHSSymbol,0)) == NULL) {
+Context.Signature->Types,LHSSymbol,0,Stream)) == NULL) {
 //DEBUG printf("DEBUG Do not have existing type %s\n",GetSymbol(BinaryFormula->FormulaUnion.BinaryFormula.LHS->FormulaUnion.Atom));
                             if (MoveSignatureNode(&(Context.Signature->Predicates),
 &(Context.Signature->Types),LHSSymbol,0,Stream) == NULL) {
@@ -1508,9 +1518,9 @@ FormulaUnion.Atom->TheSymbol.NonVariable,-1);
                         if (BinaryFormula->FormulaUnion.BinaryFormula.LHS->
 FormulaUnion.Atom->TheSymbol.NonVariable->NumberOfUses == 0) {
                             if ((ToDeletePtr = IsSymbolInSignatureListPointer(
-&(Context.Signature->Functions),LHSSymbol,LHSSymbolArity)) != NULL ||
+&(Context.Signature->Functions),LHSSymbol,LHSSymbolArity,Stream)) != NULL ||
 (ToDeletePtr = IsSymbolInSignatureListPointer(&(Context.Signature->Predicates),
-LHSSymbol,LHSSymbolArity)) != NULL) {
+LHSSymbol,LHSSymbolArity,Stream)) != NULL) {
                                 RemoveSignatureNodeFromTree(ToDeletePtr);
                             } else {
                                 sprintf(ErrorMessage,
@@ -1530,7 +1540,7 @@ function : atom_as_term;
 //DEBUG printf("Fix %s to be a %s of arity %d\n",LHSSymbol,TermTypeToString(NewTermType),GetArityFromTyping(Stream,BinaryFormula->FormulaUnion.BinaryFormula.RHS));
                         BinaryFormula->FormulaUnion.BinaryFormula.LHS->FormulaUnion.Atom->
 TheSymbol.NonVariable = InsertIntoSignature(Context.Signature,NewTermType,LHSSymbol,
-GetArityFromTyping(Stream,BinaryFormula->FormulaUnion.BinaryFormula.RHS),Stream);
+GetArityFromTyping(Stream,BinaryFormula->FormulaUnion.BinaryFormula.RHS),-1,0,Stream);
 //DEBUG printf("Fixed atom symbol is %s and the arity is %d and the args are %s\n",GetSymbol(BinaryFormula->FormulaUnion.BinaryFormula.LHS->FormulaUnion.Atom),GetArity(BinaryFormula->FormulaUnion.BinaryFormula.LHS->FormulaUnion.Atom),GetArguments(BinaryFormula->FormulaUnion.BinaryFormula.LHS->FormulaUnion.Atom) == NULL ? "NULL" : "not NULL");
                     }
                 }

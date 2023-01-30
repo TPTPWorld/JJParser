@@ -67,6 +67,8 @@ typedef struct SymbolTag {
     char * ShortSymbol;
     int NumberOfUses;
     int Arity;
+    int AppliedArity;  //----Used for {} connectives that have their own parameters (arity)
+    int InternalSymbol;  //-----Used for things not to be counted in statistics
 //----These are left and right for the tree implementation (to be renamed)
     struct SymbolTag * LastSymbol;
     struct SymbolTag * NextSymbol;
@@ -330,6 +332,7 @@ typedef enum {
     interpretation,
     unknown,
 //----Collections
+    logical,
     axiom_like,
     not_conjecture,
 //----For logic specifications

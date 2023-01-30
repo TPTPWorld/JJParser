@@ -23,7 +23,7 @@ FORMULA ParseLiterals(READFILE Stream,ContextType Context,VARIABLENODE * EndOfSc
         Formula->FormulaUnion.Atom = NewTerm();
         Formula->FormulaUnion.Atom->Type = atom_as_term;
         Formula->FormulaUnion.Atom->TheSymbol.NonVariable = 
-InsertIntoSignature(Context.Signature,atom_as_term,"$false",0,Stream);
+InsertIntoSignature(Context.Signature,atom_as_term,"$false",0,-1,0,Stream);
         Formula->FormulaUnion.Atom->Arguments = NULL;
         return(Formula);
     }

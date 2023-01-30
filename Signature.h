@@ -15,11 +15,13 @@ char * GetSignatureShortSymbol(SYMBOLNODE SymbolNode);
 int GetSignatureArity(SYMBOLNODE SymbolNode);
 void IncreaseSymbolUseCount(SYMBOLNODE Symbol,int HowMuch);
 int GetSignatureUses(SYMBOLNODE SymbolNode);
-SYMBOLNODE IsSymbolInSignatureList(SYMBOLNODE List,char * Name,int Arity);
-SYMBOLNODE * IsSymbolInSignatureListPointer(SYMBOLNODE * List,char * Name,int Arity);
-SYMBOLNODE InsertIntoSignatureList(SYMBOLNODE * List,char * Name,int Arity,READFILE Stream);
-SYMBOLNODE InsertIntoSignature(SIGNATURE Signature,TermType Type,char * Name,int Arity,
+SYMBOLNODE IsSymbolInSignatureList(SYMBOLNODE List,char * Name,int Arity,READFILE Stream);
+SYMBOLNODE * IsSymbolInSignatureListPointer(SYMBOLNODE * List,char * Name,int Arity,
 READFILE Stream);
+SYMBOLNODE InsertIntoSignatureList(SYMBOLNODE * List,char * Name,int Arity,int AppliedArity,
+int InternalSymbol,READFILE Stream);
+SYMBOLNODE InsertIntoSignature(SIGNATURE Signature,TermType Type,char * Name,int Arity,
+int AppliedArity,int InternalSymbol,READFILE Stream);
 SYMBOLNODE MoveSignatureNode(SYMBOLNODE * FromList,SYMBOLNODE * ToList,char * Name,int Arity,
 READFILE Stream);
 SYMBOLNODE NextInSignatureTree(SYMBOLNODE SignatureTree,SYMBOLNODE Current);

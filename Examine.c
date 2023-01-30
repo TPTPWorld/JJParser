@@ -484,9 +484,16 @@ int LooksLikeAList(TERM Term,int MinElements,int MaxElements) {
 //-------------------------------------------------------------------------------------------------
 int CheckRole(StatusType Role,StatusType DesiredRole) {
 
-     return(Role == DesiredRole || (DesiredRole == axiom_like &&
-(Role == axiom || Role == hypothesis || Role == definition || 
-Role == lemma || Role == theorem || Role == corollary || Role == external)) || 
+     return(Role == DesiredRole || 
+(DesiredRole == axiom_like && 
+ (Role == axiom || Role == hypothesis || Role == definition || Role == lemma || 
+  Role == theorem || Role == corollary || Role == external)) || 
+(DesiredRole == logical && 
+ (Role == assumption || Role == axiom || Role == hypothesis || Role == definition ||
+  Role == lemma || Role == theorem || Role == corollary || Role == conjecture ||
+  Role == question || Role == negated_conjecture || Role == plain || Role == answer ||
+  Role == type || Role == fi_domain || Role == fi_functors || Role == fi_predicates ||
+  Role == interpretation)) ||
 //----Note: assumptions are not axiom_like
 (DesiredRole == not_conjecture && Role != conjecture && 
 Role != negated_conjecture && Role != question));
@@ -511,7 +518,8 @@ AnnotatedFormula->AnnotatedFormulaUnion.AnnotatedTSTPFormula.FormulaWithVariable
 //-------------------------------------------------------------------------------------------------
 int LogicalAnnotatedFormula(ANNOTATEDFORMULA AnnotatedFormula) {
 
-    return(CheckAnnotatedFormula(AnnotatedFormula,tptp_thf) ||
+    return(
+CheckAnnotatedFormula(AnnotatedFormula,tptp_thf) ||
 CheckAnnotatedFormula(AnnotatedFormula,tptp_tff) ||
 CheckAnnotatedFormula(AnnotatedFormula,tptp_tcf) ||
 CheckAnnotatedFormula(AnnotatedFormula,tptp_fof) ||
@@ -911,7 +919,7 @@ int * VariableCollectorLength,char ** TypeCollector,int * TypeCollectorLength) {
             break;
         case atom_as_term:
         case function:
-ZZZZZZ
+//TODO
             if (strcmp(GetSymbol(Term),"()")) {
                 sprintf(TermData,"%s/%d/1\n",GetSymbol(Term),GetArity(Term));
                 if (Term->Type == atom_as_term) {
@@ -1464,7 +1472,7 @@ int GetSymbolUses(SIGNATURE Signature,TermType Type,char * Name,int Arity) {
             break;
     }
 
-    if ((SymbolNode = IsSymbolInSignatureList(List,Name,Arity)) != NULL) {
+    if ((SymbolNode = IsSymbolInSignatureList(List,Name,Arity,NULL)) != NULL) {
         return(GetSignatureUses(SymbolNode));
     } else {
         return(0);
@@ -1642,7 +1650,7 @@ Formula->FormulaUnion.UnaryFormula.Formula,NestedYet));
         case connective_atom:
 //DEBUG printf("It's an atom with symbol %s\n",GetSymbol(Formula->FormulaUnion.Atom));
             if (IsSymbolInSignatureList(Signature->Predicates,
-GetSymbol(Formula->FormulaUnion.Atom),GetArity(Formula->FormulaUnion.Atom)) != NULL) {
+GetSymbol(Formula->FormulaUnion.Atom),GetArity(Formula->FormulaUnion.Atom),NULL) != NULL) {
                 Count = NestedYet;
                 NestedYet = 1;
             }
@@ -2038,7 +2046,7 @@ Formula->FormulaUnion.Atom,Predicate);
 //----If nothing requested, take everything
             if (
 (!strcmp(Predicate,"PREDICATE") && IsSymbolInSignatureList(Signature->Predicates,
-GetSymbol(Formula->FormulaUnion.Atom),GetArity(Formula->FormulaUnion.Atom))) || 
+GetSymbol(Formula->FormulaUnion.Atom),GetArity(Formula->FormulaUnion.Atom),NULL)) || 
 (!strcmp(Predicate,"CONNECTIVE") && Formula->FormulaUnion.Atom->Type == connective) ||
 //----It's the predicate I want (in CNF and FOF; in TFF and THF it's dealt with as binary). See
 //----comment "Check for an equality" in ParseFormula in Parsing.c

@@ -31,43 +31,114 @@ SIGNATURE NewSignatureWithTypes(void) {
     SIGNATURE Signature;
 
     Signature = NewSignature();
-    IncreaseSymbolUseCount(InsertIntoSignature(Signature,a_type,"$tType",0,NULL),-1);
-    IncreaseSymbolUseCount(InsertIntoSignature(Signature,a_type,"$i",0,NULL),-1);
-    IncreaseSymbolUseCount(InsertIntoSignature(Signature,a_type,"$o",0,NULL),-1);
-    IncreaseSymbolUseCount(InsertIntoSignature(Signature,a_type,"$int",0,NULL),-1);
-    IncreaseSymbolUseCount(InsertIntoSignature(Signature,a_type,"$rat",0,NULL),-1);
-    IncreaseSymbolUseCount(InsertIntoSignature(Signature,a_type,"$real",0,NULL),-1);
-    IncreaseSymbolUseCount(InsertIntoSignature(Signature,atom_as_term,"$true",0,NULL),-1);
-    IncreaseSymbolUseCount(InsertIntoSignature(Signature,atom_as_term,"$false",0,NULL),-1);
-    IncreaseSymbolUseCount(InsertIntoSignature(Signature,atom_as_term,"$is_int",1,NULL),-1);
-    IncreaseSymbolUseCount(InsertIntoSignature(Signature,atom_as_term,"$is_rat",1,NULL),-1);
-    IncreaseSymbolUseCount(InsertIntoSignature(Signature,atom_as_term,"$less",2,NULL),-1);
-    IncreaseSymbolUseCount(InsertIntoSignature(Signature,atom_as_term,"$lesseq",2,NULL),-1);
-    IncreaseSymbolUseCount(InsertIntoSignature(Signature,atom_as_term,"$greater",2,NULL),-1);
-    IncreaseSymbolUseCount(InsertIntoSignature(Signature,atom_as_term,"$greatereq",2,NULL),-1);
-    IncreaseSymbolUseCount(InsertIntoSignature(Signature,function,"$uminus",1,NULL),-1);
-    IncreaseSymbolUseCount(InsertIntoSignature(Signature,function,"$sum",2,NULL),-1);
-    IncreaseSymbolUseCount(InsertIntoSignature(Signature,function,"$difference",2,NULL),-1);
-    IncreaseSymbolUseCount(InsertIntoSignature(Signature,function,"$product",2,NULL),-1);
-    IncreaseSymbolUseCount(InsertIntoSignature(Signature,function,"$quotient",2,NULL),-1);
-    IncreaseSymbolUseCount(InsertIntoSignature(Signature,function,"$quotient_e",2,NULL),-1);
-    IncreaseSymbolUseCount(InsertIntoSignature(Signature,function,"$quotient_t",2,NULL),-1);
-    IncreaseSymbolUseCount(InsertIntoSignature(Signature,function,"$quotient_f",2,NULL),-1);
-    IncreaseSymbolUseCount(InsertIntoSignature(Signature,function,"$remainder_e",2,NULL),-1);
-    IncreaseSymbolUseCount(InsertIntoSignature(Signature,function,"$remainder_t",2,NULL),-1);
-    IncreaseSymbolUseCount(InsertIntoSignature(Signature,function,"$remainder_f",2,NULL),-1);
-    IncreaseSymbolUseCount(InsertIntoSignature(Signature,function,"$floor",1,NULL),-1);
-    IncreaseSymbolUseCount(InsertIntoSignature(Signature,function,"$ceiling",1,NULL),-1);
-    IncreaseSymbolUseCount(InsertIntoSignature(Signature,function,"$truncate",1,NULL),-1);
-    IncreaseSymbolUseCount(InsertIntoSignature(Signature,function,"$round",1,NULL),-1);
-    IncreaseSymbolUseCount(InsertIntoSignature(Signature,function,"$to_int",1,NULL),-1);
-    IncreaseSymbolUseCount(InsertIntoSignature(Signature,function,"$to_rat",1,NULL),-1);
-    IncreaseSymbolUseCount(InsertIntoSignature(Signature,function,"$to_real",1,NULL),-1);
+    IncreaseSymbolUseCount(InsertIntoSignature(Signature,a_type,"$tType",0,-1,0,NULL),-1);
+    IncreaseSymbolUseCount(InsertIntoSignature(Signature,a_type,"$i",0,-1,0,NULL),-1);
+    IncreaseSymbolUseCount(InsertIntoSignature(Signature,a_type,"$o",0,-1,0,NULL),-1);
+    IncreaseSymbolUseCount(InsertIntoSignature(Signature,a_type,"$int",0,-1,0,NULL),-1);
+    IncreaseSymbolUseCount(InsertIntoSignature(Signature,a_type,"$rat",0,-1,0,NULL),-1);
+    IncreaseSymbolUseCount(InsertIntoSignature(Signature,a_type,"$real",0,-1,0,NULL),-1);
+    IncreaseSymbolUseCount(InsertIntoSignature(Signature,atom_as_term,"$true",0,-1,0,NULL),-1);
+    IncreaseSymbolUseCount(InsertIntoSignature(Signature,atom_as_term,"$false",0,-1,0,NULL),-1);
+    IncreaseSymbolUseCount(InsertIntoSignature(Signature,atom_as_term,"$is_int",1,-1,0,NULL),-1);
+    IncreaseSymbolUseCount(InsertIntoSignature(Signature,atom_as_term,"$is_rat",1,-1,0,NULL),-1);
+    IncreaseSymbolUseCount(InsertIntoSignature(Signature,atom_as_term,"$less",2,-1,0,NULL),-1);
+    IncreaseSymbolUseCount(InsertIntoSignature(Signature,atom_as_term,"$lesseq",2,-1,0,NULL),-1);
+    IncreaseSymbolUseCount(InsertIntoSignature(Signature,atom_as_term,"$greater",2,-1,0,NULL),-1);
+    IncreaseSymbolUseCount(InsertIntoSignature(Signature,atom_as_term,"$greatereq",2,-1,0,NULL),-1);
+    IncreaseSymbolUseCount(InsertIntoSignature(Signature,function,"$uminus",1,-1,0,NULL),-1);
+    IncreaseSymbolUseCount(InsertIntoSignature(Signature,function,"$sum",2,-1,0,NULL),-1);
+    IncreaseSymbolUseCount(InsertIntoSignature(Signature,function,"$difference",2,-1,0,NULL),-1);
+    IncreaseSymbolUseCount(InsertIntoSignature(Signature,function,"$product",2,-1,0,NULL),-1);
+    IncreaseSymbolUseCount(InsertIntoSignature(Signature,function,"$quotient",2,-1,0,NULL),-1);
+    IncreaseSymbolUseCount(InsertIntoSignature(Signature,function,"$quotient_e",2,-1,0,NULL),-1);
+    IncreaseSymbolUseCount(InsertIntoSignature(Signature,function,"$quotient_t",2,-1,0,NULL),-1);
+    IncreaseSymbolUseCount(InsertIntoSignature(Signature,function,"$quotient_f",2,-1,0,NULL),-1);
+    IncreaseSymbolUseCount(InsertIntoSignature(Signature,function,"$remainder_e",2,-1,0,NULL),-1);
+    IncreaseSymbolUseCount(InsertIntoSignature(Signature,function,"$remainder_t",2,-1,0,NULL),-1);
+    IncreaseSymbolUseCount(InsertIntoSignature(Signature,function,"$remainder_f",2,-1,0,NULL),-1);
+    IncreaseSymbolUseCount(InsertIntoSignature(Signature,function,"$floor",1,-1,0,NULL),-1);
+    IncreaseSymbolUseCount(InsertIntoSignature(Signature,function,"$ceiling",1,-1,0,NULL),-1);
+    IncreaseSymbolUseCount(InsertIntoSignature(Signature,function,"$truncate",1,-1,0,NULL),-1);
+    IncreaseSymbolUseCount(InsertIntoSignature(Signature,function,"$round",1,-1,0,NULL),-1);
+    IncreaseSymbolUseCount(InsertIntoSignature(Signature,function,"$to_int",1,-1,0,NULL),-1);
+    IncreaseSymbolUseCount(InsertIntoSignature(Signature,function,"$to_rat",1,-1,0,NULL),-1);
+    IncreaseSymbolUseCount(InsertIntoSignature(Signature,function,"$to_real",1,-1,0,NULL),-1);
+
+    IncreaseSymbolUseCount(InsertIntoSignature(Signature,function,"$modal",0,-1,1,NULL),-1);
+    IncreaseSymbolUseCount(InsertIntoSignature(Signature,function,"$alethic_modal",0,-1,1,
+NULL),-1);
+    IncreaseSymbolUseCount(InsertIntoSignature(Signature,function,"$deontic_modal",0,-1,1,
+NULL),-1);
+    IncreaseSymbolUseCount(InsertIntoSignature(Signature,function,"$epistemic_modal",0,-1,1,
+NULL),-1);
+    IncreaseSymbolUseCount(InsertIntoSignature(Signature,function,"$constants",0,-1,1,NULL),-1);
+    IncreaseSymbolUseCount(InsertIntoSignature(Signature,function,"$quantification",0,-1,1,
+NULL),-1);
+    IncreaseSymbolUseCount(InsertIntoSignature(Signature,function,"$modalities",0,-1,1,NULL),-1);
+    IncreaseSymbolUseCount(InsertIntoSignature(Signature,function,"$rigid",0,-1,1,NULL),-1);
+    IncreaseSymbolUseCount(InsertIntoSignature(Signature,function,"$flexible",0,-1,1,NULL),-1);
+    IncreaseSymbolUseCount(InsertIntoSignature(Signature,function,"$constant",0,-1,1,NULL),-1);
+    IncreaseSymbolUseCount(InsertIntoSignature(Signature,function,"$varying",0,-1,1,NULL),-1);
+    IncreaseSymbolUseCount(InsertIntoSignature(Signature,function,"$cumulative",0,-1,1,NULL),-1);
+    IncreaseSymbolUseCount(InsertIntoSignature(Signature,function,"$decreasing",0,-1,1,NULL),-1);
+
+    IncreaseSymbolUseCount(InsertIntoSignature(Signature,function,"$modal_system_K",0,-1,1,
+NULL),-1);
+    IncreaseSymbolUseCount(InsertIntoSignature(Signature,function,"$modal_system_KB",0,-1,1,
+NULL),-1);
+    IncreaseSymbolUseCount(InsertIntoSignature(Signature,function,"$modal_system_K4",0,-1,1,
+NULL),-1);
+    IncreaseSymbolUseCount(InsertIntoSignature(Signature,function,"$modal_system_K5",0,-1,1,
+NULL),-1);
+    IncreaseSymbolUseCount(InsertIntoSignature(Signature,function,"$modal_system_K45",0,-1,1,
+NULL),-1);
+    IncreaseSymbolUseCount(InsertIntoSignature(Signature,function,"$modal_system_KB5",0,-1,1,
+NULL),-1);
+    IncreaseSymbolUseCount(InsertIntoSignature(Signature,function,"$modal_system_D",0,-1,1,
+NULL),-1);
+    IncreaseSymbolUseCount(InsertIntoSignature(Signature,function,"$modal_system_DB",0,-1,1,
+NULL),-1);
+    IncreaseSymbolUseCount(InsertIntoSignature(Signature,function,"$modal_system_D4",0,-1,1,
+NULL),-1);
+    IncreaseSymbolUseCount(InsertIntoSignature(Signature,function,"$modal_system_D5",0,-1,1,
+NULL),-1);
+    IncreaseSymbolUseCount(InsertIntoSignature(Signature,function,"$modal_system_D45",0,-1,1,
+NULL),-1);
+    IncreaseSymbolUseCount(InsertIntoSignature(Signature,function,"$modal_system_T",0,-1,1,
+NULL),-1);
+    IncreaseSymbolUseCount(InsertIntoSignature(Signature,function,"$modal_system_B",0,-1,1,
+NULL),-1);
+    IncreaseSymbolUseCount(InsertIntoSignature(Signature,function,"$modal_system_S4",0,-1,1,
+NULL),-1);
+    IncreaseSymbolUseCount(InsertIntoSignature(Signature,function,"$modal_system_S5",0,-1,1,
+NULL),-1);
+    IncreaseSymbolUseCount(InsertIntoSignature(Signature,function,"$modal_system_S5u",0,-1,1,
+NULL),-1);
+    IncreaseSymbolUseCount(InsertIntoSignature(Signature,function,"modal_axiom_K",0,-1,1,NULL),-1);
+    IncreaseSymbolUseCount(InsertIntoSignature(Signature,function,"modal_axiom_T",0,-1,1,NULL),-1);
+    IncreaseSymbolUseCount(InsertIntoSignature(Signature,function,"modal_axiom_B",0,-1,1,NULL),-1);
+    IncreaseSymbolUseCount(InsertIntoSignature(Signature,function,"modal_axiom_D",0,-1,1,NULL),-1);
+    IncreaseSymbolUseCount(InsertIntoSignature(Signature,function,"modal_axiom_4",0,-1,1,NULL),-1);
+    IncreaseSymbolUseCount(InsertIntoSignature(Signature,function,"modal_axiom_5",0,-1,1,NULL),-1);
+    IncreaseSymbolUseCount(InsertIntoSignature(Signature,function,"modal_axiom_CD",0,-1,1,NULL),-1);
+    IncreaseSymbolUseCount(InsertIntoSignature(Signature,function,"modal_axiom_BoxM",0,-1,1,
+NULL),-1);
+    IncreaseSymbolUseCount(InsertIntoSignature(Signature,function,"modal_axiom_C4",0,-1,1,NULL),-1);
+    IncreaseSymbolUseCount(InsertIntoSignature(Signature,function,"modal_axiom_C",0,-1,1,NULL),-1);
+
+    IncreaseSymbolUseCount(InsertIntoSignature(Signature,function,"$box",-1,-1,0,NULL),-1);
+    IncreaseSymbolUseCount(InsertIntoSignature(Signature,function,"$dia ",-1,-1,0,NULL),-1);
+    IncreaseSymbolUseCount(InsertIntoSignature(Signature,function,"$necessary",-1,-1,0,NULL),-1);
+    IncreaseSymbolUseCount(InsertIntoSignature(Signature,function,"$possible",-1,-1,0,NULL),-1);
+    IncreaseSymbolUseCount(InsertIntoSignature(Signature,function,"$obligatory",-1,-1,0,NULL),-1);
+    IncreaseSymbolUseCount(InsertIntoSignature(Signature,function,"$permissible",-1,-1,0,NULL),-1);
+    IncreaseSymbolUseCount(InsertIntoSignature(Signature,function,"$knows",-1,-1,0,NULL),-1);
+    IncreaseSymbolUseCount(InsertIntoSignature(Signature,function,"$believes",-1,-1,0,NULL),-1);
 
     return(Signature);
 }
 //-------------------------------------------------------------------------------------------------
-SYMBOLNODE NewSignatureNode(char * Name,int Arity) {
+SYMBOLNODE NewSignatureNode(char * Name,int Arity,int AppliedArity,int InternalSymbol) {
 
     SYMBOLNODE Symbol;
     SuperString ShortName;
@@ -84,6 +155,8 @@ SYMBOLNODE NewSignatureNode(char * Name,int Arity) {
     Symbol->ShortSymbol = CopyHeapString(ShortName);
     Symbol->NumberOfUses = 1;
     Symbol->Arity = Arity;
+    Symbol->AppliedArity = AppliedArity;
+    Symbol->InternalSymbol = InternalSymbol;
     Symbol->LastSymbol = NULL;
     Symbol->NextSymbol = NULL;
 
@@ -99,7 +172,8 @@ SYMBOLNODE DuplicateSymbols(SYMBOLNODE Original) {
     if (Original == NULL) {
         Copy = NULL;
     } else {
-        Copy = NewSignatureNode(Original->NameSymbol,Original->Arity);
+        Copy = NewSignatureNode(Original->NameSymbol,Original->Arity,Original->AppliedArity,
+Original->InternalSymbol);
         Copy->NumberOfUses = Original->NumberOfUses;
         Copy->LastSymbol = DuplicateSymbols(Original->LastSymbol);
         Copy->NextSymbol = DuplicateSymbols(Original->NextSymbol);
@@ -224,6 +298,21 @@ int GetSignatureArity(SYMBOLNODE SymbolNode) {
     return(SymbolNode->Arity);
 }
 //-------------------------------------------------------------------------------------------------
+void SetSignatureArity(SYMBOLNODE SymbolNode,int Arity) {
+
+    SymbolNode->Arity = Arity;
+}
+//-------------------------------------------------------------------------------------------------
+int GetSignatureAppliedArity(SYMBOLNODE SymbolNode) {
+
+    return(SymbolNode->AppliedArity);
+}
+//-------------------------------------------------------------------------------------------------
+void SetSignatureAppliedArity(SYMBOLNODE SymbolNode,int AppliedArity) {
+
+    SymbolNode->AppliedArity = AppliedArity;
+}
+//-------------------------------------------------------------------------------------------------
 int GetSignatureUses(SYMBOLNODE SymbolNode) {
 
     return(SymbolNode->NumberOfUses);
@@ -234,17 +323,41 @@ void IncreaseSymbolUseCount(SYMBOLNODE Symbol,int HowMuch) {
     Symbol->NumberOfUses += HowMuch;
 }
 //-------------------------------------------------------------------------------------------------
-SYMBOLNODE IsSymbolInSignatureList(SYMBOLNODE List,char * Name,int Arity) {
+int IsAnInternalSymbol(char * Symbol) {
 
-    if (List == NULL || (!strcmp(GetSignatureSymbol(List),Name) &&
-//----Arity -1 means we don't care
-(Arity == -1 || GetSignatureArity(List) == Arity))) {
-        return(List);
+    return(!strcmp(Symbol,"()"));
+}
+//-------------------------------------------------------------------------------------------------
+int InternalSymbolNode(SYMBOLNODE SignatureNode) {
+
+    return(SignatureNode->InternalSymbol || IsAnInternalSymbol(GetSignatureSymbol(SignatureNode)));
+}
+//-------------------------------------------------------------------------------------------------
+SYMBOLNODE IsSymbolInSignatureList(SYMBOLNODE List,char * Name,int Arity,READFILE Stream) {
+
+    SuperString DuplicateArity;
+
+    if (List == NULL) {
+        return(NULL);
+    } else if (!strcmp(GetSignatureSymbol(List),Name)) {
+        if (Arity == -1 || GetSignatureArity(List) == -1) {
+            return(List);
+        } else if (GetSignatureArity(List) == Arity) {
+            return(List);
+        } else {
+            if (Stream != NULL && List->NumberOfUses > 0 && GetStreamWarnings(Stream)) {
+//----Warning if symbol overloading is not allowed
+                sprintf(DuplicateArity,"Multiple arity symbol %s, arity %d and now %d",
+Name,GetSignatureArity(List),Arity);
+                TokenError(Stream,DuplicateArity);
+            }
+            return(List);
+        }
     } else if (strcmp(Name,GetSignatureSymbol(List)) < 0 ||
 (strcmp(Name,GetSignatureSymbol(List)) == 0 && Arity < GetSignatureArity(List))) {
-        return(IsSymbolInSignatureList(List->LastSymbol,Name,Arity));
+        return(IsSymbolInSignatureList(List->LastSymbol,Name,Arity,Stream));
     } else {
-        return(IsSymbolInSignatureList(List->NextSymbol,Name,Arity));
+        return(IsSymbolInSignatureList(List->NextSymbol,Name,Arity,Stream));
     }
 }
 //-------------------------------------------------------------------------------------------------
@@ -253,34 +366,60 @@ int DefinedSymbol(char * Symbol) {
     return(Symbol[0] != '\'' && !islower(Symbol[0]));
 }
 //-------------------------------------------------------------------------------------------------
-SYMBOLNODE * IsSymbolInSignatureListPointer(SYMBOLNODE * List,char * Name,int Arity) {
+SYMBOLNODE * IsSymbolInSignatureListPointer(SYMBOLNODE * List,char * Name,int Arity,
+READFILE Stream) {
+
+    SuperString DuplicateArity;
 
     if (*List == NULL) {
         return(NULL);
-    }
-    if (!strcmp(GetSignatureSymbol(*List),Name) &&
-//----Arity -1 means we don't care
-(Arity == -1 || GetSignatureArity(*List) == Arity)) {
-        return(List);
+    } else if (!strcmp(GetSignatureSymbol(*List),Name)) {
+        if (Arity == -1 || GetSignatureArity(*List) == -1) {
+            return(List);
+        } else if (GetSignatureArity(*List) == Arity) {
+            return(List);
+        } else {
+            if (Stream != NULL && (*List)->NumberOfUses > 0 && GetStreamWarnings(Stream)) {
+//----Warning if symbol overloading is not allowed
+                sprintf(DuplicateArity,"Multiple arity symbol %s, arity %d and now %d",
+Name,GetSignatureArity(*List),Arity);
+                TokenError(Stream,DuplicateArity);
+            }
+            return(List);
+        }
     } else if (strcmp(Name,GetSignatureSymbol(*List)) < 0 ||
 (strcmp(Name,GetSignatureSymbol(*List)) == 0 && Arity < GetSignatureArity(*List))) {
-        return(IsSymbolInSignatureListPointer(&((*List)->LastSymbol),Name,Arity));
+        return(IsSymbolInSignatureListPointer(&((*List)->LastSymbol),Name,Arity,Stream));
     } else {
-        return(IsSymbolInSignatureListPointer(&((*List)->NextSymbol),Name,Arity));
+        return(IsSymbolInSignatureListPointer(&((*List)->NextSymbol),Name,Arity,Stream));
     }
 }
 //-------------------------------------------------------------------------------------------------
-SYMBOLNODE InsertIntoSignatureList(SYMBOLNODE * List,char * Name,int Arity,READFILE Stream) {
+SYMBOLNODE InsertIntoSignatureList(SYMBOLNODE * List,char * Name,int Arity,int AppliedArity,
+int InternalSymbol,READFILE Stream) {
 
     SuperString DuplicateArity;
     SYMBOLNODE * Current = List;
 
+//DEBUG printf("Looking for %s of arity %d\n",Name,Arity);
     while (*Current != NULL) {
 //----Same name
+//DEBUG printf("Compare required %s with signature %s\n",Name,GetSignatureSymbol(*Current));
         if (!strcmp(GetSignatureSymbol(*Current),Name)) {
+//DEBUG printf("Found %s arity %d/%d in signature\n",Name,GetSignatureArity(*Current),GetSignatureAppliedArity(*Current));
+//----Unknown arity (-1), then fix it
+            if (GetSignatureArity(*Current) == -1) {
+                SetSignatureArity(*Current,Arity);
+//DEBUG printf("Set the arity of %s to %d\n",Name,GetSignatureArity(*Current));
+            }
+            if (GetSignatureAppliedArity(*Current) == -1 && AppliedArity >= 0) {
+                SetSignatureAppliedArity(*Current,AppliedArity);
+//DEBUG printf("Set the applied arity of %s to %d\n",Name,GetSignatureAppliedArity(*Current));
+            }
 //----Same arity, we're done
             if (GetSignatureArity(*Current) == Arity) {
                 IncreaseSymbolUseCount(*Current,1);
+//DEBUG printf("Incremented use of %s/%d to %d\n",Name,Arity,GetSignatureUses(*Current));
                 return(*Current);
             } else {
                 if (Stream != NULL && (*Current)->NumberOfUses > 0 && GetStreamWarnings(Stream)) {
@@ -292,6 +431,7 @@ Name,GetSignatureArity(*Current),Arity);
             }
         }
 
+//----Search left or right
         if (strcmp(Name,GetSignatureSymbol(*Current)) < 0 ||
 (!strcmp(Name,GetSignatureSymbol(*Current)) && Arity < GetSignatureArity(*Current))) {
             Current = &((*Current)->LastSymbol);
@@ -300,7 +440,7 @@ Name,GetSignatureArity(*Current),Arity);
         }
     }
 
-    *Current = NewSignatureNode(Name,Arity);
+    *Current = NewSignatureNode(Name,Arity,AppliedArity,InternalSymbol);
 //DEBUG printf("After inserting\n");
 //DEBUG PrintSignatureTree(*List);
     return(*Current);
@@ -334,27 +474,32 @@ NodeToInsert->Arity);
 }
 //-------------------------------------------------------------------------------------------------
 SYMBOLNODE InsertIntoSignature(SIGNATURE Signature,TermType Type,char * Name,int Arity,
-READFILE Stream) {
+int AppliedArity,int InternalSymbol,READFILE Stream) {
 
     String ErrorMessage;
+    int IsInternal;
 
+    IsInternal = InternalSymbol || IsAnInternalSymbol(Name);
 //DEBUG printf("Insert %s/%d into %s\n",Name,Arity,TermTypeToString(Type));
     switch (Type) {
         case variable:
-            return(InsertIntoSignatureList(&(Signature->Variables),Name,Arity,Stream));
+            return(InsertIntoSignatureList(&(Signature->Variables),Name,Arity,-1,IsInternal,
+Stream));
             break;
         case function:
-            return(InsertIntoSignatureList(&(Signature->Functions),Name,Arity,Stream));
+            return(InsertIntoSignatureList(&(Signature->Functions),Name,Arity,AppliedArity,
+IsInternal,Stream));
             break;
         case atom_as_term:
         case connective:
-            return(InsertIntoSignatureList(&(Signature->Predicates),Name,Arity,Stream));
+            return(InsertIntoSignatureList(&(Signature->Predicates),Name,Arity,-1,IsInternal,
+Stream));
             break;
         case a_type:
-            return(InsertIntoSignatureList(&(Signature->Types),Name,Arity,Stream));
+            return(InsertIntoSignatureList(&(Signature->Types),Name,Arity,-1,IsInternal,Stream));
             break;
         case non_logical_data:
-            return(InsertIntoSignatureList(&(Signature->NonLogicals),Name,Arity,Stream));
+            return(InsertIntoSignatureList(&(Signature->NonLogicals),Name,Arity,-1,0,Stream));
             break;
         default:
             sprintf(ErrorMessage,"Unknown type for signature, %s %d",Name,Arity);
@@ -370,7 +515,8 @@ READFILE Stream) {
     SYMBOLNODE * NodePointerPointer;
     SYMBOLNODE NodePointer;
 
-    if ((NodePointerPointer = IsSymbolInSignatureListPointer(FromList,Name,Arity)) != NULL) {
+    if ((NodePointerPointer = IsSymbolInSignatureListPointer(FromList,Name,Arity,Stream)) != 
+NULL) {
         NodePointer = RemoveSignatureNodeFromTree(NodePointerPointer);
         return(InsertNodeIntoSignatureList(ToList,NodePointer,Stream));
     } else {
@@ -459,8 +605,9 @@ void PrintSignatureTree(SYMBOLNODE SignatureTree) {
 
     if (SignatureTree != NULL) {
         PrintSignatureTree(SignatureTree->LastSymbol);
-        printf("%s/%d(%d)\n",GetSignatureSymbol(SignatureTree),GetSignatureArity(SignatureTree),
-GetSignatureUses(SignatureTree));
+        printf("%s/%d/%d/%c(%d)\n",GetSignatureSymbol(SignatureTree),
+GetSignatureArity(SignatureTree),GetSignatureAppliedArity(SignatureTree),
+InternalSymbolNode(SignatureTree) ? 'I' : 'X',GetSignatureUses(SignatureTree));
         fflush(stdout);
         PrintSignatureTree(SignatureTree->NextSymbol);
     }
@@ -548,21 +695,22 @@ char ** FunctorUsageStartsHere) {
 void DoGetSignatureSymbolUsageStatistics(SYMBOLNODE SignatureNode,int * NumberOfSymbols,
 int * NumberOfSymbolsArity0,int * NumberOfUserSymbols,int * MinSymbolArity,int * MaxSymbolArity) {
 
+//----Exclude the fake
     if (SignatureNode != NULL) {
-//DEBUG printf("Symbol is %s\n",SignatureNode->NameSymbol);
-        if (GetSignatureUses(SignatureNode)) {
+//DEBUG printf("Look at %s/%d/%d which is %s\n",GetSignatureSymbol(SignatureNode),GetSignatureArity(SignatureNode),GetSignatureAppliedArity(SignatureNode),SignatureNode->InternalSymbol ? "internal" : "external");
+        if (!InternalSymbolNode(SignatureNode) && GetSignatureUses(SignatureNode) > 0) {
 //DEBUG printf("    and it is used\n");
             (*NumberOfSymbols)++;
             if (!DefinedSymbol(GetSignatureSymbol(SignatureNode))) { 
                 (*NumberOfUserSymbols)++;
             }
-            if (SignatureNode->Arity == 0) {
+            if (GetSignatureArity(SignatureNode) == 0) {
                 (*NumberOfSymbolsArity0)++;
             }
-            if (SignatureNode->Arity < *MinSymbolArity) {
+            if (GetSignatureArity(SignatureNode) < *MinSymbolArity) {
                 *MinSymbolArity = SignatureNode->Arity;
             }
-            if (SignatureNode->Arity > *MaxSymbolArity) {
+            if (GetSignatureArity(SignatureNode) > *MaxSymbolArity) {
                 *MaxSymbolArity = SignatureNode->Arity;
             }
         }

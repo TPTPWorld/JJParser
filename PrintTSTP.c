@@ -333,6 +333,11 @@ int LiteralFormula(FORMULA Formula) {
 (UnarySymbolFormula(Formula) && Formula->FormulaUnion.UnaryFormula.Connective == negation));
 }
 //-------------------------------------------------------------------------------------------------
+int LiteralOrTuple(FORMULA Formula) {
+
+    return(LiteralFormula(Formula) || Formula->Type == tuple);
+}
+//-------------------------------------------------------------------------------------------------
 int AtomicallyFlatLiteralFormula(FORMULA Formula) {
 
     return(AtomicallyFlatSymbolFormula(Formula) ||
@@ -407,7 +412,7 @@ int PreUnitEquation(FORMULA Formula) {
     FORMULA LHS;
     FORMULA RHS;
 
-    return(Equation(Formula,&LHS,&RHS) && LiteralFormula(LHS) && LiteralFormula(RHS));
+    return(Equation(Formula,&LHS,&RHS) && LiteralOrTuple(LHS) && LiteralOrTuple(RHS));
 }
 //-------------------------------------------------------------------------------------------------
 int FlatEquation(FORMULA Formula) {
@@ -888,7 +893,7 @@ Formula->FormulaUnion.QuantifiedFormula.Formula,Indent,Pretty,none,TSTPSyntaxFla
 //----Sadly the old BNF required ()s around equations on the side of a binary, and too many
 //----systems (E and Leo-III at least) have encoded that. Shitto, because new BNF does not
 //----require them (but accepts them).
-// (LastConnective != none && PreUnitEquation(Formula)) ||
+(LastConnective == none && PreUnitEquation(Formula)) ||
 (Connective == LastConnective && Associative(Connective)) ||
 (LastConnective == brackets && Associative(Connective))) {
                 NeedBrackets = 0;
@@ -915,7 +920,7 @@ RightAssociative(SideFormula->FormulaUnion.BinaryFormula.Connective)) ||
 //----Need ()s around complex sides of equations. The BNF says negations are complex.
 //----Binary gets dealt with in recursion regarding associativity. But negated equations have
 //----to be dealt with here because later they are kinda binary with TSTPSyntaxFlag = 2.
-(Equation(Formula,NULL,NULL) && !SymbolFormula(SideFormula) && 
+(Equation(Formula,NULL,NULL) && !LiteralOrTuple(SideFormula) && 
 !NegatedEquation(SideFormula,NULL,NULL) && !BinaryFormula(SideFormula))) {
 // (Equation(SideFormula,NULL,NULL) || !BinaryFormula(SideFormula)))) {
                 FakeConnective = brackets;
@@ -932,8 +937,8 @@ TSTPSyntaxFlag);
                 PFprintf(Stream," )");
             }
 //----No new line for sequences of @ and >, and flat equations. Seems redundant here.
-            NeedNewLine = !FlatFormula(Formula) && Formula->Type != assignment && 
-Formula->Type != type_declaration && !TypeDefnIdFormula(Formula);
+            NeedNewLine = !FlatFormula(Formula) && !PreUnitEquation(Formula) &&
+!TypeDefnIdFormula(Formula);
             if (NeedNewLine && Pretty) {
                 PFprintf(Stream,"\n");
                 PrintSpaces(Stream,ConnectiveIndent);
@@ -948,6 +953,7 @@ Formula->Type != type_declaration && !TypeDefnIdFormula(Formula);
 TypeDefnIdFormula(Formula) && 
 !FlatTypeDefnIdFormula(Formula) &&
 !AtomicallyFlatFormula(SideFormula) && 
+SideFormula->Type != tuple &&
 Pretty) {
                 PFprintf(Stream,"\n");
                 PrintSpaces(Stream,Indent + 2);
@@ -963,7 +969,7 @@ Pretty) {
                 if ((Associative(Connective) && !FullyAssociative(Connective) && 
 SideFormula->Type == binary && 
 LeftAssociative(SideFormula->FormulaUnion.BinaryFormula.Connective)) ||
-(Equation(Formula,NULL,NULL) && !SymbolFormula(SideFormula) && 
+(Equation(Formula,NULL,NULL) && !LiteralOrTuple(SideFormula) && 
 !NegatedEquation(SideFormula,NULL,NULL) && !BinaryFormula(SideFormula))) {
 // (Equation(SideFormula,NULL,NULL) || !BinaryFormula(SideFormula)))) {
                     FakeConnective = brackets;

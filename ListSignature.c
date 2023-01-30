@@ -136,8 +136,8 @@ SYMBOLNODE InsertIntoSignatureList(SYMBOLNODE * List,char * Name,int Arity) {
 void PrintSignatureList(SYMBOLNODE List) {
 
     while (List != NULL) {
-        printf("%s/%d(%d) ",GetSignatureSymbol(List),GetSignatureArity(List),
-GetSignatureUses(List));
+        printf("%s/%d/%d/%c(%d) ",GetSignatureSymbol(List),GetSignatureArity(List),
+GetSignatureAppliedArity(List),List->InternalSymbol ? 'I' : 'X',GetSignatureUses(List));
         List = List->NextSymbol;
     }
 }
