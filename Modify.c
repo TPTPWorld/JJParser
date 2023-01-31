@@ -431,7 +431,7 @@ int NegateConjectures(LISTNODE Head,int Simplify) {
 
     NumberNegated = 0;
     while (Head != NULL) {
-        if (CheckAnnotatedFormulaRole(Head->AnnotatedFormula,conjecture) &&
+        if (LogicalAnnotatedFormulaWithRole(Head->AnnotatedFormula,conjecture) &&
 Negate(Head->AnnotatedFormula,Simplify)) {
             Head->AnnotatedFormula->AnnotatedFormulaUnion.AnnotatedTSTPFormula.
 Status = negated_conjecture;

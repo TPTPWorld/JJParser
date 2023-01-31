@@ -25,6 +25,7 @@ int GetArityFromTyping(READFILE Stream,FORMULA TypeFormula);
 
 int CheckAnnotatedFormula(ANNOTATEDFORMULA AnnotatedFormula,SyntaxType ExpectedSyntax);
 int LogicalAnnotatedFormula(ANNOTATEDFORMULA AnnotatedFormula);
+int LogicalAnnotatedFormulaWithRole(ANNOTATEDFORMULA AnnotatedFormula,StatusType DesiredRole);
 int TPIAnnotatedFormula(ANNOTATEDFORMULA AnnotatedFormula);
 int ReallyAnAnnotatedFormula(ANNOTATEDFORMULA AnnotatedFormula);
 int CopiedAnnotatedFormula(ANNOTATEDFORMULA AnnotatedFormula);
@@ -35,7 +36,6 @@ int LooksLikeANumber(char * NumberString);
 int IsMathType(char * Symbol);
 int LooksLikeAList(TERM Term,int MinElements,int MaxElements);
 int CheckRole(StatusType Role,StatusType DesiredRole);
-int CheckAnnotatedFormulaRole(ANNOTATEDFORMULA AnnotatedFormula,StatusType DesiredRole);
 
 int ExtractTermArguments(String Term);
 char * TSTPTermToString(TERM Term,String PutTermHere);

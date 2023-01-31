@@ -499,17 +499,6 @@ int CheckRole(StatusType Role,StatusType DesiredRole) {
 Role != negated_conjecture && Role != question));
 }
 //-------------------------------------------------------------------------------------------------
-int CheckAnnotatedFormulaRole(ANNOTATEDFORMULA AnnotatedFormula,StatusType DesiredRole) {
-
-    AnnotatedTSTPFormulaType * AnnotatedTSTPFormula;
-
-    if ((AnnotatedTSTPFormula = GetAnnotatedTSTPFormula(AnnotatedFormula)) != NULL) {
-        return(CheckRole(AnnotatedTSTPFormula->Status,DesiredRole));
-    } else {
-        return(0);
-    }
-}
-//-------------------------------------------------------------------------------------------------
 int CheckAnnotatedFormula(ANNOTATEDFORMULA AnnotatedFormula,SyntaxType ExpectedSyntax) {
 
     return(AnnotatedFormula != NULL && AnnotatedFormula->Syntax == ExpectedSyntax &&
@@ -524,6 +513,12 @@ CheckAnnotatedFormula(AnnotatedFormula,tptp_tff) ||
 CheckAnnotatedFormula(AnnotatedFormula,tptp_tcf) ||
 CheckAnnotatedFormula(AnnotatedFormula,tptp_fof) ||
 CheckAnnotatedFormula(AnnotatedFormula,tptp_cnf));
+}
+//-------------------------------------------------------------------------------------------------
+int LogicalAnnotatedFormulaWithRole(ANNOTATEDFORMULA AnnotatedFormula,StatusType DesiredRole) {
+
+    return(LogicalAnnotatedFormula(AnnotatedFormula) && 
+CheckRole(AnnotatedFormula->AnnotatedFormulaUnion.AnnotatedTSTPFormula.Status,DesiredRole));
 }
 //-------------------------------------------------------------------------------------------------
 int TPIAnnotatedFormula(ANNOTATEDFORMULA AnnotatedFormula) {

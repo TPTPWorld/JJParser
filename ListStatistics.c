@@ -23,7 +23,7 @@ int ListCount(SIGNATURE Signature,LISTNODE List,CountType WhatToCount) {
     Counter = 0;
     while (List != NULL) {
 //----Ignore comments
-        if (LogicalAnnotatedFormula(List->AnnotatedFormula)) {
+        if (LogicalAnnotatedFormulaWithRole(List->AnnotatedFormula,logical)) {
             switch (WhatToCount) {
                 case nodes:
                     Counter += 1;
