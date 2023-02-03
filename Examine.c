@@ -247,7 +247,7 @@ int GetArityFromTyping(READFILE Stream,FORMULA TypeFormula) {
             break;
         case applied_connective:
         case tuple:
-            return(1);
+            return(0);
             break;
         case binary:
             if (TypeFormula->FormulaUnion.BinaryFormula.Connective == maparrow) {

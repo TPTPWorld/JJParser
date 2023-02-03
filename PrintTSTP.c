@@ -455,6 +455,13 @@ int TypeDefnIdFormula(FORMULA Formula) {
     return(TypeFormula(Formula) || DefnFormula(Formula) || IdFormula(Formula));
 }
 //-------------------------------------------------------------------------------------------------
+int PolymorphicTypeFormula(FORMULA Formula) {
+
+    return(Formula->Type == quantified && 
+(Formula->FormulaUnion.QuantifiedFormula.Quantifier == pibinder ||
+ Formula->FormulaUnion.QuantifiedFormula.Quantifier == sigmabinder));
+}
+//-------------------------------------------------------------------------------------------------
 int FlatTypeDefnIdFormula(FORMULA Formula) {
 
     return(TypeDefnIdFormula(Formula) && FlatFormula(Formula->FormulaUnion.BinaryFormula.LHS) &&
@@ -696,11 +703,18 @@ char OpeningBracket,char ClosingBracket,ConnectiveType LastConnective,int TSTPSy
     if (((Arity = GetArity(Term)) > 0  && Term->Arguments != NULL) || OpeningBracket == '[') {
         PFprintf(Stream,"%c",OpeningBracket);
         for (ElementNumber=0;ElementNumber < Arity;ElementNumber++) {
+//DEBUG printf("Printing element %d, type %s, last connective %s\n",ElementNumber,FormulaTypeToString(Term->Arguments[ElementNumber]->Type),ConnectiveToString(LastConnective));
             if (ElementNumber > 0) {
                 PFprintf(Stream,",");
             }
 //----Only some formula arguments stay on the same line
-            if (Pretty && LastConnective != brackets &&
+            if (Pretty && 
+LastConnective != brackets &&
+//----Always a new line for $let and $ite
+// ||
+//  (Term->Arguments[ElementNumber]->Type == formula &&
+//   (Term->Arguments[ElementNumber]->TheSymbol.Formula->Type == ite_formula ||
+//    Term->Arguments[ElementNumber]->TheSymbol.Formula->Type == let_formula))) &&
 !AtomicallyFlatTerm(Term->Arguments[ElementNumber]) &&
 Term->Arguments[ElementNumber]->Type != non_logical_data && 
 !NestedFormulaType(Term->Arguments[ElementNumber]->Type,1)) {
@@ -752,7 +766,7 @@ TSTPSyntaxFlag);
         if (Pretty && (!AtomFlatFormula(FormulaTuple[ElementNumber-1]) ||
 !AtomFlatFormula(FormulaTuple[ElementNumber]))) {
             PFprintf(Stream,"\n");
-            PrintSpaces(Stream,Indent+4);
+            PrintSpaces(Stream,Indent+2);
         }
         if (FlatFormula(FormulaTuple[ElementNumber])) {
             LastConnective = outermost;
@@ -939,7 +953,7 @@ TSTPSyntaxFlag);
 //----No new line for sequences of @ and >, and flat equations. Seems redundant here.
             NeedNewLine = !FlatFormula(Formula) && !PreUnitEquation(Formula) &&
 !TypeDefnIdFormula(Formula);
-            if (NeedNewLine && Pretty) {
+            if (Pretty && NeedNewLine) {
                 PFprintf(Stream,"\n");
                 PrintSpaces(Stream,ConnectiveIndent);
             } else if (Connective != typecolon && Connective != assignmentsym) {
@@ -949,23 +963,24 @@ TSTPSyntaxFlag);
             SideFormula = Formula->FormulaUnion.BinaryFormula.RHS;
 //DEBUG printf("Printing RHS %s with connective %s, last connective was %s, indent %d\n",FormulaTypeToString(SideFormula->Type),ConnectiveToString(Connective),ConnectiveToString(LastConnective),Indent);
 //----If didn't need a new line, and a type dec or defn then new line if not flat RHS
-            if (!NeedNewLine && 
-TypeDefnIdFormula(Formula) && 
-!FlatTypeDefnIdFormula(Formula) &&
-!AtomicallyFlatFormula(SideFormula) && 
-SideFormula->Type != tuple &&
-Pretty) {
+            if (Pretty && !NeedNewLine && TypeDefnIdFormula(Formula) &&
+(SideFormula->Type == tuple || SideFormula->Type == ite_formula ||
+ SideFormula->Type == let_formula || PolymorphicTypeFormula(SideFormula))) {
+// !FlatTypeDefnIdFormula(Formula)) {
+// !AtomicallyFlatFormula(SideFormula)) {
+// SideFormula->Type != tuple) {
                 PFprintf(Stream,"\n");
-                PrintSpaces(Stream,Indent + 2);
+                Indent += 2;
+                PrintSpaces(Stream,Indent);
             }
 //----If a : or := then no ()s required on RHS except if @ constructor
+            SideIndent = Indent;
             if (TypeDefnIdConnective(Connective) && FlatFormula(SideFormula)) {
 //----Why? := is very low precedence
 //      && !ApplicationFormula(SideFormula)) {
                 FakeConnective = outermost;
 //----Need to force brackets for left associative operators
             } else {
-                SideIndent = Indent;
                 if ((Associative(Connective) && !FullyAssociative(Connective) && 
 SideFormula->Type == binary && 
 LeftAssociative(SideFormula->FormulaUnion.BinaryFormula.Connective)) ||
