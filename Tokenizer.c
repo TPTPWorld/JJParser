@@ -535,12 +535,6 @@ ConnectiveType StringToConnective(char * ConnectiveString) {
     if (!strcmp(ConnectiveString,":")) {
         return(typecolon);
     }
-    if (!strcmp(ConnectiveString,":=")) {
-        return(assignmentsym);
-    }
-    if (!strcmp(ConnectiveString,"==")) {
-        return(identicalsym);
-    }
     if (!strcmp(ConnectiveString,"<<")) {
         return(subtype);
     }
@@ -555,6 +549,24 @@ ConnectiveType StringToConnective(char * ConnectiveString) {
     }
     if (!strcmp(ConnectiveString,"-->")) {
         return(gentzenarrow);
+    }
+    if (!strcmp(ConnectiveString,":=")) {
+        return(assignmentsym);
+    }
+    if (!strcmp(ConnectiveString,"==")) {
+        return(identicalsym);
+    }
+    if (!strcmp(ConnectiveString,"[.]")) {
+        return(box);
+    }
+    if (!strcmp(ConnectiveString,"<.>")) {
+        return(diamond);
+    }
+    if (!strcmp(ConnectiveString,"{.}")) {
+        return(quatrefoil);
+    }
+    if (!strcmp(ConnectiveString,"(.)")) {
+        return(circle);
     }
     sprintf(ErrorMessage,"Not a string to make into a connective: %s",ConnectiveString);
     CodingError(ErrorMessage);
@@ -641,12 +653,6 @@ char * ConnectiveToString(ConnectiveType Connective) {
         case typecolon:
             return(":");
             break;
-        case assignmentsym:
-            return(":=");
-            break;
-        case identicalsym:
-            return("==");
-            break;
         case subtype:
             return(" <<");
             break;
@@ -661,6 +667,24 @@ char * ConnectiveToString(ConnectiveType Connective) {
             break;
         case gentzenarrow:
             return("-->");
+            break;
+        case assignmentsym:
+            return(":=");
+            break;
+        case identicalsym:
+            return("==");
+            break;
+        case box:
+            return("[.]");
+            break;
+        case diamond:
+            return("<.>");
+            break;
+        case quatrefoil:
+            return("{.}");
+            break;
+        case circle:
+            return("(.)");
             break;
         case brackets:
             return("()");
@@ -1208,19 +1232,52 @@ TOKEN GetNextToken(READFILE Stream) {
             return(QuotedToken(Stream,'\'',lower_word));
             break;
         case '(':
-            return(BuildToken(punctuation,"("));
+            CurrentChar = NextCharacter(Stream);
+            if (CurrentChar == '.') {
+                CurrentChar = NextCharacter(Stream);
+                if (CurrentChar == ')') {
+                    return(BuildToken(unary_connective,"(.)"));
+                } else {
+                    CharacterError(Stream);
+                }
+            } else {
+                Stream->Overshot = 1;
+                return(BuildToken(punctuation,"("));
+            }
             break;
         case ')':
             return(BuildToken(punctuation,")"));
             break;
         case '[':
-            return(BuildToken(punctuation,"["));
+            CurrentChar = NextCharacter(Stream);
+            if (CurrentChar == '.') {
+                CurrentChar = NextCharacter(Stream);
+                if (CurrentChar == ']') {
+                    return(BuildToken(unary_connective,"[.]"));
+                } else {
+                    CharacterError(Stream);
+                }
+            } else {
+                Stream->Overshot = 1;
+                return(BuildToken(punctuation,"["));
+            }
             break;
         case ']':
             return(BuildToken(punctuation,"]"));
             break;
         case '{':
-            return(BuildToken(punctuation,"{"));
+            CurrentChar = NextCharacter(Stream);
+            if (CurrentChar == '.') {
+                CurrentChar = NextCharacter(Stream);
+                if (CurrentChar == '}') {
+                    return(BuildToken(unary_connective,"{.}"));
+                } else {
+                    CharacterError(Stream);
+                }
+            } else {
+                Stream->Overshot = 1;
+                return(BuildToken(punctuation,"{"));
+            }
             break;
         case '}':
             return(BuildToken(punctuation,"}"));
@@ -1286,7 +1343,15 @@ TOKEN GetNextToken(READFILE Stream) {
                 }
             } else if (CurrentChar == '<') {
                 return(BuildToken(binary_connective,"<<"));
+            } else if (CurrentChar == '.') {
+                CurrentChar = NextCharacter(Stream);
+                if (CurrentChar == '>') {
+                    return(BuildToken(unary_connective,"<.>"));
+                } else {
+                    CharacterError(Stream);
+                }
             } else {
+                Stream->Overshot = 1;
                 CharacterError(Stream);
             }
             break;

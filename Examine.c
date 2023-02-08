@@ -1976,7 +1976,7 @@ int DoNested) {
     int Count;
     String ErrorMessage;
 
-//DEBUG printf("Counting %s in\n",Predicate); PrintFileTSTPFormula(OpenFILEPrintFile(stdout,NULL),tptp_thf,Formula,0,1,outermost,1);
+//DEBUG printf("Counting %s (DoNested=%d) in\n",Predicate,DoNested); PrintFileTSTPFormula(OpenFILEPrintFile(stdout,NULL),tptp_thf,Formula,0,1,outermost,1);printf("\n");
     Count = 0;
     switch(Formula->Type) {
         case sequent:
@@ -2031,7 +2031,7 @@ Formula->FormulaUnion.UnaryFormula.Formula,Predicate,DoNested));
         case atom:
         case applied_connective:
             if (DoNested) {
-//----Do nested for TFX (and first-order style THF, if it's ever used)
+//----Do nested for TXF (and first-order style THF, if it's ever used)
 //DEBUG printf("Count nested of %s\n",GetSymbol(Formula->FormulaUnion.Atom));
                 Count = CountNestedFormulaAtomsByPredicate(Signature,
 Formula->FormulaUnion.Atom,Predicate);
@@ -2159,6 +2159,10 @@ ConnectiveStatisticsType * ConnectiveStatistics) {
             ConnectiveStatistics->NumberOfNegations++;
             ConnectiveStatistics->NumberOfConnectives++;
             break;
+        case application:
+            ConnectiveStatistics->NumberOfApplications++;
+            ConnectiveStatistics->NumberOfConnectives++;
+            break;
         case equation:
             ConnectiveStatistics->NumberOfEqualitySymbols++;
             break;
@@ -2181,10 +2185,6 @@ ConnectiveStatisticsType * ConnectiveStatistics) {
             ConnectiveStatistics->NumberOfDescriptions++;
             ConnectiveStatistics->NumberOfConnectives++;
             break;
-        case application:
-            ConnectiveStatistics->NumberOfApplications++;
-            ConnectiveStatistics->NumberOfConnectives++;
-            break;
         case subtype:
             ConnectiveStatistics->NumberOfSubtypes++;
             ConnectiveStatistics->NumberOfTypeConnectives++;
@@ -2200,6 +2200,12 @@ ConnectiveStatisticsType * ConnectiveStatistics) {
         case uniontype:
             ConnectiveStatistics->NumberOfUnions++;
             ConnectiveStatistics->NumberOfTypeConnectives++;
+            break;
+        case box:
+        case diamond:
+        case quatrefoil:
+        case circle:
+            ConnectiveStatistics->NumberOfNTFConnectives++;
             break;
         default:
             sprintf(ErrorMessage,"Unknown connective %s in counting",
@@ -2338,15 +2344,22 @@ Formula->FormulaUnion.UnaryFormula.Formula);
                 case negation:
                     ConnectiveStatistics.NumberOfNegations++;
                     break;
-//----Ignore these - they are counted as atoms
-            //    case pi:
-            //    case sigma:
-            //    case choice:
-            //    case description:
-            //        break;
+                case box:
+                case diamond:
+                case quatrefoil:
+                case circle:
+                    ConnectiveStatistics.NumberOfNTFConnectives++;
+                    break;
+//----Ignore these - they are counted as atoms in formulae
+                case pi:
+                case sigma:
+                case choice:
+                case description:
+                    break;
                 default:
-//DEBUG printf("%d===%s===\n",Formula->FormulaUnion.UnaryFormula.Connective,ConnectiveToString(Formula->FormulaUnion.UnaryFormula.Connective));
-                    CodingError("Unknown unary connective in counting");
+                    sprintf(ErrorMessage,"Unknown unary connective %s in counting",
+ConnectiveToString(Formula->FormulaUnion.UnaryFormula.Connective));
+                    CodingError(ErrorMessage);
                     break;
             }
             ConnectiveStatistics.NumberOfConnectives++;

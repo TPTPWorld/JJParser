@@ -289,8 +289,10 @@ Formula->FormulaUnion.Atom->Arguments));
 //-------------------------------------------------------------------------------------------------
 int AtomicallyFlatSymbolFormula(FORMULA Formula) {
 
-    return(Formula->Type == atom && AtomicallyFlatTermList(GetArity(Formula->FormulaUnion.Atom),
-Formula->FormulaUnion.Atom->Arguments));
+    return(
+(Formula->Type == atom && AtomicallyFlatTermList(
+ GetArity(Formula->FormulaUnion.Atom),Formula->FormulaUnion.Atom->Arguments)) ||
+Formula->Type == applied_connective);
 }
 // ->Type == formula &&
 // !FlatITEFormula(Term->Arguments[ElementNumber]->TheSymbol.Formula) &&
@@ -1028,14 +1030,24 @@ NegatedEquality(Formula->FormulaUnion.UnaryFormula.Formula))) {
                 }
                 PFprintf(Stream,"%s",ConnectiveToString(
 Formula->FormulaUnion.UnaryFormula.Connective));
-                if (2 - strlen(ConnectiveToString(
-Formula->FormulaUnion.UnaryFormula.Connective)) <= 0) {
-                    PrintSpaces(Stream,1);
-                } else {
-                    PrintSpaces(Stream,2 - strlen(ConnectiveToString(
-Formula->FormulaUnion.UnaryFormula.Connective)));
+                switch (strlen(ConnectiveToString(Formula->FormulaUnion.UnaryFormula.Connective))) {
+                    case 1:
+                        ConnectiveIndent = 2;
+                        break;
+                    case 2:
+                    case 3:
+                        ConnectiveIndent = 4;
+                        break;
+                    case 4:
+                    case 5:
+                        ConnectiveIndent = 6;
+                        break;
+                    default:
+                        CodingError("Weird length unary connective");
                 }
-                Indent += 2;
+                PrintSpaces(Stream,
+ConnectiveIndent - strlen(ConnectiveToString(Formula->FormulaUnion.UnaryFormula.Connective)));
+                Indent += ConnectiveIndent;
                 if (FakeConnective == brackets) {
                     PFprintf(Stream,"( ");
                     Indent +=2;

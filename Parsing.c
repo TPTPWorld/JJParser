@@ -851,14 +851,8 @@ EndOfScope,0,PrefixSymbol,free_variable,VariablesMustBeQuantified);
         } else if (IsSymbolInSignatureList(Context.Signature->Types,PrefixSymbol,0,Stream) != 
 NULL) {
             Term->Type = a_type;
-        } else if ((FoundSymbol = IsSymbolInSignatureList(Context.Signature->Functions,PrefixSymbol,
-SearchNumberOfArguments,Stream)) != NULL) {
-//DEBUG printf("Yes, known function, convert %s to function arity %d\n",PrefixSymbol,NumberOfArguments);
-            Term->Type = function;
-//----If it has -1 arity in signature, then need to set it from arguments
-            if (GetSignatureArity(FoundSymbol) != -1) {
-                NumberOfArguments = GetSignatureArity(FoundSymbol);
-            }
+//----Do predicates first so that THF things (SearchNumberOfArguments == -1) default to
+//----atom_as_term rather than function
         } else if ((FoundSymbol = IsSymbolInSignatureList(Context.Signature->Predicates,
 PrefixSymbol,SearchNumberOfArguments,Stream)) != NULL) {
 //DEBUG printf("Yes, known predicate, convert %s to predicate arity %d\n",PrefixSymbol,NumberOfArguments);
@@ -870,6 +864,14 @@ PrefixSymbol,SearchNumberOfArguments,Stream)) != NULL) {
 //----functions too. EVil world!
 //        } else {
 //            Term->Type = function;
+        } else if ((FoundSymbol = IsSymbolInSignatureList(Context.Signature->Functions,PrefixSymbol,
+SearchNumberOfArguments,Stream)) != NULL) {
+//DEBUG printf("Yes, known function, convert %s to function arity %d\n",PrefixSymbol,NumberOfArguments);
+            Term->Type = function;
+//----If it has -1 arity in signature, then need to set it from arguments
+            if (GetSignatureArity(FoundSymbol) != -1) {
+                NumberOfArguments = GetSignatureArity(FoundSymbol);
+            }
         }
 //----Some functions and types might get inserted as predicates here when they appear on the LHS
 //----of a type declaration, but that gets fixed later when the parsing of the declaration is

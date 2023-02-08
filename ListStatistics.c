@@ -683,11 +683,13 @@ Statistics.ConnectiveStatistics.NumberOfNors,
 Statistics.ConnectiveStatistics.NumberOfNands);
         }
 //----Fourth connectives line
-        if (Statistics.FormulaStatistics.NumberOfAppliedConnectives > 0) {
+        if (Statistics.FormulaStatistics.NumberOfAppliedConnectives > 0 ||
+Statistics.ConnectiveStatistics.NumberOfNTFConnectives > 0) {
             fprintf(Stream,
-"%%                                         (%4d  {};%4d   #}\n",
+"%%                                         (%4d {}@;%4d {#};%4d {.})\n",
 Statistics.FormulaStatistics.NumberOfAppliedConnectives,
-Statistics.FormulaStatistics.NumberOfIndexedConnectives);
+Statistics.FormulaStatistics.NumberOfIndexedConnectives,
+Statistics.ConnectiveStatistics.NumberOfNTFConnectives);
         }
     }
 

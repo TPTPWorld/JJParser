@@ -24,9 +24,9 @@ typedef enum {
 //----Within formulae
     atoms,
     equality_atoms,
-    connective_atoms,
-    applied_connectives,
-    indexed_connectives,
+    connective_atoms,      //----In THF, things like (&) 
+    applied_connectives,   //----In NTF, things like {$box}
+    indexed_connectives,   //----In NTF, applied_connectives with an index, like {$box(#agent)}
     variable_atoms,
     terms,
     variables,
@@ -128,6 +128,9 @@ typedef struct {
 
 //----Only TFF
     int NumberOfSubtypes;
+
+//----Only NTF
+    int NumberOfNTFConnectives;
 
 //----Not for CNF
     int NumberOfNegations;

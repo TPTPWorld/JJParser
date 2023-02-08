@@ -121,6 +121,11 @@ typedef enum {
     gentzenarrow,
     assignmentsym,
     identicalsym,
+//----Non-classical
+    box,
+    diamond,
+    quatrefoil,
+    circle,
 //----Special for unknown quantification
     free_variable,
 //----Specials for output formatting
@@ -149,7 +154,7 @@ typedef enum {
     a_type,
 //----For formulae arguments in THF and TXF
     formula,
-//----For connectives used as terms in THF
+//----For connectives used as terms in THF, e.g., (&)
     connective,
 //----For useful info, source, etc. Not in signature.
     non_logical_data,  

@@ -86,6 +86,9 @@ void InitializeConnectiveStatistics(ConnectiveStatisticsType * ConnectiveStatist
 //----Only TFF
     ConnectiveStatistics->NumberOfSubtypes = 0;
 
+//----Only NTF
+    ConnectiveStatistics->NumberOfNTFConnectives = 0;
+
 //----Not for CNF
     ConnectiveStatistics->NumberOfNegations = 0;
     ConnectiveStatistics->NumberOfDisjunctions = 0;
@@ -138,6 +141,9 @@ MoreConnectiveStatistics.NumberOfTypedEqualitySymbols;
 
 //----Only TFF
     ConnectiveStatistics->NumberOfSubtypes += MoreConnectiveStatistics.NumberOfSubtypes;
+
+//----Only NTF
+    ConnectiveStatistics->NumberOfNTFConnectives += MoreConnectiveStatistics.NumberOfNTFConnectives;
 
 //----Not for CNF
     ConnectiveStatistics->NumberOfNegations += MoreConnectiveStatistics.NumberOfNegations;
