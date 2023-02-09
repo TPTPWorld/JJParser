@@ -114,9 +114,7 @@ LISTNODE DuplicateListOfAnnotatedFormulae(LISTNODE Head,SIGNATURE Signature) {
 //----should use FreeAListNode() below.
 static void FreeListNode(LISTNODE * FreeThis,SIGNATURE Signature) {
 
-// printf("freeing ...\n");
-// PrintAnnotatedTSTPNode(stdout,(*FreeThis)->AnnotatedFormula,tptp,1);
-// printf("it has %d uses\n",(*FreeThis)->AnnotatedFormula->NumberOfUses);
+//DEBUG printf("freeing ...\n"); PrintAnnotatedTSTPNode(stdout,(*FreeThis)->AnnotatedFormula,tptp,1); printf("it has %d uses\n",(*FreeThis)->AnnotatedFormula->NumberOfUses);
     FreeAnnotatedFormula(&((*FreeThis)->AnnotatedFormula),Signature);
     Free((void **)FreeThis);
 }

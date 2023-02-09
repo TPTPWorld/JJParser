@@ -232,6 +232,7 @@ void FreeTerm(TERM * Term,SIGNATURE Signature,VARIABLENODE * Variables) {
     int ArgumentIndex;
 
     if ((*Term) != NULL) {
+//DEBUG printf("Free term with type %s\n",TermTypeToString((*Term)->Type));
         if ((*Term)->Type == variable) {
             (*Term)->TheSymbol.Variable->VariableName->NumberOfUses--;
             (*Term)->TheSymbol.Variable->NumberOfUses--;
@@ -240,6 +241,7 @@ void FreeTerm(TERM * Term,SIGNATURE Signature,VARIABLENODE * Variables) {
                 assert((*Term)->TheSymbol.Variable == NULL);
             }
         } else if ((*Term)->Type == formula) {
+//DEBUG printf("Free formula term \n");
             FreeFormula(&((*Term)->TheSymbol.Formula),Signature,Variables);
         } else if ((*Term)->Type == nested_thf || (*Term)->Type == nested_tff || 
 (*Term)->Type == nested_tcf || (*Term)->Type == nested_fof || (*Term)->Type == nested_cnf) {
@@ -247,14 +249,18 @@ void FreeTerm(TERM * Term,SIGNATURE Signature,VARIABLENODE * Variables) {
         } else if ((*Term)->Type == nested_fot) {
             FreeTermWithVariables(&((*Term)->TheSymbol.NestedTerm),Signature);
         } else {
+//DEBUG printf("Free normal term with symbol %s\n",(*Term)->TheSymbol.NonVariable->NameSymbol);
             if ((*Term)->Arguments != NULL) {
                 for (ArgumentIndex=0;ArgumentIndex<GetArity(*Term);ArgumentIndex++) {
+//DEBUG printf("Free arg %d of %d\n",ArgumentIndex,ArgumentIndex<GetArity(*Term));
                     FreeTerm(&((*Term)->Arguments[ArgumentIndex]),Signature,Variables);
                     assert((*Term)->Arguments[ArgumentIndex] == NULL);
                 }
                 Free((void **)&((*Term)->Arguments));
             }
+//DEBUG printf("Freed args of normal term with symbol %s\n",(*Term)->TheSymbol.NonVariable->NameSymbol);
             (*Term)->TheSymbol.NonVariable->NumberOfUses--;
+//DEBUG printf("TheSymbol %s/%d now has %d uses\n",(*Term)->TheSymbol.NonVariable->NameSymbol,GetArity(*Term),(*Term)->TheSymbol.NonVariable->NumberOfUses);
         }
         Free((void **)Term);
     }
@@ -837,7 +843,8 @@ EndOfScope,0,PrefixSymbol,free_variable,VariablesMustBeQuantified);
 //----Do nothing
     } else {
 //----Need to note connectives used as terms in THF
-        SearchNumberOfArguments = (Language == tptp_thf ? -1 : NumberOfArguments);
+        SearchNumberOfArguments = ((Language == tptp_thf && NumberOfArguments == 0) ? -1 : 
+NumberOfArguments);
 //DEBUG printf("See if type is known for %s/%d (search %d) currently %s\n",PrefixSymbol,NumberOfArguments,SearchNumberOfArguments,TermTypeToString(Term->Type));
 //----Fix functions created from connectives in THF to be connective
         if (FunctorType == unary_connective || FunctorType == binary_connective ||

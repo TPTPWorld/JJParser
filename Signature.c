@@ -37,6 +37,7 @@ SIGNATURE NewSignatureWithTypes(void) {
     IncreaseSymbolUseCount(InsertIntoSignature(Signature,a_type,"$int",0,-1,0,NULL),-1);
     IncreaseSymbolUseCount(InsertIntoSignature(Signature,a_type,"$rat",0,-1,0,NULL),-1);
     IncreaseSymbolUseCount(InsertIntoSignature(Signature,a_type,"$real",0,-1,0,NULL),-1);
+
     IncreaseSymbolUseCount(InsertIntoSignature(Signature,atom_as_term,"$true",0,-1,0,NULL),-1);
     IncreaseSymbolUseCount(InsertIntoSignature(Signature,atom_as_term,"$false",0,-1,0,NULL),-1);
     IncreaseSymbolUseCount(InsertIntoSignature(Signature,atom_as_term,"$is_int",1,-1,0,NULL),-1);
@@ -45,6 +46,19 @@ SIGNATURE NewSignatureWithTypes(void) {
     IncreaseSymbolUseCount(InsertIntoSignature(Signature,atom_as_term,"$lesseq",2,-1,0,NULL),-1);
     IncreaseSymbolUseCount(InsertIntoSignature(Signature,atom_as_term,"$greater",2,-1,0,NULL),-1);
     IncreaseSymbolUseCount(InsertIntoSignature(Signature,atom_as_term,"$greatereq",2,-1,0,NULL),-1);
+    IncreaseSymbolUseCount(InsertIntoSignature(Signature,atom_as_term,"$box",-1,-1,0,NULL),-1);
+    IncreaseSymbolUseCount(InsertIntoSignature(Signature,atom_as_term,"$dia ",-1,-1,0,NULL),-1);
+    IncreaseSymbolUseCount(InsertIntoSignature(Signature,atom_as_term,"$necessary",-1,-1,0,
+NULL),-1);
+    IncreaseSymbolUseCount(InsertIntoSignature(Signature,atom_as_term,"$possible",-1,-1,0,NULL),-1);
+    IncreaseSymbolUseCount(InsertIntoSignature(Signature,atom_as_term,"$obligatory",-1,-1,0,
+NULL),-1);
+    IncreaseSymbolUseCount(InsertIntoSignature(Signature,atom_as_term,"$permissible",-1,-1,0,
+NULL),-1);
+    IncreaseSymbolUseCount(InsertIntoSignature(Signature,atom_as_term,"$knows",-1,-1,0,NULL),-1);
+    IncreaseSymbolUseCount(InsertIntoSignature(Signature,atom_as_term,"$believes",-1,-1,0,
+NULL),-1);
+
     IncreaseSymbolUseCount(InsertIntoSignature(Signature,function,"$uminus",1,-1,0,NULL),-1);
     IncreaseSymbolUseCount(InsertIntoSignature(Signature,function,"$sum",2,-1,0,NULL),-1);
     IncreaseSymbolUseCount(InsertIntoSignature(Signature,function,"$difference",2,-1,0,NULL),-1);
@@ -126,15 +140,6 @@ NULL),-1);
     IncreaseSymbolUseCount(InsertIntoSignature(Signature,function,"modal_axiom_C4",0,-1,1,NULL),-1);
     IncreaseSymbolUseCount(InsertIntoSignature(Signature,function,"modal_axiom_C",0,-1,1,NULL),-1);
 
-    IncreaseSymbolUseCount(InsertIntoSignature(Signature,function,"$box",-1,-1,0,NULL),-1);
-    IncreaseSymbolUseCount(InsertIntoSignature(Signature,function,"$dia ",-1,-1,0,NULL),-1);
-    IncreaseSymbolUseCount(InsertIntoSignature(Signature,function,"$necessary",-1,-1,0,NULL),-1);
-    IncreaseSymbolUseCount(InsertIntoSignature(Signature,function,"$possible",-1,-1,0,NULL),-1);
-    IncreaseSymbolUseCount(InsertIntoSignature(Signature,function,"$obligatory",-1,-1,0,NULL),-1);
-    IncreaseSymbolUseCount(InsertIntoSignature(Signature,function,"$permissible",-1,-1,0,NULL),-1);
-    IncreaseSymbolUseCount(InsertIntoSignature(Signature,function,"$knows",-1,-1,0,NULL),-1);
-    IncreaseSymbolUseCount(InsertIntoSignature(Signature,function,"$believes",-1,-1,0,NULL),-1);
-
     return(Signature);
 }
 //-------------------------------------------------------------------------------------------------
@@ -199,6 +204,7 @@ SIGNATURE DuplicateSignature(SIGNATURE Original) {
 void FreeSignatureList(SYMBOLNODE * Symbols) {
 
     if ((*Symbols) != NULL) {
+//DEBUG printf("Freeing %s/%d/%d/%c(%d)\n",(*Symbols)->NameSymbol,(*Symbols)->Arity,(*Symbols)->AppliedArity,(*Symbols)->InternalSymbol ? 'I' : 'X',(*Symbols)->NumberOfUses);
         assert((*Symbols)->NumberOfUses == 0);
         FreeSignatureList(&((*Symbols)->LastSymbol));
         FreeSignatureList(&((*Symbols)->NextSymbol));

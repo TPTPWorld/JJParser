@@ -66,7 +66,7 @@ typedef struct SymbolTag {
     char * NameSymbol;
     char * ShortSymbol;
     int NumberOfUses;
-    int Arity;
+    int Arity;         //----The true arity, i.e., in ()s, and for {} connectives the @ ()ed length
     int AppliedArity;  //----Used for {} connectives that have their own parameters (arity)
     int InternalSymbol;  //-----Used for things not to be counted in statistics
 //----These are left and right for the tree implementation (to be renamed)
