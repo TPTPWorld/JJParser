@@ -168,6 +168,7 @@ int AtomicallyFlatFormula(FORMULA Formula);
 int AtomFlatFormula(FORMULA Formula);
 int FlatTerm(TERM Term);
 int AtomicallyFlatTerm(TERM Term);
+int Equation(FORMULA Formula,FORMULA * LHS,FORMULA * RHS);
 //-------------------------------------------------------------------------------------------------
 int TypeConnective(ConnectiveType Connective) {
 
@@ -380,14 +381,7 @@ int NegatedEquation(FORMULA Formula,FORMULA * LHS,FORMULA * RHS) {
 
     if (UnaryFormula(Formula) &&
 Formula->FormulaUnion.UnaryFormula.Connective == negation && 
-Formula->FormulaUnion.UnaryFormula.Formula->Type == binary && 
-Formula->FormulaUnion.UnaryFormula.Formula->FormulaUnion.BinaryFormula.Connective == equation) {
-        if (LHS != NULL) {
-            *LHS = Formula->FormulaUnion.UnaryFormula.Formula->FormulaUnion.BinaryFormula.LHS;
-        }
-        if (RHS != NULL) {
-            *RHS = Formula->FormulaUnion.UnaryFormula.Formula->FormulaUnion.BinaryFormula.RHS;
-        }
+Equation(Formula->FormulaUnion.UnaryFormula.Formula,LHS,RHS)) {
         return(1);
     } else {
         return(0);
@@ -909,7 +903,7 @@ Formula->FormulaUnion.QuantifiedFormula.Formula,Indent,Pretty,none,TSTPSyntaxFla
 //----Sadly the old BNF required ()s around equations on the side of a binary, and too many
 //----systems (E and Leo-III at least) have encoded that. Shitto, because new BNF does not
 //----require them (but accepts them).
-(LastConnective == none && PreUnitEquation(Formula)) ||
+(LastConnective == none && (PreUnitEquation(Formula) || TypeDefnIdFormula(Formula))) ||
 (Connective == LastConnective && Associative(Connective)) ||
 (LastConnective == brackets && Associative(Connective))) {
                 NeedBrackets = 0;

@@ -853,7 +853,7 @@ Statistics.FormulaStatistics.NumberOfTHF > 0 ||
 Statistics.FormulaStatistics.NumberOfTFF > 0 ||
 Statistics.FormulaStatistics.NumberOfFOF > 0 ||
 Statistics.FormulaStatistics.NumberOfTCF > 0) {
-            fprintf(Stream,"%4d   !;%4d   ?",
+            fprintf(Stream,";%4d   !;%4d   ?",
 Statistics.ConnectiveStatistics.NumberOfUniversals,
 Statistics.ConnectiveStatistics.NumberOfExistentials);
             if (

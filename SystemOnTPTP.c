@@ -305,6 +305,11 @@ int SZSIsA(SZSResultType SZSResult,SZSResultType DesiredResult) {
     if (SZSResult == DesiredResult) {
         return(1);
     }
+//----Bypass if general success
+    if (SZSResult == SUC) {
+        return(1);
+    }
+
     for (Index = 0; Index < sizeof(ResultIsaPairs)/(2 * sizeof(SZSResultType));Index++) {
         if (ResultIsaPairs[Index][0] == SZSResult && 
 SZSIsA(ResultIsaPairs[Index][1],DesiredResult)) {
@@ -432,6 +437,16 @@ char * PutOutputHere) {
     char * QuietnessFlag;
     String ErrorMessage;
 
+//----If time limit is 0 just return Success None
+    if (TimeLimit == 0) {
+        if (PutResultHere !=NULL) {
+            strcpy(PutResultHere,"Success");
+        }
+        if (PutOutputHere !=NULL) {
+            strcpy(PutOutputHere,"None");
+        }
+        return(1);
+    }
     if (QuietnessLevel < 0) {
         QuietnessFlag = "-q0";
         QuietnessLevel = -QuietnessLevel;
@@ -459,6 +474,13 @@ ATPSystem,TimeLimit,X2TSTPFlag,ProblemFileName);
         if (!strcmp(UsersOutputFileName,"stdout")) {
             OutputFileHandle = stdout;
         } else {
+//----If the time limit is 0, send output to /dev/null
+            if (TimeLimit == 0) {
+                if ((OutputFileHandle = OpenFileInMode("/dev/null","w")) == NULL) {
+                    pclose(SystemPipe);
+                    return(0);
+                }
+            } else {
             SystemOnTPTPFileName(FilesDirectory,UsersOutputFileName,NULL,InternalOutputFileName);
             if ((OutputFileHandle = OpenFileInMode(InternalOutputFileName,"w")) == NULL) {
                 pclose(SystemPipe);
@@ -467,6 +489,7 @@ ATPSystem,TimeLimit,X2TSTPFlag,ProblemFileName);
                 if (OutputFileName != NULL) {
                     strcpy(OutputFileName,InternalOutputFileName);
                 }
+            }
             }
         } 
     }

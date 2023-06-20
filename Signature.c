@@ -118,7 +118,7 @@ NULL),-1);
 NULL),-1);
     IncreaseSymbolUseCount(InsertIntoSignature(Signature,function,"$modal_system_D45",0,-1,1,
 NULL),-1);
-    IncreaseSymbolUseCount(InsertIntoSignature(Signature,function,"$modal_system_T",0,-1,1,
+    IncreaseSymbolUseCount(InsertIntoSignature(Signature,function,"$modal_system_M",0,-1,1,
 NULL),-1);
     IncreaseSymbolUseCount(InsertIntoSignature(Signature,function,"$modal_system_B",0,-1,1,
 NULL),-1);
@@ -128,17 +128,19 @@ NULL),-1);
 NULL),-1);
     IncreaseSymbolUseCount(InsertIntoSignature(Signature,function,"$modal_system_S5u",0,-1,1,
 NULL),-1);
-    IncreaseSymbolUseCount(InsertIntoSignature(Signature,function,"modal_axiom_K",0,-1,1,NULL),-1);
-    IncreaseSymbolUseCount(InsertIntoSignature(Signature,function,"modal_axiom_T",0,-1,1,NULL),-1);
-    IncreaseSymbolUseCount(InsertIntoSignature(Signature,function,"modal_axiom_B",0,-1,1,NULL),-1);
-    IncreaseSymbolUseCount(InsertIntoSignature(Signature,function,"modal_axiom_D",0,-1,1,NULL),-1);
-    IncreaseSymbolUseCount(InsertIntoSignature(Signature,function,"modal_axiom_4",0,-1,1,NULL),-1);
-    IncreaseSymbolUseCount(InsertIntoSignature(Signature,function,"modal_axiom_5",0,-1,1,NULL),-1);
-    IncreaseSymbolUseCount(InsertIntoSignature(Signature,function,"modal_axiom_CD",0,-1,1,NULL),-1);
-    IncreaseSymbolUseCount(InsertIntoSignature(Signature,function,"modal_axiom_BoxM",0,-1,1,
+    IncreaseSymbolUseCount(InsertIntoSignature(Signature,function,"$modal_axiom_K",0,-1,1,NULL),-1);
+    IncreaseSymbolUseCount(InsertIntoSignature(Signature,function,"$modal_axiom_T",0,-1,1,NULL),-1);
+    IncreaseSymbolUseCount(InsertIntoSignature(Signature,function,"$modal_axiom_B",0,-1,1,NULL),-1);
+    IncreaseSymbolUseCount(InsertIntoSignature(Signature,function,"$modal_axiom_D",0,-1,1,NULL),-1);
+    IncreaseSymbolUseCount(InsertIntoSignature(Signature,function,"$modal_axiom_4",0,-1,1,NULL),-1);
+    IncreaseSymbolUseCount(InsertIntoSignature(Signature,function,"$modal_axiom_5",0,-1,1,NULL),-1);
+    IncreaseSymbolUseCount(InsertIntoSignature(Signature,function,"$modal_axiom_CD",0,-1,1,
 NULL),-1);
-    IncreaseSymbolUseCount(InsertIntoSignature(Signature,function,"modal_axiom_C4",0,-1,1,NULL),-1);
-    IncreaseSymbolUseCount(InsertIntoSignature(Signature,function,"modal_axiom_C",0,-1,1,NULL),-1);
+    IncreaseSymbolUseCount(InsertIntoSignature(Signature,function,"$modal_axiom_BoxM",0,-1,1,
+NULL),-1);
+    IncreaseSymbolUseCount(InsertIntoSignature(Signature,function,"$modal_axiom_C4",0,-1,1,
+NULL),-1);
+    IncreaseSymbolUseCount(InsertIntoSignature(Signature,function,"$modal_axiom_C",0,-1,1,NULL),-1);
 
     return(Signature);
 }
