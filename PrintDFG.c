@@ -20,8 +20,7 @@ int DFGPrintSignatureList(FILE * Stream,SYMBOLNODE Node,int JustPrinted) {
     int QuotedSymbol;
 
     if (Node != NULL) {
-        NumberPrinted = DFGPrintSignatureList(Stream,Node->LastSymbol,
-JustPrinted);
+        NumberPrinted = DFGPrintSignatureList(Stream,Node->LastSymbol,JustPrinted);
         if (NumberPrinted > 0) {
             JustPrinted = 1;
         }

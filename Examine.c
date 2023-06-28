@@ -1609,8 +1609,8 @@ NestedYet));
         case assignment:
             Count = NestedYet;
             NestedYet = 0;
-            return(Count + CountNestedFormulae(Signature,
-Formula->FormulaUnion.BinaryFormula.RHS,NestedYet));
+            return(Count + CountNestedFormulae(Signature,Formula->FormulaUnion.BinaryFormula.RHS,
+NestedYet));
             break;
         case type_declaration:
             return(0);
@@ -1618,8 +1618,8 @@ Formula->FormulaUnion.BinaryFormula.RHS,NestedYet));
         case quantified:
             Count = NestedYet;
             NestedYet = 0;
-            Count += CountNestedFormulae(Signature,
-Formula->FormulaUnion.QuantifiedFormula.Formula,NestedYet);
+            Count += CountNestedFormulae(Signature,Formula->FormulaUnion.QuantifiedFormula.Formula,
+NestedYet);
 //DEBUG printf("After looking at quantified the count is %d\n",Count);
             return(Count);
             break;

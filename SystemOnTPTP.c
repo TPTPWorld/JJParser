@@ -420,8 +420,9 @@ int SystemOnTPTPAvailable(void) {
 //-------------------------------------------------------------------------------------------------
 int SystemOnTPTPGetResult(int QuietnessLevel,char * ProblemFileName,char * ATPSystem,
 int TimeLimit,char * X2TSTPFlag,char * SystemOutputPrefix,char * OptionalFlags,int KeepOutputFiles,
-char * FilesDirectory,char * UsersOutputFileName,char * OutputFileName,char * PutResultHere,
+char * FilesDirectory,char * UsersFileName,char * OutputFileName,char * PutResultHere,
 char * PutOutputHere) {
+//----OutputFileName is created from UsersFileName with a ".s" (it should be ".f" if it fails)
 
     String UNIXCommand;
     char * TPTPHome;
@@ -471,25 +472,19 @@ ATPSystem,TimeLimit,X2TSTPFlag,ProblemFileName);
 //----Set to NULL to keep gcc happy (does not know about KeepOutputFiles)
     OutputFileHandle = NULL;
     if (KeepOutputFiles) {
-        if (!strcmp(UsersOutputFileName,"stdout")) {
+        if (!strcmp(UsersFileName,"stdout")) {
             OutputFileHandle = stdout;
+            if (OutputFileName != NULL) {
+                strcpy(OutputFileName,"--");
+            }
         } else {
-//----If the time limit is 0, send output to /dev/null
-            if (TimeLimit == 0) {
-                if ((OutputFileHandle = OpenFileInMode("/dev/null","w")) == NULL) {
-                    pclose(SystemPipe);
-                    return(0);
-                }
-            } else {
-            SystemOnTPTPFileName(FilesDirectory,UsersOutputFileName,NULL,InternalOutputFileName);
+            SystemOnTPTPFileName(FilesDirectory,UsersFileName,".s",InternalOutputFileName);
             if ((OutputFileHandle = OpenFileInMode(InternalOutputFileName,"w")) == NULL) {
                 pclose(SystemPipe);
                 return(0);
-            } else {
-                if (OutputFileName != NULL) {
-                    strcpy(OutputFileName,InternalOutputFileName);
-                }
-            }
+            } 
+            if (OutputFileName != NULL) {
+                strcpy(OutputFileName,InternalOutputFileName);
             }
         } 
     }
@@ -569,14 +564,16 @@ strstr(SystemOutputLine,"% Output     : ") == SystemOutputLine &&
 int SystemOnTPTP(LISTNODE Axioms,ANNOTATEDFORMULA Conjecture,char * PositiveChecker,
 char * PositiveResult,int TestNegative,char * NegativeChecker,char * NegativeResult,int TimeLimit,
 char * SystemOutputPrefix,char * OptionalFlags,int KeepOutputFiles,char * FilesDirectory,
-char * UsersOutputFileName,String OutputFileName) {
+char * UsersFileName,String OutputFileName) {
+//----OutputFileName is created from UsersFileName with a ".s" (it should be ".f" if it fails)
 
     String ProblemFileName;
-    String CopyUsersOutputFileName;
+    String CopyUsersFileName;
+    String LocalUsersFileName;
     String SystemResult;
     int Correct;
 
-    if (!MakeProblemFile(FilesDirectory,UsersOutputFileName,".p",ProblemFileName,Axioms,axiom,
+    if (!MakeProblemFile(FilesDirectory,UsersFileName,".p",ProblemFileName,Axioms,axiom,
 Conjecture,conjecture)) {
         return(0);
     }
@@ -585,15 +582,16 @@ Conjecture,conjecture)) {
     Correct = 0;
 
 //----Need to make a copy in case the same variable is used
+    strcpy(CopyUsersFileName,UsersFileName);
 //----Set to empty if nothing given, to cause use of mktemp
-    if (UsersOutputFileName == NULL) {
-        strcpy(CopyUsersOutputFileName,"");
+    if (CopyUsersFileName == NULL) {
+        strcpy(LocalUsersFileName,"");
     } else {
-        strcpy(CopyUsersOutputFileName,UsersOutputFileName);
+        strcpy(LocalUsersFileName,CopyUsersFileName);
     }
     if (Correct == 0) {
         if (SystemOnTPTPGetResult(0,ProblemFileName,PositiveChecker,TimeLimit,"",
-SystemOutputPrefix,OptionalFlags,KeepOutputFiles,FilesDirectory,CopyUsersOutputFileName,
+SystemOutputPrefix,OptionalFlags,KeepOutputFiles,FilesDirectory,LocalUsersFileName,
 OutputFileName,SystemResult,NULL)) {
             if (SZSIsA(StringToSZSResult(SystemResult),StringToSZSResult(PositiveResult))) {
                 Correct = 1;
@@ -606,11 +604,16 @@ OutputFileName,SystemResult,NULL)) {
 
 //----Check if really not provable
     if (Correct == 0 && TestNegative) {
-        PathBasename(OutputFileName,CopyUsersOutputFileName,NULL);
-        strcat(CopyUsersOutputFileName,"_not");
+//----Set to empty if nothing given, to cause use of mktemp
+        if (CopyUsersFileName == NULL) {
+            strcpy(LocalUsersFileName,"");
+        } else {
+            strcpy(LocalUsersFileName,CopyUsersFileName);
+        }
+        strcat(LocalUsersFileName,"_not");
         if (SystemOnTPTPGetResult(0,ProblemFileName,NegativeChecker,TimeLimit,"",
-SystemOutputPrefix,OptionalFlags,KeepOutputFiles,FilesDirectory,CopyUsersOutputFileName,
-OutputFileName,SystemResult,NULL)) {
+SystemOutputPrefix,OptionalFlags,KeepOutputFiles,FilesDirectory,LocalUsersFileName,OutputFileName,
+SystemResult,NULL)) {
             if (SZSIsA(StringToSZSResult(SystemResult),StringToSZSResult(NegativeResult))) {
                 Correct = -1;
 //----Should not trust disprover's proofs
@@ -630,11 +633,11 @@ OutputFileName,SystemResult,NULL)) {
 SZSResultType SZSSystemOnTPTP(LISTNODE Axioms,ANNOTATEDFORMULA Conjecture,char * System,
 SZSResultType DesiredResult,int QuietnessLevel,int TimeLimit,char * X2TSTPFlag,
 char * SystemOutputPrefix,char * OptionalFlags,int KeepOutputFiles,char * FilesDirectory,
-char * UsersOutputFileName,String OutputFileName,SZSOutputType * SZSOutput) {
+char * UsersFileName,String OutputFileName,SZSOutputType * SZSOutput) {
 
     StatusType ConjectureRole;
     String ProblemFileName;
-    String CopyUsersOutputFileName;
+    String CopyUsersFileName;
     String SystemResult;
     String SystemOutput;
     SZSResultType SZSResult;
@@ -663,7 +666,7 @@ char * UsersOutputFileName,String OutputFileName,SZSOutputType * SZSOutput) {
     }
 
 //----Make the problem file
-    if (!MakeProblemFile(FilesDirectory,UsersOutputFileName,".p",ProblemFileName,Axioms,axiom,
+    if (!MakeProblemFile(FilesDirectory,UsersFileName,".p",ProblemFileName,Axioms,axiom,
 Conjecture,ConjectureRole)) {
         SZSResult = ERR;
     }
@@ -671,13 +674,13 @@ Conjecture,ConjectureRole)) {
     if (SZSResult == NOS) {
 //----Need to make a copy in case the same variable is used
 //----Set to empty if nothing given, to cause use of mktemp
-        if (UsersOutputFileName == NULL) {
-            strcpy(CopyUsersOutputFileName,"");
+        if (UsersFileName == NULL) {
+            strcpy(CopyUsersFileName,"");
         } else {
-            strcpy(CopyUsersOutputFileName,UsersOutputFileName);
+            strcpy(CopyUsersFileName,UsersFileName);
         }
         if (SystemOnTPTPGetResult(QuietnessLevel,ProblemFileName,System,TimeLimit,X2TSTPFlag,
-SystemOutputPrefix,OptionalFlags,KeepOutputFiles,FilesDirectory,CopyUsersOutputFileName,
+SystemOutputPrefix,OptionalFlags,KeepOutputFiles,FilesDirectory,CopyUsersFileName,
 OutputFileName,SystemResult,SystemOutput)) {
             SZSResult = StringToSZSResult(SystemResult);
 //----Promote to desired result if it is one
@@ -713,13 +716,13 @@ SZSResultType SZSSystemOnTPTPWithAlternate(LISTNODE Axioms,ANNOTATEDFORMULA Conj
 char * System,SZSResultType DesiredResult,int QuietnessLevel,char * OptionalFlags,int TimeLimit,
 char * X2TSTPFlag,int SystemTrustedForAlternate,char * AlternateSystem,
 SZSResultType AlternateDesiredResult, int AlternateTimeLimit,char * SystemOutputPrefix,
-int KeepOutputFiles,char * FilesDirectory,char * UsersOutputFileName,String OutputFileName,
+int KeepOutputFiles,char * FilesDirectory,char * UsersFileName,String OutputFileName,
 SZSOutputType * SZSOutput) {
 
     SZSResultType SZSResult;
 
     SZSResult = SZSSystemOnTPTP(Axioms,Conjecture,System,DesiredResult,QuietnessLevel,TimeLimit,
-X2TSTPFlag,SystemOutputPrefix,OptionalFlags,KeepOutputFiles,FilesDirectory,UsersOutputFileName,
+X2TSTPFlag,SystemOutputPrefix,OptionalFlags,KeepOutputFiles,FilesDirectory,UsersFileName,
 OutputFileName,SZSOutput);
 
 //----Check if really not provable

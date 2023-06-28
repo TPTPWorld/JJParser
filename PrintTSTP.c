@@ -13,6 +13,7 @@
 #include "Modify.h"
 #include "PrintTSTP.h"
 #include "PrintDFG.h"
+#include "PrintLP.h"
 #include "PrintOtter.h"
 #include "PrintKIF.h"
 #include "PrintXML.h"
@@ -70,6 +71,9 @@ PrintFormatType StringToPrintFormat(char * FormatString) {
     if (!strcmp(FormatString,"dfg")) {
         return(dfg);
     }
+    if (!strcmp(FormatString,"lambdapi")) {
+        return(lambdapi);
+    }
     if (!strcmp(FormatString,"otter")) {
         return(otter);
     }
@@ -109,6 +113,9 @@ char * PrintFormatToString(PrintFormatType Format) {
 //----Foreign formats
         case dfg:
             return("dfg");
+            break;
+        case lambdapi:
+            return("lambdapi");
             break;
         case otter:
             return("otter");
@@ -903,7 +910,8 @@ Formula->FormulaUnion.QuantifiedFormula.Formula,Indent,Pretty,none,TSTPSyntaxFla
 //----Sadly the old BNF required ()s around equations on the side of a binary, and too many
 //----systems (E and Leo-III at least) have encoded that. Shitto, because new BNF does not
 //----require them (but accepts them).
-(LastConnective == none && (PreUnitEquation(Formula) || TypeDefnIdFormula(Formula))) ||
+//----ADD BACK BRACKETS FOR NOW
+(LastConnective == none && (/*PreUnitEquation(Formula) ||*/ TypeDefnIdFormula(Formula))) ||
 (Connective == LastConnective && Associative(Connective)) ||
 (LastConnective == brackets && Associative(Connective))) {
                 NeedBrackets = 0;
@@ -1481,6 +1489,11 @@ PrintFormatType Format,int Pretty) {
             DFGPrintHeader(Stream->FileHandle,Head,Signature);
             DFGPrintListOfAnnotatedTSTPNodes(Stream->FileHandle,Head);
             DFGPrintTailer(Stream->FileHandle);
+            break;
+        case lambdapi:
+            LPPrintHeader(Stream->FileHandle,Head,Signature);
+            LPPrintListOfAnnotatedTSTPNodes(Stream->FileHandle,Head);
+            LPPrintTailer(Stream->FileHandle);
             break;
         case otter:
             OtterPrintHeader(Stream->FileHandle,Head,Signature);

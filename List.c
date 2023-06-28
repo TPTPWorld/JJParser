@@ -254,23 +254,25 @@ NULL) {
 LISTNODE * GetNodeFromListByAnnotatedFormulaFields(LISTNODE * Head,ANNOTATEDFORMULA Target,
 int SameName,int SameRole,int SameFormula) {
 
-    String FormulaName;
-    String TargetName;
-
 //----Cannot get non-logical
     if (!ReallyAnAnnotatedFormula(Target)) {
+//DEBUG printf("FUCK 1\n");
         return(NULL);
     }
 //----Search down the list for the one that I want, oo, oo, ooo
     do {
+//DEBUG printf("DO\n");
 //----Skip non-formula records
         while ((*Head) != NULL && !ReallyAnAnnotatedFormula((*Head)->AnnotatedFormula)) {
+//DEBUG printf("SKIP\n");
             Head = &((*Head)->Next);
         }
+//DEBUG printf("SEARCH 1 for %s\n",GetName(Target,NULL));
 //----Is it the one we want?
         if ((*Head) != NULL) {
+//DEBUG printf("SEARCH 2 is it %s\n",GetName((*Head)->AnnotatedFormula,NULL));
             if (
-(!SameName || !strcmp(GetName((*Head)->AnnotatedFormula,FormulaName),GetName(Target,TargetName))) &&
+(!SameName || !strcmp(GetName((*Head)->AnnotatedFormula,NULL),GetName(Target,NULL))) &&
 (!SameRole || GetRole(Target,NULL) == GetRole((*Head)->AnnotatedFormula,NULL)) &&
 (!SameFormula || SameFormulaInAnnotatedFormulae(Target,(*Head)->AnnotatedFormula,1,SameFormula))) {
                 return(Head);
@@ -302,12 +304,14 @@ LISTNODE * GetNodeFromListByAnnotatedFormulaName(LISTNODE * Head,char * Name) {
     return(GetNodeFromListByAnnotatedFormulaFields(Head,&AnnotatedFormula,1,0,0));
 }
 //-------------------------------------------------------------------------------------------------
-ANNOTATEDFORMULA GetAnnotatedFormulaFromListByName(LISTNODE Head, char * Name) {
+ANNOTATEDFORMULA GetAnnotatedFormulaFromListByName(LISTNODE Head,char * Name) {
 
     LISTNODE * NodePointer;
 
     if ((NodePointer = GetNodeFromListByAnnotatedFormulaName(&Head,Name)) != NULL) {
+//DEBUG printf("FOUND %s\n",Name);
         assert((*NodePointer) != NULL);
+        assert((*NodePointer)->AnnotatedFormula != NULL);
         return((*NodePointer)->AnnotatedFormula);
     } else {
         return(NULL);

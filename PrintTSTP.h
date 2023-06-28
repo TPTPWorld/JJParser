@@ -8,6 +8,7 @@ typedef enum {
     tptp_short,
     oldtptp,
     dfg,
+    lambdapi,
     otter,
     kif,
     xml,

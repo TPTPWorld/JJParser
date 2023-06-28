@@ -188,7 +188,7 @@ void XMLPrintTSTPTerm(XMLOutput Out, TERM Term) {
     if (*symbol=='\'') {        // remove quotes, if present
         int l=strlen(symbol)-1;
         if (symbol[l]!='\'') {
-printf("====%s====\n",symbol);
+//DEBUG printf("====%s====\n",symbol);
             CodingError("Unmatched single qoute ");
         }
 	    symbol[l]='\0';

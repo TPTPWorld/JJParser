@@ -85,17 +85,21 @@ NULL),-1);
 NULL),-1);
     IncreaseSymbolUseCount(InsertIntoSignature(Signature,function,"$epistemic_modal",0,-1,1,
 NULL),-1);
-    IncreaseSymbolUseCount(InsertIntoSignature(Signature,function,"$constants",0,-1,1,NULL),-1);
-    IncreaseSymbolUseCount(InsertIntoSignature(Signature,function,"$quantification",0,-1,1,
-NULL),-1);
-    IncreaseSymbolUseCount(InsertIntoSignature(Signature,function,"$modalities",0,-1,1,NULL),-1);
+//OLD    IncreaseSymbolUseCount(InsertIntoSignature(Signature,function,"$constants",0,-1,1,NULL),-1);
+    IncreaseSymbolUseCount(InsertIntoSignature(Signature,function,"$designation",0,-1,1,NULL),-1);
     IncreaseSymbolUseCount(InsertIntoSignature(Signature,function,"$rigid",0,-1,1,NULL),-1);
     IncreaseSymbolUseCount(InsertIntoSignature(Signature,function,"$flexible",0,-1,1,NULL),-1);
+//OLD    IncreaseSymbolUseCount(InsertIntoSignature(Signature,function,"$quantification",0,-1,1,
+    IncreaseSymbolUseCount(InsertIntoSignature(Signature,function,"$domains",0,-1,1,
+NULL),-1);
     IncreaseSymbolUseCount(InsertIntoSignature(Signature,function,"$constant",0,-1,1,NULL),-1);
     IncreaseSymbolUseCount(InsertIntoSignature(Signature,function,"$varying",0,-1,1,NULL),-1);
     IncreaseSymbolUseCount(InsertIntoSignature(Signature,function,"$cumulative",0,-1,1,NULL),-1);
     IncreaseSymbolUseCount(InsertIntoSignature(Signature,function,"$decreasing",0,-1,1,NULL),-1);
-
+    IncreaseSymbolUseCount(InsertIntoSignature(Signature,function,"$terms",0,-1,1,NULL),-1);
+    IncreaseSymbolUseCount(InsertIntoSignature(Signature,function,"$local",0,-1,1,NULL),-1);
+    IncreaseSymbolUseCount(InsertIntoSignature(Signature,function,"$global",0,-1,1,NULL),-1);
+    IncreaseSymbolUseCount(InsertIntoSignature(Signature,function,"$modalities",0,-1,1,NULL),-1);
     IncreaseSymbolUseCount(InsertIntoSignature(Signature,function,"$modal_system_K",0,-1,1,
 NULL),-1);
     IncreaseSymbolUseCount(InsertIntoSignature(Signature,function,"$modal_system_KB",0,-1,1,

@@ -1982,46 +1982,36 @@ char * NameFilter) {
     LISTNODE Head;
     String FormulaName;
     String IncludedNames;
-    LISTNODE IncludedHead,IncludeNode;
+    LISTNODE IncludedHead,Mover;
     LISTNODE * Current;
-    LISTNODE Mover;
     String ErrorMessage;
 
     Head = NULL;
     Current = &Head;
     while (!CheckTokenType(Stream,endeof)) {
         AnnotatedFormula = ParseAnnotatedFormula(Stream,Signature);
+//----Expand includes if required
+        if (ExpandIncludes && GetSyntax(AnnotatedFormula) == include) {
+            IncludedHead = GetIncludedAnnotatedFormulae(Stream,Signature,ExpandIncludes,
+AnnotatedFormula);
+//DEBUG printf("---- READ INCLUDE ---------\n");
+//DEBUG PrintListOfAnnotatedTSTPNodes(stdout,Signature,IncludedHead,1,1);
+//DEBUG printf("-------------\n");
+//----Link in and move down to the end
+            if (IncludedHead != NULL) {
+                (*Current) = IncludedHead;
+                do {
+                    Current = &((*Current)->Next);
+                } while (*Current != NULL);
+            }
+//----Fake that it was used so it gets freed
+            AnnotatedFormula->NumberOfUses++;
+            FreeAnnotatedFormula(&AnnotatedFormula,Signature);
+        } else {
 //----The usage count for the AnnotatedFormula is incremented in the addition
 //----of a list node
-        AddListNode(Current,NULL,AnnotatedFormula);
-        Current = &((*Current)->Next);
-    }
-
-//----Expand includes if required
-    if (ExpandIncludes) {
-        Current = &Head;
-        while ((*Current) != NULL) {
-            if (GetSyntax((*Current)->AnnotatedFormula) == include) {
-                IncludedHead = GetIncludedAnnotatedFormulae(Stream,Signature,
-ExpandIncludes,(*Current)->AnnotatedFormula);
-
-//----Link in and move down to the end
-                IncludeNode = (*Current);
-                if (IncludedHead == NULL) {
-                    (*Current) = IncludeNode->Next;
-                } else {
-                    (*Current) = IncludedHead;
-                    Mover = *Current;
-                    while (Mover->Next != NULL) {
-                        Mover = Mover->Next;
-                    }
-                    Mover->Next = IncludeNode->Next;
-                }
-                FreeAnnotatedFormula(&(IncludeNode->AnnotatedFormula),Signature);
-                Free((void **)&IncludeNode);
-            } else {
-                Current = &((*Current)->Next);
-            }
+            AddListNode(Current,NULL,AnnotatedFormula);
+            Current = &((*Current)->Next);
         }
     }
 
