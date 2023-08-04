@@ -208,8 +208,7 @@ char * ExpandAndFindFileName(char * FileName,char * IncludingFileName,String Exp
 //----Check various extensions and paths
         for (PathIndex=0;PathIndex < NumberOfPaths;PathIndex++) {
             for (DomainOnOff=0; DomainOnOff <= 1; DomainOnOff++) {
-                for (ExtensionIndex=0;ExtensionIndex < NumberOfExtensions;
-ExtensionIndex++) {
+                for (ExtensionIndex=0;ExtensionIndex < NumberOfExtensions;ExtensionIndex++) {
                     strcpy(ExpandedFileName,TPTPDirectory);
                     if (strcmp(Paths[PathIndex],"")) {
                         strcat(ExpandedFileName,"/");
@@ -404,8 +403,7 @@ READFILE OpenReadFile(char * OriginalFileName,char * IncludingFileName) {
         return(OpenFILEReadFile(FileName,stdin));
     }
 
-    if (ExpandAndFindFileName(FileName,IncludingFileName,FinalFileName) 
-== NULL) {
+    if (ExpandAndFindFileName(FileName,IncludingFileName,FinalFileName) == NULL) {
         return(NULL);
     }
 

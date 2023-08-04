@@ -345,6 +345,11 @@ int InternalSymbolNode(SYMBOLNODE SignatureNode) {
     return(SignatureNode->InternalSymbol || IsAnInternalSymbol(GetSignatureSymbol(SignatureNode)));
 }
 //-------------------------------------------------------------------------------------------------
+int DefinedSymbol(char * Symbol) {
+
+    return(Symbol[0] != '\'' && !islower(Symbol[0]));
+}
+//-------------------------------------------------------------------------------------------------
 SYMBOLNODE IsSymbolInSignatureList(SYMBOLNODE List,char * Name,int Arity,READFILE Stream) {
 
     SuperString DuplicateArity;
@@ -352,6 +357,7 @@ SYMBOLNODE IsSymbolInSignatureList(SYMBOLNODE List,char * Name,int Arity,READFIL
     if (List == NULL) {
         return(NULL);
     } else if (!strcmp(GetSignatureSymbol(List),Name)) {
+//----Don't care about arity, including variable arity
         if (Arity == -1 || GetSignatureArity(List) == -1) {
             return(List);
         } else if (GetSignatureArity(List) == Arity) {
@@ -371,11 +377,6 @@ Name,GetSignatureArity(List),Arity);
     } else {
         return(IsSymbolInSignatureList(List->NextSymbol,Name,Arity,Stream));
     }
-}
-//-------------------------------------------------------------------------------------------------
-int DefinedSymbol(char * Symbol) {
-
-    return(Symbol[0] != '\'' && !islower(Symbol[0]));
 }
 //-------------------------------------------------------------------------------------------------
 SYMBOLNODE * IsSymbolInSignatureListPointer(SYMBOLNODE * List,char * Name,int Arity,

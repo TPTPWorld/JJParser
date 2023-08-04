@@ -340,7 +340,7 @@ SymbolStatisticsType GetListSymbolUsageStatistics(HEADLIST HeadList) {
     int FunctorCollectorLength = STRINGLENGTH;
     int VariableCollectorLength = STRINGLENGTH;
     int TypeCollectorLength = STRINGLENGTH;
-    LISTNODE ListNode;
+//Broken variable LISTNODE ListNode;
     SymbolStatisticsType SymbolStatistics;
 
     InitializeSymbolStatistics(&SymbolStatistics);
@@ -356,10 +356,10 @@ SymbolStatisticsType GetListSymbolUsageStatistics(HEADLIST HeadList) {
 
 //----Go down list collecting
     while (HeadList != NULL) {
-        ListNode = HeadList->TheList;
         OneUsage = NULL;
-        GetListOfAnnotatedFormulaSymbolUsage(ListNode,&OneUsage,&FunctorsStart,&VariablesStart,
-&TypesStart);
+//----Broken         ListNode = HeadList->TheList;
+//----Broken         GetListOfAnnotatedFormulaSymbolUsage(ListNode,&OneUsage,&FunctorsStart,&VariablesStart,
+//----Broken &TypesStart);
         ExtendString(&TypeCollector,TypesStart,&TypeCollectorLength);
         *TypesStart = '\0';
         ExtendString(&VariableCollector,VariablesStart,&VariableCollectorLength);
@@ -496,7 +496,8 @@ rr_clauses);
 //DEBUG printf("PROGRESS: counted RR clauses\n");
     Statistics.FormulaStatistics.MaxFormulaAtoms = HeadListMaximal(Signature,&HeadListNode,literals);
 //DEBUG printf("PROGRESS: got max clause size\n");
-    if (Statistics.FormulaStatistics.NumberOfFormulae > 0) {
+    if ( Statistics.FormulaStatistics.NumberOfFormulae - 
+Statistics.FormulaStatistics.NumberOfTypeFormulae > 0) {
         Statistics.FormulaStatistics.AverageFormulaAtoms = 
 Statistics.FormulaStatistics.NumberOfAtoms / 
 (Statistics.FormulaStatistics.NumberOfFormulae - Statistics.FormulaStatistics.NumberOfTypeFormulae);
@@ -526,7 +527,8 @@ Statistics.FormulaStatistics.NumberOfAtoms /
 //DEBUG printf("PROGRESS: Got type symbol statistics from signature\n");
     } else {
 //DEBUG printf("Getting symbol statistics from formulae\n");
-        Statistics.SymbolStatistics = GetListSymbolUsageStatistics(&HeadListNode);
+//----This is broken. Use signature please.
+//      Statistics.SymbolStatistics = GetListSymbolUsageStatistics(&HeadListNode);
     }
 //DEBUG printf("PROGRESS: counted predicates and functions\n");
 //----This now counts only CNF variables. The rest get replaced by the sum of all the binders 

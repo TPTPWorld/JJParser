@@ -50,10 +50,12 @@ void ChangeStringIndex(int* Index,int Change) {
 void ExtendString(char ** ToExtend,char * ByThis, int * AllocatedLength) {
 
 //----Check if more memory is required
-    while ((int)strlen(*ToExtend) + (int)strlen(ByThis) + 1 > 
-*AllocatedLength) {
-        *ToExtend = (char *)Realloc((void *)*ToExtend,
-*AllocatedLength+STRINGLENGTH);
+    while (*ToExtend == NULL ||
+(int)strlen(*ToExtend) + (int)strlen(ByThis) + 1 > *AllocatedLength) {
+        *ToExtend = (char *)Realloc((void *)*ToExtend,*AllocatedLength+STRINGLENGTH);
+        if (*AllocatedLength == 0) {
+            strcpy(*ToExtend,"");
+        }
         *AllocatedLength += STRINGLENGTH;
     }
     strcat(*ToExtend,ByThis);
@@ -107,7 +109,7 @@ void * Realloc(void * OldMemory,int Size) {
 
     void * Memory;
 
-    if ((Memory = realloc(OldMemory,Size)) == NULL && Size > 0) {
+    if (Size > 0 && (Memory = realloc(OldMemory,Size)) == NULL) {
         perror("Realloc");
         CodingError("Realloc failed");
     }
@@ -175,8 +177,7 @@ int NameInList(char * Name,char * List) {
     strcpy(CRNameCR,"\n");
     strcat(CRNameCR,Name);
     strcat(CRNameCR,"\n");
-    return((strstr(List,&CRNameCR[1]) == List) ||
-(strstr(List,CRNameCR) != NULL));
+    return((strstr(List,&CRNameCR[1]) == List) || (strstr(List,CRNameCR) != NULL));
 
 }
 //-------------------------------------------------------------------------------------------------
@@ -225,6 +226,33 @@ int Tokenize(char * BigString,StringParts SmallParts,char * Delimiters) {
     }
 
     return(NumberOfParts);
+}
+//-------------------------------------------------------------------------------------------------
+int UniquifyStringParts(StringParts Parts) {
+
+    int Found,Current,Other,Shift;
+
+    Current = 0;
+    while (Parts[Current] != NULL) {
+        Found = 0;
+        Other = Current + 1;
+        while (Parts[Other] != NULL) {
+            if (!strcmp(Parts[Current],Parts[Other])) {
+                Found = 1;
+                Shift = Other;
+                do {
+                    Parts[Shift] = Parts[Shift+1];
+                    Shift++;
+                } while (Parts[Shift] != NULL);
+            } else {
+                Other++;
+            }
+        }
+        if (!Found) {
+            Current++;
+        }
+    }
+    return(Current);
 }
 //-------------------------------------------------------------------------------------------------
 void PrintTimeStamp(char * Message) {

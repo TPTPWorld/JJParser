@@ -213,8 +213,7 @@ LISTNODE * GetNodeFromListByNumber(LISTNODE * Head,int Number) {
 
     do {
 //----Skip non-formula records
-        while ((*Head) != NULL && 
-!LogicalAnnotatedFormula((*Head)->AnnotatedFormula)) {
+        while ((*Head) != NULL && !LogicalAnnotatedFormula((*Head)->AnnotatedFormula)) {
             Head = &((*Head)->Next);
         }
 //----Is it the one we want?
@@ -236,8 +235,7 @@ ANNOTATEDFORMULA GetAnnotatedFormulaFromListByNumber(LISTNODE Head,int Number) {
 
     LISTNODE * NodePointer;
 
-    if ((NodePointer = GetNodeFromListByNumber(&Head,Number)) !=
-NULL) {
+    if ((NodePointer = GetNodeFromListByNumber(&Head,Number)) != NULL) {
         assert((*NodePointer) != NULL);
         return((*NodePointer)->AnnotatedFormula);
     } else {

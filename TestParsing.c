@@ -21,6 +21,7 @@
 #include "PrintOtter.h"
 #include "PrintXML.h"
 #include "PrintSMT2.h"
+#include "PrintLP.h"
 #include "SystemOnTPTP.h"
 //-------------------------------------------------------------------------------------------------
 int main(int argc, char *argv[]) {
@@ -68,12 +69,11 @@ int main(int argc, char *argv[]) {
 //----One signature for all testing
     Signature = NewSignatureWithTypes();
 
-//----Read from file or stdin
-    SetNeedForNonLogicTokens(1);
+//----Get rid of blank lines, comments, etc
+    SetNeedForNonLogicTokens(0);
     SetAllowFreeVariables(0);
     SetWarnings(1);
 
-    SetNeedForNonLogicTokens(0);
 printf("TESTING: Initialized\n");
     if (argc > 1) {
         Head = ParseFileOfFormulae(argv[1],NULL,Signature,1,NULL);
@@ -81,17 +81,23 @@ printf("TESTING: Initialized\n");
         Head = ParseFILEOfFormulae("--",stdin,Signature,1,NULL);
     }
 printf("TESTING: Parsed\n");
-    PrintListOfAnnotatedTSTPNodes(stdout,Signature,Head,tptp,1);
-printf("TESTING: Printed\n");
+//     PrintSignature(Signature);
+// printf("TESTING: Printed original signature\n");
     RemovedUnusedSymbols(Signature);
 printf("TESTING: Cleaned signature\n");
     PrintSignature(Signature);
-printf("TESTING: Printed signature\n");
+printf("TESTING: Printed cleaned signature\n");
+
+    LPPrintSignatureList(stdout,Signature->Types,Head,"TYPE");
+    LPPrintSignatureList(stdout,Signature->Functions,Head,"κ");
+    LPPrintSignatureList(stdout,Signature->Predicates,Head,"Prop");
+
+    PrintListOfAnnotatedTSTPNodes(stdout,Signature,Head,lambdapi,1);
+printf("TESTING: Printed formulae\n");
     ListStatistics = GetListStatistics(Head,Signature);
 printf("TESTING: Got statistics\n");
     PrintListStatistics(stdout,ListStatistics);
 printf("TESTING: Printed statistics\n");
-
     FreeListOfAnnotatedFormulae(&Head,Signature);
 printf("TESTING: Freed formulae\n");
     assert(Head == NULL);
@@ -101,13 +107,29 @@ printf("TESTING: Freed signature\n");
     return(EXIT_SUCCESS);
 
 //-------------------------------------------------------------------------------------------------
+//----Test comparison of first two formula for being the same
+    AnotherHead = ParseFileOfFormulae(argv[2],NULL,Signature,1,NULL);
+    PrintListOfAnnotatedTSTPNodes(stdout,Signature,AnotherHead,tptp,1);
+    PrintSignature(Signature);
+    AnnotatedFormula = GetAnnotatedFormulaFromListByName(Head,"coordinator_teaches_0015");
+    AnotherAnnotatedFormula = GetAnnotatedFormulaFromListByName(AnotherHead,"coordinator_teaches");
+    PrintAnnotatedTSTPNode(stdout,AnnotatedFormula,tptp,1);
+    PrintAnnotatedTSTPNode(stdout,AnotherAnnotatedFormula,tptp,1);
+    if (SameFormulaInAnnotatedFormulae(AnnotatedFormula,AnotherAnnotatedFormula,0,1)) {
+        printf("They are identical\n");
+    } else {
+        if (SameFormulaInAnnotatedFormulae(AnnotatedFormula,AnotherAnnotatedFormula,1,1)) {
+            printf("They are renamings\n");
+        } else {
+            printf("They are quite different\n");
+        }
+    }
+    FreeListOfAnnotatedFormulae(&AnotherHead,Signature);
+
 //----Test list duplication
     AnotherHead = DuplicateListOfAnnotatedFormulae(Head,Signature);
     PrintListOfAnnotatedTSTPNodes(stdout,Signature,AnotherHead,tptp,1);
-    FreeListOfAnnotatedFormulae(&Head,Signature);
-    FreeListOfAnnotatedFormulae(&AnotherHead,Signature);
-    FreeSignature(&Signature);
-    return(EXIT_SUCCESS);
+    PrintSignature(Signature);
 
 //----Test stats
     ListStatistics = GetListStatistics(Head,Signature);
@@ -125,26 +147,6 @@ printf("TESTING: Freed signature\n");
     UninterpretNumbersInSignature(Signature,0);
     PrintListOfAnnotatedTSTPNodes(stdout,Signature,Head,tptp,1);
     exit(EXIT_SUCCESS);
-
-//----Test comparison of first two formula for being the same
-    AnnotatedFormula = GetAnnotatedFormulaFromListByNumber(Head,1);
-    AnotherAnnotatedFormula = GetAnnotatedFormulaFromListByNumber(Head,2);
-    PrintAnnotatedTSTPNode(stdout,AnnotatedFormula,tptp,1);
-    PrintAnnotatedTSTPNode(stdout,AnotherAnnotatedFormula,tptp,1);
-    if (SameFormulaInAnnotatedFormulae(AnnotatedFormula,
-AnotherAnnotatedFormula,0,1)) {
-        printf("They are identical\n");
-    } else {
-        if (SameFormulaInAnnotatedFormulae(AnnotatedFormula,
-AnotherAnnotatedFormula,1,1)) {
-            printf("They are renamings\n");
-        } else {
-            printf("They are quite different\n");
-        }
-    }
-    FreeListOfAnnotatedFormulae(&Head,Signature);
-    FreeSignature(&Signature);
-    return(EXIT_SUCCESS);
 
 //----Test reading header
     FreeListOfAnnotatedFormulae(&Head,Signature);

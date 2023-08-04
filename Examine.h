@@ -52,8 +52,8 @@ char ** VariableCollector,int * VariableCollectorLength,char ** TypeCollector,
 int * TypeCollectorLength);
 char * GetAnnotatedFormulaSymbolUsage(ANNOTATEDFORMULA AnnotatedTSTPFormula,char ** PutUsageHere,
 char ** FunctorUsageStartsHere,char ** VariableUsageStartsHere,char ** TypeUsageStartsHere);
-char * GetListOfAnnotatedFormulaSymbolUsage(LISTNODE ListNode,char ** PutUsageHere,
-char ** FunctorUsageStartsHere,char ** VariableUsageStartsHere,char ** TypeUsageStartsHere);
+//---- This is broken char * GetListOfAnnotatedFormulaSymbolUsage(LISTNODE ListNode,char ** PutUsageHere,
+//---- This is broken char ** FunctorUsageStartsHere,char ** VariableUsageStartsHere,char ** TypeUsageStartsHere);
 
 int GetSymbolUses(SIGNATURE Signature,TermType Type,char * Name,int Arity);
 int CountLiteralsOfPolarity(ANNOTATEDFORMULA AnnotatedFormula,int * Positive,int * Negative);

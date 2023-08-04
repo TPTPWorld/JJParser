@@ -108,8 +108,8 @@ int FalseAnnotatedFormula(ANNOTATEDFORMULA AnnotatedFormula) {
     if (LogicalAnnotatedFormula(AnnotatedFormula)) {
         TheFormula = AnnotatedFormula->AnnotatedFormulaUnion.
 AnnotatedTSTPFormula.FormulaWithVariables->Formula;
-        return(TheFormula->Type == atom &&
-!strcmp(GetSymbol(TheFormula->FormulaUnion.Atom),"$false"));
+        return(TheFormula->Type == atom && !strcmp(GetSymbol(TheFormula->FormulaUnion.Atom),
+"$false"));
     } else {
         return(0);
     }

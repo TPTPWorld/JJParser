@@ -545,8 +545,8 @@ FormulaWithVariables->Variables)));
     
 }
 //-------------------------------------------------------------------------------------------------
-void QuantifyFormula(FORMULA * UnquantifiedFormula,
-ConnectiveType Quantifier,VARIABLENODE VariableNode) {
+void QuantifyFormula(FORMULA * UnquantifiedFormula,ConnectiveType Quantifier,
+VARIABLENODE VariableNode) {
 
     FORMULA QuantifiedFormula;
 
@@ -556,19 +556,15 @@ ConnectiveType Quantifier,VARIABLENODE VariableNode) {
 //DEBUG printf("quantifying %s with quantification %d\n",VariableNode->VariableName->NameSymbol,VariableNode->Quantification);
             QuantifiedFormula = NewFormula();
             QuantifiedFormula->Type = quantified;
-            QuantifiedFormula->FormulaUnion.QuantifiedFormula.Quantifier =
-Quantifier;
-            QuantifiedFormula->FormulaUnion.QuantifiedFormula.VariableType = 
-NULL;
-            QuantifiedFormula->FormulaUnion.QuantifiedFormula.Variable = 
-NewTerm();
-            QuantifiedFormula->FormulaUnion.QuantifiedFormula.Variable->Type = 
-variable;
-            QuantifiedFormula->FormulaUnion.QuantifiedFormula.Variable->
-TheSymbol.Variable = VariableNode;
+            QuantifiedFormula->FormulaUnion.QuantifiedFormula.Quantifier = Quantifier;
+            QuantifiedFormula->FormulaUnion.QuantifiedFormula.ExistentialCount = 0;
+            QuantifiedFormula->FormulaUnion.QuantifiedFormula.VariableType = NULL;
+            QuantifiedFormula->FormulaUnion.QuantifiedFormula.Variable = NewTerm();
+            QuantifiedFormula->FormulaUnion.QuantifiedFormula.Variable->Type = variable;
+            QuantifiedFormula->FormulaUnion.QuantifiedFormula.Variable-> TheSymbol.Variable = 
+VariableNode;
             IncreaseVariableUseCount(VariableNode,1);
-            QuantifiedFormula->FormulaUnion.QuantifiedFormula.Formula = 
-*UnquantifiedFormula;
+            QuantifiedFormula->FormulaUnion.QuantifiedFormula.Formula = *UnquantifiedFormula;
             *UnquantifiedFormula = QuantifiedFormula;
         }
         VariableNode = VariableNode->NextVariable;
@@ -577,8 +573,7 @@ TheSymbol.Variable = VariableNode;
 //-------------------------------------------------------------------------------------------------
 void Quantify(ANNOTATEDFORMULA AnnotatedFormula,ConnectiveType Quantifier) {
 
-    if (Quantifier != universal && Quantifier != existential &&
-Quantifier != lambda) {
+    if (Quantifier != universal && Quantifier != existential && Quantifier != lambda) {
         CodingError("Quantifying with a non-quantifier");
     }
 
@@ -588,8 +583,7 @@ CheckAnnotatedFormula(AnnotatedFormula,tptp_tff) ||
 CheckAnnotatedFormula(AnnotatedFormula,tptp_fof)) {
         QuantifyFormula(&(AnnotatedFormula->AnnotatedFormulaUnion.
 AnnotatedTSTPFormula.FormulaWithVariables->Formula),Quantifier,
-AnnotatedFormula->AnnotatedFormulaUnion.AnnotatedTSTPFormula.
-FormulaWithVariables->Variables);
+AnnotatedFormula->AnnotatedFormulaUnion.AnnotatedTSTPFormula.FormulaWithVariables->Variables);
     }
 }
 //-------------------------------------------------------------------------------------------------
@@ -606,8 +600,8 @@ void FOFify(ANNOTATEDFORMULA AnnotatedFormula,ConnectiveType Quantifier) {
     if (LogicalAnnotatedFormula(AnnotatedFormula)) {
         if (CheckAnnotatedFormula(AnnotatedFormula,tptp_cnf)) {
             SetSyntax(AnnotatedFormula,tptp_fof);
+            Quantify(AnnotatedFormula,Quantifier);
         }
-        Quantify(AnnotatedFormula,Quantifier);
     }
 }
 //-------------------------------------------------------------------------------------------------
@@ -644,8 +638,7 @@ Formula->FormulaUnion.BinaryFormula.RHS;
                 Formula->FormulaUnion.BinaryFormula.Connective =
 (Formula->FormulaUnion.BinaryFormula.Connective == implication ? 
 reverseimplication : (Formula->FormulaUnion.BinaryFormula.Connective == 
-reverseimplication ? implication : 
-Formula->FormulaUnion.BinaryFormula.Connective));
+reverseimplication ? implication : Formula->FormulaUnion.BinaryFormula.Connective));
             } 
             break;
         case unary:
@@ -692,16 +685,13 @@ Signature,
 void EnsureLongForm(ANNOTATEDFORMULA AnnotatedFormula,SIGNATURE Signature) {
 
     if (ReallyAnAnnotatedFormula(AnnotatedFormula)) {
-        if (AnnotatedFormula->AnnotatedFormulaUnion.AnnotatedTSTPFormula.
-Source == NULL) {
-            AnnotatedFormula->AnnotatedFormulaUnion.AnnotatedTSTPFormula.
-Source = ParseStringTerm("unknown",nontype,Signature,0);
+        if (AnnotatedFormula->AnnotatedFormulaUnion.AnnotatedTSTPFormula.Source == NULL) {
+            AnnotatedFormula->AnnotatedFormulaUnion.AnnotatedTSTPFormula.Source = 
+ParseStringTerm("unknown",nontype,Signature,0);
         }
 
-        if (AnnotatedFormula->
-AnnotatedFormulaUnion.AnnotatedTSTPFormula.UsefulInfo == NULL) {
-            AnnotatedFormula->
-AnnotatedFormulaUnion.AnnotatedTSTPFormula.UsefulInfo = 
+        if (AnnotatedFormula->AnnotatedFormulaUnion.AnnotatedTSTPFormula.UsefulInfo == NULL) {
+            AnnotatedFormula->AnnotatedFormulaUnion.AnnotatedTSTPFormula.UsefulInfo = 
 ParseStringTerm("[]",nontype,Signature,0);
         }
     }
@@ -744,8 +734,7 @@ int DoAdd) {
     Index = 0;
     while (Index < TheList->FlexibleArity) {
 //----Check for the functor of the record to be removed
-        if (!strcmp(Symbol,TheList->Arguments[Index]->
-TheSymbol.NonVariable->NameSymbol)) {
+        if (!strcmp(Symbol,TheList->Arguments[Index]->TheSymbol.NonVariable->NameSymbol)) {
             if (DoRemove) {
                 FreeTerm(&(TheList->Arguments[Index]),Signature,NULL);
                 if (DoAdd && NumberRemoved == 0) {
@@ -753,10 +742,8 @@ TheSymbol.NonVariable->NameSymbol)) {
                     NumberAdded = 1;
                     Index++;
                 } else {
-                    for (MoveIndex = Index+1; MoveIndex < TheList->
-FlexibleArity;MoveIndex++) {
-                        TheList->Arguments[MoveIndex-1] = TheList->
-Arguments[MoveIndex];
+                    for (MoveIndex = Index+1; MoveIndex < TheList->FlexibleArity;MoveIndex++) {
+                        TheList->Arguments[MoveIndex-1] = TheList->Arguments[MoveIndex];
                     }
                     TheList->FlexibleArity--;
                 }
@@ -831,17 +818,15 @@ char * SourceString) {
 (Source = ParseStringTerm(SourceString,nontype,Signature,0)) != NULL) {
         FreeTerm(&(AnnotatedFormula->AnnotatedFormulaUnion.AnnotatedTSTPFormula.Source),Signature,
 &(AnnotatedFormula->AnnotatedFormulaUnion.AnnotatedTSTPFormula.FormulaWithVariables->Variables));
-        AnnotatedFormula->AnnotatedFormulaUnion.AnnotatedTSTPFormula.Source =
-Source;
+        AnnotatedFormula->AnnotatedFormulaUnion.AnnotatedTSTPFormula.Source = Source;
         return(1);
     } else {
         return(0);
     }
 }
 //-------------------------------------------------------------------------------------------------
-void DoUpdateUsefulInformationInAnnotatedFormula(
-ANNOTATEDFORMULA AnnotatedFormula,SIGNATURE Signature,
-char * UsefulInformation,int DoRemove,int DoAdd) {
+void DoUpdateUsefulInformationInAnnotatedFormula(ANNOTATEDFORMULA AnnotatedFormula,
+SIGNATURE Signature, char * UsefulInformation,int DoRemove,int DoAdd) {
 
     if (!ReallyAnAnnotatedFormula(AnnotatedFormula)) {
         CodingError("Trying to add useful info to a non-formula");
@@ -850,43 +835,37 @@ char * UsefulInformation,int DoRemove,int DoAdd) {
 //----Add source and useful info if there wasn't one before
     EnsureLongForm(AnnotatedFormula,Signature);
 //----Get pointer to the list
-    DoUpdateRecordInList(AnnotatedFormula->
-AnnotatedFormulaUnion.AnnotatedTSTPFormula.UsefulInfo,Signature,
-UsefulInformation,DoRemove,DoAdd);
+    DoUpdateRecordInList(AnnotatedFormula->AnnotatedFormulaUnion.AnnotatedTSTPFormula.UsefulInfo,
+Signature,UsefulInformation,DoRemove,DoAdd);
 }
 //-------------------------------------------------------------------------------------------------
-void RemoveUsefulInformationFromAnnotatedFormula(
-ANNOTATEDFORMULA AnnotatedFormula,SIGNATURE Signature,char * PrincipleSymbol) {
+void RemoveUsefulInformationFromAnnotatedFormula(ANNOTATEDFORMULA AnnotatedFormula,
+SIGNATURE Signature,char * PrincipleSymbol) {
 
-    DoUpdateUsefulInformationInAnnotatedFormula(AnnotatedFormula,
-Signature,PrincipleSymbol,1,0);
+    DoUpdateUsefulInformationInAnnotatedFormula(AnnotatedFormula,Signature,PrincipleSymbol,1,0);
 }
 //-------------------------------------------------------------------------------------------------
 void AddUsefulInformationToAnnotatedFormula(ANNOTATEDFORMULA AnnotatedFormula,
 SIGNATURE Signature,char * UsefulInformation) {
 
-    DoUpdateUsefulInformationInAnnotatedFormula(AnnotatedFormula,
-Signature,UsefulInformation,0,1);
+    DoUpdateUsefulInformationInAnnotatedFormula(AnnotatedFormula,Signature,UsefulInformation,0,1);
 }
 //-------------------------------------------------------------------------------------------------
-void UpdateUsefulInformationInAnnotatedFormula(ANNOTATEDFORMULA 
-AnnotatedFormula,SIGNATURE Signature,char * UsefulInformation) {
+void UpdateUsefulInformationInAnnotatedFormula(ANNOTATEDFORMULA AnnotatedFormula,
+SIGNATURE Signature,char * UsefulInformation) { 
 
-    DoUpdateUsefulInformationInAnnotatedFormula(AnnotatedFormula,
-Signature,UsefulInformation,1,1);
+    DoUpdateUsefulInformationInAnnotatedFormula(AnnotatedFormula,Signature,UsefulInformation,1,1);
 }
 //-------------------------------------------------------------------------------------------------
 void StandardizeFormula(FORMULA * Formula) {
 
     switch ((*Formula)->Type) {
         case quantified:
-            StandardizeFormula(&((*Formula)->FormulaUnion.QuantifiedFormula.
-Formula));
+            StandardizeFormula(&((*Formula)->FormulaUnion.QuantifiedFormula.Formula));
             break;
         case binary:
         {
-            BinaryFormulaType * BinaryFormula = &((*Formula)->FormulaUnion.
-BinaryFormula);
+            BinaryFormulaType * BinaryFormula = &((*Formula)->FormulaUnion.BinaryFormula);
             switch (BinaryFormula->Connective) {
                 case reverseimplication:
                 {
@@ -900,10 +879,8 @@ BinaryFormula);
                 {
                     FORMULA NegatedFormula = NewFormula();
                     NegatedFormula->Type = unary;
-                    NegatedFormula->FormulaUnion.UnaryFormula.
-Connective = negation;
-                    NegatedFormula->FormulaUnion.UnaryFormula.
-Formula = *Formula;
+                    NegatedFormula->FormulaUnion.UnaryFormula.Connective = negation;
+                    NegatedFormula->FormulaUnion.UnaryFormula.Formula = *Formula;
                     BinaryFormula->Connective = equivalence;
                     *Formula = NegatedFormula;
                     break;
@@ -912,10 +889,8 @@ Formula = *Formula;
                 {
                     FORMULA NegatedFormula = NewFormula();
                     NegatedFormula->Type = unary;
-                    NegatedFormula->FormulaUnion.UnaryFormula.
-Connective = negation;
-                    NegatedFormula->FormulaUnion.UnaryFormula.
-Formula = *Formula;
+                    NegatedFormula->FormulaUnion.UnaryFormula.Connective = negation;
+                    NegatedFormula->FormulaUnion.UnaryFormula.Formula = *Formula;
                     BinaryFormula->Connective = conjunction;
                     *Formula = NegatedFormula;
                     break;
@@ -924,10 +899,8 @@ Formula = *Formula;
                 {
                     FORMULA NegatedFormula = NewFormula();
                     NegatedFormula->Type = unary;
-                    NegatedFormula->FormulaUnion.UnaryFormula.
-Connective = negation;
-                    NegatedFormula->FormulaUnion.UnaryFormula.
-Formula = *Formula;
+                    NegatedFormula->FormulaUnion.UnaryFormula.Connective = negation;
+                    NegatedFormula->FormulaUnion.UnaryFormula.Formula = *Formula;
                     BinaryFormula->Connective = conjunction;
                     *Formula = NegatedFormula;
                     break;
@@ -940,8 +913,7 @@ Formula = *Formula;
             break;
         }
         case unary:
-            StandardizeFormula(&((*Formula)->FormulaUnion.UnaryFormula.
-Formula));
+            StandardizeFormula(&((*Formula)->FormulaUnion.UnaryFormula.Formula));
             break;
         case atom:
         case applied_connective:

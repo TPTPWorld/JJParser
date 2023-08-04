@@ -40,6 +40,9 @@ char * GetSymbol(TERM Term) {
             return(GetSignatureSymbol(Term->TheSymbol.Variable->VariableName));
             break;
         case formula:
+            if (Term->TheSymbol.Formula->Type == atom) {
+                return(GetSymbol(Term->TheSymbol.Formula->FormulaUnion.Atom));
+            }
         default:
             sprintf(ErrorMessage,"Invalid term type %s to get symbol\n",
 TermTypeToString(Term->Type));
@@ -1063,7 +1066,9 @@ PredicateCollector,PredicateCollectorLength,FunctorCollector,FunctorCollectorLen
 VariableCollector,VariableCollectorLength,TypeCollector,TypeCollectorLength);
 //DEBUG printf("quantified:\nP:%sF:%sV:%sT%s\n",*PredicateCollector,*FunctorCollector,*VariableCollector,*TypeCollector);
             break;
+//----This is so broken now, because I don't know if predicate or functor. Should use signature
         case type_declaration:
+            break;
         case binary:
             CollectSymbolsInFormula(Formula->FormulaUnion.BinaryFormula.LHS,PredicateCollector,
 PredicateCollectorLength,FunctorCollector,FunctorCollectorLength,VariableCollector,
@@ -3222,8 +3227,7 @@ AnnotatedFormulaUnion.AnnotatedTSTPFormula.Source),&BufferSize);
 }
 //-------------------------------------------------------------------------------------------------
 //----Same as GetParentNames but no theory names
-char * GetNodeParentNames(ANNOTATEDFORMULA AnnotatedFormula,
-char * PutNamesHere) {
+char * GetNodeParentNames(ANNOTATEDFORMULA AnnotatedFormula,char * PutNamesHere) {
 
     char * Buffer;
     char * StartOfTheory;

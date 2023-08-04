@@ -489,6 +489,7 @@ TERM DuplicateTerm(TERM Original,ContextType Context,int ForceNewVariables) {
     TERM Term;
     VARIABLENODE Variable;
     String ErrorMessage;
+    TermType ActualType;
 
     if (Original == NULL) {
         return(NULL);
@@ -504,11 +505,19 @@ TERM DuplicateTerm(TERM Original,ContextType Context,int ForceNewVariables) {
         case function:
         case a_type:
         case non_logical_data:
-//DEBUG printf("Duplicating term with symbol %s, arity %d, arguments are %s \n",GetSymbol(Term),GetArity(Term),Original->Arguments == NULL ? "NULL" : "not NULL");
-            Term->TheSymbol.NonVariable = InsertIntoSignature(Context.Signature,Term->Type,
+//----For TFF functions are stored as atom_as_term. Need to hack arond that
+            if (Term->Type == atom_as_term && IsSymbolInSignatureList(Context.Signature->Functions,
+GetSymbol(Term),GetArity(Term),NULL) != NULL) {
+                ActualType = function;
+            } else {
+                ActualType = Term->Type;
+            }
+//DEBUG printf("Duplicating term with symbol %s, original type %s, fixed type %s, arity %d, arguments are %s \n",GetSymbol(Term),TermTypeToString(Term->Type),TermTypeToString(ActualType),GetArity(Term),Original->Arguments == NULL ? "NULL" : "not NULL");
+            Term->TheSymbol.NonVariable = InsertIntoSignature(Context.Signature,ActualType,
 Original->TheSymbol.NonVariable->NameSymbol,Original->TheSymbol.NonVariable->Arity,
 Original->TheSymbol.NonVariable->AppliedArity,Original->TheSymbol.NonVariable->InternalSymbol,
 NULL);
+//DEBUG printf("Duplicated term with symbol %s, type %s, arity %d, arguments are %s \n",GetSymbol(Term),TermTypeToString(Term->Type),GetArity(Term),Original->Arguments == NULL ? "NULL" : "not NULL");
             Term->Arguments = DuplicateArguments(GetArity(Term),Original->Arguments,Context,
 ForceNewVariables);
             break;
@@ -1093,6 +1102,7 @@ none);
         Formula = NewFormula();
         Formula->Type = quantified;
         Formula->FormulaUnion.QuantifiedFormula.Quantifier = Quantifier;
+        Formula->FormulaUnion.QuantifiedFormula.ExistentialCount = 0;
         ParseQuantifiedVariable(Stream,Language,Context,EndOfScope,Quantifier,
 VariablesMustBeQuantified,&(Formula->FormulaUnion.QuantifiedFormula));
 //----Now get the rest of the variables
@@ -1112,6 +1122,7 @@ ContextType Context,VARIABLENODE * EndOfScope,int VariablesMustBeQuantified) {
     Formula->Type = quantified;
     Formula->FormulaUnion.QuantifiedFormula.Quantifier = 
 StringToConnective(CurrentToken(Stream)->NameToken);
+    Formula->FormulaUnion.QuantifiedFormula.ExistentialCount = 0;
     AcceptTokenType(Stream,quantifier);
     AcceptToken(Stream,punctuation,"[");
     OldEndOfScope = *EndOfScope;

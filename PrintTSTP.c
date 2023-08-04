@@ -910,10 +910,12 @@ Formula->FormulaUnion.QuantifiedFormula.Formula,Indent,Pretty,none,TSTPSyntaxFla
 //----Sadly the old BNF required ()s around equations on the side of a binary, and too many
 //----systems (E and Leo-III at least) have encoded that. Shitto, because new BNF does not
 //----require them (but accepts them).
-//----ADD BACK BRACKETS FOR NOW
-(LastConnective == none && (/*PreUnitEquation(Formula) ||*/ TypeDefnIdFormula(Formula))) ||
-(Connective == LastConnective && Associative(Connective)) ||
-(LastConnective == brackets && Associative(Connective))) {
+ (LastConnective == none && 
+  (((Language == tptp_fof || Language == tptp_cnf || Language == tptp_tcf) && 
+     PreUnitEquation(Formula)) ||
+   TypeDefnIdFormula(Formula))) ||
+ (Connective == LastConnective && Associative(Connective)) ||
+ (LastConnective == brackets && Associative(Connective))) {
                 NeedBrackets = 0;
                 ConnectiveIndent = Indent - strlen(ConnectiveToString(Connective)) - 1;
             } else {

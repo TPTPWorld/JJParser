@@ -8,7 +8,7 @@ int ListCount(SIGNATURE Signature,LISTNODE List,CountType WhatToCount);
 int HeadListCount(SIGNATURE Signature,HEADLIST HeadListHead,CountType WhatToCount);
 int ListMaximal(SIGNATURE Signature,LISTNODE List,MaximizeType WhatToMaximize);
 
-SymbolStatisticsType GetListSymbolUsageStatistics(HEADLIST HeadList);
+//---- Broken SymbolStatisticsType GetListSymbolUsageStatistics(HEADLIST HeadList);
 StatisticsType GetListStatistics(LISTNODE ListHead,SIGNATURE Signature);
 void PrintListStatistics(FILE * Stream,StatisticsType Statistics);
 //-------------------------------------------------------------------------------------------------

@@ -73,6 +73,7 @@ static SZSResultTripleType ResultTriples[] = {
 };
 
 static SZSResultType ResultIsaPairs[][2] = {
+//----THM and CSA no longer SUC because of something I can't recall.
     {SUC,SZS},{NOS,SZS},
     {UNP,SUC},{SAP,SUC},{CSP,SUC},{CUP,SUC},{FUN,SUC},
     {CSA,UNP},{ESA,UNP},
@@ -305,10 +306,6 @@ int SZSIsA(SZSResultType SZSResult,SZSResultType DesiredResult) {
     if (SZSResult == DesiredResult) {
         return(1);
     }
-//----Bypass if general success
-    if (SZSResult == SUC) {
-        return(1);
-    }
 
     for (Index = 0; Index < sizeof(ResultIsaPairs)/(2 * sizeof(SZSResultType));Index++) {
         if (ResultIsaPairs[Index][0] == SZSResult && 
@@ -422,7 +419,8 @@ int SystemOnTPTPGetResult(int QuietnessLevel,char * ProblemFileName,char * ATPSy
 int TimeLimit,char * X2TSTPFlag,char * SystemOutputPrefix,char * OptionalFlags,int KeepOutputFiles,
 char * FilesDirectory,char * UsersFileName,char * OutputFileName,char * PutResultHere,
 char * PutOutputHere) {
-//----OutputFileName is created from UsersFileName with a ".s" (it should be ".f" if it fails)
+//----If the TimeLimit is not 0 (nothing gets run), the OutputFileName is created from the
+//----UsersFileName with a ".s" (it should be ".f" if it fails)
 
     String UNIXCommand;
     char * TPTPHome;
@@ -460,8 +458,8 @@ char * PutOutputHere) {
 QuietnessFlag,QuietnessLevel,OptionalFlags,ATPSystem,TimeLimit,X2TSTPFlag,ProblemFileName);
 //----If not, use the macro from compile time
     } else {
-        sprintf(UNIXCommand,"%s/%s -q%d %s %d %s %s",TPTP_HOME,SYSTEM_ON_TPTP,QuietnessLevel,
-ATPSystem,TimeLimit,X2TSTPFlag,ProblemFileName);
+        sprintf(UNIXCommand,"%s/%s -q%d %s %d %s %s",TPTP_HOME,SYSTEM_ON_TPTP,
+              QuietnessLevel,              ATPSystem,TimeLimit,X2TSTPFlag,ProblemFileName);
     }
     if ((SystemPipe = popen(UNIXCommand,"r")) == NULL) {
         perror("Running SystemOnTPTP");
@@ -593,7 +591,11 @@ Conjecture,conjecture)) {
         if (SystemOnTPTPGetResult(0,ProblemFileName,PositiveChecker,TimeLimit,"",
 SystemOutputPrefix,OptionalFlags,KeepOutputFiles,FilesDirectory,LocalUsersFileName,
 OutputFileName,SystemResult,NULL)) {
-            if (SZSIsA(StringToSZSResult(SystemResult),StringToSZSResult(PositiveResult))) {
+//DEBUG printf("Result for %s is %s want a %s\n",LocalUsersFileName,SystemResult,PositiveResult);
+//----Have to check for Success separately because it is not SZSIsa (for some forgotten reason)
+            if (StringToSZSResult(SystemResult) == SUC ||
+SZSIsA(StringToSZSResult(SystemResult),StringToSZSResult(PositiveResult))) {
+//DEBUG printf("That works that %s is a %s\n",SystemResult,PositiveResult);
                 Correct = 1;
 //----Should not trust prover's disproofs
 //            } else if (!strcmp(SystemResult,NegativeResult)) {
@@ -614,7 +616,8 @@ OutputFileName,SystemResult,NULL)) {
         if (SystemOnTPTPGetResult(0,ProblemFileName,NegativeChecker,TimeLimit,"",
 SystemOutputPrefix,OptionalFlags,KeepOutputFiles,FilesDirectory,LocalUsersFileName,OutputFileName,
 SystemResult,NULL)) {
-            if (SZSIsA(StringToSZSResult(SystemResult),StringToSZSResult(NegativeResult))) {
+            if (StringToSZSResult(SystemResult) == SUC ||
+SZSIsA(StringToSZSResult(SystemResult),StringToSZSResult(NegativeResult))) {
                 Correct = -1;
 //----Should not trust disprover's proofs
 //            } else if (!strcmp(SystemResult,PositiveResult)) {

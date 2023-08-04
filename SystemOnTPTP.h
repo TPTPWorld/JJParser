@@ -5,32 +5,36 @@
 #include "DataTypes.h"
 #include "PrintTSTP.h"
 //-------------------------------------------------------------------------------------------------
-typedef enum {SZS,
-              SUC,
-              UNP,SAP,ESA,
-              SAT,FSA,THM,EQV,TAC,WEC,ETH,TAU,WTC,WTH,
-              CAX,SCA,TCA,WCA,
-              CUP,CSP,ECS,
-              CSA,CTH,CEQ,UNC,WCC,ECT,FUN,UNS,WUC,WCT,
-              SCC,UCA,
-              NOC,
-              NOS,
-              OPN,UNK,ASS,
-              STP,ERR,OSE,INE,SYE,SEE,TYE,
-              FOR,USR,RSO,TMO,MMO,GUP,INC,IAP,INP,NTT,NTY,
-              nonszsresult} SZSResultType;
+typedef enum {
+    SZS,
+    SUC,
+    UNP,SAP,ESA,
+    SAT,FSA,THM,EQV,TAC,WEC,ETH,TAU,WTC,WTH,
+    CAX,SCA,TCA,WCA,
+    CUP,CSP,ECS,
+    CSA,CTH,CEQ,UNC,WCC,ECT,FUN,UNS,WUC,WCT,
+    SCC,UCA,
+    NOC,
+    NOS,
+    OPN,UNK,ASS,
+    STP,ERR,OSE,INE,SYE,SEE,TYE,
+    FOR,USR,RSO,TMO,MMO,GUP,INC,IAP,INP,NTT,NTY,
+    nonszsresult
+} SZSResultType;
 
 typedef SZSResultType * SZSResultArray;
 
-typedef enum {LDa,
-              Sol,
-              Prf,Der,Ref,CRf,
-              Int,HIn,DIn,FIn,IIn,RIn,TIn,
-              Mod,DMo,HMo,FMo,IMo,RMo,TMo,Sat,
-              Lof,Lth,Lfo,Lcn,
-              NSo,IPr,IRf,ICf,Ass,
-              Non,
-              nonszsoutput} SZSOutputType;
+typedef enum {
+    LDa,
+    Sol,
+    Prf,Der,Ref,CRf,
+    Int,HIn,DIn,FIn,IIn,RIn,TIn,
+    Mod,DMo,HMo,FMo,IMo,RMo,TMo,Sat,
+    Lof,Lth,Lfo,Lcn,
+    NSo,IPr,IRf,ICf,Ass,
+    Non,
+    nonszsoutput
+} SZSOutputType;
 
 typedef SZSOutputType * SZSOutputArray;
 

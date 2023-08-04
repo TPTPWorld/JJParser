@@ -35,6 +35,7 @@ long RandomInRange(long Lowest,long Highest,int Seed);
 int NameInList(char * Name,char * List);
 int RemoveNameFromList(char * Name,char * List);
 int Tokenize(char * BigString,StringParts SmallParts,char * Delimiters);
+int UniquifyStringParts(StringParts Parts);
 
 void PrintTimeStamp(char * Message);
 void Trim(char * TheString);
