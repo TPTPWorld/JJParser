@@ -446,6 +446,7 @@ char * PutOutputHere) {
         }
         return(1);
     }
+//----Negative QuietnessLevel means only system output, add '0' into -q flag.
     if (QuietnessLevel < 0) {
         QuietnessFlag = "-q0";
         QuietnessLevel = -QuietnessLevel;
@@ -513,6 +514,7 @@ strstr(SystemOutputLine,"RESULT: ") == SystemOutputLine &&
             GotResult = 1;
 //DEBUG printf("Got the result %s\n",PutResultHere);
         }
+//----If getting only the system output there is no "RESULT: ", so try get from "% Result     : "
         if (!GotResult && !strcmp(X2TSTPFlag,"-S") &&
 strstr(SystemOutputLine,"% Result     : ") == SystemOutputLine &&
 (SaysPart = strstr(SystemOutputLine," : ")) != NULL &&
@@ -539,6 +541,7 @@ strstr(SystemOutputLine,"OUTPUT: ") == SystemOutputLine &&
             GotOutput = 1;
 //DEBUG printf("Got the output %s\n",PutOutputHere);
         }
+//----If getting only the system output there is no "OUTPUT: ", so try get from "% Output     : "
         if (PutOutputHere != NULL && !GotOutput && !strcmp(X2TSTPFlag,"-S") &&
 strstr(SystemOutputLine,"% Output     : ") == SystemOutputLine &&
 (SaysPart = strstr(SystemOutputLine," : ")) != NULL &&
