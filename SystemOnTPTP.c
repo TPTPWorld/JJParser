@@ -3,6 +3,8 @@
 #include <assert.h>
 #include <ctype.h>
 #include <stdlib.h>
+#include <curl/curl.h>
+
 #include "DataTypes.h"
 #include "Utilities.h"
 #include "Parsing.h"
@@ -415,6 +417,153 @@ int SystemOnTPTPAvailable(void) {
     }
 }
 //-------------------------------------------------------------------------------------------------
+FILE * StartLocalSoT(char * QuietnessFlag,int QuietnessLevel,char * ProblemFileName,
+char * ATPSystem,int TimeLimit,char * X2TSTPFlag,char * OptionalFlags) {
+
+    char * TPTPHome;
+    FILE * SystemPipe;
+    String UNIXCommand;
+    String ErrorMessage;
+
+//----First look if user has a TPTP_HOME environment variable
+    if ((TPTPHome = getenv("TPTP_HOME")) != NULL) {
+        sprintf(UNIXCommand,"%s/%s %s%d %s %s %d %s %s",TPTPHome,SYSTEM_ON_TPTP,
+QuietnessFlag,QuietnessLevel,OptionalFlags,ATPSystem,TimeLimit,X2TSTPFlag,ProblemFileName);
+//----If not, use the macro from compile time
+    } else {
+        sprintf(UNIXCommand,"%s/%s -q%d %s %d %s %s",TPTP_HOME,SYSTEM_ON_TPTP,
+              QuietnessLevel,              ATPSystem,TimeLimit,X2TSTPFlag,ProblemFileName);
+    }
+    if ((SystemPipe = popen(UNIXCommand,"r")) == NULL) {
+        perror("Running SystemOnTPTP");
+        sprintf(ErrorMessage,"Could not start %s",UNIXCommand);
+        ReportError("OSError",ErrorMessage,0);
+    }
+    return(SystemPipe);
+}
+//-------------------------------------------------------------------------------------------------
+size_t ReadCallback(void * TheReturnedData,size_t ElementSize,size_t NumberOfElements,
+void * DataWriteHandle) {
+
+    int Index;
+    char * TheReturnedChars;
+    int NumberOfChars;
+
+    TheReturnedChars = (char *)TheReturnedData;
+    NumberOfChars = (ElementSize * NumberOfElements)/sizeof(char);
+
+//DEBUG printf("There are %d characters\n",NumberOfChars);
+        for (Index = 0;Index < NumberOfChars;Index++) {
+//DEBUG printf("-%c-%d-",TheReturnedChars[Index],TheReturnedChars[Index]);
+            fprintf((FILE *)DataWriteHandle,"%c",TheReturnedChars[Index]);
+            fflush((FILE *)DataWriteHandle);
+        }
+
+    return(ElementSize*NumberOfElements);
+}
+//-------------------------------------------------------------------------------------------------
+curl_mime * BuildURLParameters(char * QuietnessFlag,int QuietnessLevel,char * ProblemFileName,
+char * ATPSystem,int TimeLimit,char * X2TSTPFlag,CURL * CurlHandle) {
+
+    curl_mime * MultipartForm;
+    curl_mimepart * MultipartField;
+    String OneParameter;
+
+    MultipartForm = curl_mime_init(CurlHandle);
+
+    MultipartField = curl_mime_addpart(MultipartForm);
+    curl_mime_name(MultipartField,"NoHTML");
+    curl_mime_data(MultipartField,"1",CURL_ZERO_TERMINATED);
+    MultipartField = curl_mime_addpart(MultipartForm);
+    curl_mime_name(MultipartField,"QuietFlag");
+    sprintf(OneParameter,"%s%d",QuietnessFlag,QuietnessLevel);
+    curl_mime_data(MultipartField,OneParameter,CURL_ZERO_TERMINATED);
+    MultipartField = curl_mime_addpart(MultipartForm);
+    curl_mime_name(MultipartField,"SubmitButton");
+    curl_mime_data(MultipartField,"RunSelectedSystems",CURL_ZERO_TERMINATED);
+    MultipartField = curl_mime_addpart(MultipartForm);
+    sprintf(OneParameter,"System___%s",ATPSystem);
+    curl_mime_name(MultipartField,OneParameter);
+    curl_mime_data(MultipartField,ATPSystem,CURL_ZERO_TERMINATED);
+    MultipartField = curl_mime_addpart(MultipartForm);
+    sprintf(OneParameter,"TimeLimit___%s",ATPSystem);
+    curl_mime_name(MultipartField,OneParameter);
+    sprintf(OneParameter,"%d",TimeLimit);
+    curl_mime_data(MultipartField,OneParameter,CURL_ZERO_TERMINATED);
+    if (!strcmp(X2TSTPFlag,"-S")) {
+        MultipartField = curl_mime_addpart(MultipartForm);
+        curl_mime_name(MultipartField,"X2TPTP");
+        curl_mime_data(MultipartField,"-S",CURL_ZERO_TERMINATED);
+    }
+
+    return(MultipartForm);
+
+}
+//-------------------------------------------------------------------------------------------------
+FILE * StartRemoteSoT(char * QuietnessFlag,int QuietnessLevel,char * ProblemFileName,
+char * ATPSystem,int TimeLimit,char * X2TSTPFlag,curl_mime * MultipartForm) {
+
+    CURL * CurlHandle;
+    CURLcode CurlResult;
+    int Pipe[2];
+    FILE * DataReadHandle;
+    FILE * DataWriteHandle;
+    SuperString OneLine;
+
+    if (curl_global_init(CURL_GLOBAL_ALL) != 0) {
+        printf("ERROR: Could not initialize curl\n");
+        return(NULL);
+    }
+    if ((CurlHandle = curl_easy_init()) != NULL) {
+        if (curl_easy_setopt(CurlHandle,CURLOPT_URL,SYSTEM_ON_TPTP_FORMREPLYURL) != CURLE_OK) {
+            printf("ERROR: Could not set URL %s\n",SYSTEM_ON_TPTP_FORMREPLYURL);
+            curl_easy_cleanup(CurlHandle);
+            return(NULL);
+        }
+
+//----if the multipart form has not alrady been created, e.g., in RemoteSoT, make it here.
+        if (MultipartForm == NULL) {
+            if ((MultipartForm = BuildURLParameters(QuietnessFlag,QuietnessLevel,ProblemFileName,
+ATPSystem,TimeLimit,X2TSTPFlag,CurlHandle)) == NULL) {\
+                printf("ERROR: Could not set build multi-part form\n");
+                curl_easy_cleanup(CurlHandle);
+                return(NULL);
+            }
+        }
+
+        if (curl_easy_setopt(CurlHandle,CURLOPT_MIMEPOST,MultipartForm) != CURLE_OK ||
+curl_easy_setopt(CurlHandle,CURLOPT_USERAGENT,"libcurl-agent/1.0") != CURLE_OK) {
+            printf("ERROR: Could not set multi-part form or user agent\n");
+            curl_easy_cleanup(CurlHandle);
+            return(NULL);
+        }
+
+        if (pipe(Pipe) == -1 || (DataReadHandle = fdopen(Pipe[0],"r")) == NULL ||
+(DataWriteHandle = fdopen(Pipe[1],"w")) == NULL) {
+            printf("ERROR: Could not create and open pipe\n");
+            fclose(DataReadHandle);
+            DataReadHandle = NULL;
+        } else {
+            curl_easy_setopt(CurlHandle,CURLOPT_WRITEDATA,(void *)DataWriteHandle);
+            curl_easy_setopt(CurlHandle,CURLOPT_WRITEFUNCTION,ReadCallback);
+            CurlResult = curl_easy_perform(CurlHandle);
+            fclose(DataWriteHandle);
+            while (fgets(OneLine,SUPERSTRINGLENGTH,DataReadHandle) != NULL) {
+                printf("GOT %s",OneLine);
+            }
+            if (CurlResult != CURLE_OK) {
+                printf("ERROR: curl failed: %s\n",curl_easy_strerror(CurlResult));
+                fclose(DataReadHandle);
+                DataReadHandle = NULL;
+            }
+        }
+        curl_mime_free(MultipartForm);
+        curl_easy_cleanup(CurlHandle);
+    }
+    curl_global_cleanup();
+    return(DataReadHandle);
+}
+//-------------------------------------------------------------------------------------------------
 int SystemOnTPTPGetResult(int QuietnessLevel,char * ProblemFileName,char * ATPSystem,
 int TimeLimit,char * X2TSTPFlag,char * SystemOutputPrefix,char * OptionalFlags,int KeepOutputFiles,
 char * FilesDirectory,char * UsersFileName,char * OutputFileName,char * PutResultHere,
@@ -422,8 +571,7 @@ char * PutOutputHere) {
 //----If the TimeLimit is not 0 (nothing gets run), the OutputFileName is created from the
 //----UsersFileName with a ".s" (it should be ".f" if it fails)
 
-    String UNIXCommand;
-    char * TPTPHome;
+    int LocalSoT = 1;
     String InternalOutputFileName;
     FILE * OutputFileHandle;
     FILE * SystemPipe;
@@ -434,7 +582,6 @@ char * PutOutputHere) {
     char * CPUPart;
     char * WCPart;
     char * QuietnessFlag;
-    String ErrorMessage;
 
 //----If time limit is 0 just return Success None
     if (TimeLimit == 0) {
@@ -453,19 +600,16 @@ char * PutOutputHere) {
     } else {
         QuietnessFlag = "-q";
     }
-//----First look if user has a TPTP_HOME environment variable
-    if ((TPTPHome = getenv("TPTP_HOME")) != NULL) {
-        sprintf(UNIXCommand,"%s/%s %s%d %s %s %d %s %s",TPTPHome,SYSTEM_ON_TPTP,
-QuietnessFlag,QuietnessLevel,OptionalFlags,ATPSystem,TimeLimit,X2TSTPFlag,ProblemFileName);
-//----If not, use the macro from compile time
+    if (LocalSoT) {
+       SystemPipe = StartLocalSoT(QuietnessFlag,QuietnessLevel,ProblemFileName,ATPSystem,
+TimeLimit,X2TSTPFlag,OptionalFlags);
     } else {
-        sprintf(UNIXCommand,"%s/%s -q%d %s %d %s %s",TPTP_HOME,SYSTEM_ON_TPTP,
-              QuietnessLevel,              ATPSystem,TimeLimit,X2TSTPFlag,ProblemFileName);
+       SystemPipe = StartRemoteSoT(QuietnessFlag,QuietnessLevel,ProblemFileName,ATPSystem,
+TimeLimit,X2TSTPFlag,NULL);
     }
-    if ((SystemPipe = popen(UNIXCommand,"r")) == NULL) {
-        perror("Running SystemOnTPTP");
-        sprintf(ErrorMessage,"Could not start %s",UNIXCommand);
-        ReportError("OSError",ErrorMessage,0);
+    if (SystemPipe == NULL) {
+        printf("ERROR: Could not start %s SystemOnTPTP\n",LocalSoT ? "local" : "remote");
+        return(0);
     }
 
 //----Set to NULL to keep gcc happy (does not know about KeepOutputFiles)
@@ -553,7 +697,11 @@ strstr(SystemOutputLine,"% Output     : ") == SystemOutputLine &&
         }
     }
 
-    pclose(SystemPipe);
+    if (LocalSoT) {
+        pclose(SystemPipe);
+    } else {
+        fclose(SystemPipe);
+    }
     if (KeepOutputFiles && OutputFileHandle != stdout) {
         fclose(OutputFileHandle);
     }

@@ -54,6 +54,7 @@ typedef struct {
     #define TPTP_HOME "/home/tptp"
 #endif
 #define SYSTEM_ON_TPTP "SystemExecution/SystemOnTPTP"
+#define SYSTEM_ON_TPTP_FORMREPLYURL "https://tptp.cs.miami.edu/cgi-bin/SystemOnTPTPFormReply"
 //-------------------------------------------------------------------------------------------------
 SZSResultType StringToSZSResult(char * SZSResult);
 char * SZSResultToUserString(SZSResultType SZSResult);
@@ -76,6 +77,10 @@ int SystemOnTPTP(LISTNODE Axioms,ANNOTATEDFORMULA Conjecture,char * PositiveChec
 char * PositiveResult,int TestNegative,char * NegativeChecker,char * NegativeResult,int TimeLimit,
 char * SystemOutputPrefix,char * OptionalFlags,int KeepOutputFiles,char * FilesDirectory,
 char * UsersOutputFileName,String OutputFileName);
+size_t ReadCallback(void * TheReturnedData,size_t ElementSize,size_t NumberOfElements,
+void * DataWriteHandle);
+FILE * StartRemoteSoT(char * QuietnessFlag,int QuietnessLevel,char * ProblemFileName,
+char * ATPSystem,int TimeLimit,char * X2TSTPFlag,curl_mime * MultipartForm);
 int SystemOnTPTPGetResult(int QuietnessLevel,char * ProblemFileName,char * ATPSystem,int TimeLimit,
 char * X2TSTPFlag,char * SystemOutputPrefix,char * OptionalFlags,int KeepOutputFiles,
 char * FilesDirectory,char * UsersOutputFileName,char * OutputFileName,char * PutResultHere,
