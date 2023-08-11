@@ -632,7 +632,11 @@ TimeLimit,X2TSTPFlag,NULL);
         } else {
             SystemOnTPTPFileName(FilesDirectory,UsersFileName,".s",InternalOutputFileName);
             if ((OutputFileHandle = OpenFileInMode(InternalOutputFileName,"w")) == NULL) {
-                pclose(SystemPipe);
+                if (LocalSoT) {
+                    pclose(SystemPipe);
+                } else {
+                    fclose(SystemPipe);
+                }
                 return(0);
             } 
             if (OutputFileName != NULL) {
