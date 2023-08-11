@@ -577,11 +577,10 @@ curl_easy_setopt(CurlHandle,CURLOPT_USERAGENT,"libcurl-agent/1.0") != CURLE_OK) 
 int SystemOnTPTPGetResult(int QuietnessLevel,char * ProblemFileName,char * ATPSystem,
 int TimeLimit,char * X2TSTPFlag,char * SystemOutputPrefix,char * OptionalFlags,int KeepOutputFiles,
 char * FilesDirectory,char * UsersFileName,char * OutputFileName,char * PutResultHere,
-char * PutOutputHere) {
+char * PutOutputHere,int LocalSoT) {
 //----If the TimeLimit is not 0 (nothing gets run), the OutputFileName is created from the
 //----UsersFileName with a ".s" (it should be ".f" if it fails)
 
-    int LocalSoT = 1;
     String InternalOutputFileName;
     FILE * OutputFileHandle;
     FILE * SystemPipe;
@@ -723,7 +722,7 @@ strstr(SystemOutputLine,"% Output     : ") == SystemOutputLine &&
 int SystemOnTPTP(LISTNODE Axioms,ANNOTATEDFORMULA Conjecture,char * PositiveChecker,
 char * PositiveResult,int TestNegative,char * NegativeChecker,char * NegativeResult,int TimeLimit,
 char * SystemOutputPrefix,char * OptionalFlags,int KeepOutputFiles,char * FilesDirectory,
-char * UsersFileName,String OutputFileName) {
+char * UsersFileName,String OutputFileName,int LocalSoT) {
 //----OutputFileName is created from UsersFileName with a ".s" (it should be ".f" if it fails)
 
     String ProblemFileName;
@@ -751,7 +750,7 @@ Conjecture,conjecture)) {
     if (Correct == 0) {
         if (SystemOnTPTPGetResult(0,ProblemFileName,PositiveChecker,TimeLimit,"",
 SystemOutputPrefix,OptionalFlags,KeepOutputFiles,FilesDirectory,LocalUsersFileName,
-OutputFileName,SystemResult,NULL)) {
+OutputFileName,SystemResult,NULL,LocalSoT)) {
 //DEBUG printf("Result for %s is %s want a %s\n",LocalUsersFileName,SystemResult,PositiveResult);
 //----Have to check for Success separately because it is not SZSIsa (for some forgotten reason)
             if (StringToSZSResult(SystemResult) == SUC ||
@@ -776,7 +775,7 @@ SZSIsA(StringToSZSResult(SystemResult),StringToSZSResult(PositiveResult))) {
         strcat(LocalUsersFileName,"_not");
         if (SystemOnTPTPGetResult(0,ProblemFileName,NegativeChecker,TimeLimit,"",
 SystemOutputPrefix,OptionalFlags,KeepOutputFiles,FilesDirectory,LocalUsersFileName,OutputFileName,
-SystemResult,NULL)) {
+SystemResult,NULL,LocalSoT)) {
             if (StringToSZSResult(SystemResult) == SUC ||
 SZSIsA(StringToSZSResult(SystemResult),StringToSZSResult(NegativeResult))) {
                 Correct = -1;
@@ -797,7 +796,7 @@ SZSIsA(StringToSZSResult(SystemResult),StringToSZSResult(NegativeResult))) {
 SZSResultType SZSSystemOnTPTP(LISTNODE Axioms,ANNOTATEDFORMULA Conjecture,char * System,
 SZSResultType DesiredResult,int QuietnessLevel,int TimeLimit,char * X2TSTPFlag,
 char * SystemOutputPrefix,char * OptionalFlags,int KeepOutputFiles,char * FilesDirectory,
-char * UsersFileName,String OutputFileName,SZSOutputType * SZSOutput) {
+char * UsersFileName,String OutputFileName,SZSOutputType * SZSOutput,int LocalSoT) {
 
     StatusType ConjectureRole;
     String ProblemFileName;
@@ -845,7 +844,7 @@ Conjecture,ConjectureRole)) {
         }
         if (SystemOnTPTPGetResult(QuietnessLevel,ProblemFileName,System,TimeLimit,X2TSTPFlag,
 SystemOutputPrefix,OptionalFlags,KeepOutputFiles,FilesDirectory,CopyUsersFileName,
-OutputFileName,SystemResult,SystemOutput)) {
+OutputFileName,SystemResult,SystemOutput,LocalSoT)) {
             SZSResult = StringToSZSResult(SystemResult);
 //----Promote to desired result if it is one
             if (SZSIsA(SZSResult,DesiredResult)) {
@@ -881,13 +880,13 @@ char * System,SZSResultType DesiredResult,int QuietnessLevel,char * OptionalFlag
 char * X2TSTPFlag,int SystemTrustedForAlternate,char * AlternateSystem,
 SZSResultType AlternateDesiredResult, int AlternateTimeLimit,char * SystemOutputPrefix,
 int KeepOutputFiles,char * FilesDirectory,char * UsersFileName,String OutputFileName,
-SZSOutputType * SZSOutput) {
+SZSOutputType * SZSOutput,int LocalSoT) {
 
     SZSResultType SZSResult;
 
     SZSResult = SZSSystemOnTPTP(Axioms,Conjecture,System,DesiredResult,QuietnessLevel,TimeLimit,
 X2TSTPFlag,SystemOutputPrefix,OptionalFlags,KeepOutputFiles,FilesDirectory,UsersFileName,
-OutputFileName,SZSOutput);
+OutputFileName,SZSOutput,LocalSoT);
 
 //----Check if really not provable
     if (SZSResult != DesiredResult && (SystemTrustedForAlternate || AlternateSystem != NULL)) {
@@ -899,7 +898,7 @@ OutputFileName,SZSOutput);
             strcat(OutputFileName,"_not");
             SZSResult = SZSSystemOnTPTP(Axioms,Conjecture,AlternateSystem,AlternateDesiredResult,
 QuietnessLevel,AlternateTimeLimit,X2TSTPFlag,SystemOutputPrefix,OptionalFlags,KeepOutputFiles,
-FilesDirectory,OutputFileName,OutputFileName,SZSOutput);
+FilesDirectory,OutputFileName,OutputFileName,SZSOutput,LocalSoT);
         }
     }
 

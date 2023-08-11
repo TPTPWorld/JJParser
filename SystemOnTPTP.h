@@ -2,6 +2,8 @@
 #define SYSTEMONTPTP_H
 //-------------------------------------------------------------------------------------------------
 #include <unistd.h>
+#include <curl/curl.h>
+
 #include "DataTypes.h"
 #include "PrintTSTP.h"
 //-------------------------------------------------------------------------------------------------
@@ -76,7 +78,7 @@ int SystemOnTPTPAvailable(void);
 int SystemOnTPTP(LISTNODE Axioms,ANNOTATEDFORMULA Conjecture,char * PositiveChecker,
 char * PositiveResult,int TestNegative,char * NegativeChecker,char * NegativeResult,int TimeLimit,
 char * SystemOutputPrefix,char * OptionalFlags,int KeepOutputFiles,char * FilesDirectory,
-char * UsersOutputFileName,String OutputFileName);
+char * UsersOutputFileName,String OutputFileName,int LocalSoT);
 size_t ReadCallback(void * TheReturnedData,size_t ElementSize,size_t NumberOfElements,
 void * DataWriteHandle);
 CURL * InitializeRemoteSoT();
@@ -85,11 +87,11 @@ char * ATPSystem,int TimeLimit,char * X2TSTPFlag,curl_mime * MultipartForm);
 int SystemOnTPTPGetResult(int QuietnessLevel,char * ProblemFileName,char * ATPSystem,int TimeLimit,
 char * X2TSTPFlag,char * SystemOutputPrefix,char * OptionalFlags,int KeepOutputFiles,
 char * FilesDirectory,char * UsersOutputFileName,char * OutputFileName,char * PutResultHere,
-char * PutOutputHere);
+char * PutOutputHere,int LocalSoT);
 SZSResultType SZSSystemOnTPTP(LISTNODE Axioms,ANNOTATEDFORMULA Conjecture,char * System,
 SZSResultType DesiredResult,int QuietnessLevel,int TimeLimit,char * X2TSTPFlag,
 char * SystemOutputPrefix,char * OptionalFlags,int KeepOutputFiles,char * FilesDirectory,
-char * UsersOutputFileName,String OutputFileName,SZSOutputType * SZSOutput);
+char * UsersOutputFileName,String OutputFileName,SZSOutputType * SZSOutput,int LocalSoT);
 
 LISTNODE ApplyExternalProgram(LISTNODE Head,StatusType AsStatus,ANNOTATEDFORMULA Conjecture,
 const char * ExecuteFormatString,SIGNATURE Signature);
