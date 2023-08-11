@@ -121,7 +121,7 @@ char * CopyHeapString(char * String) {
 
     char * NewString;
 
-    if (String == NULL || strlen(String) == 0) {
+    if (String == NULL) {
         return(NULL);
     } else {
 //DEBUG printf("MM %d for ==%s==\n",strlen(String)+1,String);

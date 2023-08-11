@@ -416,7 +416,7 @@ AnnotatedFormulaUnion.AnnotatedTSTPFormula.FormulaWithVariables->Variables,NULL)
 //OutputFileName,OutputFileName);
             Result = SystemOnTPTP(Axioms,Conjectures->AnnotatedFormula,
 "E---0.9","Theorem",1,"Paradox---1.3","CounterTheorem",30,"","",1,"/tmp",
-"output",OutputFileName);
+"output",OutputFileName,1);
 //            Result = SystemOnTPTP(Axioms,Conjectures->AnnotatedFormula,
 //"E---0.9","Theorem",1,"Paradox---1.3","CounterTheorem",30,"",0,NULL,NULL,NULL);
             printf("The output file name is %s\n",OutputFileName);
