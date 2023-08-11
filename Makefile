@@ -11,13 +11,13 @@ OBJS = $(JJPARSER)/ListStatistics.o $(JJPARSER)/List.o $(JJPARSER)/Examine.o $(J
 
 all: $(OBJS)
 
-TestParsing: $(OBJS) TestParsing.o
+TestParsing: $(OBJS) TestParsing.o Makefile
 	$(CC) $(CFLAGS) -o $@ $(OBJS) TestParsing.o $(LFLAGS)
 
-DRSParsing: $(OBJS) DRSParsing.o
+DRSParsing: $(OBJS) DRSParsing.o Makefile
 	$(CC) $(CFLAGS) -o $@ $(OBJS) DRSParsing.o $(LFLAGS)
 
-TestTree: $(OBJS) TestTree.o
+TestTree: $(OBJS) TestTree.o Makefile
 	$(CC) $(CFLAGS) -o $@ $(OBJS) TestTree.o $(LFLAGS)
 
 .c.o:
