@@ -47,6 +47,37 @@ void ChangeStringIndex(int* Index,int Change) {
     }
 }
 //-------------------------------------------------------------------------------------------------
+void Free(void ** Memory) {
+
+    assert(*Memory != NULL);
+    free(*Memory);
+    *Memory = NULL;
+}
+//-------------------------------------------------------------------------------------------------
+void * Malloc(int Size) {
+
+    void * Memory;
+
+    if ((Memory = malloc(Size)) == NULL) {
+        perror("Malloc");
+        exit(EXIT_FAILURE);
+    }
+
+    return(Memory);
+}
+//-------------------------------------------------------------------------------------------------
+void * Realloc(void * OldMemory,int Size) {
+
+    void * Memory;
+
+    if (Size > 0 && (Memory = realloc(OldMemory,Size)) == NULL) {
+        perror("Realloc");
+        CodingError("Realloc failed");
+    }
+
+    return(Memory);
+}
+//-------------------------------------------------------------------------------------------------
 void ExtendString(char ** ToExtend,char * ByThis, int * AllocatedLength) {
 
 //----Check if more memory is required
@@ -86,46 +117,15 @@ char * BufferReturn(char ** Buffer,char * UserBuffer) {
     }
 }
 //-------------------------------------------------------------------------------------------------
-void Free(void ** Memory) {
-
-    assert(*Memory != NULL);
-    free(*Memory);
-    *Memory = NULL;
-}
-//-------------------------------------------------------------------------------------------------
-void * Malloc(int Size) {
-
-    void * Memory;
-
-    if ((Memory = malloc(Size)) == NULL) {
-        perror("Malloc");
-        exit(EXIT_FAILURE);
-    }
-
-    return(Memory);
-}
-//-------------------------------------------------------------------------------------------------
-void * Realloc(void * OldMemory,int Size) {
-
-    void * Memory;
-
-    if (Size > 0 && (Memory = realloc(OldMemory,Size)) == NULL) {
-        perror("Realloc");
-        CodingError("Realloc failed");
-    }
-
-    return(Memory);
-}
-//-------------------------------------------------------------------------------------------------
 char * CopyHeapString(char * String) {
 
     char * NewString;
 
-    if (String == NULL) {
+    if (String == NULL || strlen(String) == 0) {
         return(NULL);
     } else {
 //DEBUG printf("MM %d for ==%s==\n",strlen(String)+1,String);
-        NewString = (char *)Malloc(strlen(String)+1);
+        NewString = (char *)Malloc(sizeof(char) * (strlen(String)+1));
         strcpy(NewString,String);
         return(NewString);
     }

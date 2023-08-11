@@ -989,7 +989,7 @@ TOKEN CloneToken(TOKEN TokenCopy) {
 
     return(BuildToken(TokenCopy->KindToken,TokenCopy->NameToken));
 }
-//---------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 void FreeToken(TOKEN * Pointer) {
 
     if (*Pointer != NULL) {

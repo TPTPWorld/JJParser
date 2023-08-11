@@ -215,6 +215,7 @@ void FreeSignatureList(SYMBOLNODE * Symbols) {
         FreeSignatureList(&((*Symbols)->LastSymbol));
         FreeSignatureList(&((*Symbols)->NextSymbol));
         Free((void **)(&((*Symbols)->NameSymbol)));
+        Free((void **)(&((*Symbols)->ShortSymbol)));
         Free((void **)Symbols);
     }
 }
@@ -227,6 +228,8 @@ void FreeSignature(SIGNATURE * Signature) {
     assert((*Signature)->Functions == NULL);
     FreeSignatureList(&((*Signature)->Predicates));
     assert((*Signature)->Predicates == NULL);
+    FreeSignatureList(&((*Signature)->Types));
+    assert((*Signature)->Types == NULL);
     FreeSignatureList(&((*Signature)->NonLogicals));
     assert((*Signature)->NonLogicals == NULL);
 
