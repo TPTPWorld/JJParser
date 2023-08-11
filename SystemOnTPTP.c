@@ -478,6 +478,7 @@ char * ATPSystem,int TimeLimit,char * X2TSTPFlag,CURL * CurlHandle) {
     curl_mime_name(MultipartField,"QuietFlag");
     sprintf(OneParameter,"%s%d",QuietnessFlag,QuietnessLevel);
     curl_mime_data(MultipartField,OneParameter,CURL_ZERO_TERMINATED);
+
     MultipartField = curl_mime_addpart(MultipartForm);
     curl_mime_name(MultipartField,"SubmitButton");
     curl_mime_data(MultipartField,"RunSelectedSystems",CURL_ZERO_TERMINATED);
@@ -490,6 +491,14 @@ char * ATPSystem,int TimeLimit,char * X2TSTPFlag,CURL * CurlHandle) {
     curl_mime_name(MultipartField,OneParameter);
     sprintf(OneParameter,"%d",TimeLimit);
     curl_mime_data(MultipartField,OneParameter,CURL_ZERO_TERMINATED);
+
+    MultipartField = curl_mime_addpart(MultipartForm);
+    curl_mime_name(MultipartField,"ProblemSource");
+    curl_mime_data(MultipartField,"UPLOAD",CURL_ZERO_TERMINATED);
+    MultipartField = curl_mime_addpart(MultipartForm);
+    curl_mime_name(MultipartField,"UPLOADProblem");
+    curl_mime_filedata(MultipartField,ProblemFileName);
+
     if (!strcmp(X2TSTPFlag,"-S")) {
         MultipartField = curl_mime_addpart(MultipartForm);
         curl_mime_name(MultipartField,"X2TPTP");
