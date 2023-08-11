@@ -54,7 +54,7 @@ void Free(void ** Memory) {
     *Memory = NULL;
 }
 //-------------------------------------------------------------------------------------------------
-void * Malloc(int Size) {
+void * Malloc(size_t Size) {
 
     void * Memory;
 
@@ -66,7 +66,7 @@ void * Malloc(int Size) {
     return(Memory);
 }
 //-------------------------------------------------------------------------------------------------
-void * Realloc(void * OldMemory,int Size) {
+void * Realloc(void * OldMemory,size_t Size) {
 
     void * Memory;
 
@@ -124,7 +124,7 @@ char * CopyHeapString(char * String) {
     if (String == NULL) {
         return(NULL);
     } else {
-//DEBUG printf("MM %d for ==%s==\n",strlen(String)+1,String);
+// printf("MM %ld for ==%s==\n",strlen(String)+1,String);
         NewString = (char *)Malloc(sizeof(char) * (strlen(String)+1));
         strcpy(NewString,String);
         return(NewString);

@@ -22,8 +22,8 @@ void MakeBuffer(char ** Buffer,int * BufferSize);
 void ExtendAndFree(char ** Buffer,char * WithThisToFree,int * BufferSize);
 char * BufferReturn(char ** Buffer,char * UserBuffer);
 void Free(void ** Memory);
-void * Malloc(int Size);
-void * Realloc(void * OldMemory,int Size);
+void * Malloc(size_t Size);
+void * Realloc(void * OldMemory,size_t Size);
 
 char * CopyHeapString(char * String);
 int MinimumOfInt(int I1,int I2);

@@ -207,16 +207,21 @@ SIGNATURE DuplicateSignature(SIGNATURE Original) {
     return(Copy);
 }
 //-------------------------------------------------------------------------------------------------
+void FreeSymbolNode(SYMBOLNODE * Symbol) {
+
+    assert((*Symbol)->NumberOfUses == 0);
+    Free((void **)(&((*Symbol)->NameSymbol)));
+    Free((void **)(&((*Symbol)->ShortSymbol)));
+    Free((void **)Symbol);
+}
+//-------------------------------------------------------------------------------------------------
 void FreeSignatureList(SYMBOLNODE * Symbols) {
 
     if ((*Symbols) != NULL) {
 //DEBUG printf("Freeing %s/%d/%d/%c(%d)\n",(*Symbols)->NameSymbol,(*Symbols)->Arity,(*Symbols)->AppliedArity,(*Symbols)->InternalSymbol ? 'I' : 'X',(*Symbols)->NumberOfUses);
-        assert((*Symbols)->NumberOfUses == 0);
         FreeSignatureList(&((*Symbols)->LastSymbol));
         FreeSignatureList(&((*Symbols)->NextSymbol));
-        Free((void **)(&((*Symbols)->NameSymbol)));
-        Free((void **)(&((*Symbols)->ShortSymbol)));
-        Free((void **)Symbols);
+        FreeSymbolNode(Symbols);
     }
 }
 //-------------------------------------------------------------------------------------------------
@@ -276,7 +281,7 @@ int RemovedUnusedSymbolsFromList(SYMBOLNODE * Symbols) {
         NumberRemoved += RemovedUnusedSymbolsFromList(&((*Symbols)->NextSymbol));
         if ((*Symbols)->NumberOfUses  == 0) {
             ToFree = RemoveSignatureNodeFromTree(Symbols);
-            Free((void **)&ToFree);
+            FreeSymbolNode(&ToFree);
             NumberRemoved++;
         }
     }
