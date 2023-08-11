@@ -530,7 +530,6 @@ char * ATPSystem,int TimeLimit,char * X2TSTPFlag,curl_mime * MultipartForm) {
     int Pipe[2];
     FILE * DataReadHandle;
     FILE * DataWriteHandle;
-    SuperString OneLine;
 
     if ((CurlHandle = InitializeRemoteSoT()) == NULL) {
         return(NULL);
@@ -563,9 +562,6 @@ curl_easy_setopt(CurlHandle,CURLOPT_USERAGENT,"libcurl-agent/1.0") != CURLE_OK) 
         curl_easy_setopt(CurlHandle,CURLOPT_WRITEFUNCTION,ReadCallback);
         CurlResult = curl_easy_perform(CurlHandle);
         fclose(DataWriteHandle);
-        while (fgets(OneLine,SUPERSTRINGLENGTH,DataReadHandle) != NULL) {
-            printf("GOT %s",OneLine);
-        }
         if (CurlResult != CURLE_OK) {
             printf("ERROR: curl failed: %s\n",curl_easy_strerror(CurlResult));
             fclose(DataReadHandle);
