@@ -500,6 +500,28 @@ char * ATPSystem,int TimeLimit,char * X2TSTPFlag,CURL * CurlHandle) {
 
 }
 //-------------------------------------------------------------------------------------------------
+CURL * InitializeRemoteSoT() {
+
+    CURL * CurlHandle;
+
+    if (curl_global_init(CURL_GLOBAL_ALL) != 0) {
+        printf("ERROR: Could not global initialize curl\n");
+        return(NULL);
+    }
+    if ((CurlHandle = curl_easy_init()) == NULL) {
+        printf("ERROR: Could not easy initialize curl\n");
+        return(NULL);
+    }
+
+    if (curl_easy_setopt(CurlHandle,CURLOPT_URL,SYSTEM_ON_TPTP_FORMREPLYURL) != CURLE_OK) {
+        printf("ERROR: Could not set URL %s\n",SYSTEM_ON_TPTP_FORMREPLYURL);
+        curl_easy_cleanup(CurlHandle);
+        return(NULL);
+    }
+
+    return(CurlHandle);
+}
+//-------------------------------------------------------------------------------------------------
 FILE * StartRemoteSoT(char * QuietnessFlag,int QuietnessLevel,char * ProblemFileName,
 char * ATPSystem,int TimeLimit,char * X2TSTPFlag,curl_mime * MultipartForm) {
 
@@ -510,56 +532,48 @@ char * ATPSystem,int TimeLimit,char * X2TSTPFlag,curl_mime * MultipartForm) {
     FILE * DataWriteHandle;
     SuperString OneLine;
 
-    if (curl_global_init(CURL_GLOBAL_ALL) != 0) {
-        printf("ERROR: Could not initialize curl\n");
+    if ((CurlHandle = InitializeRemoteSoT()) == NULL) {
         return(NULL);
     }
-    if ((CurlHandle = curl_easy_init()) != NULL) {
-        if (curl_easy_setopt(CurlHandle,CURLOPT_URL,SYSTEM_ON_TPTP_FORMREPLYURL) != CURLE_OK) {
-            printf("ERROR: Could not set URL %s\n",SYSTEM_ON_TPTP_FORMREPLYURL);
-            curl_easy_cleanup(CurlHandle);
-            return(NULL);
-        }
 
 //----if the multipart form has not alrady been created, e.g., in RemoteSoT, make it here.
-        if (MultipartForm == NULL) {
-            if ((MultipartForm = BuildURLParameters(QuietnessFlag,QuietnessLevel,ProblemFileName,
-ATPSystem,TimeLimit,X2TSTPFlag,CurlHandle)) == NULL) {\
-                printf("ERROR: Could not set build multi-part form\n");
-                curl_easy_cleanup(CurlHandle);
-                return(NULL);
-            }
-        }
+    if (MultipartForm == NULL &&
+(MultipartForm = BuildURLParameters(QuietnessFlag,QuietnessLevel,ProblemFileName,
+ATPSystem,TimeLimit,X2TSTPFlag,CurlHandle)) == NULL) {
+        printf("ERROR: Could not build multi-part form\n");
+        curl_easy_cleanup(CurlHandle);
+        return(NULL);
+    }
 
-        if (curl_easy_setopt(CurlHandle,CURLOPT_MIMEPOST,MultipartForm) != CURLE_OK ||
+    if (curl_easy_setopt(CurlHandle,CURLOPT_MIMEPOST,MultipartForm) != CURLE_OK ||
 curl_easy_setopt(CurlHandle,CURLOPT_USERAGENT,"libcurl-agent/1.0") != CURLE_OK) {
-            printf("ERROR: Could not set multi-part form or user agent\n");
-            curl_easy_cleanup(CurlHandle);
-            return(NULL);
-        }
-
-        if (pipe(Pipe) == -1 || (DataReadHandle = fdopen(Pipe[0],"r")) == NULL ||
-(DataWriteHandle = fdopen(Pipe[1],"w")) == NULL) {
-            printf("ERROR: Could not create and open pipe\n");
-            fclose(DataReadHandle);
-            DataReadHandle = NULL;
-        } else {
-            curl_easy_setopt(CurlHandle,CURLOPT_WRITEDATA,(void *)DataWriteHandle);
-            curl_easy_setopt(CurlHandle,CURLOPT_WRITEFUNCTION,ReadCallback);
-            CurlResult = curl_easy_perform(CurlHandle);
-            fclose(DataWriteHandle);
-            while (fgets(OneLine,SUPERSTRINGLENGTH,DataReadHandle) != NULL) {
-                printf("GOT %s",OneLine);
-            }
-            if (CurlResult != CURLE_OK) {
-                printf("ERROR: curl failed: %s\n",curl_easy_strerror(CurlResult));
-                fclose(DataReadHandle);
-                DataReadHandle = NULL;
-            }
-        }
+        printf("ERROR: Could not set multi-part form or user agent\n");
         curl_mime_free(MultipartForm);
         curl_easy_cleanup(CurlHandle);
+        return(NULL);
     }
+
+    if (pipe(Pipe) == -1 || (DataReadHandle = fdopen(Pipe[0],"r")) == NULL ||
+(DataWriteHandle = fdopen(Pipe[1],"w")) == NULL) {
+        printf("ERROR: Could not create and open pipe\n");
+        fclose(DataReadHandle);
+        DataReadHandle = NULL;
+    } else {
+        curl_easy_setopt(CurlHandle,CURLOPT_WRITEDATA,(void *)DataWriteHandle);
+        curl_easy_setopt(CurlHandle,CURLOPT_WRITEFUNCTION,ReadCallback);
+        CurlResult = curl_easy_perform(CurlHandle);
+        fclose(DataWriteHandle);
+        while (fgets(OneLine,SUPERSTRINGLENGTH,DataReadHandle) != NULL) {
+            printf("GOT %s",OneLine);
+        }
+        if (CurlResult != CURLE_OK) {
+            printf("ERROR: curl failed: %s\n",curl_easy_strerror(CurlResult));
+            fclose(DataReadHandle);
+            DataReadHandle = NULL;
+        }
+    }
+    curl_mime_free(MultipartForm);
+    curl_easy_cleanup(CurlHandle);
     curl_global_cleanup();
     return(DataReadHandle);
 }

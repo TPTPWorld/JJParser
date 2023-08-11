@@ -79,6 +79,7 @@ char * SystemOutputPrefix,char * OptionalFlags,int KeepOutputFiles,char * FilesD
 char * UsersOutputFileName,String OutputFileName);
 size_t ReadCallback(void * TheReturnedData,size_t ElementSize,size_t NumberOfElements,
 void * DataWriteHandle);
+CURL * InitializeRemoteSoT();
 FILE * StartRemoteSoT(char * QuietnessFlag,int QuietnessLevel,char * ProblemFileName,
 char * ATPSystem,int TimeLimit,char * X2TSTPFlag,curl_mime * MultipartForm);
 int SystemOnTPTPGetResult(int QuietnessLevel,char * ProblemFileName,char * ATPSystem,int TimeLimit,
