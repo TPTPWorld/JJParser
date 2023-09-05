@@ -87,12 +87,7 @@ printf("TESTING: Parsed\n");
 printf("TESTING: Cleaned signature\n");
     PrintSignature(Signature);
 printf("TESTING: Printed cleaned signature\n");
-
-    LPPrintSignatureList(stdout,Signature->Types,Head,"TYPE");
-    LPPrintSignatureList(stdout,Signature->Functions,Head,"κ");
-    LPPrintSignatureList(stdout,Signature->Predicates,Head,"Prop");
-
-    PrintListOfAnnotatedTSTPNodes(stdout,Signature,Head,lambdapi,1);
+    PrintListOfAnnotatedTSTPNodes(stdout,Signature,Head,tptp,1);
 printf("TESTING: Printed formulae\n");
     ListStatistics = GetListStatistics(Head,Signature);
 printf("TESTING: Got statistics\n");
@@ -107,6 +102,12 @@ printf("TESTING: Freed signature\n");
     return(EXIT_SUCCESS);
 
 //-------------------------------------------------------------------------------------------------
+//----Test lambdapi stuff
+    LPPrintSignatureList(stdout,Signature->Types,Head,"TYPE");
+    LPPrintSignatureList(stdout,Signature->Functions,Head,"κ");
+    LPPrintSignatureList(stdout,Signature->Predicates,Head,"Prop");
+    PrintListOfAnnotatedTSTPNodes(stdout,Signature,Head,lambdapi,1);
+
 //----Test comparison of first two formula for being the same
     AnotherHead = ParseFileOfFormulae(argv[2],NULL,Signature,1,NULL);
     PrintListOfAnnotatedTSTPNodes(stdout,Signature,AnotherHead,tptp,1);

@@ -1363,8 +1363,9 @@ int RangeRestrictedClause(ANNOTATEDFORMULA AnnotatedFormula) {
     char * Slash;
     String CRNameSlash;
 
-    if (!CheckAnnotatedFormula(AnnotatedFormula,tptp_cnf) &&
-!CheckAnnotatedFormula(AnnotatedFormula,tptp_tcf)) {
+    if (!CheckAnnotatedFormula(AnnotatedFormula,tptp_cnf)) {
+//----GetListSymbolUsageStatistics the old non-signature way is broken for typed things
+// !CheckAnnotatedFormula(AnnotatedFormula,tptp_tcf)) {
         return(0);
     }
 
