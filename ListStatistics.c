@@ -326,6 +326,7 @@ int * NumberOfMathTypes) {
     }
 }
 //-------------------------------------------------------------------------------------------------
+//----THIS IS BROKEN
 SymbolStatisticsType GetListSymbolUsageStatistics(HEADLIST HeadList) {
 
     char * PredicateCollector;
