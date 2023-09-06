@@ -2212,6 +2212,8 @@ ConnectiveStatisticsType * ConnectiveStatistics) {
         case quatrefoil:
         case circle:
             ConnectiveStatistics->NumberOfNTFConnectives++;
+            ConnectiveStatistics->NumberOfConnectives++;
+//DEBUG printf("Found a short applied %s counts are %d %d\n",ConnectiveToString(Connective),ConnectiveStatistics->NumberOfNTFConnectives,ConnectiveStatistics->NumberOfConnectives);
             break;
         default:
             sprintf(ErrorMessage,"Unknown connective %s in counting",
@@ -2377,6 +2379,12 @@ GetArity(Formula->FormulaUnion.Atom),GetArguments(Formula->FormulaUnion.Atom),
 &GetArgumentConnectiveUsage);
 //----Count use of connectives as atoms. 
             AtomSymbol = GetSymbol(Formula->FormulaUnion.Atom);
+//DEBUG printf("AtomSymbol is %s type is %s\n",AtomSymbol,TermTypeToString(Formula->FormulaUnion.Atom->Type));
+//----Counting {$box} type things for NTF
+            if (Formula->Type == applied_connective && Formula->FormulaUnion.Atom->Type == atom_as_term) {
+//----The number of actual statistics is counted by APPLIED_CONNECTIVES in HeadListCount
+                ConnectiveStatistics.NumberOfConnectives++;
+            }
             if (Formula->FormulaUnion.Atom->Type == connective ||
 (Formula->FormulaUnion.Atom->Type == atom_as_term &&
 (!strcmp(AtomSymbol,"@=") ||

@@ -636,8 +636,8 @@ TSTPSyntaxFlag);
         PFprintf(Stream,"= ");
         PrintFileTSTPTerm(Stream,Language,Term->Arguments[1],Pretty,Indent,LastConnective,1);
     } else {
-//----Check if a list
-        if (GetSymbol(Term)[0] == '[') {
+//----Check if a list. Avoid [.] NTF short connectives
+        if (GetSymbol(Term)[0] == '[' && GetSymbol(Term)[1] != '.') {
             OpeningBracket = '[';
             ClosingBracket = ']';
         } else if (GetSymbol(Term)[0] == '(') {

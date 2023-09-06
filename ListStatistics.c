@@ -413,6 +413,7 @@ ConnectiveStatisticsType GetListConnectiveUsageStatistics(HEADLIST HeadList) {
                 FormulaConnectiveStatistics = GetFormulaConnectiveUsage(GetListNodeFormula(
 ListNode));
                 AddOnConnectiveStatistics(&ConnectiveStatistics,FormulaConnectiveStatistics);
+//DEBUG printf("Total count up to %d\n",ConnectiveStatistics.NumberOfConnectives);
             }
             ListNode = ListNode->Next;
         }

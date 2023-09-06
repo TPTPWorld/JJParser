@@ -123,6 +123,7 @@ void AddOnConnectiveStatistics(ConnectiveStatisticsType * ConnectiveStatistics,
 ConnectiveStatisticsType MoreConnectiveStatistics) {
 
     ConnectiveStatistics->NumberOfConnectives += MoreConnectiveStatistics.NumberOfConnectives;
+
     ConnectiveStatistics->NumberOfEqualitySymbols += 
 MoreConnectiveStatistics.NumberOfEqualitySymbols;
     ConnectiveStatistics->NumberOfTypeConnectives += 
