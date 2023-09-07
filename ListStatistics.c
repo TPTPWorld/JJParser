@@ -690,10 +690,10 @@ Statistics.ConnectiveStatistics.NumberOfNands);
         if (Statistics.FormulaStatistics.NumberOfAppliedConnectives > 0 ||
 Statistics.ConnectiveStatistics.NumberOfNTFConnectives > 0) {
             fprintf(Stream,
-"%%                                         (%4d {}@;%4d {#};%4d {.})\n",
-Statistics.FormulaStatistics.NumberOfAppliedConnectives,
-Statistics.FormulaStatistics.NumberOfIndexedConnectives,
-Statistics.ConnectiveStatistics.NumberOfNTFConnectives);
+"%%                                         (%4d {.};%4d {#})\n",
+Statistics.FormulaStatistics.NumberOfAppliedConnectives +
+Statistics.ConnectiveStatistics.NumberOfNTFConnectives,
+Statistics.FormulaStatistics.NumberOfIndexedConnectives);
         }
     }
 
