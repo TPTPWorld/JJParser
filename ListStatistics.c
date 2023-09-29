@@ -843,21 +843,23 @@ Statistics.FormulaStatistics.NumberOfTFF > 0 ||
 Statistics.FormulaStatistics.NumberOfFOF > 0 ||
 Statistics.FormulaStatistics.NumberOfTCF > 0 ||
 Statistics.FormulaStatistics.NumberOfCNF > 0) {
-        fprintf(Stream,"%%            Number of variables   : %4d (",
+        fprintf(Stream,"%%            Number of variables   : %4d ",
 Statistics.SymbolStatistics.NumberOfVariables);
         if (
 Statistics.FormulaStatistics.NumberOfTCF > 0 ||
 Statistics.FormulaStatistics.NumberOfCNF > 0) {
-            fprintf(Stream,"%4d sgn",Statistics.SymbolStatistics.NumberOfSingletons);
+            fprintf(Stream,"(%4d sgn",Statistics.SymbolStatistics.NumberOfSingletons);
         } else if (Statistics.FormulaStatistics.NumberOfTHF > 0) {
-            fprintf(Stream,"%4d   ^",Statistics.ConnectiveStatistics.NumberOfLambdas);
-        } 
+            fprintf(Stream,"(%4d   ^",Statistics.ConnectiveStatistics.NumberOfLambdas);
+        } else {
+            fprintf(Stream,"(");
+        }
         if (
 Statistics.FormulaStatistics.NumberOfTHF > 0 ||
 Statistics.FormulaStatistics.NumberOfTFF > 0 ||
 Statistics.FormulaStatistics.NumberOfFOF > 0 ||
 Statistics.FormulaStatistics.NumberOfTCF > 0) {
-            fprintf(Stream,";%4d   !;%4d   ?",
+            fprintf(Stream,"%4d   !;%4d   ?",
 Statistics.ConnectiveStatistics.NumberOfUniversals,
 Statistics.ConnectiveStatistics.NumberOfExistentials);
             if (

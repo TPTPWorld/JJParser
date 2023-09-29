@@ -291,15 +291,15 @@ int LooksLikeAReal(char * RealString) {
 
     int NumberScanned;
     double TheDouble;
-    int Index;
 
-    for (Index = 0;Index < strlen(RealString);Index++) {
-        if (isalpha(RealString[Index])) {
-            RealString[Index] = tolower(RealString[Index]);
-        }
-    }
+//----Old way of dealing with nan/Nan/NAN
+//    for (Index = 0;Index < strlen(RealString);Index++) {
+//        if (isalpha(RealString[Index])) {
+//            RealString[Index] = tolower(RealString[Index]);
+//        }
+//    }
 
-    if (strncmp("inf",RealString,3) && strncmp("nan",RealString,3)) {
+    if (strncasecmp("inf",RealString,3) && strncasecmp("nan",RealString,3)) {
         NumberScanned = sscanf(RealString,"%lf",&TheDouble);
 //DEBUG printf("%s float scanned %d characters as %lf\n",RealString,NumberScanned,TheDouble);
         return(NumberScanned);
@@ -338,15 +338,15 @@ int LooksLikeAnInteger(char * IntegerString) {
 
     int NumberScanned;
     long TheLong;
-    int Index;
 
-    for (Index = 0;Index < strlen(IntegerString);Index++) {
-        if (isalpha(IntegerString[Index])) {
-            IntegerString[Index] = tolower(IntegerString[Index]);
-        }
-    }
+//----Old way of dealing with nan/Nan/NAN
+//    for (Index = 0;Index < strlen(IntegerString);Index++) {
+//        if (isalpha(IntegerString[Index])) {
+//            IntegerString[Index] = tolower(IntegerString[Index]);
+//        }
+//    }
 
-    if (strncmp("inf",IntegerString,3) && strncmp("nan",IntegerString,3)) {
+    if (strncasecmp("inf",IntegerString,3) && strncasecmp("nan",IntegerString,3)) {
         NumberScanned = sscanf(IntegerString,"%ld",&TheLong);
 //DEBUG printf("%s long scanned %d characters as %ld\n",IntegerString,NumberScanned,TheLong);
         return(NumberScanned && !LooksLikeAReal(IntegerString));
@@ -2063,6 +2063,7 @@ GetArity(Formula->FormulaUnion.Atom))) ||
 GetArity(Formula->FormulaUnion.Atom))) ||
 (!strcmp(Predicate,"MATH_NUMBER") && LooksLikeANumber(GetSymbol(Formula->FormulaUnion.Atom))) ) {
 //DEBUG printf("--%s-- matches --%s--, total is %d\n",GetSymbol(Formula->FormulaUnion.Atom),Predicate,Count+1);
+//DEBUG printf("Required %s is the symbol here %s\n",Predicate,GetSymbol(Formula->FormulaUnion.Atom));
                 return(Count + 1);
             } else {
 //DEBUG printf("--%s-- not matches --%s--, total is %d\n",GetSymbol(Formula->FormulaUnion.Atom),Predicate,Count);
