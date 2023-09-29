@@ -344,7 +344,7 @@ int LooksLikeAnInteger(char * IntegerString) {
 //        if (isalpha(IntegerString[Index])) {
 //            IntegerString[Index] = tolower(IntegerString[Index]);
 //        }
-//    }
+//     }
 
     if (strncasecmp("inf",IntegerString,3) && strncasecmp("nan",IntegerString,3)) {
         NumberScanned = sscanf(IntegerString,"%ld",&TheLong);
