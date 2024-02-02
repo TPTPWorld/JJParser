@@ -1405,6 +1405,8 @@ VariablesMustBeQuantified,none);
                 Formula->FormulaUnion.Atom = ParseTerm(Stream,Language,Context,EndOfScope,
 atom_as_term,none,NULL,VariablesMustBeQuantified);
                 AcceptToken(Stream,punctuation,"}");
+//----Ignore any last connective so that this is treated as binary when the @ comes next.
+                LastConnective = none;
             }
             break;
         case quantifier:
