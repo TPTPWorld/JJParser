@@ -1405,8 +1405,16 @@ VariablesMustBeQuantified,none);
                 Formula->FormulaUnion.Atom = ParseTerm(Stream,Language,Context,EndOfScope,
 atom_as_term,none,NULL,VariablesMustBeQuantified);
                 AcceptToken(Stream,punctuation,"}");
-//----Ignore any last connective so that this is treated as binary when the @ comes next.
-                LastConnective = none;
+                AcceptToken(Stream,binary_connective,"@");
+                BinaryFormula = NewFormula();
+                BinaryFormula->Type = binary;
+                BinaryFormula->FormulaUnion.BinaryFormula.LHS = Formula;
+                BinaryFormula->FormulaUnion.BinaryFormula.Connective = application;
+                AcceptToken(Stream,punctuation,"(");
+                BinaryFormula->FormulaUnion.BinaryFormula.RHS = ParseFormula(Stream,Language,
+Context,EndOfScope,1,1,VariablesMustBeQuantified,none);
+                AcceptToken(Stream,punctuation,")");
+                Formula = BinaryFormula;
             }
             break;
         case quantifier:
