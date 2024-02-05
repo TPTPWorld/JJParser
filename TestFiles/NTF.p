@@ -29,10 +29,13 @@ tff(long,axiom,
     {$box} @ (p) ).
 
 tff(longer,axiom,
-    {$box} @ (p,p,p) ).
+    {$box} @ (p & p & p) ).
 
 tff(long_indexed,axiom,
     {$box(#1)} @ (p) ).
+
+tff(connected_long_indexed,axiom,
+    p & {$box(#1)} @ (p) & p ).
 
 thf(short_thf,axiom,
     [.] p ).
@@ -42,6 +45,9 @@ thf(short_thf,axiom,
 
 thf(long_thf,axiom,
     {$box} @ p ).
+
+thf(connected_long_thf,axiom,
+    p & ({$box} @ p) & p ).
 
 thf(longer_thf,axiom,
     {$box} @ p @ p @ p ).

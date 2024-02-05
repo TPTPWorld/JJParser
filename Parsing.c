@@ -1405,16 +1405,19 @@ VariablesMustBeQuantified,none);
                 Formula->FormulaUnion.Atom = ParseTerm(Stream,Language,Context,EndOfScope,
 atom_as_term,none,NULL,VariablesMustBeQuantified);
                 AcceptToken(Stream,punctuation,"}");
-                AcceptToken(Stream,binary_connective,"@");
-                BinaryFormula = NewFormula();
-                BinaryFormula->Type = binary;
-                BinaryFormula->FormulaUnion.BinaryFormula.LHS = Formula;
-                BinaryFormula->FormulaUnion.BinaryFormula.Connective = application;
-                AcceptToken(Stream,punctuation,"(");
-                BinaryFormula->FormulaUnion.BinaryFormula.RHS = ParseFormula(Stream,Language,
+//----If TFF non-classical, then require the applied formula in ()s
+                if (Language == tptp_tff) {
+                    AcceptToken(Stream,binary_connective,"@");
+                    BinaryFormula = NewFormula();
+                    BinaryFormula->Type = binary;
+                    BinaryFormula->FormulaUnion.BinaryFormula.LHS = Formula;
+                    BinaryFormula->FormulaUnion.BinaryFormula.Connective = application;
+                    AcceptToken(Stream,punctuation,"(");
+                    BinaryFormula->FormulaUnion.BinaryFormula.RHS = ParseFormula(Stream,Language,
 Context,EndOfScope,1,1,VariablesMustBeQuantified,none);
-                AcceptToken(Stream,punctuation,")");
-                Formula = BinaryFormula;
+                    AcceptToken(Stream,punctuation,")");
+                    Formula = BinaryFormula;
+                } 
             }
             break;
         case quantifier:
