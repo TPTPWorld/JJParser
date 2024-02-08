@@ -40,7 +40,7 @@ tff(connected_long_indexed,axiom,
 thf(short_thf,axiom,
     [.] p ).
 
-thf(short_thf,axiom,
+thf(short_bracketed_thf,axiom,
     [.] (p) ).
 
 thf(long_thf,axiom,

@@ -821,6 +821,7 @@ int Pretty,ConnectiveType LastConnective,int TSTPSyntaxFlag) {
     int ConnectiveIndent;
     int VariableIndent;
     int SideIndent;
+    int LHSWasAppliedConnective;
     ConnectiveType Connective;
     ConnectiveType FakeConnective;
     FORMULA SideFormula;
@@ -934,6 +935,7 @@ Formula->FormulaUnion.QuantifiedFormula.Formula,Indent,Pretty,none,TSTPSyntaxFla
             SideFormula = Formula->FormulaUnion.BinaryFormula.LHS;
 //DEBUG printf("Printing LHS %s with connective %s, last connective was %s, indent %d\n",FormulaTypeToString(SideFormula->Type),ConnectiveToString(Connective),ConnectiveToString(LastConnective),Indent);
             SideIndent = Indent;
+            LHSWasAppliedConnective = SideFormula->Type == applied_connective;
             if ((Associative(Connective) && !FullyAssociative(Connective) && 
 SideFormula->Type == binary &&
 RightAssociative(SideFormula->FormulaUnion.BinaryFormula.Connective)) ||
@@ -987,11 +989,12 @@ TSTPSyntaxFlag);
                 FakeConnective = outermost;
 //----Need to force brackets for left associative operators
             } else {
-                if ((Associative(Connective) && !FullyAssociative(Connective) && 
-SideFormula->Type == binary && 
-LeftAssociative(SideFormula->FormulaUnion.BinaryFormula.Connective)) ||
+                if (
+(Associative(Connective) && !FullyAssociative(Connective) && SideFormula->Type == binary && 
+ LeftAssociative(SideFormula->FormulaUnion.BinaryFormula.Connective)) ||
 (Equation(Formula,NULL,NULL) && !LiteralOrTuple(SideFormula) && 
-!NegatedEquation(SideFormula,NULL,NULL) && !BinaryFormula(SideFormula))) {
+ !NegatedEquation(SideFormula,NULL,NULL) && !BinaryFormula(SideFormula)) ||
+(LHSWasAppliedConnective)) {
 // (Equation(SideFormula,NULL,NULL) || !BinaryFormula(SideFormula)))) {
                     FakeConnective = brackets;
                     PFprintf(Stream,"( ");
