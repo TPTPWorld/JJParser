@@ -358,7 +358,7 @@ int DefinedSymbol(char * Symbol) {
     return(Symbol[0] != '\'' && !islower(Symbol[0]));
 }
 //-------------------------------------------------------------------------------------------------
-SYMBOLNODE IsSymbolInSignatureList(SYMBOLNODE List,char * Name,int Arity,READFILE Stream) {
+SYMBOLNODE RecursiveIsSymbolInSignatureList(SYMBOLNODE List,char * Name,int Arity,READFILE Stream) {
 
     SuperString DuplicateArity;
 
