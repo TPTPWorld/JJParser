@@ -358,6 +358,37 @@ int DefinedSymbol(char * Symbol) {
     return(Symbol[0] != '\'' && !islower(Symbol[0]));
 }
 //-------------------------------------------------------------------------------------------------
+SYMBOLNODE IsSymbolInSignatureList(SYMBOLNODE List,char * Name,int Arity,READFILE Stream) {
+
+    SuperString DuplicateArity;
+
+    while (1) {
+        if (List == NULL) {
+            return(NULL);
+        } else if (!strcmp(GetSignatureSymbol(List),Name)) {
+//----Don't care about arity, including variable arity
+            if (Arity == -1 || GetSignatureArity(List) == -1) {
+                return(List);
+            } else if (GetSignatureArity(List) == Arity) {
+                return(List);
+            } else {
+                if (Stream != NULL && List->NumberOfUses > 0 && GetStreamWarnings(Stream)) {
+//----Warning if symbol overloading is not allowed
+                    sprintf(DuplicateArity,"Multiple arity symbol %s, arity %d and looking for %d",
+Name,GetSignatureArity(List),Arity);
+                    TokenWarning(Stream,DuplicateArity);
+                }
+            }
+        } 
+        if (strcmp(Name,GetSignatureSymbol(List)) < 0 ||
+(strcmp(Name,GetSignatureSymbol(List)) == 0 && Arity < GetSignatureArity(List))) {
+            List = List->LastSymbol;
+        } else {
+            List = List->NextSymbol;
+        }
+    }
+}
+//-------------------------------------------------------------------------------------------------
 SYMBOLNODE RecursiveIsSymbolInSignatureList(SYMBOLNODE List,char * Name,int Arity,READFILE Stream) {
 
     SuperString DuplicateArity;
@@ -388,6 +419,37 @@ Name,GetSignatureArity(List),Arity);
 }
 //-------------------------------------------------------------------------------------------------
 SYMBOLNODE * IsSymbolInSignatureListPointer(SYMBOLNODE * List,char * Name,int Arity,
+READFILE Stream) {
+
+    SuperString DuplicateArity;
+
+    while (1) {
+        if (*List == NULL) {
+            return(NULL);
+        } else if (!strcmp(GetSignatureSymbol(*List),Name)) {
+            if (Arity == -1 || GetSignatureArity(*List) == -1) {
+                return(List);
+            } else if (GetSignatureArity(*List) == Arity) {
+                return(List);
+            } else {
+                if (Stream != NULL && (*List)->NumberOfUses > 0 && GetStreamWarnings(Stream)) {
+//----Warning if symbol overloading is not allowed
+                    sprintf(DuplicateArity,"Multiple arity symbol %s, arity %d and looking for %d",
+Name,GetSignatureArity(*List),Arity);
+                    TokenWarning(Stream,DuplicateArity);
+                }
+            }
+        } 
+        if (strcmp(Name,GetSignatureSymbol(*List)) < 0 ||
+(strcmp(Name,GetSignatureSymbol(*List)) == 0 && Arity < GetSignatureArity(*List))) {
+            List = &((*List)->LastSymbol);
+        } else {
+            List = &((*List)->NextSymbol);
+        }
+    }
+}
+//-------------------------------------------------------------------------------------------------
+SYMBOLNODE * RecursiveIsSymbolInSignatureListPointer(SYMBOLNODE * List,char * Name,int Arity,
 READFILE Stream) {
 
     SuperString DuplicateArity;
