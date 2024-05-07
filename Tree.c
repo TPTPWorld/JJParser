@@ -57,8 +57,7 @@ LISTNODE * AddHere,int IgnoreDuplicates) {
 //----If ignoring duplicates and we've already been here, just see if we
 //----kept this boy to return the result
     if (IgnoreDuplicates && Root->Visited) {
-        return(GetNodeFromListByAnnotatedFormula(ListSoFar,Root->
-AnnotatedFormula) != NULL);
+        return(GetNodeFromListByAnnotatedFormula(ListSoFar,Root->AnnotatedFormula) != NULL);
     }
 //----Otherwise mark that we've been here and continue
     Root->Visited = 1;
@@ -331,7 +330,7 @@ LISTNODE GetRootList(LISTNODE Head,SIGNATURE Signature) {
     StringParts ParentNames;
     int ParentNumber;
     LISTNODE * Remover;
-    String ParentName;
+    SuperString ParentName;
     BTREENODE ParentTree;
 
     RootList = DuplicateListOfNodes(Head,0);
@@ -352,7 +351,9 @@ ParentNames[ParentNumber]) == NULL) {
                 Remover = &RootList;
                 while (*Remover != NULL && strcmp(ParentNames[ParentNumber],
 GetName((*Remover)->AnnotatedFormula,ParentName))) {
+//DEBUG printf("Looked at %s\n",GetName((*Remover)->AnnotatedFormula,ParentName));
                     Remover = &((*Remover)->Next);
+//DEBUG if (*Remover != NULL) printf("Look at %s\n",GetName((*Remover)->AnnotatedFormula,ParentName));
                 }
 //----If found then remove from list and add to tree
                 if (*Remover != NULL) {
@@ -655,7 +656,7 @@ ROOTLIST BuildRootList(LISTNODE Head,SIGNATURE Signature) {
     ROOTLIST * NextRootList;
     LISTNODE RootAnnotatedFormulae;
     LISTNODE RootAnnotatedFormulaNode;
-    String RootName;
+    SuperString RootName;
     String ErrorMessage;
 
 //----This is the binary tree of all tree nodes
