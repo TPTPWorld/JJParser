@@ -384,18 +384,7 @@ Formula->FormulaUnion.UnaryFormula.Formula->Type == atom &&
 PositiveEquality(Formula->FormulaUnion.UnaryFormula.Formula->FormulaUnion.Atom));
 }
 //-------------------------------------------------------------------------------------------------
-int NegatedEquation(FORMULA Formula,FORMULA * LHS,FORMULA * RHS) {
-
-    if (UnaryFormula(Formula) &&
-Formula->FormulaUnion.UnaryFormula.Connective == negation && 
-Equation(Formula->FormulaUnion.UnaryFormula.Formula,LHS,RHS)) {
-        return(1);
-    } else {
-        return(0);
-    }
-}
-//-------------------------------------------------------------------------------------------------
-int Equation(FORMULA Formula,FORMULA * LHS,FORMULA * RHS) {
+int PositiveEquation(FORMULA Formula,FORMULA * LHS,FORMULA * RHS) {
 
     if (Formula->Type == binary && Formula->FormulaUnion.BinaryFormula.Connective == equation) {
         if (LHS != NULL) {
@@ -405,9 +394,24 @@ int Equation(FORMULA Formula,FORMULA * LHS,FORMULA * RHS) {
             *RHS = Formula->FormulaUnion.BinaryFormula.RHS;
         }
         return(1);
-    } else {
-        return(NegatedEquation(Formula,LHS,RHS));
     }
+    return(0);
+}
+//-------------------------------------------------------------------------------------------------
+int NegatedEquation(FORMULA Formula,FORMULA * LHS,FORMULA * RHS) {
+
+    if (UnaryFormula(Formula) &&
+Formula->FormulaUnion.UnaryFormula.Connective == negation && 
+PositiveEquation(Formula->FormulaUnion.UnaryFormula.Formula,LHS,RHS)) {
+        return(1);
+    } else {
+        return(0);
+    }
+}
+//-------------------------------------------------------------------------------------------------
+int Equation(FORMULA Formula,FORMULA * LHS,FORMULA * RHS) {
+
+    return(PositiveEquation(Formula,LHS,RHS) || NegatedEquation(Formula,LHS,RHS));
 }
 //-------------------------------------------------------------------------------------------------
 int PreUnitEquation(FORMULA Formula) {
@@ -1029,7 +1033,6 @@ Indent,Pretty,LastConnective,TSTPSyntaxFlag);
   !BinaryFormula(Formula->FormulaUnion.UnaryFormula.Formula) &&
   !QuantifiedFormula(Formula->FormulaUnion.UnaryFormula.Formula)) ||
 Equation(Formula->FormulaUnion.UnaryFormula.Formula,NULL,NULL) || 
-NegatedEquation(Formula->FormulaUnion.UnaryFormula.Formula,NULL,NULL) || 
 NegatedEquality(Formula->FormulaUnion.UnaryFormula.Formula))) {
                     FakeConnective = brackets;
                 } else {
