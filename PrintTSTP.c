@@ -1018,6 +1018,7 @@ TSTPSyntaxFlag);
             break;
 
         case unary:
+//DEBUG if (Formula->FormulaUnion.UnaryFormula.Connective == negation && (NegatedEquation(Formula->FormulaUnion.UnaryFormula.Formula,NULL,NULL) || NegatedEquality(Formula->FormulaUnion.UnaryFormula.Formula))) printf("NEG NEG\n");
 //----Special for infix negated equality
             if (TSTPSyntaxFlag && 
 (NegatedEquation(Formula,NULL,NULL) || NegatedEquality(Formula))) {
