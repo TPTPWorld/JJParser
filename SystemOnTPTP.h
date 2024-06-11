@@ -56,7 +56,7 @@ typedef struct {
     #define TPTP_HOME "/home/tptp"
 #endif
 #define SYSTEM_ON_TPTP "SystemExecution/SystemOnTPTP"
-#define SYSTEM_ON_TPTP_FORMREPLYURL "https://tptp.cs.miami.edu/cgi-bin/SystemOnTPTPFormReply"
+#define SYSTEM_ON_TPTP_FORMREPLYURL "https://tptp.org/cgi-bin/SystemOnTPTPFormReply"
 //-------------------------------------------------------------------------------------------------
 SZSResultType StringToSZSResult(char * SZSResult);
 char * SZSResultToUserString(SZSResultType SZSResult);
