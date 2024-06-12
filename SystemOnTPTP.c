@@ -549,7 +549,7 @@ curl_easy_setopt(CurlHandle,CURLOPT_USERAGENT,"libcurl-agent/1.0") != CURLE_OK) 
         DataReadHandle = NULL;
     } else {
         curl_easy_setopt(CurlHandle,CURLOPT_WRITEDATA,(void *)DataWriteHandle);
-        // curl_easy_setopt(CurlHandle,CURLOPT_WRITEFUNCTION,ReadCallback);
+//----Default works! curl_easy_setopt(CurlHandle,CURLOPT_WRITEFUNCTION,ReadCallback);
         CurlResult = curl_easy_perform(CurlHandle);
         fclose(DataWriteHandle);
         if (CurlResult != CURLE_OK) {
@@ -569,6 +569,7 @@ int SystemOnTPTPAvailable(int UseLocalSoT) {
     char * TPTPHome;
     CURL * CurlHandle;
     CURLcode CurlResult;
+    FILE * DevNullHandle;
 
     if (UseLocalSoT) {
 //----First look if user has a TPTP_HOME environment variable
@@ -590,15 +591,18 @@ int SystemOnTPTPAvailable(int UseLocalSoT) {
             return(0);
         }
     } else {
-printf("HERE 1\n");
         if ((CurlHandle = InitializeRemoteSoT()) == NULL) {
             return(0);
         }
-printf("HERE 2\n");
+        if ((DevNullHandle = fopen("/dev/null","w")) == NULL) {
+            printf("ERROR: Could not open /dev/null to discard data\n");
+            FinalizeRemoteSoT(CurlHandle);
+            return(0);
+        }
+        curl_easy_setopt(CurlHandle,CURLOPT_WRITEDATA,(void *)DevNullHandle);
         CurlResult = curl_easy_perform(CurlHandle);
-printf("HERE 3 and it is %d\n",CurlResult == CURLE_OK);
+        fclose(DevNullHandle);
         FinalizeRemoteSoT(CurlHandle);
-printf("HERE 4\n");
         return(CurlResult == CURLE_OK);
     }
 }
