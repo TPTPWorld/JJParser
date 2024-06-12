@@ -549,7 +549,7 @@ curl_easy_setopt(CurlHandle,CURLOPT_USERAGENT,"libcurl-agent/1.0") != CURLE_OK) 
         DataReadHandle = NULL;
     } else {
         curl_easy_setopt(CurlHandle,CURLOPT_WRITEDATA,(void *)DataWriteHandle);
-        curl_easy_setopt(CurlHandle,CURLOPT_WRITEFUNCTION,ReadCallback);
+        // curl_easy_setopt(CurlHandle,CURLOPT_WRITEFUNCTION,ReadCallback);
         CurlResult = curl_easy_perform(CurlHandle);
         fclose(DataWriteHandle);
         if (CurlResult != CURLE_OK) {
