@@ -392,28 +392,33 @@ LISTNODE Head,StatusType AxiomsStatus,ANNOTATEDFORMULA Conjecture,StatusType Con
     return(1);
 }
 //-------------------------------------------------------------------------------------------------
-int SystemOnTPTPAvailable(void) {
+int SystemOnTPTPAvailable(int UseLocalSoT) {
 
     String UNIXCommand;
     char * TPTPHome;
 
+    if (UseLocalSoT) {
 //----First look if user has a TPTP_HOME environment variable
-    if ((TPTPHome = getenv("TPTP_HOME")) != NULL) {
+        if ((TPTPHome = getenv("TPTP_HOME")) != NULL) {
 //DEBUG printf("Using the TPTP_HOME environment variable\n");
-        sprintf(UNIXCommand,"%s/%s",TPTPHome,SYSTEM_ON_TPTP);
+            sprintf(UNIXCommand,"%s/%s",TPTPHome,SYSTEM_ON_TPTP);
 //----If not, use the macro from compile time
-    } else {
+        } else {
 //DEBUG printf("Using the macro\n");
-        sprintf(UNIXCommand,"%s/%s",TPTP_HOME,SYSTEM_ON_TPTP);
-    }
+            sprintf(UNIXCommand,"%s/%s",TPTP_HOME,SYSTEM_ON_TPTP);
+        }
 //DEBUG printf("Checking %s\n",UNIXCommand);
-    if (access(UNIXCommand,X_OK) == 0) {
+        if (access(UNIXCommand,X_OK) == 0) {
 //DEBUG printf("Access OK\n");
-        return(1);
-    } else {
+            return(1);
+        } else {
 //DEBUG printf("Access not OK\n");
-        perror(UNIXCommand);
-        return(0);
+            perror(UNIXCommand);
+            return(0);
+        }
+    } else {
+printf("TEST REMOTE SOT\n");
+        return(1);
     }
 }
 //-------------------------------------------------------------------------------------------------

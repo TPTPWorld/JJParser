@@ -74,7 +74,7 @@ int SZSOutputIsA(SZSOutputType SZSOutput,SZSOutputType DesiredOutput);
 void SystemOnTPTPFileName(char * Directory,char * BaseName,char * Extension,String FileName);
 int MakeProblemFile(char * FilesDirectory,char * BaseName,char * Extension,String ProblemFileName,
 LISTNODE Head,StatusType AxiomsStatus,ANNOTATEDFORMULA Conjecture,StatusType ConjectureStatus);
-int SystemOnTPTPAvailable(void);
+int SystemOnTPTPAvailable(UseLocalSoT);
 int SystemOnTPTP(LISTNODE Axioms,ANNOTATEDFORMULA Conjecture,char * PositiveChecker,
 char * PositiveResult,int TestNegative,char * NegativeChecker,char * NegativeResult,int TimeLimit,
 char * SystemOutputPrefix,char * OptionalFlags,int KeepOutputFiles,char * FilesDirectory,
