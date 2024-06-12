@@ -392,36 +392,6 @@ LISTNODE Head,StatusType AxiomsStatus,ANNOTATEDFORMULA Conjecture,StatusType Con
     return(1);
 }
 //-------------------------------------------------------------------------------------------------
-int SystemOnTPTPAvailable(int UseLocalSoT) {
-
-    String UNIXCommand;
-    char * TPTPHome;
-
-    if (UseLocalSoT) {
-//----First look if user has a TPTP_HOME environment variable
-        if ((TPTPHome = getenv("TPTP_HOME")) != NULL) {
-//DEBUG printf("Using the TPTP_HOME environment variable\n");
-            sprintf(UNIXCommand,"%s/%s",TPTPHome,SYSTEM_ON_TPTP);
-//----If not, use the macro from compile time
-        } else {
-//DEBUG printf("Using the macro\n");
-            sprintf(UNIXCommand,"%s/%s",TPTP_HOME,SYSTEM_ON_TPTP);
-        }
-//DEBUG printf("Checking %s\n",UNIXCommand);
-        if (access(UNIXCommand,X_OK) == 0) {
-//DEBUG printf("Access OK\n");
-            return(1);
-        } else {
-//DEBUG printf("Access not OK\n");
-            perror(UNIXCommand);
-            return(0);
-        }
-    } else {
-printf("TEST REMOTE SOT\n");
-        return(1);
-    }
-}
-//-------------------------------------------------------------------------------------------------
 FILE * StartLocalSoT(char * QuietnessFlag,int QuietnessLevel,char * ProblemFileName,
 char * ATPSystem,int TimeLimit,char * X2TSTPFlag,char * OptionalFlags) {
 
@@ -536,6 +506,12 @@ CURL * InitializeRemoteSoT() {
     return(CurlHandle);
 }
 //-------------------------------------------------------------------------------------------------
+void FinalizeRemoteSoT(CURL * CurlHandle) {
+
+    curl_easy_cleanup(CurlHandle);
+    curl_global_cleanup();
+}
+//-------------------------------------------------------------------------------------------------
 FILE * StartRemoteSoT(char * QuietnessFlag,int QuietnessLevel,char * ProblemFileName,
 char * ATPSystem,int TimeLimit,char * X2TSTPFlag,curl_mime * MultipartForm) {
 
@@ -583,9 +559,48 @@ curl_easy_setopt(CurlHandle,CURLOPT_USERAGENT,"libcurl-agent/1.0") != CURLE_OK) 
         }
     }
     curl_mime_free(MultipartForm);
-    curl_easy_cleanup(CurlHandle);
-    curl_global_cleanup();
+    FinalizeRemoteSoT(CurlHandle);
     return(DataReadHandle);
+}
+//-------------------------------------------------------------------------------------------------
+int SystemOnTPTPAvailable(int UseLocalSoT) {
+
+    String UNIXCommand;
+    char * TPTPHome;
+    CURL * CurlHandle;
+    CURLcode CurlResult;
+
+    if (UseLocalSoT) {
+//----First look if user has a TPTP_HOME environment variable
+        if ((TPTPHome = getenv("TPTP_HOME")) != NULL) {
+//DEBUG printf("Using the TPTP_HOME environment variable\n");
+            sprintf(UNIXCommand,"%s/%s",TPTPHome,SYSTEM_ON_TPTP);
+//----If not, use the macro from compile time
+        } else {
+//DEBUG printf("Using the macro\n");
+            sprintf(UNIXCommand,"%s/%s",TPTP_HOME,SYSTEM_ON_TPTP);
+        }
+//DEBUG printf("Checking %s\n",UNIXCommand);
+        if (access(UNIXCommand,X_OK) == 0) {
+//DEBUG printf("Access OK\n");
+            return(1);
+        } else {
+//DEBUG printf("Access not OK\n");
+            perror(UNIXCommand);
+            return(0);
+        }
+    } else {
+printf("HERE 1\n");
+        if ((CurlHandle = InitializeRemoteSoT()) == NULL) {
+            return(0);
+        }
+printf("HERE 2\n");
+        CurlResult = curl_easy_perform(CurlHandle);
+printf("HERE 3 and it is %d\n",CurlResult == CURLE_OK);
+        FinalizeRemoteSoT(CurlHandle);
+printf("HERE 4\n");
+        return(CurlResult == CURLE_OK);
+    }
 }
 //-------------------------------------------------------------------------------------------------
 int SystemOnTPTPGetResult(int QuietnessLevel,char * ProblemFileName,char * ATPSystem,

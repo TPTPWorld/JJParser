@@ -74,7 +74,6 @@ int SZSOutputIsA(SZSOutputType SZSOutput,SZSOutputType DesiredOutput);
 void SystemOnTPTPFileName(char * Directory,char * BaseName,char * Extension,String FileName);
 int MakeProblemFile(char * FilesDirectory,char * BaseName,char * Extension,String ProblemFileName,
 LISTNODE Head,StatusType AxiomsStatus,ANNOTATEDFORMULA Conjecture,StatusType ConjectureStatus);
-int SystemOnTPTPAvailable(int UseLocalSoT);
 int SystemOnTPTP(LISTNODE Axioms,ANNOTATEDFORMULA Conjecture,char * PositiveChecker,
 char * PositiveResult,int TestNegative,char * NegativeChecker,char * NegativeResult,int TimeLimit,
 char * SystemOutputPrefix,char * OptionalFlags,int KeepOutputFiles,char * FilesDirectory,
@@ -84,6 +83,7 @@ void * DataWriteHandle);
 CURL * InitializeRemoteSoT();
 FILE * StartRemoteSoT(char * QuietnessFlag,int QuietnessLevel,char * ProblemFileName,
 char * ATPSystem,int TimeLimit,char * X2TSTPFlag,curl_mime * MultipartForm);
+int SystemOnTPTPAvailable(int UseLocalSoT);
 int SystemOnTPTPGetResult(int QuietnessLevel,char * ProblemFileName,char * ATPSystem,int TimeLimit,
 char * X2TSTPFlag,char * SystemOutputPrefix,char * OptionalFlags,int KeepOutputFiles,
 char * FilesDirectory,char * UsersOutputFileName,char * OutputFileName,char * PutResultHere,
