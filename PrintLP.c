@@ -18,7 +18,7 @@ void LPPrintFormula(FILE * Stream,FORMULA Formula);
 char * TPTPtoLPSymbol(char * TPTPSymbol) {
 
     if (!strcmp(TPTPSymbol,"$i")) {
-        return("κ");
+        return("τ ι");  //----Was return("κ");
     } else if (!strcmp(TPTPSymbol,"$o")) {
         return("Prop");
     } else if (!strcmp(TPTPSymbol,"$false")) {
@@ -26,7 +26,7 @@ char * TPTPtoLPSymbol(char * TPTPSymbol) {
     } else if (!strcmp(TPTPSymbol,"$true")) {
         return("⊤");
     } else if (!strcmp(TPTPSymbol,"$tType")) {
-        return("TYPE");
+        return("Type");
     } else {
         return(TPTPSymbol);
     }
@@ -56,10 +56,10 @@ char * LPConnectiveToString(ConnectiveType Connective) {
             return("¬");
             break;
         case universal:
-            return("∀");
+            return("∀α");
             break;
         case existential:
-            return("∃");
+            return("∃α");
             break;
         case equation:
             return("=");
@@ -79,7 +79,7 @@ void PrintLPArgumentSignature(FILE * Stream,FORMULA TypeSignature) {
         PrintLPArgumentSignature(Stream,TypeSignature->FormulaUnion.BinaryFormula.LHS);
         PrintLPArgumentSignature(Stream,TypeSignature->FormulaUnion.BinaryFormula.RHS);
     } else {
-        fprintf(Stream,"%s → ",TPTPtoLPSymbol(GetSymbol(TypeSignature->FormulaUnion.Atom)));
+        fprintf(Stream,"τ %s → ",TPTPtoLPSymbol(GetSymbol(TypeSignature->FormulaUnion.Atom)));
     }
 }
 //-------------------------------------------------------------------------------------------------
@@ -126,10 +126,11 @@ FormulaUnion.Atom);
                 }
             } else {
                 for (Index = 0;Index < GetSignatureArity(Node);Index++) {
-                    fprintf(Stream,"κ → ");
+                    fprintf(Stream,"τ ι → ");
+//----Was  fprintf(Stream,"κ → ");
                 }
             }
-            fprintf(Stream,"%s ;\n",TPTPtoLPSymbol(ResultType));
+            fprintf(Stream,"τ %s ;\n",TPTPtoLPSymbol(ResultType));
             NumberPrinted++;
         }
         NumberPrinted += LPPrintSignatureList(Stream,Node->NextSymbol,Head,ResultType);
