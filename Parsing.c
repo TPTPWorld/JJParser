@@ -513,7 +513,9 @@ GetSymbol(Term),GetArity(Term),NULL) != NULL) {
                 ActualType = Term->Type;
             }
 //DEBUG printf("Duplicating term with symbol %s, original type %s, fixed type %s, arity %d, arguments are %s \n",GetSymbol(Term),TermTypeToString(Term->Type),TermTypeToString(ActualType),GetArity(Term),Original->Arguments == NULL ? "NULL" : "not NULL");
-            Term->TheSymbol.NonVariable = InsertIntoSignature(Context.Signature,ActualType,
+//----THIS NEEDS TO BE FIXED BECAUSE TYPES CAN BE GUESSED AS PREDICATES - THEY ARE FIXED LATER
+//----IN PARSING
+           Term->TheSymbol.NonVariable = InsertIntoSignature(Context.Signature,ActualType,
 Original->TheSymbol.NonVariable->NameSymbol,Original->TheSymbol.NonVariable->Arity,
 Original->TheSymbol.NonVariable->AppliedArity,Original->TheSymbol.NonVariable->InternalSymbol,
 NULL);
@@ -1658,8 +1660,7 @@ SIGNATURE Signature,int ForceNewVariables) {
 //DEBUG PrintVariableList(FormulaWithVariables->Variables,NULL);
 
 //----Set the variable instantiations to their rightful values
-    ParallelCopyVariableInstantiations(Original->Variables,
-FormulaWithVariables->Variables);
+    ParallelCopyVariableInstantiations(Original->Variables,FormulaWithVariables->Variables);
 
     return(FormulaWithVariables); 
 }

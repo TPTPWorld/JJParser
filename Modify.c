@@ -727,7 +727,7 @@ int DoAdd) {
     }
     Symbol[Index] = '\0';
 
-//----Done so that new info is placed is position if first old one
+//----Done so that new info is placed in position of first old one
 //----Look through useful info list and remove all with this symbol
     NumberRemoved = 0;
     NumberAdded = 0;

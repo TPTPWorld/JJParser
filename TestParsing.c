@@ -406,7 +406,7 @@ AnnotatedFormulaUnion.AnnotatedTSTPFormula.FormulaWithVariables->Variables,NULL)
     return(EXIT_SUCCESS);
 
 //----Test use of SystemOnTPTP
-    if (SystemOnTPTPAvailable()) {
+    if (SystemOnTPTPAvailable(1)) {
         Axioms = GetListOfAnnotatedFormulaeWithRole(Head,axiom_like,Signature);
         printf("Axioms are ...\n");
         PrintListOfAnnotatedTSTPNodes(stdout,Signature,Axioms,tptp,1);

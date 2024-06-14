@@ -62,7 +62,7 @@ char * LPConnectiveToString(ConnectiveType Connective) {
             return("∃α");
             break;
         case equation:
-            return("=");
+            return("=α");
             break;
         default:
             sprintf(ErrorMessage,"Connective %s unknown for printing LP",
@@ -75,11 +75,17 @@ ConnectiveToString(Connective));
 //-------------------------------------------------------------------------------------------------
 void PrintLPArgumentSignature(FILE * Stream,FORMULA TypeSignature) {
 
+    char * TheType;
+
     if (TypeSignature->Type == binary) {
         PrintLPArgumentSignature(Stream,TypeSignature->FormulaUnion.BinaryFormula.LHS);
         PrintLPArgumentSignature(Stream,TypeSignature->FormulaUnion.BinaryFormula.RHS);
     } else {
-        fprintf(Stream,"τ %s → ",TPTPtoLPSymbol(GetSymbol(TypeSignature->FormulaUnion.Atom)));
+        TheType = GetSymbol(TypeSignature->FormulaUnion.Atom);
+        if (strcmp(TheType,"Prop") && strcmp(TheType,"Type")) {
+            fprintf(Stream,"τ ");
+        }
+        fprintf(Stream,"%s → ",TPTPtoLPSymbol(GetSymbol(TypeSignature->FormulaUnion.Atom)));
     }
 }
 //-------------------------------------------------------------------------------------------------
@@ -130,7 +136,11 @@ FormulaUnion.Atom);
 //----Was  fprintf(Stream,"κ → ");
                 }
             }
-            fprintf(Stream,"τ %s ;\n",TPTPtoLPSymbol(ResultType));
+            if (strcmp(ResultType,"$o") && strcmp(ResultType,"$tType") &&
+strcmp(ResultType,"Prop") && strcmp(ResultType,"Type")) {
+                fprintf(Stream,"τ ");
+            }
+            fprintf(Stream,"%s ;\n",TPTPtoLPSymbol(ResultType));
             NumberPrinted++;
         }
         NumberPrinted += LPPrintSignatureList(Stream,Node->NextSymbol,Head,ResultType);
@@ -158,7 +168,7 @@ void LPPrintTerm(FILE * Stream,TERM Term) {
             if (!strcmp(Symbol,"=")) {
                 fprintf(Stream,"(");
                 LPPrintTerm(Stream,Term->Arguments[0]);
-                fprintf(Stream," = ");
+                fprintf(Stream," =α ");
                 LPPrintTerm(Stream,Term->Arguments[1]);
                 fprintf(Stream,")");
             } else {
@@ -194,10 +204,12 @@ void LPPrintFormula(FILE * Stream,FORMULA Formula) {
             fprintf(Stream,"%s (λ %s",
 LPConnectiveToString(Formula->FormulaUnion.QuantifiedFormula.Quantifier),
 GetSymbol(Formula->FormulaUnion.QuantifiedFormula.Variable));
-            if (Formula->FormulaUnion.QuantifiedFormula.VariableType != NULL) {
-                fprintf(Stream,":");
-                LPPrintFormula(Stream,Formula->FormulaUnion.QuantifiedFormula.VariableType);
-            }
+//----Frederic says: Instead, you can also put no type in abstractions and just write "(λ X,
+//---- ..." as Lambdapi is able to infer those types automatically.
+//            if (Formula->FormulaUnion.QuantifiedFormula.VariableType != NULL) {
+//                fprintf(Stream,":");
+//                LPPrintFormula(Stream,Formula->FormulaUnion.QuantifiedFormula.VariableType);
+//            }
             fprintf(Stream,", ");
             LPPrintFormula(Stream,Formula->FormulaUnion.QuantifiedFormula.Formula);
             fprintf(Stream,")");

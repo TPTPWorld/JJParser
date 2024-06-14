@@ -55,7 +55,7 @@ ANNOTATEDFORMULA ParseAnnotatedFormula(READFILE Stream,SIGNATURE Signature);
 ANNOTATEDFORMULA ParseAndUseAnnotatedFormula(READFILE Stream,SIGNATURE 
 Signature);
 
-void GetIncludeParts(ANNOTATEDFORMULA AnnotatedFormula,String IncludeFile,String IncludeFilter);
+void GetIncludeParts(ANNOTATEDFORMULA AnnotatedFormula,String IncludeFile,SuperString IncludeFilter);
 LISTNODE ParseREADFILEOfFormulae(READFILE Stream,SIGNATURE Signature,int ExpandIncludes,
 char * NameFilter);
 LISTNODE ParseFILEOfFormulae(char * FileName,FILE * FileStream,SIGNATURE Signature,
