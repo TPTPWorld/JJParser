@@ -14,7 +14,7 @@
 #include "Examine.h"
 #include "SystemOnTPTP.h"
 //-------------------------------------------------------------------------------------------------
-char * GetInferenceParentNames(TERM InferenceTerm,String PutNamesHere);
+char * GetInferenceParentNames(TERM InferenceTerm,char * PutNamesHere);
 int CountVariableUsageInTerm(TERM Term,VARIABLENODE Variable);
 int CountTermNestedFormulae(SIGNATURE Signature,TERM Term);
 int CountVariablesInFormulaByType(FORMULA Formula,char * Type);
@@ -488,6 +488,7 @@ int LooksLikeAList(TERM Term,int MinElements,int MaxElements) {
 int CheckRole(StatusType Role,StatusType DesiredRole) {
 
      return(Role == DesiredRole || 
+//----Note: assumptions are not axiom_like
 (DesiredRole == axiom_like && 
  (Role == axiom || Role == hypothesis || Role == definition || Role == lemma || 
   Role == theorem || Role == corollary || Role == external)) || 
@@ -495,11 +496,14 @@ int CheckRole(StatusType Role,StatusType DesiredRole) {
  (Role == assumption || Role == axiom || Role == hypothesis || Role == definition ||
   Role == lemma || Role == theorem || Role == corollary || Role == conjecture ||
   Role == question || Role == negated_conjecture || Role == plain || Role == answer ||
-  Role == type || Role == fi_domain || Role == fi_functors || Role == fi_predicates ||
-  Role == interpretation)) ||
-//----Note: assumptions are not axiom_like
-(DesiredRole == not_conjecture && Role != conjecture && 
-Role != negated_conjecture && Role != question));
+  Role == fi_domain || Role == fi_functors || Role == fi_predicates || Role == interpretation ||
+  Role == type || Role == logic)) ||
+(DesiredRole == logical_formula &&
+ (CheckRole(Role,logical) && Role != type && Role != logic)) ||
+(DesiredRole == logical_non_formula &&
+ (CheckRole(Role,logical) && (Role == type || Role == logic))) ||
+(DesiredRole == not_conjecture && Role != conjecture && Role != negated_conjecture && 
+Role != question));
 }
 //-------------------------------------------------------------------------------------------------
 int CheckAnnotatedFormula(ANNOTATEDFORMULA AnnotatedFormula,SyntaxType ExpectedSyntax) {

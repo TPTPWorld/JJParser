@@ -10,7 +10,7 @@ char * GetSymbol(TERM Term);
 int GetArity(TERM Term);
 TERMArray GetArguments(TERM Term);
 SyntaxType GetSyntax(ANNOTATEDFORMULA AnnotatedFormula);
-char * GetName(ANNOTATEDFORMULA AnnotatedFormula,String PutNameHere);
+char * GetName(ANNOTATEDFORMULA AnnotatedFormula,char * PutNameHere);
 StatusType GetRole(ANNOTATEDFORMULA AnnotatedFormula,TERM * SubStatus);
 AnnotatedTSTPFormulaType * GetAnnotatedTSTPFormula(ANNOTATEDFORMULA AnnotatedFormula);
 AnnotatedTSTPFormulaType * GetListNodeAnnotatedTSTPFormula(LISTNODE List);
@@ -38,7 +38,7 @@ int LooksLikeAList(TERM Term,int MinElements,int MaxElements);
 int CheckRole(StatusType Role,StatusType DesiredRole);
 
 int ExtractTermArguments(String Term);
-char * TSTPTermToString(TERM Term,String PutTermHere);
+char * TSTPTermToString(TERM Term,char * PutTermHere);
 
 int CountVariableUsageInFormula(FORMULA Formula,VARIABLENODE Variable,int * QuantifiedOccurences);
 void NormalizeSymbolUsage(char * SymbolUsage);

@@ -44,8 +44,8 @@ void ResetRootListVisited(ROOTLIST RootListHead) {
 }
 //-------------------------------------------------------------------------------------------------
 //----Returns 1/0 if all ancestors are not conjectures
-int GetRootListWithAxiomAncestorLeaves(TREENODE Root,LISTNODE * ListSoFar,
-LISTNODE * AddHere,int IgnoreDuplicates) {
+int GetRootListWithAxiomAncestorLeaves(TREENODE Root,LISTNODE * ListSoFar,LISTNODE * AddHere,
+int IgnoreDuplicates) {
 
     int AllAxiomAncestors;
     int Index;
@@ -66,8 +66,8 @@ LISTNODE * AddHere,int IgnoreDuplicates) {
     if (Root->NumberOfParents == 0) {
         if (CheckRole(GetRole(Root->AnnotatedFormula,NULL),axiom_like)) {
 //----If allowing duplicates or not already in the list
-            if (!IgnoreDuplicates || GetNodeFromListByAnnotatedFormula(
-ListSoFar,Root->AnnotatedFormula) == NULL) {
+            if (!IgnoreDuplicates || GetNodeFromListByAnnotatedFormula(ListSoFar,
+Root->AnnotatedFormula) == NULL) {
 //----Add to the list
                 AddListNode(AddHere,NULL,Root->AnnotatedFormula);
             }
@@ -324,6 +324,7 @@ TREENODE GetFalseRootNode(ROOTLIST RootListHead) {
 //-------------------------------------------------------------------------------------------------
 LISTNODE GetRootList(LISTNODE Head,SIGNATURE Signature) {
 
+    StatusType Role;
     LISTNODE RootList;
     char * AllParentNames;
     int NumberOfParents;
@@ -336,37 +337,58 @@ LISTNODE GetRootList(LISTNODE Head,SIGNATURE Signature) {
     RootList = DuplicateListOfNodes(Head,0);
     ParentTree = NULL;
 
-//----For every node in the derivation list
+//----For every node in the derivation list, excluding types and logic
     while ((Head = GetLogicNode(Head)) != NULL) {
+//DEBUG printf("Look at \n");
+//DEBUG PrintAnnotatedTSTPNode(stdout,Head->AnnotatedFormula,tptp,1);
+//----Immediately exclude types and logic
+        if (LogicalAnnotatedFormulaWithRole(Head->AnnotatedFormula,logical_non_formula)) {
+//----Find in linear list and move to tree
+//DEBUG printf("Remove at type or logic\n");
+//DEBUG PrintAnnotatedTSTPNode(stdout,Head->AnnotatedFormula,tptp,1);
+            Remover = &RootList;
+            while (*Remover != NULL && strcmp(GetName(Head->AnnotatedFormula,NULL),
+GetName((*Remover)->AnnotatedFormula,ParentName))) {
+                Remover = &((*Remover)->Next);
+            }
+//----If found then remove from list and add to tree
+            if (*Remover != NULL) {
+                AddBTreeNode(&ParentTree,(*Remover)->AnnotatedFormula);
+                FreeAListNode(Remover,Signature);
+            }
+        } else {
 //DEBUG printf("remove parents of %s\n",GetName(Head->AnnotatedFormula,NULL));
-        AllParentNames = GetParentNames(Head->AnnotatedFormula,NULL);
-        NumberOfParents = Tokenize(AllParentNames,ParentNames,"\n");
+            AllParentNames = GetParentNames(Head->AnnotatedFormula,NULL);
+            NumberOfParents = Tokenize(AllParentNames,ParentNames,"\n");
 //----Remove all parents - they are not roots
-        for (ParentNumber = 0;ParentNumber< NumberOfParents;ParentNumber++) {
+            for (ParentNumber = 0;ParentNumber< NumberOfParents;ParentNumber++) {
 //DEBUG printf("    remove parent %s\n",ParentNames[ParentNumber]);
 //----Check if not already removed
-            if (GetNodeFromBTreeByAnnotatedFormulaName(&ParentTree,
+                if (GetNodeFromBTreeByAnnotatedFormulaName(&ParentTree,
 ParentNames[ParentNumber]) == NULL) {
 //----Find in linear list and move to tree
-                Remover = &RootList;
-                while (*Remover != NULL && strcmp(ParentNames[ParentNumber],
+                    Remover = &RootList;
+                    while (*Remover != NULL && strcmp(ParentNames[ParentNumber],
 GetName((*Remover)->AnnotatedFormula,ParentName))) {
 //DEBUG printf("Looked at %s\n",GetName((*Remover)->AnnotatedFormula,ParentName));
-                    Remover = &((*Remover)->Next);
+                        Remover = &((*Remover)->Next);
 //DEBUG if (*Remover != NULL) printf("Look at %s\n",GetName((*Remover)->AnnotatedFormula,ParentName));
-                }
+                    }
 //----If found then remove from list and add to tree
-                if (*Remover != NULL) {
-                    AddBTreeNode(&ParentTree,(*Remover)->AnnotatedFormula);
-                    FreeAListNode(Remover,Signature);
+                    if (*Remover != NULL) {
+                        AddBTreeNode(&ParentTree,(*Remover)->AnnotatedFormula);
+                        FreeAListNode(Remover,Signature);
+                    }
                 }
             }
-        }
-        Free((void **)&AllParentNames);
+            Free((void **)&AllParentNames);
+        } 
         Head = Head->Next;
     }
 //----Free the tree of parents
     FreeBTreeOfAnnotatedFormulae(&ParentTree,Signature);
+//DEBUG printf("The root is \n");
+//DEBUG PrintAnnotatedTSTPNode(stdout,RootList->AnnotatedFormula,tptp,1);
 
     return(RootList);
 }
@@ -658,6 +680,7 @@ ROOTLIST BuildRootList(LISTNODE Head,SIGNATURE Signature) {
     LISTNODE RootAnnotatedFormulaNode;
     SuperString RootName;
     String ErrorMessage;
+    StatusType Role;
 
 //----This is the binary tree of all tree nodes
     BTreeOfTreeNodes = NULL;
@@ -695,7 +718,12 @@ Signature) == NULL) {
     FreeListOfAnnotatedFormulae(&RootAnnotatedFormulae,Signature);
 //----Free binary tree
     FreeRootBTree(&BTreeOfTreeNodes,0,Signature);
-//----Should be none left not in tree
+//----Should be none left not in tree, except type and logic
+    while (NodesNotInTree != NULL) {
+        if (LogicalAnnotatedFormulaWithRole(NodesNotInTree->AnnotatedFormula,logical_non_formula)) {
+            FreeAListNode(&NodesNotInTree,Signature);
+        }
+    }
     if (NodesNotInTree != NULL) {
         ReportError("InputError","Could not build root list",0);
         FreeRootList(&RootListHead,1,Signature);

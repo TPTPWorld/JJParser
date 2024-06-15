@@ -338,6 +338,8 @@ typedef enum {
     unknown,
 //----Collections
     logical,
+    logical_formula,
+    logical_non_formula,
     axiom_like,
     not_conjecture,
 //----For logic specifications
