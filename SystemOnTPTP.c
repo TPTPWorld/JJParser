@@ -777,13 +777,13 @@ Conjecture,conjecture)) {
     Correct = 0;
 
 //----Need to make a copy in case the same variable is used
-    strcpy(CopyUsersFileName,UsersFileName);
 //----Set to empty if nothing given, to cause use of mktemp
-    if (CopyUsersFileName == NULL) {
-        strcpy(LocalUsersFileName,"");
+    if (UsersFileName == NULL) {
+        strcpy(CopyUsersFileName,"");
     } else {
-        strcpy(LocalUsersFileName,CopyUsersFileName);
+        strcpy(CopyUsersFileName,UsersFileName);
     }
+    strcpy(LocalUsersFileName,CopyUsersFileName);
     if (Correct == 0) {
         if (SystemOnTPTPGetResult(0,ProblemFileName,PositiveChecker,TimeLimit,"",
 SystemOutputPrefix,OptionalFlags,KeepOutputFiles,FilesDirectory,LocalUsersFileName,
@@ -804,11 +804,7 @@ SZSIsA(StringToSZSResult(SystemResult),StringToSZSResult(PositiveResult))) {
 //----Check if really not provable
     if (Correct == 0 && TestNegative) {
 //----Set to empty if nothing given, to cause use of mktemp
-        if (CopyUsersFileName == NULL) {
-            strcpy(LocalUsersFileName,"");
-        } else {
-            strcpy(LocalUsersFileName,CopyUsersFileName);
-        }
+        strcpy(LocalUsersFileName,CopyUsersFileName);
         strcat(LocalUsersFileName,"_not");
         if (SystemOnTPTPGetResult(0,ProblemFileName,NegativeChecker,TimeLimit,"",
 SystemOutputPrefix,OptionalFlags,KeepOutputFiles,FilesDirectory,LocalUsersFileName,OutputFileName,
