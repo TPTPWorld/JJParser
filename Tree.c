@@ -324,7 +324,6 @@ TREENODE GetFalseRootNode(ROOTLIST RootListHead) {
 //-------------------------------------------------------------------------------------------------
 LISTNODE GetRootList(LISTNODE Head,SIGNATURE Signature) {
 
-    StatusType Role;
     LISTNODE RootList;
     char * AllParentNames;
     int NumberOfParents;
@@ -680,7 +679,6 @@ ROOTLIST BuildRootList(LISTNODE Head,SIGNATURE Signature) {
     LISTNODE RootAnnotatedFormulaNode;
     SuperString RootName;
     String ErrorMessage;
-    StatusType Role;
 
 //----This is the binary tree of all tree nodes
     BTreeOfTreeNodes = NULL;
