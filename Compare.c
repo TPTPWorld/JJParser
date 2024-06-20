@@ -49,13 +49,18 @@ VARIABLERENAMING * RenamedVariables) {
 
     int Index;
 
-    for (Index = 0; Index < Arity; Index++) {
-        if (!SameTerm(Arguments1[Index],Arguments2[Index],AllowVariableRenaming,0,
+//----For THF arguments don't exist despite arity
+    if (Arguments1 == NULL || Arguments2 == NULL) {
+        return(Arguments1 == Arguments2);
+    } else {
+        for (Index = 0; Index < Arity; Index++) {
+            if (!SameTerm(Arguments1[Index],Arguments2[Index],AllowVariableRenaming,0,
 RenamedVariables)) {
-            return(0);
+                return(0);
+            }
         }
+        return(1);
     }
-    return(1);
 }
 //-------------------------------------------------------------------------------------------------
 int SameTerm(TERM Term1,TERM Term2,int AllowVariableRenaming,int AllowCommutation,
@@ -81,8 +86,8 @@ VARIABLERENAMING * RenamedVariables) {
 AllowVariableRenaming,AllowCommutation,RenamedVariables));
             break;
         case atom_as_term:
-//----If equality then compare modulo allowing commutation, else fall
-//----through to term case.
+//DEBUG printf("The symbols are %s and %s\n",GetSymbol(Term1),GetSymbol(Term2));
+//----If equality then compare modulo allowing commutation, else fall through to term case.
             if (Term1->TheSymbol.NonVariable == Term2->TheSymbol.NonVariable &&
 !strcmp(GetSymbol(Term1),"=")) {
                 if (SameArguments(Term1->Arguments,Term2->Arguments,

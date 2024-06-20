@@ -706,7 +706,7 @@ char OpeningBracket,char ClosingBracket,ConnectiveType LastConnective,int TSTPSy
     int NeedNewLine = 0;
 
 //DEBUG printf("Printing term list, arity %d opening bracket %c\n",GetArity(Term),OpeningBracket);
-//----Need to check the args exist, because for type declarations they don't
+//----Need to check the args exist, because for type declarations they don't. Also for THF.
     if (((Arity = GetArity(Term)) > 0  && Term->Arguments != NULL) || OpeningBracket == '[') {
         PFprintf(Stream,"%c",OpeningBracket);
         for (ElementNumber=0;ElementNumber < Arity;ElementNumber++) {

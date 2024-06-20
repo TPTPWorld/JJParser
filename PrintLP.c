@@ -18,7 +18,7 @@ void LPPrintFormula(FILE * Stream,FORMULA Formula);
 char * TPTPtoLPSymbol(char * TPTPSymbol) {
 
     if (!strcmp(TPTPSymbol,"$i")) {
-        return("τ ι");  //----Was return("κ");
+        return("ι");  //----Was return("κ");
     } else if (!strcmp(TPTPSymbol,"$o")) {
         return("Prop");
     } else if (!strcmp(TPTPSymbol,"$false")) {
@@ -37,6 +37,9 @@ char * LPConnectiveToString(ConnectiveType Connective) {
     String ErrorMessage;
 
     switch (Connective) {
+        case application:
+            return("");
+            break;
         case disjunction:
             return("∨");
             break;
@@ -51,6 +54,9 @@ char * LPConnectiveToString(ConnectiveType Connective) {
             break;
         case reverseimplication:
             return("<=");
+            break;
+        case lambda:
+            return("λ");
             break;
         case negation:
             return("¬");
@@ -79,17 +85,19 @@ void PrintLPArgumentSignature(FILE * Stream,FORMULA TypeSignature) {
 
     if (TypeSignature->Type == binary) {
         PrintLPArgumentSignature(Stream,TypeSignature->FormulaUnion.BinaryFormula.LHS);
+        fprintf(Stream," → ");
         PrintLPArgumentSignature(Stream,TypeSignature->FormulaUnion.BinaryFormula.RHS);
     } else {
         TheType = GetSymbol(TypeSignature->FormulaUnion.Atom);
-        if (strcmp(TheType,"Prop") && strcmp(TheType,"Type")) {
+        if (strcmp(TheType,"$o") && strcmp(TheType,"$tType") && strcmp(TheType,"Prop") && 
+strcmp(TheType,"Type")) {
             fprintf(Stream,"τ ");
         }
-        fprintf(Stream,"%s → ",TPTPtoLPSymbol(GetSymbol(TypeSignature->FormulaUnion.Atom)));
+        fprintf(Stream,"%s",TPTPtoLPSymbol(TheType));
     }
 }
 //-------------------------------------------------------------------------------------------------
-int LPPrintSignatureList(FILE * Stream,SYMBOLNODE Node,LISTNODE Head,char * ResultType) {
+int LPPrintSignatureList(FILE * Stream,SYMBOLNODE Node,LISTNODE TypeFormulae,char * ResultType) {
 
     int NumberPrinted;
     int Index;
@@ -98,12 +106,12 @@ int LPPrintSignatureList(FILE * Stream,SYMBOLNODE Node,LISTNODE Head,char * Resu
     LISTNODE Searcher;
 
     if (Node != NULL) {
-        NumberPrinted = LPPrintSignatureList(Stream,Node->LastSymbol,Head,ResultType);
+        NumberPrinted = LPPrintSignatureList(Stream,Node->LastSymbol,TypeFormulae,ResultType);
         strcpy(Symbol,GetSignatureSymbol(Node));
 //----Suppress interpreted symbols
         if (Symbol[0] != '$' && strcmp(Symbol,"=") && strcmp(Symbol,"!=")) {
             MatchingTypeFormula = NULL;
-            Searcher = Head;
+            Searcher = TypeFormulae;
             while (Searcher != NULL && MatchingTypeFormula == NULL) {
                 if (GetListNodeStatus(Searcher) == type) {
                     SearchingTypeFormula = GetListNodeFormula(Searcher);
@@ -121,14 +129,12 @@ FormulaUnion.Atom))) {
             fprintf(Stream,"constant symbol %s : ",Symbol);
 //----Find the symbol's declaration
             if (MatchingTypeFormula != NULL) {
-                MatchingTypeFormula = MatchingTypeFormula->FormulaUnion.BinaryFormula.RHS;
                 if (MatchingTypeFormula->Type == binary) {
-                    ResultType = GetSymbol(MatchingTypeFormula->FormulaUnion.BinaryFormula.RHS->
-FormulaUnion.Atom);
+//----Move over to the type itself
                     MatchingTypeFormula = MatchingTypeFormula->FormulaUnion.BinaryFormula.LHS;
-                    PrintLPArgumentSignature(Stream,MatchingTypeFormula);
-                } else {
-                    ResultType = GetSymbol(MatchingTypeFormula->FormulaUnion.Atom);
+                    PrintLPArgumentSignature(Stream,
+MatchingTypeFormula->FormulaUnion.BinaryFormula.LHS);
+                    fprintf(Stream," → ");
                 }
             } else {
                 for (Index = 0;Index < GetSignatureArity(Node);Index++) {
@@ -136,14 +142,16 @@ FormulaUnion.Atom);
 //----Was  fprintf(Stream,"κ → ");
                 }
             }
-            if (strcmp(ResultType,"$o") && strcmp(ResultType,"$tType") &&
-strcmp(ResultType,"Prop") && strcmp(ResultType,"Type")) {
-                fprintf(Stream,"τ ");
+            if (MatchingTypeFormula != NULL) {
+                PrintLPArgumentSignature(Stream,
+MatchingTypeFormula->FormulaUnion.BinaryFormula.RHS);
+            } else {
+                fprintf(Stream,"%s",ResultType);
             }
-            fprintf(Stream,"%s ;\n",TPTPtoLPSymbol(ResultType));
+            fprintf(Stream," ;\n");
             NumberPrinted++;
         }
-        NumberPrinted += LPPrintSignatureList(Stream,Node->NextSymbol,Head,ResultType);
+        NumberPrinted += LPPrintSignatureList(Stream,Node->NextSymbol,TypeFormulae,ResultType);
     } else {
         NumberPrinted = 0;
     }
@@ -157,6 +165,7 @@ void LPPrintTerm(FILE * Stream,TERM Term) {
     String ErrorMessage;
 
     switch (Term->Type) {
+//----Check if a nested formula - no symbol. This is for THF, TXF, TFF
         case formula:
             LPPrintFormula(Stream,Term->TheSymbol.Formula);
             break;
@@ -172,15 +181,17 @@ void LPPrintTerm(FILE * Stream,TERM Term) {
                 LPPrintTerm(Stream,Term->Arguments[1]);
                 fprintf(Stream,")");
             } else {
-                if (GetArity(Term) > 0) {
+                if (GetArity(Term) > 0 && Term->Arguments != NULL) {
                     fprintf(Stream,"(");
                 }
-                fprintf(Stream,"%s",TPTPtoLPSymbol(GetSymbol(Term)));
-                for (Index=0;Index < GetArity(Term);Index++) {
-                    fprintf(Stream," ");
-                    LPPrintTerm(Stream,Term->Arguments[Index]);
+                fprintf(Stream,"%s",TPTPtoLPSymbol(Symbol));
+                if (GetArity(Term) > 0 && Term->Arguments != NULL) {
+                    for (Index=0;Index < GetArity(Term);Index++) {
+                        fprintf(Stream," ");
+                        LPPrintTerm(Stream,Term->Arguments[Index]);
+                    }
                 }
-                if (GetArity(Term) > 0) {
+                if (GetArity(Term) > 0 && Term->Arguments != NULL) {
                     fprintf(Stream,")");
                 }
             }
@@ -250,6 +261,7 @@ void LPPrintAnnotatedTSTPNode(FILE * Stream,ANNOTATEDFORMULA AnnotatedFormula) {
         case blank_line:
             fprintf(Stream,"\n");
             break;
+        case tptp_thf:
         case tptp_tff:
             if (GetRole(AnnotatedFormula,NULL) == type) {
                 break;
