@@ -226,10 +226,19 @@ GetSymbol(Formula->FormulaUnion.QuantifiedFormula.Variable));
             fprintf(Stream,")");
             break;
         case binary:
-            LPPrintFormula(Stream,Formula->FormulaUnion.BinaryFormula.LHS);
-            fprintf(Stream," %s ",
+//----No xor, gotta hack it
+            if (Formula->FormulaUnion.BinaryFormula.Connective == nonequivalence) {
+                fprintf(Stream," %s(",LPConnectiveToString(negation));
+                LPPrintFormula(Stream,Formula->FormulaUnion.BinaryFormula.LHS);
+                fprintf(Stream," %s ",LPConnectiveToString(equivalence));
+                LPPrintFormula(Stream,Formula->FormulaUnion.BinaryFormula.RHS);
+                fprintf(Stream,")");
+            } else {
+                 LPPrintFormula(Stream,Formula->FormulaUnion.BinaryFormula.LHS);
+                 fprintf(Stream," %s ",
 LPConnectiveToString(Formula->FormulaUnion.BinaryFormula.Connective));
-            LPPrintFormula(Stream,Formula->FormulaUnion.BinaryFormula.RHS);
+                 LPPrintFormula(Stream,Formula->FormulaUnion.BinaryFormula.RHS);
+            }
             break;
         case unary:
             fprintf(Stream,"%s ",
