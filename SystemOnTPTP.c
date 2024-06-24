@@ -409,6 +409,7 @@ QuietnessFlag,QuietnessLevel,OptionalFlags,ATPSystem,TimeLimit,X2TSTPFlag,Proble
         sprintf(UNIXCommand,"%s/%s -q%d %s %d %s %s",TPTP_HOME,SYSTEM_ON_TPTP,
               QuietnessLevel,              ATPSystem,TimeLimit,X2TSTPFlag,ProblemFileName);
     }
+//DEBUG printf("RUN: %s\n",UNIXCommand);fflush(stdout);
     if ((SystemPipe = popen(UNIXCommand,"r")) == NULL) {
         perror("Running SystemOnTPTP");
         sprintf(ErrorMessage,"Could not start %s",UNIXCommand);
