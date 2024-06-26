@@ -1420,6 +1420,10 @@ Context,EndOfScope,1,1,VariablesMustBeQuantified,none);
                     AcceptToken(Stream,punctuation,")");
                     Formula = BinaryFormula;
                 } 
+            } else {
+//----Any other punctuation is an error
+                TokenError(Stream,"Illegal punctuation here");
+                return(NULL);
             }
             break;
         case quantifier:
