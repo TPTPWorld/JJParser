@@ -158,6 +158,7 @@ void AritizeSymbolsInSignature(SIGNATURE Signature) {
     
     AritizeSymbols(Signature->Functions);
     AritizeSymbols(Signature->Predicates);
+    AritizeSymbols(Signature->Types);
 }
 //-------------------------------------------------------------------------------------------------
 void DequoteSymbols(SYMBOLNODE Symbols) {
@@ -471,8 +472,7 @@ GetSignatureSymbol(VariableNode->VariableName),UniqueIndex++);
     }
 }
 //-------------------------------------------------------------------------------------------------
-int RemoveVacuousQuantifiersFromFormula(FORMULA * TheFormula,
-VARIABLENODE * TheVariables) {
+int RemoveVacuousQuantifiersFromFormula(FORMULA * TheFormula,VARIABLENODE * TheVariables) {
 
     VARIABLENODE * VariableNodePtr;
     VARIABLENODE VariableNode;
@@ -511,8 +511,8 @@ TheVariables));
             break;
         case binary:
             return(RemoveVacuousQuantifiersFromFormula(&((*TheFormula)->
-FormulaUnion.BinaryFormula.LHS),TheVariables)
-+ RemoveVacuousQuantifiersFromFormula(&((*TheFormula)->
+FormulaUnion.BinaryFormula.LHS),TheVariables) + 
+RemoveVacuousQuantifiersFromFormula(&((*TheFormula)->
 FormulaUnion.BinaryFormula.RHS),TheVariables));
             break;
         case unary:
@@ -531,8 +531,7 @@ FormulaUnion.UnaryFormula.Formula),TheVariables));
 
 }
 //-------------------------------------------------------------------------------------------------
-int RemoveVacuousQuantifiersFromAnnotatedFormula(
-ANNOTATEDFORMULA AnnotatedFormula) {
+int RemoveVacuousQuantifiersFromAnnotatedFormula(ANNOTATEDFORMULA AnnotatedFormula) {
 
     if (!LogicalAnnotatedFormula(AnnotatedFormula)) {
         CodingError("Trying to remove vacuous quantifiers in a non-formula");
@@ -540,9 +539,7 @@ ANNOTATEDFORMULA AnnotatedFormula) {
     
     return(RemoveVacuousQuantifiersFromFormula(&(AnnotatedFormula->
 AnnotatedFormulaUnion.AnnotatedTSTPFormula.FormulaWithVariables->Formula),
-&(AnnotatedFormula->AnnotatedFormulaUnion.AnnotatedTSTPFormula.
-FormulaWithVariables->Variables)));
-    
+&(AnnotatedFormula->AnnotatedFormulaUnion.AnnotatedTSTPFormula. FormulaWithVariables->Variables)));
 }
 //-------------------------------------------------------------------------------------------------
 void QuantifyFormula(FORMULA * UnquantifiedFormula,ConnectiveType Quantifier,
@@ -661,8 +658,7 @@ Formula->FormulaUnion.Atom->Arguments[1];
     }
 }
 //-------------------------------------------------------------------------------------------------
-void RandomizeAnnotatedFormula(ANNOTATEDFORMULA AnnotatedFormula,
-unsigned int Seed) {
+void RandomizeAnnotatedFormula(ANNOTATEDFORMULA AnnotatedFormula,unsigned int Seed) {
 
     SeedRand(Seed);
     if (LogicalAnnotatedFormula(AnnotatedFormula)) {

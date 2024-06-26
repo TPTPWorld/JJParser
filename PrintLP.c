@@ -15,7 +15,38 @@
 //-------------------------------------------------------------------------------------------------
 void LPPrintFormula(FILE * Stream,FORMULA Formula);
 //-------------------------------------------------------------------------------------------------
+static char * LAMBDAPI_RESERVED_WORDS[] = {
+    "{|abort|}","{|admit|}","{|admitted|}","{|apply|}","{|as|}","{|assert|}","{|assertnot|}",
+    "{|associative|}","{|assume|}","{|begin|}","{|builtin|}","{|coerce_rule|}","{|commutative|}",
+    "{|compute|}","{|constant|}","{|debug|}","{|end|}","{|fail|}","{|flag|}","{|generalize|}",
+    "{|have|}","{|in|}","{|induction|}","{|inductive|}","{|infix|}","{|injective|}","{|left|}",
+    "{|let|}","{|notation|}","{|off|}","{|on|}","{|opaque|}","{|open|}","{|postfix|}","{|prefix|}",
+    "{|print|}","{|private|}","{|proofterm|}","{|protected|}","{|prover|}","{|prover_timeout|}",
+    "{|quantifier|}","{|refine|}","{|reflexivity|}","{|remove|}","{|require|}","{|rewrite|}",
+    "{|right|}","{|rule|}","{|search|}","{|sequential|}","{|simplify|}","{|solve|}","{|symbol|}",
+    "{|symmetry|}","{|try|}","{|type|}","{|unif_rule|}","{|verbose|}","{|why3|}","{|with" };
+//----Looks like a variable   "TYPE",
+
+char * LambdaPiReserved(char * Symbol) {
+
+    String BracketedSymbol;
+    int Index;
+
+    strcpy(BracketedSymbol,"{|");
+    strcat(BracketedSymbol,Symbol);
+    strcat(BracketedSymbol,"|}");
+    for (Index = 0;Index < sizeof(LAMBDAPI_RESERVED_WORDS)/sizeof(char *);Index++) {
+        if (!strcmp(BracketedSymbol,LAMBDAPI_RESERVED_WORDS[Index])) {
+            return(LAMBDAPI_RESERVED_WORDS[Index]);
+        }
+    }
+    return(NULL);
+
+}
+//-------------------------------------------------------------------------------------------------
 char * TPTPtoLPSymbol(char * TPTPSymbol) {
+ 
+    char * LPBracketed;
 
     if (!strcmp(TPTPSymbol,"$i")) {
         return("ι");  //----Was return("κ");
@@ -27,6 +58,8 @@ char * TPTPtoLPSymbol(char * TPTPSymbol) {
         return("⊤");
     } else if (!strcmp(TPTPSymbol,"$tType")) {
         return("Type");
+    } else if (islower(TPTPSymbol[0]) && (LPBracketed = LambdaPiReserved(TPTPSymbol)) != NULL) {
+        return(LPBracketed);
     } else {
         return(TPTPSymbol);
     }
@@ -126,7 +159,7 @@ FormulaUnion.Atom))) {
                 }
                 Searcher = Searcher->Next;
             }
-            fprintf(Stream,"constant symbol %s : ",Symbol);
+            fprintf(Stream,"constant symbol %s : ",TPTPtoLPSymbol(Symbol));
 //----Find the symbol's declaration
             if (MatchingTypeFormula != NULL) {
                 if (MatchingTypeFormula->Type == binary) {
