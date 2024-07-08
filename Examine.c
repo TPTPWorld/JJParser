@@ -2886,8 +2886,8 @@ AnnotatedTSTPFormula.Source->Arguments[0],PutNameHere));
     }
 }
 //-------------------------------------------------------------------------------------------------
-TERM GetSourceInfoTERMFromSourceInfo(TERM InferenceInfo,char * Symbol,
-char * InferenceRuleName,int * Index) {
+TERM GetSourceInfoTERMFromSourceInfo(TERM InferenceInfo,char * Symbol,char * InferenceRuleName,
+int * Index) {
 
     String FinalSymbol;
 
@@ -2976,19 +2976,18 @@ char * InfoTermSymbol) {
 //DEBUG printf("SourceSymbol %s InfoTermSymbol %s\n",SourceSymbol,InfoTermSymbol);
 //----Source is any or as specified
     if ((SourceSymbol == NULL ||
-!strcmp(GetSymbol(AnnotatedFormula->AnnotatedFormulaUnion.AnnotatedTSTPFormula.
-Source),SourceSymbol)) &&
+!strcmp(GetSymbol(AnnotatedFormula->AnnotatedFormulaUnion.AnnotatedTSTPFormula.Source),
+SourceSymbol)) &&
 //----Must have at least two arguments
-GetArity(AnnotatedFormula->AnnotatedFormulaUnion.AnnotatedTSTPFormula.Source)
->= 2 &&
+GetArity(AnnotatedFormula->AnnotatedFormulaUnion.AnnotatedTSTPFormula.Source) >= 2 &&
 //----The second argument must look like a list
-LooksLikeAList(AnnotatedFormula->AnnotatedFormulaUnion.AnnotatedTSTPFormula.
-Source->Arguments[1],-1,-1)) {
+LooksLikeAList(AnnotatedFormula->AnnotatedFormulaUnion.AnnotatedTSTPFormula.Source->Arguments[1],
+-1,-1)) {
         Index = 0;
         return(GetSourceInfoTERMFromSourceInfo(AnnotatedFormula-> 
 AnnotatedFormulaUnion.AnnotatedTSTPFormula.Source->Arguments[1],InfoTermSymbol,
-GetSymbol(AnnotatedFormula->AnnotatedFormulaUnion.AnnotatedTSTPFormula.Source->
-Arguments[0]),&Index));
+GetSymbol(AnnotatedFormula->AnnotatedFormulaUnion.AnnotatedTSTPFormula.Source->Arguments[0]),
+&Index));
     } else {
         return(NULL);
     }
