@@ -295,7 +295,7 @@ FormulaTypeToString(Formula->Type));
     fprintf(Stream,")");
 }
 //-------------------------------------------------------------------------------------------------
-void LPPrintAnnotatedTSTPNode(FILE * Stream,ANNOTATEDFORMULA AnnotatedFormula) {
+void LPPrintAnnotatedTSTPNode(FILE * Stream,ANNOTATEDFORMULA AnnotatedFormula,char * Label) {
 
     String ErrorMessage;
 
@@ -306,20 +306,21 @@ void LPPrintAnnotatedTSTPNode(FILE * Stream,ANNOTATEDFORMULA AnnotatedFormula) {
         case blank_line:
             fprintf(Stream,"\n");
             break;
+//----Note fall through to tptp_fof
         case tptp_thf:
         case tptp_tff:
             if (GetRole(AnnotatedFormula,NULL) == type) {
                 break;
             }
         case tptp_fof:
-            fprintf(Stream,"symbol %s : ϵ ",GetName(AnnotatedFormula,NULL));
+            fprintf(Stream,"symbol %s : %s ",GetName(AnnotatedFormula,NULL),Label);
             LPPrintFormula(Stream,AnnotatedFormula->AnnotatedFormulaUnion.
 AnnotatedTSTPFormula.FormulaWithVariables->Formula);
             fprintf(Stream," ;\n");
             break;
         case tptp_cnf:
             FOFify(AnnotatedFormula,universal);
-            LPPrintAnnotatedTSTPNode(Stream,AnnotatedFormula);
+            LPPrintAnnotatedTSTPNode(Stream,AnnotatedFormula,Label);
             break;
         default:
             sprintf(ErrorMessage,"Syntax type %s unknown for printing LP",
@@ -337,10 +338,10 @@ void LPPrintTailer(FILE * Stream) {
 
 }
 //-------------------------------------------------------------------------------------------------
-void LPPrintListOfAnnotatedTSTPNodes(FILE * Stream,LISTNODE Head) {
+void LPPrintListOfAnnotatedTSTPNodes(FILE * Stream,LISTNODE Head,char * Label) {
 
     while (Head != NULL) {
-        LPPrintAnnotatedTSTPNode(Stream,Head->AnnotatedFormula);
+        LPPrintAnnotatedTSTPNode(Stream,Head->AnnotatedFormula,Label);
         Head = Head->Next;
     }
 }
