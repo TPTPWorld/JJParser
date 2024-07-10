@@ -91,7 +91,8 @@ int TrueAnnotatedFormula(ANNOTATEDFORMULA AnnotatedFormula) {
 
     FORMULA TheFormula;
 
-    if (LogicalAnnotatedFormula(AnnotatedFormula)) {
+    if (LogicalAnnotatedFormula(AnnotatedFormula) &&
+CheckRole(GetRole(AnnotatedFormula,NULL),logical_formula)) {
         TheFormula = AnnotatedFormula->AnnotatedFormulaUnion.
 AnnotatedTSTPFormula.FormulaWithVariables->Formula;
         return(TheFormula->Type == atom &&
@@ -105,7 +106,8 @@ int FalseAnnotatedFormula(ANNOTATEDFORMULA AnnotatedFormula) {
 
     FORMULA TheFormula;
 
-    if (LogicalAnnotatedFormula(AnnotatedFormula)) {
+    if (LogicalAnnotatedFormula(AnnotatedFormula) &&
+CheckRole(GetRole(AnnotatedFormula,NULL),logical_formula)) {
         TheFormula = AnnotatedFormula->AnnotatedFormulaUnion.
 AnnotatedTSTPFormula.FormulaWithVariables->Formula;
         return(TheFormula->Type == atom && !strcmp(GetSymbol(TheFormula->FormulaUnion.Atom),
@@ -118,10 +120,10 @@ AnnotatedTSTPFormula.FormulaWithVariables->Formula;
 int AnnotatedFormulaTrueInInterpretation(ANNOTATEDFORMULA AnnotatedFormula,
 InterpretationType Interpretation) {
 
-    if (LogicalAnnotatedFormula(AnnotatedFormula)) {
+    if (LogicalAnnotatedFormula(AnnotatedFormula) &&
+CheckRole(GetRole(AnnotatedFormula,NULL),logical_formula)) {
         return(FormulaTrueInInterpretation(AnnotatedFormula->
-AnnotatedFormulaUnion.AnnotatedTSTPFormula.FormulaWithVariables->Formula,
-Interpretation));
+AnnotatedFormulaUnion.AnnotatedTSTPFormula.FormulaWithVariables->Formula,Interpretation));
     } else {
         return(0);
     }
@@ -131,8 +133,7 @@ int ListOfAnnotatedFormulaTrueInInterpretation(LISTNODE Head,
 InterpretationType Interpretation) {
 
     while (Head != NULL) {
-        if (AnnotatedFormulaTrueInInterpretation(Head->AnnotatedFormula,
-Interpretation)) {
+        if (AnnotatedFormulaTrueInInterpretation(Head->AnnotatedFormula,Interpretation)) {
             Head = Head->Next;
         } else {
 //DEBUG PrintAnnotatedTSTPNode(stdout,Head->AnnotatedFormula,tptp,1);
