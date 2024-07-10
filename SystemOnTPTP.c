@@ -378,10 +378,12 @@ LISTNODE Head,StatusType AxiomsStatus,ANNOTATEDFORMULA Conjecture,StatusType Con
 //----Make a file to save the problem
     SystemOnTPTPFileName(FilesDirectory,BaseName,Extension,ProblemFileName);
     if ((ProblemFileHandle = OpenFileInMode(ProblemFileName,"w")) == NULL) {
+        printf("ERROR: Could not make problem file %s\n",ProblemFileName);
         return(0);
     }
 //----Why did I check for NULL here?
     if (Head != NULL) {
+//----Note type formulae remain type (fuck, what other cases could I miss?)
         PrintListOfAnnotatedTSTPNodesWithStatus(ProblemFileHandle,NULL,Head,tptp,1,AxiomsStatus);
     }
     if (Conjecture != NULL) {
