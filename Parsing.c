@@ -827,8 +827,8 @@ Language != tptp_tcf) {
     } else {
 //DEBUG printf("Not doing infix now, at %s\n",CurrentToken(Stream)->NameToken);
         InfixRHSType = nonterm;
-//----Cannot have a variable if a predicate was expected, unless in a typed
-//----language, where variables can be types in polymorphic cases.
+//----Cannot have a variable if a predicate was expected, unless in a typed language, where 
+//----variables can be types in polymorphic cases.
         if (Language != tptp_thf && Language != tptp_tff && Language != tptp_tcf &&
 DesiredType == atom_as_term && TypeIfInfix == variable) {
             TokenError(Stream,"Variables cannot be used as predicates except in THF and TFX");
@@ -1461,6 +1461,7 @@ VariablesMustBeQuantified);
 
 //----Check for an equality
 //DEBUG printf("check equality with token %s and allow is %d\n",CurrentToken(Stream)->NameToken,AllowInfixEquality);
+//----In THF and TFF (in)equalities are binary formulae
     if (AllowInfixEquality && 
 (Language == tptp_thf || Language == tptp_tff || Language == tptp_tcf) && 
 (CheckToken(Stream,lower_word,"=") || CheckToken(Stream,lower_word,"!="))) {
