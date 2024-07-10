@@ -1501,7 +1501,7 @@ PrintFormatType Format,int Pretty) {
             break;
         case lambdapi:
             LPPrintHeader(Stream->FileHandle,Head,Signature);
-            LPPrintListOfAnnotatedTSTPNodes(Stream->FileHandle,Head);
+            LPPrintListOfAnnotatedTSTPNodes(Stream->FileHandle,Head,"ϵ");
             LPPrintTailer(Stream->FileHandle);
             break;
         case otter:
