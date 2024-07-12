@@ -431,11 +431,11 @@ void * DataWriteHandle) {
     NumberOfChars = (ElementSize * NumberOfElements)/sizeof(char);
 
 //DEBUG printf("There are %d characters\n",NumberOfChars);
-        for (Index = 0;Index < NumberOfChars;Index++) {
+    for (Index = 0;Index < NumberOfChars;Index++) {
 //DEBUG printf("-%c-%d-",TheReturnedChars[Index],TheReturnedChars[Index]);
-            fprintf((FILE *)DataWriteHandle,"%c",TheReturnedChars[Index]);
-            fflush((FILE *)DataWriteHandle);
-        }
+        fprintf((FILE *)DataWriteHandle,"%c",TheReturnedChars[Index]);
+        fflush((FILE *)DataWriteHandle);
+    }
 
     return(ElementSize*NumberOfElements);
 }
@@ -552,8 +552,11 @@ curl_easy_setopt(CurlHandle,CURLOPT_USERAGENT,"libcurl-agent/1.0") != CURLE_OK) 
         DataReadHandle = NULL;
     } else {
         curl_easy_setopt(CurlHandle,CURLOPT_WRITEDATA,(void *)DataWriteHandle);
-//----Default works! curl_easy_setopt(CurlHandle,CURLOPT_WRITEFUNCTION,ReadCallback);
+//        CurlResult = curl_easy_setopt(CurlHandle,CURLOPT_WRITEFUNCTION,ReadCallback);
+//----Default didn't work for some case - don't understand why - it's all plain text
+//DEBUG printf("HERE before curling data\n");fflush(stdout);
         CurlResult = curl_easy_perform(CurlHandle);
+//DEBUG printf("HERE after curling data\n");fflush(stdout);
         fclose(DataWriteHandle);
         if (CurlResult != CURLE_OK) {
             printf("ERROR: curl failed: %s\n",curl_easy_strerror(CurlResult));
@@ -622,7 +625,7 @@ char * PutOutputHere,int LocalSoT) {
     FILE * SystemPipe;
     int GotResult;
     int GotOutput;
-    String SystemOutputLine;
+    SuperString SystemOutputLine;
     char * SaysPart;
     char * CPUPart;
     char * WCPart;
@@ -681,11 +684,10 @@ TimeLimit,X2TSTPFlag,NULL);
         } 
     }
 
-//----Read SystemOnTPTP output echoing to file and looking for RESULT and 
-//----OUTPUT
+//----Read SystemOnTPTP output echoing to file and looking for RESULT and OUTPUT
     GotResult = 0;
     GotOutput = 0;
-    while (fgets(SystemOutputLine,STRINGLENGTH,SystemPipe) != NULL) {
+    while (fgets(SystemOutputLine,SUPERSTRINGLENGTH,SystemPipe) != NULL) {
         if (KeepOutputFiles) {
             fputs(SystemOutputLine,OutputFileHandle);
         }
