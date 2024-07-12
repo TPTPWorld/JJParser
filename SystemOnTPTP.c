@@ -613,6 +613,30 @@ int SystemOnTPTPAvailable(int UseLocalSoT) {
     }
 }
 //-------------------------------------------------------------------------------------------------
+char * rfgets(char * Line,int Length,FILE * Handle) {
+
+    int OneChar;
+    int NextCharIndex;
+
+    NextCharIndex = 0;
+    while ((OneChar = fgetc(Handle)) != EOF) {
+        if (NextCharIndex == Length - 1) {
+            Line[NextCharIndex] = '\0';
+            printf("ERROR: Ran out of space reading a line, partial is %s\n",Line);
+            return(NULL);
+        } else {
+            Line[NextCharIndex] = (char)OneChar;
+            if (Line[NextCharIndex] == '\n') {
+                Line[++NextCharIndex] = '\0';
+                return(Line);
+            } else {
+                NextCharIndex++;
+            }
+        }
+    }
+    return(NULL);
+}
+//-------------------------------------------------------------------------------------------------
 int SystemOnTPTPGetResult(int QuietnessLevel,char * ProblemFileName,char * ATPSystem,
 int TimeLimit,char * X2TSTPFlag,char * SystemOutputPrefix,char * OptionalFlags,int KeepOutputFiles,
 char * FilesDirectory,char * UsersFileName,char * OutputFileName,char * PutResultHere,
@@ -687,7 +711,7 @@ TimeLimit,X2TSTPFlag,NULL);
 //----Read SystemOnTPTP output echoing to file and looking for RESULT and OUTPUT
     GotResult = 0;
     GotOutput = 0;
-    while (fgets(SystemOutputLine,SUPERSTRINGLENGTH,SystemPipe) != NULL) {
+    while (rfgets(SystemOutputLine,SUPERSTRINGLENGTH,SystemPipe) != NULL) {
         if (KeepOutputFiles) {
             fputs(SystemOutputLine,OutputFileHandle);
         }
