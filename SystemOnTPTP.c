@@ -426,17 +426,35 @@ void * DataWriteHandle) {
     int Index;
     char * TheReturnedChars;
     int NumberOfChars;
+    int NumberWritten;
 
+//DEBUG printf("Try write %d bytes\n",(int)(ElementSize*NumberOfElements));fflush(stdout);
+//----This is weird stuff. Seems that curl has a bug at EOF and sends the whole buffer but there's
+//----not always anything in it. I am throwing away data for now.
+    if ((int)(ElementSize*NumberOfElements) == 8000) {
+        printf("WARNING: curl sent 8000, I'm ignoring the data for now\n");fflush(stdout);
+        return(8000);
+    }
+    if ((NumberWritten = fwrite(TheReturnedData,ElementSize,NumberOfElements,DataWriteHandle)) <
+NumberOfElements) {
+        printf("ERROR: Wrote only %d of %d elements in curl\n",(int)NumberWritten,
+(int)NumberOfElements);
+        fflush(stdout);
+    }
+    return(ElementSize*NumberWritten);
+
+//----Old character oriented that doesn't work for UTF-8
     TheReturnedChars = (char *)TheReturnedData;
     NumberOfChars = (ElementSize * NumberOfElements)/sizeof(char);
 
-//DEBUG printf("There are %d characters\n",NumberOfChars);
+TheReturnedChars[NumberOfChars] = '\0';printf("The curled data as a string is %s\n",TheReturnedChars);fflush(stdout);
     for (Index = 0;Index < NumberOfChars;Index++) {
-//DEBUG printf("-%c-%d-",TheReturnedChars[Index],TheReturnedChars[Index]);
+//DEBUG printf("-%c-%d-",TheReturnedChars[Index],TheReturnedChars[Index]);fflush(stdout);
         fprintf((FILE *)DataWriteHandle,"%c",TheReturnedChars[Index]);
         fflush((FILE *)DataWriteHandle);
     }
 
+printf("Returning %d chars\n",(int)NumberOfElements);
     return(ElementSize*NumberOfElements);
 }
 //-------------------------------------------------------------------------------------------------
@@ -552,11 +570,9 @@ curl_easy_setopt(CurlHandle,CURLOPT_USERAGENT,"libcurl-agent/1.0") != CURLE_OK) 
         DataReadHandle = NULL;
     } else {
         curl_easy_setopt(CurlHandle,CURLOPT_WRITEDATA,(void *)DataWriteHandle);
-//        CurlResult = curl_easy_setopt(CurlHandle,CURLOPT_WRITEFUNCTION,ReadCallback);
-//----Default didn't work for some case - don't understand why - it's all plain text
-//DEBUG printf("HERE before curling data\n");fflush(stdout);
+//----Default didn't work for UTF-8, wrote my own ReadCallback
+        CurlResult = curl_easy_setopt(CurlHandle,CURLOPT_WRITEFUNCTION,ReadCallback);
         CurlResult = curl_easy_perform(CurlHandle);
-//DEBUG printf("HERE after curling data\n");fflush(stdout);
         fclose(DataWriteHandle);
         if (CurlResult != CURLE_OK) {
             printf("ERROR: curl failed: %s\n",curl_easy_strerror(CurlResult));
@@ -613,27 +629,35 @@ int SystemOnTPTPAvailable(int UseLocalSoT) {
     }
 }
 //-------------------------------------------------------------------------------------------------
+//----Version of fgets that copes with UTF-8 - "r"aw fgets
 char * rfgets(char * Line,int Length,FILE * Handle) {
 
     int OneChar;
     int NextCharIndex;
 
     NextCharIndex = 0;
-    while ((OneChar = fgetc(Handle)) != EOF) {
-        if (NextCharIndex == Length - 1) {
+    do {
+        OneChar = fgetc(Handle);
+//DEBUG printf("read a char =%c=%d=",OneChar,OneChar);fflush(stdout);
+        if (OneChar == EOF || OneChar == 256) {
             Line[NextCharIndex] = '\0';
-            printf("ERROR: Ran out of space reading a line, partial is %s\n",Line);
+            return(NULL);
+        } else if (NextCharIndex == Length - 1) {
+            Line[NextCharIndex] = '\0';
+            printf("ERROR: Ran out of space reading a line, partial is %s\n",Line);fflush(stdout);
             return(NULL);
         } else {
             Line[NextCharIndex] = (char)OneChar;
+            Line[NextCharIndex+1] = '\0';
             if (Line[NextCharIndex] == '\n') {
-                Line[++NextCharIndex] = '\0';
+//DEBUG printf("Line found %s",Line);
                 return(Line);
             } else {
+//DEBUG printf("Line so far is %s\n",Line);
                 NextCharIndex++;
             }
         }
-    }
+    } while (1);
     return(NULL);
 }
 //-------------------------------------------------------------------------------------------------
@@ -711,7 +735,7 @@ TimeLimit,X2TSTPFlag,NULL);
 //----Read SystemOnTPTP output echoing to file and looking for RESULT and OUTPUT
     GotResult = 0;
     GotOutput = 0;
-    while (rfgets(SystemOutputLine,SUPERSTRINGLENGTH,SystemPipe) != NULL) {
+    while (rfgets(SystemOutputLine,STRINGLENGTH,SystemPipe) != NULL) {
         if (KeepOutputFiles) {
             fputs(SystemOutputLine,OutputFileHandle);
         }
