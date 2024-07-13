@@ -429,12 +429,6 @@ void * DataWriteHandle) {
     int NumberWritten;
 
 //DEBUG printf("Try write %d bytes\n",(int)(ElementSize*NumberOfElements));fflush(stdout);
-//----This is weird stuff. Seems that curl has a bug at EOF and sends the whole buffer but there's
-//----not always anything in it. I am throwing away data for now.
-    if ((int)(ElementSize*NumberOfElements) == 8000) {
-        printf("WARNING: curl sent 8000, I'm ignoring the data for now\n");fflush(stdout);
-        return(8000);
-    }
     if ((NumberWritten = fwrite(TheReturnedData,ElementSize,NumberOfElements,DataWriteHandle)) <
 NumberOfElements) {
         printf("ERROR: Wrote only %d of %d elements in curl\n",(int)NumberWritten,
@@ -567,22 +561,35 @@ curl_easy_setopt(CurlHandle,CURLOPT_USERAGENT,"libcurl-agent/1.0") != CURLE_OK) 
 (DataWriteHandle = fdopen(Pipe[1],"w")) == NULL) {
         printf("ERROR: Could not create and open pipe\n");
         fclose(DataReadHandle);
-        DataReadHandle = NULL;
+        fclose(DataWriteHandle);
+        return(NULL);
     } else {
         curl_easy_setopt(CurlHandle,CURLOPT_WRITEDATA,(void *)DataWriteHandle);
-//----Default didn't work for UTF-8, wrote my own ReadCallback
-        CurlResult = curl_easy_setopt(CurlHandle,CURLOPT_WRITEFUNCTION,ReadCallback);
-        CurlResult = curl_easy_perform(CurlHandle);
-        fclose(DataWriteHandle);
-        if (CurlResult != CURLE_OK) {
-            printf("ERROR: curl failed: %s\n",curl_easy_strerror(CurlResult));
-            fclose(DataReadHandle);
-            DataReadHandle = NULL;
+//----Default works, so I don't need my own ReadCallback
+// CurlResult = curl_easy_setopt(CurlHandle,CURLOPT_WRITEFUNCTION,ReadCallback);
+        switch (fork()) {
+            case -1:
+                printf("ERROR: Cannot fork to run curl for %s on %s\n",ATPSystem,ProblemFileName);
+                return(NULL);
+                break;
+            case 0:
+//----Child runs the curl
+                fclose(DataReadHandle);
+                CurlResult = curl_easy_perform(CurlHandle);
+                fclose(DataWriteHandle);
+                if (CurlResult != CURLE_OK) {
+                    printf("ERROR: curl failed: %s\n",curl_easy_strerror(CurlResult));
+                }
+                curl_mime_free(MultipartForm);
+                FinalizeRemoteSoT(CurlHandle);
+                exit(EXIT_SUCCESS);
+                break;
+            default:
+                fclose(DataWriteHandle);
+                return(DataReadHandle);
+                break;
         }
     }
-    curl_mime_free(MultipartForm);
-    FinalizeRemoteSoT(CurlHandle);
-    return(DataReadHandle);
 }
 //-------------------------------------------------------------------------------------------------
 int SystemOnTPTPAvailable(int UseLocalSoT) {
@@ -673,7 +680,7 @@ char * PutOutputHere,int LocalSoT) {
     FILE * SystemPipe;
     int GotResult;
     int GotOutput;
-    SuperString SystemOutputLine;
+    String SystemOutputLine;
     char * SaysPart;
     char * CPUPart;
     char * WCPart;
