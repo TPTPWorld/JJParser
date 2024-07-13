@@ -99,6 +99,8 @@ typedef enum {
     negation,
     universal,
     existential,
+//----TXF
+    epsilon,
 //----Higher order
     lambda,
     pibinder,

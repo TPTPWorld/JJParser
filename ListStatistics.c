@@ -542,6 +542,7 @@ variables);
     Statistics.SymbolStatistics.NumberOfVariables +=
 Statistics.ConnectiveStatistics.NumberOfUniversals +
 Statistics.ConnectiveStatistics.NumberOfExistentials +
+Statistics.ConnectiveStatistics.NumberOfEpsilons +
 Statistics.ConnectiveStatistics.NumberOfLambdas +
 Statistics.ConnectiveStatistics.NumberOfPiBinders +
 Statistics.ConnectiveStatistics.NumberOfSigmaBinders +

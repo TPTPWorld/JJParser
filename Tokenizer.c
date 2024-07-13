@@ -493,6 +493,9 @@ ConnectiveType StringToConnective(char * ConnectiveString) {
     if (!strcmp(ConnectiveString,"?")) {
         return(existential);
     }
+    if (!strcmp(ConnectiveString,"#")) {
+        return(epsilon);
+    }
     if (!strcmp(ConnectiveString,"^")) {
         return(lambda);
     }
@@ -610,6 +613,9 @@ char * ConnectiveToString(ConnectiveType Connective) {
             break;
         case existential:
             return("?");
+            break;
+        case epsilon:
+            return("#");
             break;
         case lambda:
             return("^");
@@ -1188,9 +1194,12 @@ TOKEN GetNextToken(READFILE Stream) {
                 CharacterError(Stream);
             }
             break;
-//----# as the first character is still a comment, to make E happy. This is nasty code.
+//----# as the first character is no longer a comment, that make E happy. 
+//if (Stream->Character > 1) {
         case '#':
-            if (Stream->Character > 1) {
+//----Is it a quantifier or a modal index?
+            CurrentChar = NextCharacter(Stream);
+            if (isalnum(CurrentChar)) {
 //----Copied from default case below
                 Index = 0;
                 do {
@@ -1201,7 +1210,11 @@ TOKEN GetNextToken(READFILE Stream) {
                 LocalValue[Index] = '\0';
                 Stream->Overshot = 1;
                 return(BuildToken(lower_word,LocalValue));
+            } else {
+                Stream->Overshot = 1;
+                return(BuildToken(quantifier,"#"));
             }
+            break;
 //----Otherwise continue to comment processing
         case '%':
             if (Stream->NeedNonLogicTokens) {
