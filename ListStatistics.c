@@ -361,6 +361,8 @@ SymbolStatisticsType GetListSymbolUsageStatistics(HEADLIST HeadList) {
 //----Broken         ListNode = HeadList->TheList;
 //----Broken         GetListOfAnnotatedFormulaSymbolUsage(ListNode,&OneUsage,&FunctorsStart,&VariablesStart,
 //----Broken &TypesStart);
+//----To make gcc ignore all this
+        TypesStart = VariablesStart = FunctorsStart = NULL;
         ExtendString(&TypeCollector,TypesStart,&TypeCollectorLength);
         *TypesStart = '\0';
         ExtendString(&VariableCollector,VariablesStart,&VariableCollectorLength);
