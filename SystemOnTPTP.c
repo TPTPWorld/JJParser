@@ -636,7 +636,8 @@ int SystemOnTPTPAvailable(int UseLocalSoT) {
     }
 }
 //-------------------------------------------------------------------------------------------------
-//----Version of fgets that copes with UTF-8 - "r"aw fgets
+//----Version of fgets that copes with UTF-8 - "r"aw fgets. Turns out this is not needed - the 
+//----problem was the unnamed pipe filling up - now I fork() a new process for the curl.
 char * rfgets(char * Line,int Length,FILE * Handle) {
 
     int OneChar;
@@ -742,7 +743,7 @@ TimeLimit,X2TSTPFlag,NULL);
 //----Read SystemOnTPTP output echoing to file and looking for RESULT and OUTPUT
     GotResult = 0;
     GotOutput = 0;
-    while (rfgets(SystemOutputLine,STRINGLENGTH,SystemPipe) != NULL) {
+    while (fgets(SystemOutputLine,STRINGLENGTH,SystemPipe) != NULL) {
         if (KeepOutputFiles) {
             fputs(SystemOutputLine,OutputFileHandle);
         }
