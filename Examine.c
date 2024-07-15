@@ -2118,6 +2118,9 @@ ConnectiveStatisticsType * ConnectiveStatistics) {
         case existential:
             ConnectiveStatistics->NumberOfExistentials++;
             break;
+        case epsilon:
+            ConnectiveStatistics->NumberOfEpsilons++;
+            break;
         case lambda:
             ConnectiveStatistics->NumberOfLambdas++;
             break;

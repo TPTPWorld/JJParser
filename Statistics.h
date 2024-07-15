@@ -146,6 +146,7 @@ typedef struct {
 //----Variable binders
     int NumberOfUniversals;
     int NumberOfExistentials;
+    int NumberOfEpsilons;
     int NumberOfLambdas;
     int NumberOfPiBinders;
     int NumberOfSigmaBinders;
