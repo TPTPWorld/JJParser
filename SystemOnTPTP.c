@@ -681,7 +681,7 @@ char * PutOutputHere,int LocalSoT) {
     FILE * SystemPipe;
     int GotResult;
     int GotOutput;
-    String SystemOutputLine;
+    SuperString SystemOutputLine;
     char * SaysPart;
     char * CPUPart;
     char * WCPart;
@@ -743,7 +743,7 @@ TimeLimit,X2TSTPFlag,NULL);
 //----Read SystemOnTPTP output echoing to file and looking for RESULT and OUTPUT
     GotResult = 0;
     GotOutput = 0;
-    while (fgets(SystemOutputLine,STRINGLENGTH,SystemPipe) != NULL) {
+    while (fgets(SystemOutputLine,SUPERSTRINGLENGTH,SystemPipe) != NULL) {
         if (KeepOutputFiles) {
             fputs(SystemOutputLine,OutputFileHandle);
         }
