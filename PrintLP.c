@@ -57,7 +57,7 @@ char * TPTPtoLPSymbol(char * TPTPSymbol) {
     } else if (!strcmp(TPTPSymbol,"$true")) {
         return("⊤");
     } else if (!strcmp(TPTPSymbol,"$tType")) {
-        return("Type");
+        return("Set");
     } else if (islower(TPTPSymbol[0]) && (LPBracketed = LambdaPiReserved(TPTPSymbol)) != NULL) {
         return(LPBracketed);
     } else {
@@ -95,13 +95,13 @@ char * LPConnectiveToString(ConnectiveType Connective) {
             return("¬");
             break;
         case universal:
-            return("∀α");
+            return("∀");
             break;
         case existential:
-            return("∃α");
+            return("∃");
             break;
         case equation:
-            return("=α");
+            return("=");
             break;
         default:
             sprintf(ErrorMessage,"Connective %s unknown for printing LP",
@@ -210,7 +210,7 @@ void LPPrintTerm(FILE * Stream,TERM Term) {
             if (!strcmp(Symbol,"=")) {
                 fprintf(Stream,"(");
                 LPPrintTerm(Stream,Term->Arguments[0]);
-                fprintf(Stream," =α ");
+                fprintf(Stream," = ");
                 LPPrintTerm(Stream,Term->Arguments[1]);
                 fprintf(Stream,")");
             } else {
