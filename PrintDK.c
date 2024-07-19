@@ -11,9 +11,9 @@
 #include "Examine.h"
 #include "Modify.h"
 #include "PrintTSTP.h"
-#include "PrintLP.h"
+#include "PrintDK.h"
 //-------------------------------------------------------------------------------------------------
-void LPPrintFormula(FILE * Stream,FORMULA Formula);
+void DKPrintFormula(FILE * Stream,FORMULA Formula);
 //-------------------------------------------------------------------------------------------------
 static char * LAMBDAPI_RESERVED_WORDS[] = {
     "{|abort|}","{|admit|}","{|admitted|}","{|apply|}","{|as|}","{|assert|}","{|assertnot|}",
@@ -27,7 +27,7 @@ static char * LAMBDAPI_RESERVED_WORDS[] = {
     "{|symmetry|}","{|try|}","{|type|}","{|unif_rule|}","{|verbose|}","{|why3|}","{|with" };
 //----Looks like a variable   "TYPE",
 
-char * LambdaPiReserved(char * Symbol) {
+char * DeduktiReserved(char * Symbol) {
 
     String BracketedSymbol;
     int Index;
@@ -44,28 +44,28 @@ char * LambdaPiReserved(char * Symbol) {
 
 }
 //-------------------------------------------------------------------------------------------------
-char * TPTPtoLPSymbol(char * TPTPSymbol) {
+char * TPTPtoDKSymbol(char * TPTPSymbol) {
  
-    char * LPBracketed;
+    char * DKBracketed;
 
     if (!strcmp(TPTPSymbol,"$i")) {
         return("ι");  //----Was return("κ");
     } else if (!strcmp(TPTPSymbol,"$o")) {
-        return("Prop");
+        return("prop");
     } else if (!strcmp(TPTPSymbol,"$false")) {
-        return("⊥");
+        return("False");
     } else if (!strcmp(TPTPSymbol,"$true")) {
-        return("⊤");
+        return("True");
     } else if (!strcmp(TPTPSymbol,"$tType")) {
-        return("Set");
-    } else if (islower(TPTPSymbol[0]) && (LPBracketed = LambdaPiReserved(TPTPSymbol)) != NULL) {
-        return(LPBracketed);
+        return("type");
+    } else if (islower(TPTPSymbol[0]) && (DKBracketed = DeduktiReserved(TPTPSymbol)) != NULL) {
+        return(DKBracketed);
     } else {
         return(TPTPSymbol);
     }
 }
 //-------------------------------------------------------------------------------------------------
-char * LPConnectiveToString(ConnectiveType Connective) {
+char * DKConnectiveToString(ConnectiveType Connective) {
 
     String ErrorMessage;
 
@@ -74,40 +74,40 @@ char * LPConnectiveToString(ConnectiveType Connective) {
             return("");
             break;
         case disjunction:
-            return("∨");
+            return("zenon.or");
             break;
         case conjunction:
-            return("∧");
+            return("zenon.and");
             break;
         case equivalence:
-            return("⇔");
+            return("zenon.eqv");
             break;
         case implication:
-            return("⇒");
+            return("zenon.imp");
             break;
         case reverseimplication:
             return("<=");
             break;
         case lambda:
-            return("λ");
+            return("");
             break;
         case negation:
-            return("¬");
+            return("zenon.not");
             break;
         case epsilon:
-            return("ε");
+            return("zenon.proof");
             break;
         case universal:
-            return("∀");
+            return("zenon.forall");
             break;
         case existential:
-            return("∃");
+            return("zenon.exists");
             break;
         case equation:
-            return("=");
+            return("zenon.equal");
             break;
         default:
-            sprintf(ErrorMessage,"Connective %s unknown for printing LP",
+            sprintf(ErrorMessage,"Connective %s unknown for printing DK",
 ConnectiveToString(Connective));
             CodingError(ErrorMessage);
             return(NULL);
@@ -115,25 +115,25 @@ ConnectiveToString(Connective));
     }       
 }
 //-------------------------------------------------------------------------------------------------
-void PrintLPArgumentSignature(FILE * Stream,FORMULA TypeSignature) {
+void PrintDKArgumentSignature(FILE * Stream,FORMULA TypeSignature) {
 
     char * TheType;
 
     if (TypeSignature->Type == binary) {
-        PrintLPArgumentSignature(Stream,TypeSignature->FormulaUnion.BinaryFormula.LHS);
+        PrintDKArgumentSignature(Stream,TypeSignature->FormulaUnion.BinaryFormula.LHS);
         fprintf(Stream," → ");
-        PrintLPArgumentSignature(Stream,TypeSignature->FormulaUnion.BinaryFormula.RHS);
+        PrintDKArgumentSignature(Stream,TypeSignature->FormulaUnion.BinaryFormula.RHS);
     } else {
         TheType = GetSymbol(TypeSignature->FormulaUnion.Atom);
-        if (strcmp(TheType,"$o") && strcmp(TheType,"$tType") && strcmp(TheType,"Prop") && 
+        if (strcmp(TheType,"$o") && strcmp(TheType,"$tType") && strcmp(TheType,"prop") && 
 strcmp(TheType,"Type")) {
-            fprintf(Stream,"τ ");
+            fprintf(Stream,"term ");
         }
-        fprintf(Stream,"%s",TPTPtoLPSymbol(TheType));
+        fprintf(Stream,"%s",TPTPtoDKSymbol(TheType));
     }
 }
 //-------------------------------------------------------------------------------------------------
-int LPPrintSignatureList(FILE * Stream,SYMBOLNODE Node,LISTNODE TypeFormulae,char * ResultType) {
+int DKPrintSignatureList(FILE * Stream,SYMBOLNODE Node,LISTNODE TypeFormulae,char * ResultType) {
 
     int NumberPrinted;
     int Index;
@@ -142,7 +142,7 @@ int LPPrintSignatureList(FILE * Stream,SYMBOLNODE Node,LISTNODE TypeFormulae,cha
     LISTNODE Searcher;
 
     if (Node != NULL) {
-        NumberPrinted = LPPrintSignatureList(Stream,Node->LastSymbol,TypeFormulae,ResultType);
+        NumberPrinted = DKPrintSignatureList(Stream,Node->LastSymbol,TypeFormulae,ResultType);
         strcpy(Symbol,GetSignatureSymbol(Node));
 //----Suppress interpreted symbols
         if (Symbol[0] != '$' && strcmp(Symbol,"=") && strcmp(Symbol,"!=")) {
@@ -162,24 +162,24 @@ FormulaUnion.Atom))) {
                 }
                 Searcher = Searcher->Next;
             }
-            fprintf(Stream,"constant symbol %s : ",TPTPtoLPSymbol(Symbol));
+            fprintf(Stream,"constant symbol %s : ",TPTPtoDKSymbol(Symbol));
 //----Find the symbol's declaration
             if (MatchingTypeFormula != NULL) {
                 if (MatchingTypeFormula->Type == binary) {
 //----Move over to the type itself
                     MatchingTypeFormula = MatchingTypeFormula->FormulaUnion.BinaryFormula.LHS;
-                    PrintLPArgumentSignature(Stream,
+                    PrintDKArgumentSignature(Stream,
 MatchingTypeFormula->FormulaUnion.BinaryFormula.LHS);
                     fprintf(Stream," → ");
                 }
             } else {
                 for (Index = 0;Index < GetSignatureArity(Node);Index++) {
-                    fprintf(Stream,"τ ι → ");
+                    fprintf(Stream,"term iota → ");
 //----Was  fprintf(Stream,"κ → ");
                 }
             }
             if (MatchingTypeFormula != NULL) {
-                PrintLPArgumentSignature(Stream,
+                PrintDKArgumentSignature(Stream,
 MatchingTypeFormula->FormulaUnion.BinaryFormula.RHS);
             } else {
                 fprintf(Stream,"%s",ResultType);
@@ -187,14 +187,14 @@ MatchingTypeFormula->FormulaUnion.BinaryFormula.RHS);
             fprintf(Stream," ;\n");
             NumberPrinted++;
         }
-        NumberPrinted += LPPrintSignatureList(Stream,Node->NextSymbol,TypeFormulae,ResultType);
+        NumberPrinted += DKPrintSignatureList(Stream,Node->NextSymbol,TypeFormulae,ResultType);
     } else {
         NumberPrinted = 0;
     }
     return(NumberPrinted);
 }
 //-------------------------------------------------------------------------------------------------
-void LPPrintTerm(FILE * Stream,TERM Term) {
+void DKPrintTerm(FILE * Stream,TERM Term) {
 
     int Index;
     String Symbol;
@@ -203,7 +203,7 @@ void LPPrintTerm(FILE * Stream,TERM Term) {
     switch (Term->Type) {
 //----Check if a nested formula - no symbol. This is for THF, TXF, TFF
         case formula:
-            LPPrintFormula(Stream,Term->TheSymbol.Formula);
+            DKPrintFormula(Stream,Term->TheSymbol.Formula);
             break;
         case a_type:
         case atom_as_term:
@@ -212,19 +212,19 @@ void LPPrintTerm(FILE * Stream,TERM Term) {
             strcpy(Symbol,GetSymbol(Term));
             if (!strcmp(Symbol,"=")) {
                 fprintf(Stream,"(");
-                LPPrintTerm(Stream,Term->Arguments[0]);
+                DKPrintTerm(Stream,Term->Arguments[0]);
                 fprintf(Stream," = ");
-                LPPrintTerm(Stream,Term->Arguments[1]);
+                DKPrintTerm(Stream,Term->Arguments[1]);
                 fprintf(Stream,")");
             } else {
                 if (GetArity(Term) > 0 && Term->Arguments != NULL) {
                     fprintf(Stream,"(");
                 }
-                fprintf(Stream,"%s",TPTPtoLPSymbol(Symbol));
+                fprintf(Stream,"%s",TPTPtoDKSymbol(Symbol));
                 if (GetArity(Term) > 0 && Term->Arguments != NULL) {
                     for (Index=0;Index < GetArity(Term);Index++) {
                         fprintf(Stream," ");
-                        LPPrintTerm(Stream,Term->Arguments[Index]);
+                        DKPrintTerm(Stream,Term->Arguments[Index]);
                     }
                 }
                 if (GetArity(Term) > 0 && Term->Arguments != NULL) {
@@ -233,7 +233,7 @@ void LPPrintTerm(FILE * Stream,TERM Term) {
             }
             break;
         default:
-            sprintf(ErrorMessage,"Term type %s unknown for printing LP",
+            sprintf(ErrorMessage,"Term type %s unknown for printing DK",
 TermTypeToString(Term->Type));
             CodingError(ErrorMessage);
             break;
@@ -241,7 +241,7 @@ TermTypeToString(Term->Type));
     }
 }
 //-------------------------------------------------------------------------------------------------
-void LPPrintFormula(FILE * Stream,FORMULA Formula) {
+void DKPrintFormula(FILE * Stream,FORMULA Formula) {
 
     String ErrorMessage;
 
@@ -249,48 +249,48 @@ void LPPrintFormula(FILE * Stream,FORMULA Formula) {
     switch (Formula->Type) {
         case quantified:
             fprintf(Stream,"%s (λ %s",
-LPConnectiveToString(Formula->FormulaUnion.QuantifiedFormula.Quantifier),
+DKConnectiveToString(Formula->FormulaUnion.QuantifiedFormula.Quantifier),
 GetSymbol(Formula->FormulaUnion.QuantifiedFormula.Variable));
 //----Frederic says: Instead, you can also put no type in abstractions and just write "(λ X,
 //---- ..." as Lambdapi is able to infer those types automatically. But for FOF he recants:
 //----You use typed FOL syntax and X11 could be of any type a priori.
             fprintf(Stream," : ");
             if (Formula->FormulaUnion.QuantifiedFormula.VariableType != NULL) {
-                PrintLPArgumentSignature(Stream,Formula->FormulaUnion.QuantifiedFormula.VariableType);
+                PrintDKArgumentSignature(Stream,Formula->FormulaUnion.QuantifiedFormula.VariableType);
             } else {
-                fprintf(Stream,"τ ι");
+                fprintf(Stream,"term iota");
             }
             fprintf(Stream,", ");
-            LPPrintFormula(Stream,Formula->FormulaUnion.QuantifiedFormula.Formula);
+            DKPrintFormula(Stream,Formula->FormulaUnion.QuantifiedFormula.Formula);
             fprintf(Stream,")");
             break;
         case binary:
 //----No xor, gotta hack it
             if (Formula->FormulaUnion.BinaryFormula.Connective == nonequivalence) {
-                fprintf(Stream," %s(",LPConnectiveToString(negation));
-                LPPrintFormula(Stream,Formula->FormulaUnion.BinaryFormula.LHS);
-                fprintf(Stream," %s ",LPConnectiveToString(equivalence));
-                LPPrintFormula(Stream,Formula->FormulaUnion.BinaryFormula.RHS);
+                fprintf(Stream," %s(",DKConnectiveToString(negation));
+                DKPrintFormula(Stream,Formula->FormulaUnion.BinaryFormula.LHS);
+                fprintf(Stream," %s ",DKConnectiveToString(equivalence));
+                DKPrintFormula(Stream,Formula->FormulaUnion.BinaryFormula.RHS);
                 fprintf(Stream,")");
             } else {
-                 LPPrintFormula(Stream,Formula->FormulaUnion.BinaryFormula.LHS);
+                 DKPrintFormula(Stream,Formula->FormulaUnion.BinaryFormula.LHS);
                  fprintf(Stream," %s ",
-LPConnectiveToString(Formula->FormulaUnion.BinaryFormula.Connective));
-                 LPPrintFormula(Stream,Formula->FormulaUnion.BinaryFormula.RHS);
+DKConnectiveToString(Formula->FormulaUnion.BinaryFormula.Connective));
+                 DKPrintFormula(Stream,Formula->FormulaUnion.BinaryFormula.RHS);
             }
             break;
         case unary:
             fprintf(Stream,"%s ",
-LPConnectiveToString(Formula->FormulaUnion.UnaryFormula.Connective));
-            LPPrintFormula(Stream,Formula->FormulaUnion.UnaryFormula.Formula);
+DKConnectiveToString(Formula->FormulaUnion.UnaryFormula.Connective));
+            DKPrintFormula(Stream,Formula->FormulaUnion.UnaryFormula.Formula);
             break;
         case atom:
-            LPPrintTerm(Stream,Formula->FormulaUnion.Atom);
+            DKPrintTerm(Stream,Formula->FormulaUnion.Atom);
             break;
         case type_declaration:
             break;
         default:
-            sprintf(ErrorMessage,"Formula type %s unknown for printing LP",
+            sprintf(ErrorMessage,"Formula type %s unknown for printing DK",
 FormulaTypeToString(Formula->Type));
             CodingError(ErrorMessage);
             break;
@@ -298,7 +298,7 @@ FormulaTypeToString(Formula->Type));
     fprintf(Stream,")");
 }
 //-------------------------------------------------------------------------------------------------
-void LPPrintAnnotatedTSTPNode(FILE * Stream,ANNOTATEDFORMULA AnnotatedFormula,char * Label) {
+void DKPrintAnnotatedTSTPNode(FILE * Stream,ANNOTATEDFORMULA AnnotatedFormula,char * Label) {
 
     String ErrorMessage;
 
@@ -317,34 +317,34 @@ void LPPrintAnnotatedTSTPNode(FILE * Stream,ANNOTATEDFORMULA AnnotatedFormula,ch
             }
         case tptp_fof:
             fprintf(Stream,"symbol %s : %s ",GetName(AnnotatedFormula,NULL),Label);
-            LPPrintFormula(Stream,AnnotatedFormula->AnnotatedFormulaUnion.
+            DKPrintFormula(Stream,AnnotatedFormula->AnnotatedFormulaUnion.
 AnnotatedTSTPFormula.FormulaWithVariables->Formula);
             fprintf(Stream," ;\n");
             break;
         case tptp_cnf:
             FOFify(AnnotatedFormula,universal);
-            LPPrintAnnotatedTSTPNode(Stream,AnnotatedFormula,Label);
+            DKPrintAnnotatedTSTPNode(Stream,AnnotatedFormula,Label);
             break;
         default:
-            sprintf(ErrorMessage,"Syntax type %s unknown for printing LP",
+            sprintf(ErrorMessage,"Syntax type %s unknown for printing DK",
 SyntaxToString(AnnotatedFormula->Syntax));
             CodingError(ErrorMessage);
             break;
     }
 }
 //-------------------------------------------------------------------------------------------------
-void LPPrintHeader(FILE * Stream,LISTNODE Head,SIGNATURE Signature) {
+void DKPrintHeader(FILE * Stream,LISTNODE Head,SIGNATURE Signature) {
 
 }
 //-------------------------------------------------------------------------------------------------
-void LPPrintTailer(FILE * Stream) {
+void DKPrintTailer(FILE * Stream) {
 
 }
 //-------------------------------------------------------------------------------------------------
-void LPPrintListOfAnnotatedTSTPNodes(FILE * Stream,LISTNODE Head,char * Label) {
+void DKPrintListOfAnnotatedTSTPNodes(FILE * Stream,LISTNODE Head,char * Label) {
 
     while (Head != NULL) {
-        LPPrintAnnotatedTSTPNode(Stream,Head->AnnotatedFormula,Label);
+        DKPrintAnnotatedTSTPNode(Stream,Head->AnnotatedFormula,Label);
         Head = Head->Next;
     }
 }
