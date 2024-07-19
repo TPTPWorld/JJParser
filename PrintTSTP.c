@@ -842,18 +842,20 @@ Formula->FormulaUnion.TupleFormula.NumberOfElements,
 Formula->FormulaUnion.TupleFormula.Elements,Pretty,Indent,TSTPSyntaxFlag);
             break;
         case sequent:
+            PFprintf(Stream,"( ");
             PrintFileFormulaeTuple(Stream,Language,
 Formula->FormulaUnion.SequentFormula.NumberOfLHSElements,
-Formula->FormulaUnion.SequentFormula.LHS,Pretty,Indent,TSTPSyntaxFlag);
+Formula->FormulaUnion.SequentFormula.LHS,Pretty,Indent+2,TSTPSyntaxFlag);
             if (Pretty) {
                 PFprintf(Stream,"\n");
-                PrintSpaces(Stream,Indent - 1 - 
+                PrintSpaces(Stream,Indent + 1 - 
 strlen(ConnectiveToString(gentzenarrow)));
             }
             PFprintf(Stream,"%s ",ConnectiveToString(gentzenarrow));
             PrintFileFormulaeTuple(Stream,Language,
 Formula->FormulaUnion.SequentFormula.NumberOfRHSElements,
-Formula->FormulaUnion.SequentFormula.RHS,Pretty,Indent,TSTPSyntaxFlag);
+Formula->FormulaUnion.SequentFormula.RHS,Pretty,Indent+2,TSTPSyntaxFlag);
+            PFprintf(Stream," )");
             break;
         case quantified:
             PFprintf(Stream,"%s",ConnectiveToString(
