@@ -162,7 +162,7 @@ FormulaUnion.Atom))) {
                 }
                 Searcher = Searcher->Next;
             }
-            fprintf(Stream,"constant symbol %s : ",TPTPtoDKSymbol(Symbol));
+            fprintf(Stream,"%s : ",TPTPtoDKSymbol(Symbol));
 //----Find the symbol's declaration
             if (MatchingTypeFormula != NULL) {
                 if (MatchingTypeFormula->Type == binary) {
@@ -184,7 +184,7 @@ MatchingTypeFormula->FormulaUnion.BinaryFormula.RHS);
             } else {
                 fprintf(Stream,"%s",ResultType);
             }
-            fprintf(Stream," ;\n");
+            fprintf(Stream," .\n");
             NumberPrinted++;
         }
         NumberPrinted += DKPrintSignatureList(Stream,Node->NextSymbol,TypeFormulae,ResultType);
@@ -298,7 +298,8 @@ FormulaTypeToString(Formula->Type));
     fprintf(Stream,")");
 }
 //-------------------------------------------------------------------------------------------------
-void DKPrintAnnotatedTSTPNode(FILE * Stream,ANNOTATEDFORMULA AnnotatedFormula,char * Label) {
+void DKPrintAnnotatedTSTPNode(FILE * Stream,ANNOTATEDFORMULA AnnotatedFormula,char * Prefix,
+char * Label) {
 
     String ErrorMessage;
 
@@ -316,14 +317,14 @@ void DKPrintAnnotatedTSTPNode(FILE * Stream,ANNOTATEDFORMULA AnnotatedFormula,ch
                 break;
             }
         case tptp_fof:
-            fprintf(Stream,"symbol %s : %s ",GetName(AnnotatedFormula,NULL),Label);
+            fprintf(Stream,"%s %s : %s ",Prefix,GetName(AnnotatedFormula,NULL),Label);
             DKPrintFormula(Stream,AnnotatedFormula->AnnotatedFormulaUnion.
 AnnotatedTSTPFormula.FormulaWithVariables->Formula);
-            fprintf(Stream," ;\n");
+            fprintf(Stream," .\n");
             break;
         case tptp_cnf:
             FOFify(AnnotatedFormula,universal);
-            DKPrintAnnotatedTSTPNode(Stream,AnnotatedFormula,Label);
+            DKPrintAnnotatedTSTPNode(Stream,AnnotatedFormula,Prefix,Label);
             break;
         default:
             sprintf(ErrorMessage,"Syntax type %s unknown for printing DK",
@@ -341,10 +342,10 @@ void DKPrintTailer(FILE * Stream) {
 
 }
 //-------------------------------------------------------------------------------------------------
-void DKPrintListOfAnnotatedTSTPNodes(FILE * Stream,LISTNODE Head,char * Label) {
+void DKPrintListOfAnnotatedTSTPNodes(FILE * Stream,LISTNODE Head,char * Prefix,char * Label) {
 
     while (Head != NULL) {
-        DKPrintAnnotatedTSTPNode(Stream,Head->AnnotatedFormula,Label);
+        DKPrintAnnotatedTSTPNode(Stream,Head->AnnotatedFormula,Prefix,Label);
         Head = Head->Next;
     }
 }
