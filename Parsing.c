@@ -316,6 +316,7 @@ VARIABLENODE * Variables) {
 void FreeFormula(FORMULA * Formula,SIGNATURE Signature,VARIABLENODE * Variables) {
 
     SYMBOLNODE Symbol;
+    String ErrorMessage;
 
     if (*Formula != NULL) {
         switch ((*Formula)->Type) {
@@ -324,6 +325,7 @@ void FreeFormula(FORMULA * Formula,SIGNATURE Signature,VARIABLENODE * Variables)
 &((*Formula)->FormulaUnion.TupleFormula.Elements),Signature,Variables);
                 assert((*Formula)->FormulaUnion.TupleFormula.Elements == NULL);
                 break;
+            case sequent:
                 FreeTupleFormulae((*Formula)->FormulaUnion.SequentFormula.NumberOfLHSElements,
 &((*Formula)->FormulaUnion.SequentFormula.LHS),Signature,Variables);
                 assert((*Formula)->FormulaUnion.SequentFormula.LHS == NULL);
@@ -381,7 +383,9 @@ Signature,Variables);
                 FreeFormula(&((*Formula)->FormulaUnion.LetFormula.LetBody),Signature,Variables);
                 break;
             default:
-                CodingError("Formula type unknown for freeing");
+                sprintf(ErrorMessage,"Formula type %s unknown for freeing",
+FormulaTypeToString((*Formula)->Type));
+                CodingError(ErrorMessage);
                 break;
         }
         Free((void **)Formula);
