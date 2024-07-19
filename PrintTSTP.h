@@ -9,6 +9,7 @@ typedef enum {
     oldtptp,
     dfg,
     lambdapi,
+    dedukti,
     otter,
     kif,
     xml,

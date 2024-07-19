@@ -14,6 +14,7 @@
 #include "PrintTSTP.h"
 #include "PrintDFG.h"
 #include "PrintLP.h"
+#include "PrintDK.h"
 #include "PrintOtter.h"
 #include "PrintKIF.h"
 #include "PrintXML.h"
@@ -1505,6 +1506,11 @@ PrintFormatType Format,int Pretty) {
             LPPrintHeader(Stream->FileHandle,Head,Signature);
             LPPrintListOfAnnotatedTSTPNodes(Stream->FileHandle,Head,"ϵ");
             LPPrintTailer(Stream->FileHandle);
+            break;
+        case dedukti:
+            DKPrintHeader(Stream->FileHandle,Head,Signature);
+            DKPrintListOfAnnotatedTSTPNodes(Stream->FileHandle,Head,"proof");
+            DKPrintTailer(Stream->FileHandle);
             break;
         case otter:
             OtterPrintHeader(Stream->FileHandle,Head,Signature);

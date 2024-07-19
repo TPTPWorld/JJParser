@@ -95,7 +95,7 @@ char * DKConnectiveToString(ConnectiveType Connective) {
             return("zenon.not");
             break;
         case epsilon:
-            return("zenon.proof");
+            return("zenon.epsilon");
             break;
         case universal:
             return("zenon.forall");
@@ -248,19 +248,15 @@ void DKPrintFormula(FILE * Stream,FORMULA Formula) {
     fprintf(Stream,"(");
     switch (Formula->Type) {
         case quantified:
-            fprintf(Stream,"%s (λ %s",
+            fprintf(Stream,"%s (%s: ",
 DKConnectiveToString(Formula->FormulaUnion.QuantifiedFormula.Quantifier),
 GetSymbol(Formula->FormulaUnion.QuantifiedFormula.Variable));
-//----Frederic says: Instead, you can also put no type in abstractions and just write "(λ X,
-//---- ..." as Lambdapi is able to infer those types automatically. But for FOF he recants:
-//----You use typed FOL syntax and X11 could be of any type a priori.
-            fprintf(Stream," : ");
             if (Formula->FormulaUnion.QuantifiedFormula.VariableType != NULL) {
                 PrintDKArgumentSignature(Stream,Formula->FormulaUnion.QuantifiedFormula.VariableType);
             } else {
                 fprintf(Stream,"term iota");
             }
-            fprintf(Stream,", ");
+            fprintf(Stream," => ");
             DKPrintFormula(Stream,Formula->FormulaUnion.QuantifiedFormula.Formula);
             fprintf(Stream,")");
             break;
@@ -268,15 +264,16 @@ GetSymbol(Formula->FormulaUnion.QuantifiedFormula.Variable));
 //----No xor, gotta hack it
             if (Formula->FormulaUnion.BinaryFormula.Connective == nonequivalence) {
                 fprintf(Stream," %s(",DKConnectiveToString(negation));
-                DKPrintFormula(Stream,Formula->FormulaUnion.BinaryFormula.LHS);
                 fprintf(Stream," %s ",DKConnectiveToString(equivalence));
+                DKPrintFormula(Stream,Formula->FormulaUnion.BinaryFormula.LHS);
                 DKPrintFormula(Stream,Formula->FormulaUnion.BinaryFormula.RHS);
                 fprintf(Stream,")");
             } else {
-                 DKPrintFormula(Stream,Formula->FormulaUnion.BinaryFormula.LHS);
-                 fprintf(Stream," %s ",
+                 fprintf(Stream,"(%s ",
 DKConnectiveToString(Formula->FormulaUnion.BinaryFormula.Connective));
+                 DKPrintFormula(Stream,Formula->FormulaUnion.BinaryFormula.LHS);
                  DKPrintFormula(Stream,Formula->FormulaUnion.BinaryFormula.RHS);
+                 fprintf(Stream," )");
             }
             break;
         case unary:
