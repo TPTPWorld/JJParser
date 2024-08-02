@@ -689,10 +689,10 @@ char * PutOutputHere,int LocalSoT) {
 
 //----If time limit is 0 just return Success None
     if (TimeLimit == 0) {
-        if (PutResultHere !=NULL) {
+        if (PutResultHere != NULL) {
             strcpy(PutResultHere,"Success");
         }
-        if (PutOutputHere !=NULL) {
+        if (PutOutputHere != NULL) {
             strcpy(PutOutputHere,"None");
         }
         return(1);
