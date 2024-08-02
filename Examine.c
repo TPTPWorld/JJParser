@@ -3023,13 +3023,11 @@ TERM GetInferenceInfoTERM(ANNOTATEDFORMULA AnnotatedFormula,char * Symbol) {
 //----Gets a useful info term from an inference source
 //----Calling routine must provide enough space for info, or send NULL and
 //----take responsibility for the malloced memory.
-char * GetInferenceInfoTerm(ANNOTATEDFORMULA AnnotatedFormula,char * Symbol,
-char * PutInfoHere) {
+char * GetInferenceInfoTerm(ANNOTATEDFORMULA AnnotatedFormula,char * Symbol,char * PutInfoHere) {
 
     TERM InferenceTerm;
 
-    if ((InferenceTerm = GetInferenceInfoTERM(AnnotatedFormula,Symbol)) != 
-NULL) {
+    if ((InferenceTerm = GetInferenceInfoTERM(AnnotatedFormula,Symbol)) != NULL) {
         return(TSTPTermToString(InferenceTerm,PutInfoHere));
     } else {
         return(NULL);
