@@ -2820,10 +2820,9 @@ AnnotatedFormula->AnnotatedFormulaUnion.AnnotatedTSTPFormula.Source == NULL) {
     }
 
     if (SourceSymbol == NULL ||
-!strcmp(GetSymbol(AnnotatedFormula->AnnotatedFormulaUnion.AnnotatedTSTPFormula.
-Source),SourceSymbol)) {
-        return(AnnotatedFormula->AnnotatedFormulaUnion.AnnotatedTSTPFormula.
-Source);
+!strcmp(GetSymbol(AnnotatedFormula->AnnotatedFormulaUnion.AnnotatedTSTPFormula. Source),
+SourceSymbol)) {
+        return(AnnotatedFormula->AnnotatedFormulaUnion.AnnotatedTSTPFormula.Source);
     }
     return(NULL);
 }
@@ -2941,18 +2940,18 @@ Arguments[Index],Symbol,ArrayOfInfoTERMs,NumberOfTerms);
     }
 }
 //-------------------------------------------------------------------------------------------------
-//----Gets one from this layer, then looks through the parents to get more
-//----from nested inference records
-void GetInferenceInfoTERMsFromInferenceRecord(TERM InferenceRecord,
-char * Symbol,TERMArray * ArrayOfInfoTERMs,int * NumberOfTerms) {
+//----Gets one from this layer, then looks through the parents to get more from nested inference 
+//----records
+void GetInferenceInfoTERMsFromInferenceRecord(TERM InferenceRecord,char * Symbol,
+TERMArray * ArrayOfInfoTERMs,int * NumberOfTerms) {
 
     *NumberOfTerms = 0;
-    DoGetInferenceInfoTERMsFromInferenceRecord(InferenceRecord,Symbol,
-ArrayOfInfoTERMs,NumberOfTerms);
+    DoGetInferenceInfoTERMsFromInferenceRecord(InferenceRecord,Symbol,ArrayOfInfoTERMs,
+NumberOfTerms);
 }
 //-------------------------------------------------------------------------------------------------
-TERMArray GetInferenceInfoTERMs(ANNOTATEDFORMULA AnnotatedFormula,
-char * Symbol,int * NumberOfTerms) {
+TERMArray GetInferenceInfoTERMs(ANNOTATEDFORMULA AnnotatedFormula,char * Symbol,
+int * NumberOfTerms) {
 
     TERMArray ArrayOfInfoTERMs;
 
@@ -3182,8 +3181,8 @@ char * GetOneParentNames(TERM ParentSource,char * PutNamesHere) {
     return(BufferReturn(&Buffer,PutNamesHere));
 }
 //-------------------------------------------------------------------------------------------------
-//----Calling routine must provide enough space for info, or send NULL and
-//----take responsibility for the malloced memory.
+//----Calling routine must provide enough space for info, or send NULL and take responsibility for 
+//----the malloced memory.
 char * GetInferenceParentNames(TERM InferenceTerm,char * PutNamesHere) {
 
     int Index;
@@ -3207,8 +3206,8 @@ Arguments[Index],NULL),&BufferSize);
     return(BufferReturn(&Buffer,PutNamesHere));
 }
 //-------------------------------------------------------------------------------------------------
-//----Calling routine must provide enough space for info, or send NULL and
-//----take responsibility for the malloced memory.
+//----Calling routine must provide enough space for info, or send NULL and take responsibility for 
+//----the malloced memory.
 char * GetParentNames(ANNOTATEDFORMULA AnnotatedFormula,char * PutNamesHere) {
 
     char * Buffer;

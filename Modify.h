@@ -32,6 +32,8 @@ void DoUpdateRecordInList(TERM TheList,SIGNATURE Signature,char * UsefulInformat
 int DoAdd);
 int RemoveNamedTermFromList(char * Name,TERM TheList,int MaxToRemove,SIGNATURE Signature);
 int RemoveParentFromInferenceTerm(char * ParentName,TERM Source,SIGNATURE Signature);
+int AddParentToInferredFormula(ANNOTATEDFORMULA NewParent,ANNOTATEDFORMULA Inferred,
+SIGNATURE Signature);
 int SetSourceFromString(ANNOTATEDFORMULA AnnotatedFormula,SIGNATURE Signature,char * StringSource);
 void RemoveUsefulInformationFromAnnotatedFormula(ANNOTATEDFORMULA AnnotatedFormula,
 SIGNATURE Signature,char * PrincipleSymbol);
