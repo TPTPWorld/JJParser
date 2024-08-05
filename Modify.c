@@ -233,8 +233,7 @@ SIGNATURE Signature) {
 
 //----Get parents' names
     ParentNames = GetNodeParentNames(AnnotatedFormula,NULL);
-    if ((FormulaAssumptionsTerm = GetInferenceInfoTERM(AnnotatedFormula,
-"assumptions")) != NULL) {
+    if ((FormulaAssumptionsTerm = GetInferenceInfoTERM(AnnotatedFormula,"assumptions")) != NULL) {
 //----Get assumptions' names
         FormulaAssumptions = ExtractAssumptionsList(FormulaAssumptionsTerm);
 //DEBUG printf("FormulaAssumptions are %s\n",FormulaAssumptions);
@@ -258,13 +257,10 @@ AnnotatedFormulaUnion.AnnotatedTSTPFormula.FormulaWithVariables,Signature,1);
 //----Make a new node for the implication
             AssumptionFormula = NewFormula();
             AssumptionFormula->Type = binary;
-            AssumptionFormula->FormulaUnion.BinaryFormula.Connective = 
-implication;
-            AssumptionFormula->FormulaUnion.BinaryFormula.LHS = Antecedent->
-Formula;
+            AssumptionFormula->FormulaUnion.BinaryFormula.Connective = implication;
+            AssumptionFormula->FormulaUnion.BinaryFormula.LHS = Antecedent->Formula;
             AssumptionFormula->FormulaUnion.BinaryFormula.RHS = 
-AnnotatedFormula->AnnotatedFormulaUnion.AnnotatedTSTPFormula.
-FormulaWithVariables->Formula;
+AnnotatedFormula->AnnotatedFormulaUnion.AnnotatedTSTPFormula.FormulaWithVariables->Formula;
 //----Combine the variable lists
             AppendVariableList(&(AnnotatedFormula->AnnotatedFormulaUnion.
 AnnotatedTSTPFormula.FormulaWithVariables->Variables),Antecedent->Variables);
@@ -803,6 +799,47 @@ GetArity(Source->Arguments[2]) == -1) {
     }
 
     return(RemoveNamedTermFromList(ParentName,Source->Arguments[2],-1,Signature) > 0);
+}
+//-------------------------------------------------------------------------------------------------
+int AddParentToInferenceTerm(char * ParentName,TERM Source,SIGNATURE Signature) {
+
+    TERM ParentList;
+    SYMBOLNODE ParentNameInSignature;
+
+//----Nothing if not an inference term
+    if (strcmp(GetSymbol(Source),"inference") || GetArity(Source) != 3 ||
+GetArity(Source->Arguments[2]) == -1) {
+        return(0);
+    }
+
+    ParentList = Source->Arguments[2];
+    ParentNameInSignature = InsertIntoSignatureList(&(Signature->NonLogicals),ParentName,0,0,0,
+NULL);
+    if (ParentNameInSignature == NULL) {
+        return(0);
+    } else {
+        ParentList->Arguments = (TERMArray)Realloc((void *)ParentList->Arguments,
+ParentList->FlexibleArity+1 * sizeof(TERM));
+        ParentList->Arguments[ParentList->FlexibleArity] = NewTerm();
+        ParentList->Arguments[ParentList->FlexibleArity]->Type = non_logical_data;
+        ParentList->Arguments[ParentList->FlexibleArity]->TheSymbol.NonVariable =
+ParentNameInSignature;
+        IncreaseSymbolUseCount(ParentNameInSignature,1);
+        ParentList->FlexibleArity++;
+        return(1);
+    }
+}
+//-------------------------------------------------------------------------------------------------
+int AddParentToInferredFormula(ANNOTATEDFORMULA NewParent,ANNOTATEDFORMULA Inferred,
+SIGNATURE Signature) {
+
+    TERM InferredTERM;
+
+    if ((InferredTERM = GetSourceTERM(Inferred,"inference")) != NULL) {
+        return(AddParentToInferenceTerm(GetName(NewParent,NULL),InferredTERM,Signature));
+    } else {
+        return(0);
+    }
 }
 //-------------------------------------------------------------------------------------------------
 int SetSourceFromString(ANNOTATEDFORMULA AnnotatedFormula,SIGNATURE Signature,

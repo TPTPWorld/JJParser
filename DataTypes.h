@@ -158,7 +158,7 @@ typedef enum {
     formula,
 //----For connectives used as terms in THF, e.g., (&)
     connective,
-//----For useful info, source, etc. Not in signature.
+//----For useful info, source, etc. 
     non_logical_data,  
 //----Forcing a new variable to be inserted, replaced by variable
     new_variable,
