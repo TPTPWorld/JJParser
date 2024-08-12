@@ -209,6 +209,7 @@ SIGNATURE DuplicateSignature(SIGNATURE Original) {
 //-------------------------------------------------------------------------------------------------
 void FreeSymbolNode(SYMBOLNODE * Symbol) {
 
+//DEBUG printf("Freeing node %s\n",(*Symbol)->NameSymbol);
     assert((*Symbol)->NumberOfUses == 0);
     Free((void **)(&((*Symbol)->NameSymbol)));
     Free((void **)(&((*Symbol)->ShortSymbol)));

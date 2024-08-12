@@ -813,6 +813,8 @@ GetArity(Source->Arguments[2]) == -1) {
     }
 
     ParentList = Source->Arguments[2];
+//----This deal with the number of occurrences, so no need to increment when adding to parent
+//----list below.
     ParentNameInSignature = InsertIntoSignatureList(&(Signature->NonLogicals),ParentName,0,0,0,
 NULL);
     if (ParentNameInSignature == NULL) {
@@ -824,8 +826,8 @@ ParentList->FlexibleArity+1 * sizeof(TERM));
         ParentList->Arguments[ParentList->FlexibleArity]->Type = non_logical_data;
         ParentList->Arguments[ParentList->FlexibleArity]->TheSymbol.NonVariable =
 ParentNameInSignature;
-        IncreaseSymbolUseCount(ParentNameInSignature,1);
         ParentList->FlexibleArity++;
+//DEBUG printf("Increased us count of %s to %d\n",ParentNameInSignature->NameSymbol,ParentNameInSignature->NumberOfUses);
         return(1);
     }
 }
