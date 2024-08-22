@@ -88,7 +88,7 @@ printf("TESTING: Parsed\n");
 printf("TESTING: Cleaned signature\n");
     PrintSignature(Signature);
 printf("TESTING: Printed cleaned signature\n");
-    PrintListOfAnnotatedTSTPNodes(stdout,Signature,Head,dedukti,1);
+    PrintListOfAnnotatedTSTPNodes(stdout,Signature,Head,tptp,1);
 printf("TESTING: Printed formulae\n");
     ListStatistics = GetListStatistics(Head,Signature);
 printf("TESTING: Got statistics\n");

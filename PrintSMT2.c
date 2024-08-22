@@ -15,7 +15,6 @@
 #include <search.h>
 
 //-------------------------------------------------------------------------------------------------
-
 void SMT2EscapedString(FILE * Stream, const char *s) {
   const char *p;
     //p store where where are in the initial s

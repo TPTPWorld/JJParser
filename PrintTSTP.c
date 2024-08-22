@@ -912,7 +912,7 @@ Formula->FormulaUnion.QuantifiedFormula.Formula,Indent,Pretty,none,TSTPSyntaxFla
         case assignment:
         case type_declaration:
             Connective = Formula->FormulaUnion.BinaryFormula.Connective;
-//DEBUG printf("Printing %s with connective %s, last connective was %s, indent %d\n",FormulaTypeToString(Formula->Type),ConnectiveToString(Connective),ConnectiveToString(LastConnective),Indent);
+//DEBUG printf("Printing binary %s with connective %s, last connective was %s, indent %d\n",FormulaTypeToString(Formula->Type),ConnectiveToString(Connective),ConnectiveToString(LastConnective),Indent);
 //----No brackets for sequences of associative formulae and top level
             if (LastConnective == outermost || 
 //----Sadly the old BNF required ()s around equations on the side of a binary, and too many
@@ -1509,7 +1509,7 @@ PrintFormatType Format,int Pretty) {
             break;
         case dedukti:
             DKPrintHeader(Stream->FileHandle,Head,Signature);
-            DKPrintListOfAnnotatedTSTPNodes(Stream->FileHandle,Head,"proof");
+            DKPrintListOfAnnotatedTSTPNodes(Stream->FileHandle,Head,"","proof");
             DKPrintTailer(Stream->FileHandle);
             break;
         case otter:

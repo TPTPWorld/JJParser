@@ -28,6 +28,7 @@ char * GetSymbol(TERM Term) {
         CodingError("Getting symbol for NULL term");
     }
 
+//DEBUG printf("Get symbol for term of type %s\n",TermTypeToString(Term->Type));fflush(stdout);
     switch (Term->Type) {
         case atom_as_term:
         case connective:

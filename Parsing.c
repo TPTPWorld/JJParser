@@ -448,6 +448,7 @@ VARIABLENODE * EndOfScope,TermType DesiredType,int VariablesMustBeQuantified) {
 (DesiredType == function || DesiredType == atom_as_term) ) {
         FormulaArgument = NewTerm();
         FormulaArgument->Type = formula;
+//DEBUG printf("Parse argument as formula, type %s, tokan %s\n",TermTypeToString(DesiredType),CurrentToken(Stream)->NameToken);
         FormulaArgument->TheSymbol.Formula = ParseFormula(Stream,Language,Context,EndOfScope,1,1,
 VariablesMustBeQuantified,none);
         return(FormulaArgument);
@@ -835,7 +836,7 @@ Language != tptp_tcf) {
 //----variables can be types in polymorphic cases.
         if (Language != tptp_thf && Language != tptp_tff && Language != tptp_tcf &&
 DesiredType == atom_as_term && TypeIfInfix == variable) {
-            TokenError(Stream,"Variables cannot be used as predicates except in THF and TFX");
+            TokenError(Stream,"Variables cannot be used as predicates except in THF and TXF");
         }
     }
 
@@ -1012,7 +1013,7 @@ VARIABLENODE * EndOfScope,int VariablesMustBeQuantified) {
     Formula->Type = atom;
     Formula->FormulaUnion.Atom = ParseTerm(Stream,Language,Context,EndOfScope,atom_as_term,none,
 &InfixNegatedAtom,VariablesMustBeQuantified);
-//DEBUG printf("Atom symbol is %s and the arity is %d and the args are %s and the sig has %d uses\n",GetSymbol(Formula->FormulaUnion.Atom),GetArity(Formula->FormulaUnion.Atom),GetArguments(Formula->FormulaUnion.Atom) == NULL ? "NULL" : "not NULL",Formula->FormulaUnion.Atom->TheSymbol.NonVariable->NumberOfUses);
+//DEBUG printf("Atom symbol is %s and the arity is %d and the args are %s and the term type is %s and the sig has %d uses\n",GetSymbol(Formula->FormulaUnion.Atom),GetArity(Formula->FormulaUnion.Atom),GetArguments(Formula->FormulaUnion.Atom) == NULL ? "NULL" : "not NULL",TermTypeToString(Formula->FormulaUnion.Atom->Type),Formula->FormulaUnion.Atom->Type == variable ? Formula->FormulaUnion.Atom->TheSymbol.Variable->NumberOfUses:Formula->FormulaUnion.Atom->TheSymbol.NonVariable->NumberOfUses);
 //DEBUG printf("Parsed an atom: ");PrintTSTPTerm(stdout,Language,Formula->FormulaUnion.Atom,0,1,1);printf("\n");
 
 //----Hack to fix negated infix equality
@@ -1390,6 +1391,7 @@ ConnectiveType LastConnective) {
     switch (CurrentToken(Stream)->KindToken) {
 //----Three types of punctuation - ( for ()ed, [ for tuple, { for non-classical
         case punctuation:
+//DEBUG printf("Parsing punctuation %s\n",CurrentToken(Stream)->NameToken);
             if (CheckToken(Stream,punctuation,"[")) {
                 Formula = ParseTupleOrSequentFormula(Stream,Language,Context,
 EndOfScope,AllowBinary,VariablesMustBeQuantified,LastConnective);
@@ -1456,8 +1458,9 @@ VariablesMustBeQuantified);
                 Formula = ParseLETFormula(Stream,Language,Context,EndOfScope,
 VariablesMustBeQuantified);
             } else {
-//DEBUG printf("Parsed as an atom %s\n",CurrentToken(Stream)->NameToken);
+//DEBUG printf("Parse as an atom %s\n",CurrentToken(Stream)->NameToken);
                 Formula = ParseAtom(Stream,Language,Context,EndOfScope,VariablesMustBeQuantified);
+//DEBUG printf("Parsed as an atom with term type %s\n",TermTypeToString(Formula->FormulaUnion.Atom->Type));
             }
             break;
     }
@@ -1501,7 +1504,9 @@ AllowBinary &&
     CheckToken(Stream,punctuation,":")
   ) ) ) {
 //----Make sure it's a legitimate type declaration
-        if (CheckToken(Stream,punctuation,":") && Formula->Type != atom) {
+        if (CheckToken(Stream,punctuation,":") && 
+(Formula->Type != atom ||
+ Formula->FormulaUnion.Atom->Type == variable)) {
             TokenError(Stream,"Type declaration for non-atomic symbol");
             return(NULL);
         }
