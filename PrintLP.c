@@ -44,25 +44,31 @@ char * LambdaPiReserved(char * Symbol) {
 
 }
 //-------------------------------------------------------------------------------------------------
-char * TPTPtoLPSymbol(char * TPTPSymbol) {
+char * TPTPtoLPSymbol(char * TPTPSymbol,char * Prefix,String PutFinalHere) {
  
     char * LPBracketed;
 
     if (!strcmp(TPTPSymbol,"$i")) {
-        return("ι");  //----Was return("κ");
+        strcpy(PutFinalHere,"ι");
     } else if (!strcmp(TPTPSymbol,"$o")) {
-        return("Prop");
+        strcpy(PutFinalHere,"Prop");
     } else if (!strcmp(TPTPSymbol,"$false")) {
-        return("⊥");
+        strcpy(PutFinalHere,"⊥");
     } else if (!strcmp(TPTPSymbol,"$true")) {
-        return("⊤");
+        strcpy(PutFinalHere,"⊤");
     } else if (!strcmp(TPTPSymbol,"$tType")) {
-        return("Set");
+        strcpy(PutFinalHere,"Set");
     } else if (islower(TPTPSymbol[0]) && (LPBracketed = LambdaPiReserved(TPTPSymbol)) != NULL) {
-        return(LPBracketed);
+        strcpy(PutFinalHere,LPBracketed);
     } else {
-        return(TPTPSymbol);
+        strcpy(PutFinalHere,"");
+//----Prefix non-variables with "S.", from the signature
+        if (!isupper(TPTPSymbol[0])) {
+            strcat(PutFinalHere,Prefix);
+        }
+        strcat(PutFinalHere,TPTPSymbol);
     }
+    return(PutFinalHere);
 }
 //-------------------------------------------------------------------------------------------------
 char * LPConnectiveToString(ConnectiveType Connective) {
@@ -118,6 +124,7 @@ ConnectiveToString(Connective));
 void PrintLPArgumentSignature(FILE * Stream,FORMULA TypeSignature) {
 
     char * TheType;
+    String ToPrint;
 
     if (TypeSignature->Type == binary) {
         PrintLPArgumentSignature(Stream,TypeSignature->FormulaUnion.BinaryFormula.LHS);
@@ -129,7 +136,7 @@ void PrintLPArgumentSignature(FILE * Stream,FORMULA TypeSignature) {
 strcmp(TheType,"Type")) {
             fprintf(Stream,"τ ");
         }
-        fprintf(Stream,"%s",TPTPtoLPSymbol(TheType));
+        fprintf(Stream,"%s",TPTPtoLPSymbol(TheType,"S.",ToPrint));
     }
 }
 //-------------------------------------------------------------------------------------------------
@@ -140,6 +147,7 @@ int LPPrintSignatureList(FILE * Stream,SYMBOLNODE Node,LISTNODE TypeFormulae,cha
     String Symbol;
     FORMULA SearchingTypeFormula,MatchingTypeFormula;
     LISTNODE Searcher;
+    String ToPrint;
 
     if (Node != NULL) {
         NumberPrinted = LPPrintSignatureList(Stream,Node->LastSymbol,TypeFormulae,ResultType);
@@ -162,7 +170,7 @@ FormulaUnion.Atom))) {
                 }
                 Searcher = Searcher->Next;
             }
-            fprintf(Stream,"constant symbol %s : ",TPTPtoLPSymbol(Symbol));
+            fprintf(Stream,"constant symbol %s : ",TPTPtoLPSymbol(Symbol,"",ToPrint));
 //----Find the symbol's declaration
             if (MatchingTypeFormula != NULL) {
                 if (MatchingTypeFormula->Type == binary) {
@@ -199,6 +207,7 @@ void LPPrintTerm(FILE * Stream,TERM Term) {
     int Index;
     String Symbol;
     String ErrorMessage;
+    String ToPrint;
 
     switch (Term->Type) {
 //----Check if a nested formula - no symbol. This is for THF, TXF, TFF
@@ -220,7 +229,7 @@ void LPPrintTerm(FILE * Stream,TERM Term) {
                 if (GetArity(Term) > 0 && Term->Arguments != NULL) {
                     fprintf(Stream,"(");
                 }
-                fprintf(Stream,"%s",TPTPtoLPSymbol(Symbol));
+                fprintf(Stream,"%s",TPTPtoLPSymbol(Symbol,"S.",ToPrint));
                 if (GetArity(Term) > 0 && Term->Arguments != NULL) {
                     for (Index=0;Index < GetArity(Term);Index++) {
                         fprintf(Stream," ");
