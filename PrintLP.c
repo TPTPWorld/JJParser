@@ -59,12 +59,14 @@ char * TPTPtoLPSymbol(char * TPTPSymbol,char * Prefix,String PutFinalHere) {
     } else if (!strcmp(TPTPSymbol,"$tType")) {
         strcpy(PutFinalHere,"Set");
     } else if (islower(TPTPSymbol[0]) && (LPBracketed = LambdaPiReserved(TPTPSymbol)) != NULL) {
-        strcpy(PutFinalHere,LPBracketed);
+        strcpy(PutFinalHere,Prefix);
+        strcat(PutFinalHere,LPBracketed);
     } else {
-        strcpy(PutFinalHere,"");
-//----Prefix non-variables with "S.", from the signature
-        if (!isupper(TPTPSymbol[0])) {
-            strcat(PutFinalHere,Prefix);
+//----Prefix non-variables with "S." or "F.", from the signature/formulae
+        if (isupper(TPTPSymbol[0])) {
+            strcpy(PutFinalHere,"");
+        } else {
+            strcpy(PutFinalHere,Prefix);
         }
         strcat(PutFinalHere,TPTPSymbol);
     }
