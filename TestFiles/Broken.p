@@ -1,6 +1,6 @@
-tff(says,type,
-    says: $i > $o ).
+thf(p_decl,type,p: $int > $o).
+thf(r_decl,type,r: $o).
+thf(q_decl,type,q: $o).
 
-tff(island,axiom,
-    ! [P: $i] :
-      says(P: $i) ).
+tff(eqeq,axiom,
+    r != q).
