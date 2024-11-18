@@ -82,6 +82,14 @@ printf("TESTING: Initialized\n");
         Head = ParseFILEOfFormulae("--",stdin,Signature,1,NULL);
     }
 printf("TESTING: Parsed\n");
+//----Test building root list
+    RootListHead = BuildRootList(Head,Signature);
+    PrintRootList(stdout,RootListHead);
+    FreeRootList(&RootListHead,1,Signature);
+    FreeListOfAnnotatedFormulae(&Head,Signature);
+    FreeSignature(&Signature);
+    return(EXIT_SUCCESS);
+
 //     PrintSignature(Signature);
 // printf("TESTING: Printed original signature\n");
     RemovedUnusedSymbols(Signature);
@@ -161,14 +169,6 @@ printf("TESTING: Freed signature\n");
     Head = ParseFileOfHeader(argv[1]);
     PrintListOfAnnotatedTSTPNodes(stdout,Signature,Head,tptp,1);
     FreeListOfAnnotatedFormulae(&Head,Signature);
-    return(EXIT_SUCCESS);
-
-//----Test building root list
-    RootListHead = BuildRootList(Head,Signature);
-    PrintRootList(stdout,RootListHead);
-    FreeRootList(&RootListHead,1,Signature);
-    FreeListOfAnnotatedFormulae(&Head,Signature);
-    FreeSignature(&Signature);
     return(EXIT_SUCCESS);
 
 //----Test randomization

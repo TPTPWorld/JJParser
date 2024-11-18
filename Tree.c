@@ -693,9 +693,11 @@ ROOTLIST BuildRootList(LISTNODE Head,SIGNATURE Signature) {
     NextRootList = &RootListHead;
 //----Find all the root annotated formulae - each will start a tree
     RootAnnotatedFormulae = GetRootList(Head,Signature);
+printf("Found roots\n");
     RootAnnotatedFormulaNode = RootAnnotatedFormulae;
     while (RootAnnotatedFormulaNode != NULL) {
         GetName(RootAnnotatedFormulaNode->AnnotatedFormula,RootName);
+printf("Doing root %s\n",RootName);
         *NextRootList = NewRootNode(NULL);
         if (BuildTree(&NodesNotInTree,RootName,&((*NextRootList)->TheTree),&BTreeOfTreeNodes,
 Signature) == NULL) {
@@ -707,6 +709,7 @@ Signature) == NULL) {
             FreeListOfAnnotatedFormulae(&NodesNotInTree,Signature);
             return(NULL);
         } else {
+printf("Built tree for %s\n",RootName);
             NextRootList = &((*NextRootList)->Next);
         }
         RootAnnotatedFormulaNode = RootAnnotatedFormulaNode->Next;
