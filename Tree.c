@@ -599,8 +599,8 @@ LookingForThis) {
     return(NULL);
 }
 //-------------------------------------------------------------------------------------------------
-//----Using a reference parameter rather than returning so that the linking
-//----is done immediately to allow search what we have done already
+//----Using a reference parameter rather than returning so that the linking is done immediately to 
+//----allow search what we have done already.
 TREENODE BuildTree(LISTNODE * NodesNotInTree,char * Name,TREENODE * TheTree,
 ROOTBTREE * BTreeOfTreeNodes,SIGNATURE Signature) {
 
@@ -613,18 +613,17 @@ ROOTBTREE * BTreeOfTreeNodes,SIGNATURE Signature) {
 
 //DEBUG printf("Building tree for root %s \n",Name);fflush(stdout);
 //----Try link to an existing node in the tree
-    if ((InTree = GetNodeFromRootBTreeByAnnotatedFormulaName(BTreeOfTreeNodes,
-Name)) != NULL) {
-//DEBUG printf("already in tree\n");fflush(stdout);
+    if ((InTree = GetNodeFromRootBTreeByAnnotatedFormulaName(BTreeOfTreeNodes,Name)) != NULL) {
+//DEBUG printf("%s is already in tree\n",Name);fflush(stdout);
         *TheTree = (*InTree)->TheTree;
         (*TheTree)->NumberOfUses++;
         return(*TheTree);
 
 //----Make new tree node
     } else {
-//DEBUG printf("making the tree node\n");fflush(stdout);
-        if ((PtrToNodeInList = GetNodeFromListByAnnotatedFormulaName(
-NodesNotInTree,Name)) == NULL) {
+//DEBUG printf("Making the tree node for %s\n",Name);fflush(stdout);
+        if ((PtrToNodeInList = GetNodeFromListByAnnotatedFormulaName(NodesNotInTree,Name)) == 
+NULL) {
             sprintf(ErrorMessage,"Could not find formula named %s",Name);
             ReportError("SemanticError",ErrorMessage,0);
             return(NULL);
@@ -638,11 +637,9 @@ NodesNotInTree,Name)) == NULL) {
 
 //----Do parents if derived 
         if (DerivedAnnotatedFormula((*TheTree)->AnnotatedFormula)) {
-            AllParentNames = GetNodeParentNames((*TheTree)->AnnotatedFormula,
-NULL);
+            AllParentNames = GetNodeParentNames((*TheTree)->AnnotatedFormula,NULL);
 //DEBUG printf("Parents are %s\n",AllParentNames);fflush(stdout);
-            if (((*TheTree)->NumberOfParents = Tokenize(AllParentNames,
-ParentNames,"\n")) == 0) {
+            if (((*TheTree)->NumberOfParents = Tokenize(AllParentNames,ParentNames,"\n")) == 0) {
 //DEBUG printf("There are no parents\n");fflush(stdout);
 //----Derived but no parents - for tautologies which are inferred from nothing
                 (*TheTree)->Parents = NULL;
@@ -650,13 +647,14 @@ ParentNames,"\n")) == 0) {
 //DEBUG printf("Make list for the %d parents\n",(*TheTree)->NumberOfParents);fflush(stdout);
                 (*TheTree)->Parents = NewParentsList((*TheTree)->NumberOfParents);
 //DEBUG printf("Loop for parents\n");fflush(stdout);
-                for (ParentIndex = 0;ParentIndex < (*TheTree)->NumberOfParents;
-ParentIndex++) {
+                for (ParentIndex = 0;ParentIndex < (*TheTree)->NumberOfParents;ParentIndex++) {
 //DEBUG printf("Dealing with parent %s\n",ParentNames[ParentIndex]);fflush(stdout);
                     if (BuildTree(NodesNotInTree,ParentNames[ParentIndex],
 &((*TheTree)->Parents[ParentIndex]),BTreeOfTreeNodes,Signature) == NULL) {
 //DEBUG printf("ERROR: Could not build parent trees\n");fflush(stdout);
                         return(NULL);
+                    } else {
+//DEBUG printf("Built parent tree for %s\n",ParentNames[ParentIndex]);fflush(stdout);
                     }
                 }
             }
@@ -693,11 +691,11 @@ ROOTLIST BuildRootList(LISTNODE Head,SIGNATURE Signature) {
     NextRootList = &RootListHead;
 //----Find all the root annotated formulae - each will start a tree
     RootAnnotatedFormulae = GetRootList(Head,Signature);
-printf("Found roots\n");
+//DEBUG printf("Found roots\n");
     RootAnnotatedFormulaNode = RootAnnotatedFormulae;
     while (RootAnnotatedFormulaNode != NULL) {
         GetName(RootAnnotatedFormulaNode->AnnotatedFormula,RootName);
-printf("Doing root %s\n",RootName);
+//DEBUG printf("Doing root %s\n",RootName);
         *NextRootList = NewRootNode(NULL);
         if (BuildTree(&NodesNotInTree,RootName,&((*NextRootList)->TheTree),&BTreeOfTreeNodes,
 Signature) == NULL) {
@@ -709,7 +707,7 @@ Signature) == NULL) {
             FreeListOfAnnotatedFormulae(&NodesNotInTree,Signature);
             return(NULL);
         } else {
-printf("Built tree for %s\n",RootName);
+//DEBUG printf("Built tree for %s\n",RootName);
             NextRootList = &((*NextRootList)->Next);
         }
         RootAnnotatedFormulaNode = RootAnnotatedFormulaNode->Next;
