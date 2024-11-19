@@ -123,22 +123,22 @@ ConnectiveToString(Connective));
     }       
 }
 //-------------------------------------------------------------------------------------------------
-void PrintLPArgumentSignature(FILE * Stream,FORMULA TypeSignature) {
+void PrintLPArgumentSignature(FILE * Stream,FORMULA TypeSignature,char * Prefix) {
 
     char * TheType;
     String ToPrint;
 
     if (TypeSignature->Type == binary) {
-        PrintLPArgumentSignature(Stream,TypeSignature->FormulaUnion.BinaryFormula.LHS);
+        PrintLPArgumentSignature(Stream,TypeSignature->FormulaUnion.BinaryFormula.LHS,Prefix);
         fprintf(Stream," → ");
-        PrintLPArgumentSignature(Stream,TypeSignature->FormulaUnion.BinaryFormula.RHS);
+        PrintLPArgumentSignature(Stream,TypeSignature->FormulaUnion.BinaryFormula.RHS,Prefix);
     } else {
         TheType = GetSymbol(TypeSignature->FormulaUnion.Atom);
         if (strcmp(TheType,"$o") && strcmp(TheType,"$tType") && strcmp(TheType,"Prop") && 
 strcmp(TheType,"Type")) {
             fprintf(Stream,"τ ");
         }
-        fprintf(Stream,"%s",TPTPtoLPSymbol(TheType,"S.",ToPrint));
+        fprintf(Stream,"%s",TPTPtoLPSymbol(TheType,Prefix,ToPrint));
     }
 }
 //-------------------------------------------------------------------------------------------------
@@ -179,7 +179,7 @@ FormulaUnion.Atom))) {
 //----Move over to the type itself
                     MatchingTypeFormula = MatchingTypeFormula->FormulaUnion.BinaryFormula.LHS;
                     PrintLPArgumentSignature(Stream,
-MatchingTypeFormula->FormulaUnion.BinaryFormula.LHS);
+MatchingTypeFormula->FormulaUnion.BinaryFormula.LHS,"");
                     fprintf(Stream," → ");
                 }
             } else {
@@ -190,7 +190,7 @@ MatchingTypeFormula->FormulaUnion.BinaryFormula.LHS);
             }
             if (MatchingTypeFormula != NULL) {
                 PrintLPArgumentSignature(Stream,
-MatchingTypeFormula->FormulaUnion.BinaryFormula.RHS);
+MatchingTypeFormula->FormulaUnion.BinaryFormula.RHS,"");
             } else {
                 fprintf(Stream,"%s",ResultType);
             }
@@ -267,7 +267,8 @@ GetSymbol(Formula->FormulaUnion.QuantifiedFormula.Variable));
 //----You use typed FOL syntax and X11 could be of any type a priori.
             fprintf(Stream," : ");
             if (Formula->FormulaUnion.QuantifiedFormula.VariableType != NULL) {
-                PrintLPArgumentSignature(Stream,Formula->FormulaUnion.QuantifiedFormula.VariableType);
+                PrintLPArgumentSignature(Stream,
+Formula->FormulaUnion.QuantifiedFormula.VariableType,"S.");
             } else {
                 fprintf(Stream,"τ ι");
             }
