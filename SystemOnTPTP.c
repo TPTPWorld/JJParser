@@ -845,20 +845,21 @@ Conjecture,conjecture)) {
         strcpy(CopyUsersFileName,UsersFileName);
     }
     strcpy(LocalUsersFileName,CopyUsersFileName);
-    if (Correct == 0) {
-        if (SystemOnTPTPGetResult(0,ProblemFileName,PositiveChecker,TimeLimit,"",
+    if (SystemOnTPTPGetResult(0,ProblemFileName,PositiveChecker,TimeLimit,"",
 SystemOutputPrefix,OptionalFlags,KeepOutputFiles,FilesDirectory,LocalUsersFileName,
 OutputFileName,SystemResult,NULL,LocalSoT)) {
 //DEBUG printf("Result for %s is %s want a %s\n",LocalUsersFileName,SystemResult,PositiveResult);
 //----Have to check for Success separately because it is not SZSIsa (for some forgotten reason)
-            if (StringToSZSResult(SystemResult) == SUC ||
-SZSIsA(StringToSZSResult(SystemResult),StringToSZSResult(PositiveResult))) {
+printf("Want %s that starts with %c got %s\n",PositiveResult,*PositiveResult,SystemResult);
+        if (StringToSZSResult(SystemResult) == SUC ||
+//----If required result has a leading "+" then it must be exact
+(*PositiveResult == '+' ? !strcmp(SystemResult,PositiveResult+1) :
+SZSIsA(StringToSZSResult(SystemResult),StringToSZSResult(PositiveResult)))) {
 //DEBUG printf("That works that %s is a %s\n",SystemResult,PositiveResult);
-                Correct = 1;
+            Correct = 1;
 //----Should not trust prover's disproofs
-//            } else if (!strcmp(SystemResult,NegativeResult)) {
-//                Correct = -1;
-            }
+//        } else if (!strcmp(SystemResult,NegativeResult)) {
+//            Correct = -1;
         }
     }
 
@@ -871,7 +872,8 @@ SZSIsA(StringToSZSResult(SystemResult),StringToSZSResult(PositiveResult))) {
 SystemOutputPrefix,OptionalFlags,KeepOutputFiles,FilesDirectory,LocalUsersFileName,OutputFileName,
 SystemResult,NULL,LocalSoT)) {
             if (StringToSZSResult(SystemResult) == SUC ||
-SZSIsA(StringToSZSResult(SystemResult),StringToSZSResult(NegativeResult))) {
+(*NegativeResult == '+' ? !strcmp(SystemResult,NegativeResult+1) :
+SZSIsA(StringToSZSResult(SystemResult),StringToSZSResult(NegativeResult)))) {
                 Correct = -1;
 //----Should not trust disprover's proofs
 //            } else if (!strcmp(SystemResult,PositiveResult)) {
