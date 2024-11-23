@@ -850,7 +850,6 @@ SystemOutputPrefix,OptionalFlags,KeepOutputFiles,FilesDirectory,LocalUsersFileNa
 OutputFileName,SystemResult,NULL,LocalSoT)) {
 //DEBUG printf("Result for %s is %s want a %s\n",LocalUsersFileName,SystemResult,PositiveResult);
 //----Have to check for Success separately because it is not SZSIsa (for some forgotten reason)
-printf("Want %s that starts with %c got %s\n",PositiveResult,*PositiveResult,SystemResult);
         if (StringToSZSResult(SystemResult) == SUC ||
 //----If required result has a leading "+" then it must be exact
 (*PositiveResult == '+' ? !strcmp(SystemResult,PositiveResult+1) :
