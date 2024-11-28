@@ -3169,14 +3169,13 @@ char * GetOneParentNames(TERM ParentSource,char * PutNamesHere) {
         ExtendAndFree(&Buffer,TSTPTermToString(ParentSource,NULL),&BufferSize);
         ExtendString(&Buffer,"\n",&BufferSize);
 //----If an atom with extra information about the inference
-    } else if (!strcmp(GetSymbol(ParentSource),":") && GetArity(ParentSource) 
-== 2) {
-        ExtendString(&Buffer,GetSymbol(ParentSource->Arguments[0]),&BufferSize);
-        ExtendString(&Buffer,"\n",&BufferSize);
+    } else if (!strcmp(GetSymbol(ParentSource),":") && GetArity(ParentSource) == 2) {
+        return(GetOneParentNames(ParentSource->Arguments[0],PutNamesHere));
+        // ExtendString(&Buffer,GetSymbol(ParentSource->Arguments[0]),&BufferSize);
+        // ExtendString(&Buffer,"\n",&BufferSize);
 //----If a nested inference record
     } else if (!strcmp(GetSymbol(ParentSource),"inference")) {
-        ExtendAndFree(&Buffer,GetInferenceParentNames(ParentSource,NULL),
-&BufferSize);
+        ExtendAndFree(&Buffer,GetInferenceParentNames(ParentSource,NULL),&BufferSize);
     } 
 
     return(BufferReturn(&Buffer,PutNamesHere));
@@ -3191,8 +3190,7 @@ char * GetInferenceParentNames(TERM InferenceTerm,char * PutNamesHere) {
     int BufferSize;
 
 //----Check that it's an inference record with a list of parents
-    if (GetArity(InferenceTerm) != 3 ||
-GetSymbol(InferenceTerm->Arguments[2])[0] != '[') {
+    if (GetArity(InferenceTerm) != 3 || GetSymbol(InferenceTerm->Arguments[2])[0] != '[') {
         CodingError("Getting parent names from malformed inference record");
     }
 
