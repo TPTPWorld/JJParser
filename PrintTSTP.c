@@ -758,34 +758,36 @@ FORMULAArray FormulaTuple,int Pretty,int Indent,int TSTPSyntaxFlag) {
     ConnectiveType LastConnective;
 
     PFprintf(Stream,"[");
-    if ((NeedSpace = !AtomFlatFormulaList(NumberOfElements,FormulaTuple))) {
-        PFprintf(Stream," ");
-    }
-//----Need to () nested formula that are not flat, e.g., binaries.
-    if (FlatFormula(FormulaTuple[0])) {
-        LastConnective = outermost;
-    } else {
-        LastConnective = none;
-    }
-    PrintFileTSTPFormula(Stream,Language,FormulaTuple[0],Indent+2,Pretty,LastConnective,
-TSTPSyntaxFlag);
-    for (ElementNumber=1;ElementNumber < NumberOfElements;ElementNumber++) {
-        PFprintf(Stream,",");
-        if (Pretty && (!AtomFlatFormula(FormulaTuple[ElementNumber-1]) ||
-!AtomFlatFormula(FormulaTuple[ElementNumber]))) {
-            PFprintf(Stream,"\n");
-            PrintSpaces(Stream,Indent+2);
+    if (NumberOfElements > 0) {
+        if ((NeedSpace = !AtomFlatFormulaList(NumberOfElements,FormulaTuple))) {
+            PFprintf(Stream," ");
         }
-        if (FlatFormula(FormulaTuple[ElementNumber])) {
+//----Need to () nested formula that are not flat, e.g., binaries.
+        if (FlatFormula(FormulaTuple[0])) {
             LastConnective = outermost;
         } else {
             LastConnective = none;
         }
-        PrintFileTSTPFormula(Stream,Language,FormulaTuple[ElementNumber],Indent+2,Pretty,
+        PrintFileTSTPFormula(Stream,Language,FormulaTuple[0],Indent+2,Pretty,LastConnective,
+TSTPSyntaxFlag);
+        for (ElementNumber=1;ElementNumber < NumberOfElements;ElementNumber++) {
+            PFprintf(Stream,",");
+            if (Pretty && (!AtomFlatFormula(FormulaTuple[ElementNumber-1]) ||
+!AtomFlatFormula(FormulaTuple[ElementNumber]))) {
+                PFprintf(Stream,"\n");
+                PrintSpaces(Stream,Indent+2);
+            }
+            if (FlatFormula(FormulaTuple[ElementNumber])) {
+                LastConnective = outermost;
+            } else {
+                LastConnective = none;
+            }
+            PrintFileTSTPFormula(Stream,Language,FormulaTuple[ElementNumber],Indent+2,Pretty,
 LastConnective,TSTPSyntaxFlag);
-    }
-    if (NeedSpace) {
-        PFprintf(Stream," ");
+        }
+        if (NeedSpace) {
+            PFprintf(Stream," ");
+        }
     }
     PFprintf(Stream,"]");
 }
