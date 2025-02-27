@@ -74,6 +74,7 @@ NULL),-1);
     IncreaseSymbolUseCount(InsertIntoSignature(Signature,function,"$ceiling",1,-1,0,NULL),-1);
     IncreaseSymbolUseCount(InsertIntoSignature(Signature,function,"$truncate",1,-1,0,NULL),-1);
     IncreaseSymbolUseCount(InsertIntoSignature(Signature,function,"$round",1,-1,0,NULL),-1);
+    IncreaseSymbolUseCount(InsertIntoSignature(Signature,function,"$abs",1,-1,0,NULL),-1);
     IncreaseSymbolUseCount(InsertIntoSignature(Signature,function,"$to_int",1,-1,0,NULL),-1);
     IncreaseSymbolUseCount(InsertIntoSignature(Signature,function,"$to_rat",1,-1,0,NULL),-1);
     IncreaseSymbolUseCount(InsertIntoSignature(Signature,function,"$to_real",1,-1,0,NULL),-1);

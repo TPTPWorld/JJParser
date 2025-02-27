@@ -444,6 +444,7 @@ int IsMathFunctor(char * Symbol,int Arity) {
         "$ceiling/1",
         "$truncate/1",
         "$round/1",
+        "$abs/1",
         "$to_int/1",
         "$to_rat/1",
         "$to_real/1" };
