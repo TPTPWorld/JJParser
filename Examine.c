@@ -3096,8 +3096,7 @@ char * GetDischargedNames(ANNOTATEDFORMULA AnnotatedFormula,TERM * DischargeList
     int NameIndex;
 
     MakeBuffer(&Buffer,&BufferSize);
-    ArrayOfInfoTERMs = GetInferenceInfoTERMs(AnnotatedFormula,
-"__inference_rule__",&NumberOfTerms);
+    ArrayOfInfoTERMs = GetInferenceInfoTERMs(AnnotatedFormula,"__inference_rule__",&NumberOfTerms);
     for (Index=0;Index < NumberOfTerms;Index++) {
         if (GetArity(ArrayOfInfoTERMs[Index]) == 2 &&
 !strcmp(GetSymbol(ArrayOfInfoTERMs[Index]->Arguments[0]),"discharge")) {
