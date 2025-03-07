@@ -383,7 +383,7 @@ LISTNODE Head,StatusType AxiomsStatus,ANNOTATEDFORMULA Conjecture,StatusType Con
     }
 //----Why did I check for NULL here?
     if (Head != NULL) {
-//----Note type formulae remain type (fuck, what other cases could I miss?)
+//----Note logic and type formulae remain logic and type (fuck, what other cases could I miss?)
         PrintListOfAnnotatedTSTPNodesWithStatus(ProblemFileHandle,NULL,Head,tptp,1,AxiomsStatus);
     }
     if (Conjecture != NULL) {
