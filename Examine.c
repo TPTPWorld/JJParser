@@ -2901,30 +2901,29 @@ int * Index) {
         strcpy(FinalSymbol,Symbol);
     }
     for ( ; *Index < InferenceInfo->FlexibleArity; (*Index)++) {
-        if (!strcmp(FinalSymbol,InferenceInfo->Arguments[*Index]->TheSymbol.
-NonVariable->NameSymbol)) {
+        if (!strcmp(FinalSymbol,InferenceInfo->Arguments[*Index]->
+TheSymbol.NonVariable->NameSymbol)) {
             return(InferenceInfo->Arguments[*Index]);
         }
     }
     return(NULL);
 }
 //-------------------------------------------------------------------------------------------------
-void DoGetInferenceInfoTERMsFromInferenceRecord(TERM InferenceRecord,
-char * Symbol,TERMArray * ArrayOfInfoTERMs,int * NumberOfTerms) {
+void DoGetInferenceInfoTERMsFromInferenceRecord(TERM InferenceRecord,char * Symbol,
+TERMArray * ArrayOfInfoTERMs,int * NumberOfTerms) {
 
     TERM ThisInfoTERM;
     TERM ParentsList;
     int Index;
 
 //----Check that it's an inference record with a list of parents
-    if (GetArity(InferenceRecord) != 3 ||
-!LooksLikeAList(InferenceRecord->Arguments[2],-1,-1)) {
+    if (GetArity(InferenceRecord) != 3 || !LooksLikeAList(InferenceRecord->Arguments[2],-1,-1)) {
         CodingError("Getting inference info from malformed inference record");
     }
 
     Index = 0;
-    while ((ThisInfoTERM = GetSourceInfoTERMFromSourceInfo(InferenceRecord->
-Arguments[1],Symbol,GetSymbol(InferenceRecord->Arguments[0]),&Index)) != NULL) {
+    while ((ThisInfoTERM = GetSourceInfoTERMFromSourceInfo(InferenceRecord->Arguments[1],Symbol,
+GetSymbol(InferenceRecord->Arguments[0]),&Index)) != NULL) {
         (*NumberOfTerms)++;
         *ArrayOfInfoTERMs = (TERMArray)Realloc((void *)*ArrayOfInfoTERMs,
 (*NumberOfTerms) * sizeof(TERM));
@@ -2966,8 +2965,7 @@ DerivedAnnotatedFormula(AnnotatedFormula) &&
 !strcmp(GetSymbol(AnnotatedFormula->AnnotatedFormulaUnion.AnnotatedTSTPFormula.
 Source),"inference")) {
         GetInferenceInfoTERMsFromInferenceRecord(AnnotatedFormula->
-AnnotatedFormulaUnion.AnnotatedTSTPFormula.Source,Symbol,
-&ArrayOfInfoTERMs,NumberOfTerms);
+AnnotatedFormulaUnion.AnnotatedTSTPFormula.Source,Symbol,&ArrayOfInfoTERMs,NumberOfTerms);
     }
     return(ArrayOfInfoTERMs);
 }
@@ -3044,8 +3042,7 @@ SZSResultArray ArrayOfSZSStatuses,int * NumberOfSZSResults) {
     int NumberOfTerms;
     int Index;
 
-    ArrayOfStatusTERMs = GetInferenceInfoTERMs(AnnotatedFormula,"status",
-&NumberOfTerms);
+    ArrayOfStatusTERMs = GetInferenceInfoTERMs(AnnotatedFormula,"status",&NumberOfTerms);
     if (NumberOfTerms == 0) {
         if (ArrayOfStatusTERMs != NULL) {
             Free((void **)&ArrayOfStatusTERMs);
@@ -3096,17 +3093,20 @@ char * GetDischargedNames(ANNOTATEDFORMULA AnnotatedFormula,TERM * DischargeList
     int NameIndex;
 
     MakeBuffer(&Buffer,&BufferSize);
-    ArrayOfInfoTERMs = GetInferenceInfoTERMs(AnnotatedFormula,"__inference_rule__",&NumberOfTerms);
+    ArrayOfInfoTERMs = GetInferenceInfoTERMs(AnnotatedFormula,"discharge",&NumberOfTerms);
+//DEBUG printf("There are %d terms\n",NumberOfTerms);
     for (Index=0;Index < NumberOfTerms;Index++) {
+//DEBUG printf("Look at a term with name %s\n",GetSymbol(ArrayOfInfoTERMs[Index]));
         if (GetArity(ArrayOfInfoTERMs[Index]) == 2 &&
-!strcmp(GetSymbol(ArrayOfInfoTERMs[Index]->Arguments[0]),"discharge")) {
+!strcmp(GetSymbol(ArrayOfInfoTERMs[Index]),"discharge")) {
             if (!LooksLikeAList(ArrayOfInfoTERMs[Index]->Arguments[1],-1,-1)) {
                 CodingError("No list of discharged assumptions");
             }
 //----This assumes only one discharge list, which is prolly true
             *DischargeList = ArrayOfInfoTERMs[Index]->Arguments[1];
-            for (NameIndex=0;NameIndex < GetArity(ArrayOfInfoTERMs[Index]->
-Arguments[1]);NameIndex++) {
+            for (NameIndex=0;NameIndex < GetArity(ArrayOfInfoTERMs[Index]->Arguments[1]);
+NameIndex++) {
+//DEBUG printf("Discharging %s\n",GetSymbol(ArrayOfInfoTERMs[Index]->Arguments[1]->Arguments[NameIndex]));
                 ExtendString(&Buffer,GetSymbol(ArrayOfInfoTERMs[Index]->
 Arguments[1]->Arguments[NameIndex]),&BufferSize);
                 ExtendString(&Buffer,",",&BufferSize);
