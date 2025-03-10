@@ -10,24 +10,24 @@
 #include "PrintTSTP.h"
 #include "Examine.h"
 #include "Interpret.h"
+#include "Compare.h"
 //-------------------------------------------------------------------------------------------------
-int FormulaTrueInInterpretation(FORMULA Formula,InterpretationType 
-Interpretation) {
+int FormulaTrueInInterpretation(FORMULA Formula,InterpretationType Interpretation) {
 
     int LHSInterpretation;
     int RHSInterpretation;
 
     switch (Formula->Type) {
         case quantified:
-            return(FormulaTrueInInterpretation(Formula->FormulaUnion.
-QuantifiedFormula.Formula,Interpretation));
+            return(FormulaTrueInInterpretation(Formula->FormulaUnion.QuantifiedFormula.Formula,
+Interpretation));
             break;
         case binary:
 //----A little inefficient, but WTF
-            LHSInterpretation = FormulaTrueInInterpretation(Formula->
-FormulaUnion.BinaryFormula.LHS,Interpretation);
-            RHSInterpretation = FormulaTrueInInterpretation(Formula->
-FormulaUnion.BinaryFormula.RHS,Interpretation);
+            LHSInterpretation = FormulaTrueInInterpretation(Formula->FormulaUnion.BinaryFormula.LHS,
+Interpretation);
+            RHSInterpretation = FormulaTrueInInterpretation(Formula->FormulaUnion.BinaryFormula.RHS,
+Interpretation);
             switch (Formula->FormulaUnion.BinaryFormula.Connective) {
                 case disjunction:
                     return(LHSInterpretation || RHSInterpretation);
@@ -39,11 +39,9 @@ FormulaUnion.BinaryFormula.RHS,Interpretation);
                     return(LHSInterpretation == RHSInterpretation);
                     break;
                 case implication:
-                    return(!LHSInterpretation || (LHSInterpretation && 
-RHSInterpretation));
+                    return(!LHSInterpretation || (LHSInterpretation && RHSInterpretation));
                     break;
-                case reverseimplication:
-                    return(!RHSInterpretation || (RHSInterpretation && 
+                case reverseimplication: return(!RHSInterpretation || (RHSInterpretation && 
 LHSInterpretation));
                     break;
                 case nonequivalence:
@@ -55,19 +53,26 @@ LHSInterpretation));
                 case negatedconjunction:
                     return(!(LHSInterpretation && RHSInterpretation));
                     break;
+//----Equations (with =) are now binary formulae
+                case equation:
+                    if (Interpretation == positive) {
+                        return(SameFormula(Formula->FormulaUnion.BinaryFormula.LHS,
+Formula->FormulaUnion.BinaryFormula.RHS,0,0));
+                    } else {
+                        return(0);
+                    }
+                    break;
                 default:
-                    CodingError(
-"Illegal binary connective in FormulaTrueInInterpretation");
+                    CodingError("Illegal binary connective in FormulaTrueInInterpretation");
                     break;
             }
             break;
         case unary:
             if (Formula->FormulaUnion.UnaryFormula.Connective == negation) {
-                return(!FormulaTrueInInterpretation(Formula->FormulaUnion.
-UnaryFormula.Formula,Interpretation));
+                return(!FormulaTrueInInterpretation(Formula->FormulaUnion.UnaryFormula.Formula,
+Interpretation));
             } else {
-                CodingError(
-"Illegal unary connective in FormulaTrueInInterpretation");
+                CodingError("Illegal unary connective in FormulaTrueInInterpretation");
             }
             break;
         case atom:

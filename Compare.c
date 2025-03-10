@@ -198,8 +198,7 @@ FormulaTypeToString(Formula1->Type));
     }
 }
 //-------------------------------------------------------------------------------------------------
-int SameFormula(FORMULA Formula1,FORMULA Formula2,int AllowVariableRenaming,
-int AllowCommutation) {
+int SameFormula(FORMULA Formula1,FORMULA Formula2,int AllowVariableRenaming,int AllowCommutation) {
 
     VARIABLERENAMING RenamedVariables;
     VARIABLERENAMING NextNode;

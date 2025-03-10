@@ -13,7 +13,6 @@ int TrueAnnotatedFormula(ANNOTATEDFORMULA AnnotatedFormula);
 int FalseAnnotatedFormula(ANNOTATEDFORMULA AnnotatedFormula);
 int AnnotatedFormulaTrueInInterpretation(ANNOTATEDFORMULA AnnotatedFormula,
 InterpretationType Interpretation);
-int ListOfAnnotatedFormulaTrueInInterpretation(LISTNODE Head,
-InterpretationType Interpretation);
+int ListOfAnnotatedFormulaTrueInInterpretation(LISTNODE Head,InterpretationType Interpretation);
 //-------------------------------------------------------------------------------------------------
 #endif
