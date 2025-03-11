@@ -1460,8 +1460,8 @@ PrintFormatType Format,int Pretty,StatusType Role) {
     OldRole = GetRole(AnnotatedFormula,&OldSubRole);
     DesiredRole = Role == axiom ? axiom_like : Role;
     
-//----Only set if not nonstatus, not logic or type (hack), and not what we want
-    if (Role != nonstatus && OldRole != logic && OldRole != type && 
+//----Only set if not nonstatus, not logic or type or definition (hack), and not what we want
+    if (Role != nonstatus && OldRole != logic && OldRole != type && OldRole != definition &&
 !CheckRole(OldRole,DesiredRole)) {
         SetStatus(AnnotatedFormula,Role,OldSubRole);
     }
