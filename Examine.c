@@ -563,10 +563,9 @@ int InferredAnnotatedFormula(ANNOTATEDFORMULA AnnotatedFormula) {
 //----Has a source
 AnnotatedFormula->AnnotatedFormulaUnion.AnnotatedTSTPFormula.Source != NULL && 
 //----Source is inference
-!strcmp(GetSymbol(AnnotatedFormula->AnnotatedFormulaUnion.AnnotatedTSTPFormula.
-Source),"inference") &&
-GetArity(AnnotatedFormula->AnnotatedFormulaUnion.AnnotatedTSTPFormula.Source) 
-== 3);
+!strcmp(GetSymbol(AnnotatedFormula->AnnotatedFormulaUnion.AnnotatedTSTPFormula.Source),
+"inference") &&
+GetArity(AnnotatedFormula->AnnotatedFormulaUnion.AnnotatedTSTPFormula.Source) == 3);
 }
 //-------------------------------------------------------------------------------------------------
 int DerivedAnnotatedFormula(ANNOTATEDFORMULA AnnotatedFormula) {
