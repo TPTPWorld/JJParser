@@ -853,7 +853,7 @@ Statistics.FormulaStatistics.NumberOfTCF > 0 ||
 Statistics.FormulaStatistics.NumberOfCNF > 0) {
             fprintf(Stream,"(%4d sgn",Statistics.SymbolStatistics.NumberOfSingletons);
         } else if (Statistics.FormulaStatistics.NumberOfTHF > 0) {
-            fprintf(Stream,"(%4d   ^",Statistics.ConnectiveStatistics.NumberOfLambdas);
+            fprintf(Stream,"(%4d   ^;",Statistics.ConnectiveStatistics.NumberOfLambdas);
         } else {
             fprintf(Stream,"(");
         }
