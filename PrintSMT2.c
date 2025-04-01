@@ -293,7 +293,6 @@ void SMT2PrintAnnotatedTSTPNode(FILE * Stream,ANNOTATEDFORMULA AnnotatedFormula)
             break;
     }
 }
-
 //-------------------------------------------------------------------------------------------------
 void SMT2PrintListOfAnnotatedTSTPNodes(FILE * Stream,LISTNODE Head) {
 
