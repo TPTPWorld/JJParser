@@ -293,6 +293,8 @@ PRINTFILE OpenStringPrintFile(char * Content) {
         return(NULL);
     }
 
+//----Empty the string
+    *Content = '\0';
     Stream = NewPrintFile();
     Stream->StringFileContent = Content;
 

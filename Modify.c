@@ -232,7 +232,7 @@ SIGNATURE Signature) {
 //DEBUG PrintAnnotatedTSTPNode(stdout,AnnotatedFormula,tptp,1);
 
 //----Get parents' names
-    ParentNames = GetNodeParentNames(AnnotatedFormula,NULL);
+    ParentNames = GetNodeParentNames(AnnotatedFormula,0,NULL);
     if ((FormulaAssumptionsTerm = GetInferenceInfoTERM(AnnotatedFormula,"assumptions")) != NULL) {
 //----Get assumptions' names
         FormulaAssumptions = ExtractAssumptionsList(FormulaAssumptionsTerm);
@@ -323,8 +323,7 @@ void ExpandListAssumptions(LISTNODE Head,SIGNATURE Signature) {
 
     Target = Head;
     while (Target != NULL) {
-        ExpandAnnotatedFormulaAssumptions(Target->AnnotatedFormula,Head,
-Signature);
+        ExpandAnnotatedFormulaAssumptions(Target->AnnotatedFormula,Head,Signature);
         Target = Target->Next;
     }
 }

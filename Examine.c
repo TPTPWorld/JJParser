@@ -14,7 +14,7 @@
 #include "Examine.h"
 #include "SystemOnTPTP.h"
 //-------------------------------------------------------------------------------------------------
-char * GetInferenceParentNames(TERM InferenceTerm,char * PutNamesHere);
+char * GetInferenceParentNames(TERM InferenceTerm,int IncludeDetails,char * PutNamesHere);
 int CountVariableUsageInTerm(TERM Term,VARIABLENODE Variable);
 int CountTermNestedFormulae(SIGNATURE Signature,TERM Term);
 int CountVariablesInFormulaByType(FORMULA Formula,char * Type);
@@ -3151,10 +3151,11 @@ char * ExtractAssumptionsList(TERM AssumptionsTerm) {
 //-------------------------------------------------------------------------------------------------
 //----Calling routine must provide enough space for info, or send NULL and
 //----take responsibility for the malloced memory.
-char * GetOneParentNames(TERM ParentSource,char * PutNamesHere) {
+char * GetOneParentNames(TERM ParentSource,int IncludeDetails,char * PutNamesHere) {
 
     char * Buffer;
     int BufferSize;
+    SuperString DetailedTerm;
 
 //----Build in malloced memory
     MakeBuffer(&Buffer,&BufferSize);
@@ -3169,12 +3170,17 @@ char * GetOneParentNames(TERM ParentSource,char * PutNamesHere) {
         ExtendString(&Buffer,"\n",&BufferSize);
 //----If an atom with extra information about the inference
     } else if (!strcmp(GetSymbol(ParentSource),":") && GetArity(ParentSource) == 2) {
-        return(GetOneParentNames(ParentSource->Arguments[0],PutNamesHere));
-        // ExtendString(&Buffer,GetSymbol(ParentSource->Arguments[0]),&BufferSize);
-        // ExtendString(&Buffer,"\n",&BufferSize);
+        if (IncludeDetails) {
+            PrintStringTSTPTerm(DetailedTerm,tptp_fof,ParentSource,0,0,1);
+            ExtendString(&Buffer,DetailedTerm,&BufferSize);
+            ExtendString(&Buffer,"\n",&BufferSize);
+        } else {
+            return(GetOneParentNames(ParentSource->Arguments[0],IncludeDetails,PutNamesHere));
+        }
 //----If a nested inference record
     } else if (!strcmp(GetSymbol(ParentSource),"inference")) {
-        ExtendAndFree(&Buffer,GetInferenceParentNames(ParentSource,NULL),&BufferSize);
+        ExtendAndFree(&Buffer,GetInferenceParentNames(ParentSource,IncludeDetails,NULL),
+&BufferSize);
     } 
 
     return(BufferReturn(&Buffer,PutNamesHere));
@@ -3182,7 +3188,7 @@ char * GetOneParentNames(TERM ParentSource,char * PutNamesHere) {
 //-------------------------------------------------------------------------------------------------
 //----Calling routine must provide enough space for info, or send NULL and take responsibility for 
 //----the malloced memory.
-char * GetInferenceParentNames(TERM InferenceTerm,char * PutNamesHere) {
+char * GetInferenceParentNames(TERM InferenceTerm,int IncludeDetails,char * PutNamesHere) {
 
     int Index;
     char * Buffer;
@@ -3198,7 +3204,7 @@ char * GetInferenceParentNames(TERM InferenceTerm,char * PutNamesHere) {
 
     for (Index = 0; Index < GetArity(InferenceTerm->Arguments[2]); Index++) {
         ExtendAndFree(&Buffer,GetOneParentNames(InferenceTerm->Arguments[2]->
-Arguments[Index],NULL),&BufferSize);
+Arguments[Index],IncludeDetails,NULL),&BufferSize);
     }
 
     return(BufferReturn(&Buffer,PutNamesHere));
@@ -3206,7 +3212,7 @@ Arguments[Index],NULL),&BufferSize);
 //-------------------------------------------------------------------------------------------------
 //----Calling routine must provide enough space for info, or send NULL and take responsibility for 
 //----the malloced memory.
-char * GetParentNames(ANNOTATEDFORMULA AnnotatedFormula,char * PutNamesHere) {
+char * GetParentNames(ANNOTATEDFORMULA AnnotatedFormula,int IncludeDetails,char * PutNamesHere) {
 
     char * Buffer;
     int BufferSize;
@@ -3218,7 +3224,7 @@ char * GetParentNames(ANNOTATEDFORMULA AnnotatedFormula,char * PutNamesHere) {
 //----Check if it's an inference
             if (InferredAnnotatedFormula(AnnotatedFormula)) {
                 Buffer = GetInferenceParentNames(AnnotatedFormula->
-AnnotatedFormulaUnion.AnnotatedTSTPFormula.Source,NULL);
+AnnotatedFormulaUnion.AnnotatedTSTPFormula.Source,IncludeDetails,NULL);
             } else {
 //----Must be the name of a node directly
                 MakeBuffer(&Buffer,&BufferSize);
@@ -3238,13 +3244,14 @@ AnnotatedFormulaUnion.AnnotatedTSTPFormula.Source),&BufferSize);
 }
 //-------------------------------------------------------------------------------------------------
 //----Same as GetParentNames but no theory names
-char * GetNodeParentNames(ANNOTATEDFORMULA AnnotatedFormula,char * PutNamesHere) {
+char * GetNodeParentNames(ANNOTATEDFORMULA AnnotatedFormula,int IncludeDetails,
+char * PutNamesHere) {
 
     char * Buffer;
     char * StartOfTheory;
     char * EndOfTheory;
 
-    Buffer = GetParentNames(AnnotatedFormula,NULL);
+    Buffer = GetParentNames(AnnotatedFormula,IncludeDetails,NULL);
     while ((StartOfTheory = strstr(Buffer,"theory(")) != NULL) {
         EndOfTheory = strchr(StartOfTheory,'\n');
         strcpy(StartOfTheory,EndOfTheory+1);
@@ -3261,7 +3268,7 @@ SIGNATURE Signature) {
     StringParts ParentNames;
 
     *Parents = NULL;
-    AllParentNames = GetNodeParentNames(AnnotatedFormula,NULL);
+    AllParentNames = GetNodeParentNames(AnnotatedFormula,0,NULL);
     NumberOfParents = Tokenize(AllParentNames,ParentNames,"\n");
     if (!GetNodesForNames(Head,ParentNames,NumberOfParents,Parents,Signature)) {
         Free((void **)&AllParentNames);

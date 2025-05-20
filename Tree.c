@@ -189,8 +189,7 @@ IgnoreDuplicates,Syntax);
 //-------------------------------------------------------------------------------------------------
 //----Beware, this does not reset the visited tag, so if using it repeatedly
 //----you may want to do that - depends on the application.
-void GetRootLeafList(TREENODE Root,LISTNODE * LeafListHead,
-int IgnoreDuplicates) {
+void GetRootLeafList(TREENODE Root,LISTNODE * LeafListHead,int IgnoreDuplicates) {
 
     int Index;
 
@@ -206,8 +205,8 @@ int IgnoreDuplicates) {
     Root->Visited = 1;
 
     if (Root->NumberOfParents == 0) {
-        if (!IgnoreDuplicates || GetNodeFromListByAnnotatedFormula(
-LeafListHead,Root->AnnotatedFormula) == NULL) {
+        if (!IgnoreDuplicates || GetNodeFromListByAnnotatedFormula(LeafListHead,
+Root->AnnotatedFormula) == NULL) {
             AddListNode(LeafListHead,(*LeafListHead),Root->AnnotatedFormula);
         }
     } else {
@@ -283,8 +282,8 @@ ROOTLIST GetFalseNodes(ROOTLIST RootListHead,LISTNODE Head) {
     FalseList = NULL;
     while (Head != NULL) {
         if (FalseAnnotatedFormula(Head->AnnotatedFormula)) {
-            if ((FalseNode = AnnotatedFormulaInTrees(RootListHead,
-Head->AnnotatedFormula)) == NULL) {
+            if ((FalseNode = AnnotatedFormulaInTrees(RootListHead,Head->AnnotatedFormula)) == 
+NULL) {
                 CodingError("False node is not in any tree");
             } else {
                 AddRootNode(&FalseList,FalseList,FalseNode);
@@ -357,7 +356,7 @@ GetName((*Remover)->AnnotatedFormula,ParentName))) {
             }
         } else {
 //DEBUG printf("remove parents of %s\n",GetName(Head->AnnotatedFormula,NULL));
-            AllParentNames = GetParentNames(Head->AnnotatedFormula,NULL);
+            AllParentNames = GetParentNames(Head->AnnotatedFormula,0,NULL);
             NumberOfParents = Tokenize(AllParentNames,ParentNames,"\n");
 //----Remove all parents - they are not roots
             for (ParentNumber = 0;ParentNumber< NumberOfParents;ParentNumber++) {
@@ -637,7 +636,7 @@ NULL) {
 
 //----Do parents if derived 
         if (DerivedAnnotatedFormula((*TheTree)->AnnotatedFormula)) {
-            AllParentNames = GetNodeParentNames((*TheTree)->AnnotatedFormula,NULL);
+            AllParentNames = GetNodeParentNames((*TheTree)->AnnotatedFormula,0,NULL);
 //DEBUG printf("Parents are %s\n",AllParentNames);fflush(stdout);
             if (((*TheTree)->NumberOfParents = Tokenize(AllParentNames,ParentNames,"\n")) == 0) {
 //DEBUG printf("There are no parents\n");fflush(stdout);

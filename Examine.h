@@ -98,8 +98,8 @@ SZSResultArray ArrayOfSZSStatuses,int * NumberOfSZSResults);
 char * GetInferenceStatus(ANNOTATEDFORMULA AnnotatedFormula,char * SZSStatus);
 char * GetDischargedNames(ANNOTATEDFORMULA AnnotatedFormula,TERM * DischargeList);
 char * ExtractAssumptionsList(TERM AssumptionsTerm);
-char * GetParentNames(ANNOTATEDFORMULA AnnotatedFormula,char * PutNamesHere);
-char * GetNodeParentNames(ANNOTATEDFORMULA AnnotatedFormula,char * PutNamesHere);
+char * GetParentNames(ANNOTATEDFORMULA AnnotatedFormula,int IncludeDetails,char * PutNamesHere);
+char * GetNodeParentNames(ANNOTATEDFORMULA AnnotatedFormula,int IncludeDetails,char * PutNamesHere);
 int GetNodeParentList(ANNOTATEDFORMULA AnnotatedFormula,LISTNODE Head,LISTNODE * Parents,
 SIGNATURE Signature);
 char * GetFileSourceNameAndNode(ANNOTATEDFORMULA AnnotatedFormula,char * PutUsageHere);
