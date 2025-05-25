@@ -321,11 +321,17 @@ LISTNODE * ParentList,SIGNATURE Signature) {
 
     int ParentNumber;
     ANNOTATEDFORMULA ParentAnnotatedFormula;
+    String NameWithoutDetails;
+    char * Colon;
 
     *ParentList = NULL;
     for (ParentNumber = 0;ParentNumber < NumberOfParents;ParentNumber++) {
+        strcpy(NameWithoutDetails,ParentNames[ParentNumber]);
+        if ((Colon = strchr(NameWithoutDetails,':')) != NULL) {
+            *Colon = '\0';
+        }
         if ((ParentAnnotatedFormula = GetAnnotatedFormulaFromListByName(Head,
-ParentNames[ParentNumber])) == NULL) {
+NameWithoutDetails)) == NULL) {
             FreeListOfAnnotatedFormulae(ParentList,Signature);
             return(0);
         } else {
@@ -336,8 +342,7 @@ ParentNames[ParentNumber])) == NULL) {
     return(1);
 }
 //-------------------------------------------------------------------------------------------------
-LISTNODE * GetNodeFromListByAnnotatedFormula(LISTNODE * Head,ANNOTATEDFORMULA
-AnnotatedFormula) {
+LISTNODE * GetNodeFromListByAnnotatedFormula(LISTNODE * Head,ANNOTATEDFORMULA AnnotatedFormula) {
 
     while ((*Head) != NULL) {
         if ((*Head)->AnnotatedFormula == AnnotatedFormula) {

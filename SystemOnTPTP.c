@@ -557,11 +557,16 @@ curl_easy_setopt(CurlHandle,CURLOPT_USERAGENT,"libcurl-agent/1.0") != CURLE_OK) 
         return(NULL);
     }
 
+    DataReadHandle = DataWriteHandle = NULL;
     if (pipe(Pipe) == -1 || (DataReadHandle = fdopen(Pipe[0],"r")) == NULL ||
 (DataWriteHandle = fdopen(Pipe[1],"w")) == NULL) {
         printf("ERROR: Could not create and open pipe\n");
-        fclose(DataReadHandle);
-        fclose(DataWriteHandle);
+        if (DataReadHandle != NULL) {
+            fclose(DataReadHandle);
+        }
+        if (DataWriteHandle != NULL) {
+            fclose(DataWriteHandle);
+        }
         return(NULL);
     } else {
         curl_easy_setopt(CurlHandle,CURLOPT_WRITEDATA,(void *)DataWriteHandle);

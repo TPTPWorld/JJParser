@@ -37,21 +37,45 @@ ANNOTATEDFORMULA NewAnnotatedTSTPFormula(SyntaxType Syntax) {
     return(AnnotatedFormula);
 }
 //-------------------------------------------------------------------------------------------------
-void FreeAnnotatedTSTPFormula(ANNOTATEDFORMULA * AnnotatedFormula,SIGNATURE Signature) {
+void FreeAnnotatedTSTPFormulaHeader(ANNOTATEDFORMULA * AnnotatedFormula,SIGNATURE Signature) {
 
     Free((void **)&((*AnnotatedFormula)->AnnotatedFormulaUnion.AnnotatedTSTPFormula.Name));
     assert((*AnnotatedFormula)->AnnotatedFormulaUnion.AnnotatedTSTPFormula.Name == NULL);
-    FreeTerm(&((*AnnotatedFormula)->AnnotatedFormulaUnion.AnnotatedTSTPFormula.SubStatus),Signature,
-NULL);
+
+    Free((void **)AnnotatedFormula);
+}
+//-------------------------------------------------------------------------------------------------
+void FreeAnnotatedTSTPFormula(ANNOTATEDFORMULA * AnnotatedFormula,SIGNATURE Signature) {
+
+    FreeTerm(&((*AnnotatedFormula)->AnnotatedFormulaUnion.AnnotatedTSTPFormula.SubStatus),
+Signature,NULL);
     FreeFormulaWithVariables(&((*AnnotatedFormula)->
 AnnotatedFormulaUnion.AnnotatedTSTPFormula.FormulaWithVariables),Signature);
-    assert((*AnnotatedFormula)->
-AnnotatedFormulaUnion.AnnotatedTSTPFormula.FormulaWithVariables == NULL);
+    assert((*AnnotatedFormula)->AnnotatedFormulaUnion.AnnotatedTSTPFormula.FormulaWithVariables == 
+NULL);
     FreeTerm(&((*AnnotatedFormula)->AnnotatedFormulaUnion.AnnotatedTSTPFormula.Source),Signature,
 NULL);
     FreeTerm(&((*AnnotatedFormula)->AnnotatedFormulaUnion.AnnotatedTSTPFormula.UsefulInfo),
 Signature,NULL);
-    Free((void **)AnnotatedFormula);
+
+    FreeAnnotatedTSTPFormulaHeader(AnnotatedFormula,Signature);
+}
+//-------------------------------------------------------------------------------------------------
+ANNOTATEDFORMULA DuplicateAnnotatedTSTPFormulaHeader(ANNOTATEDFORMULA Original,
+SIGNATURE Signature) {
+
+    ANNOTATEDFORMULA AnnotatedFormula;
+
+    if (Original == NULL) {
+        CodingError("Duplicating a NULL formula");
+    }
+    AnnotatedFormula = NewAnnotatedTSTPFormula(Original->Syntax);
+    AnnotatedFormula->AnnotatedFormulaUnion.AnnotatedTSTPFormula.Name = 
+CopyHeapString(Original->AnnotatedFormulaUnion.AnnotatedTSTPFormula.Name);
+    AnnotatedFormula->AnnotatedFormulaUnion.AnnotatedTSTPFormula.Status = 
+Original->AnnotatedFormulaUnion.AnnotatedTSTPFormula.Status;
+
+    return(AnnotatedFormula);
 }
 //-------------------------------------------------------------------------------------------------
 ANNOTATEDFORMULA DuplicateAnnotatedTSTPFormula(ANNOTATEDFORMULA Original,SIGNATURE Signature,
@@ -63,22 +87,18 @@ int ForceNewVariables) {
     if (Original == NULL) {
         CodingError("Duplicating a NULL formula");
     }
-    AnnotatedFormula = NewAnnotatedTSTPFormula(Original->Syntax);
+    AnnotatedFormula = DuplicateAnnotatedTSTPFormulaHeader(Original,Signature);
+
 //----Create context for duplicating non-logical stuff
     Context.Variables = NULL;
     Context.Signature = Signature;
 
-    AnnotatedFormula->AnnotatedFormulaUnion.AnnotatedTSTPFormula.Name = 
-CopyHeapString(Original->AnnotatedFormulaUnion.AnnotatedTSTPFormula.Name);
-    AnnotatedFormula->AnnotatedFormulaUnion.AnnotatedTSTPFormula.Status = 
-Original->AnnotatedFormulaUnion.AnnotatedTSTPFormula.Status;
     AnnotatedFormula->AnnotatedFormulaUnion.AnnotatedTSTPFormula.SubStatus = 
 DuplicateTerm(Original->AnnotatedFormulaUnion.AnnotatedTSTPFormula.SubStatus,Context,0);
     AnnotatedFormula->AnnotatedFormulaUnion.AnnotatedTSTPFormula.FormulaWithVariables =
 DuplicateFormulaWithVariables(
 Original->AnnotatedFormulaUnion.AnnotatedTSTPFormula.FormulaWithVariables,Signature,
 ForceNewVariables);
-
     AnnotatedFormula->AnnotatedFormulaUnion.AnnotatedTSTPFormula.Source =
 DuplicateTerm(Original->AnnotatedFormulaUnion.AnnotatedTSTPFormula.Source,Context,0);
     AnnotatedFormula->AnnotatedFormulaUnion.AnnotatedTSTPFormula.UsefulInfo =

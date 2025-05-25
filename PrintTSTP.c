@@ -1059,6 +1059,7 @@ Formula->FormulaUnion.UnaryFormula.Connective));
                         ConnectiveIndent = 6;
                         break;
                     default:
+                        ConnectiveIndent = 0;
                         CodingError("Weird length unary connective");
                 }
                 PrintSpaces(Stream,

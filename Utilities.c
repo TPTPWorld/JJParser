@@ -70,6 +70,7 @@ void * Realloc(void * OldMemory,size_t Size) {
 
     void * Memory;
 
+    Memory = NULL;
     if (Size > 0 && (Memory = realloc(OldMemory,Size)) == NULL) {
         perror("Realloc");
         CodingError("Realloc failed");
