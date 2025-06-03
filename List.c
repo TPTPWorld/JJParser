@@ -323,8 +323,10 @@ LISTNODE * ParentList,SIGNATURE Signature) {
     ANNOTATEDFORMULA ParentAnnotatedFormula;
     String NameWithoutDetails;
     char * Colon;
+    LISTNODE * AddHere;
 
     *ParentList = NULL;
+    AddHere = ParentList;
     for (ParentNumber = 0;ParentNumber < NumberOfParents;ParentNumber++) {
         strcpy(NameWithoutDetails,ParentNames[ParentNumber]);
         if ((Colon = strchr(NameWithoutDetails,':')) != NULL) {
@@ -335,8 +337,8 @@ NameWithoutDetails)) == NULL) {
             FreeListOfAnnotatedFormulae(ParentList,Signature);
             return(0);
         } else {
-            AddListNode(ParentList,NULL,ParentAnnotatedFormula);
-            ParentList = &((*ParentList)->Next);
+            AddListNode(AddHere,NULL,ParentAnnotatedFormula);
+            AddHere = &((*AddHere)->Next);
         }
     }
     return(1);
