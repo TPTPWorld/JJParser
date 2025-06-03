@@ -317,7 +317,7 @@ ANNOTATEDFORMULA GetAnnotatedFormulaFromListByName(LISTNODE Head,char * Name) {
 }
 //-------------------------------------------------------------------------------------------------
 int GetNodesForNames(LISTNODE Head,StringParts ParentNames,int NumberOfParents,
-LISTNODE * ParentList,SIGNATURE Signature) {
+LISTNODE * ParentList,int * MissingNameIndex,SIGNATURE Signature) {
 
     int ParentNumber;
     ANNOTATEDFORMULA ParentAnnotatedFormula;
@@ -335,6 +335,9 @@ LISTNODE * ParentList,SIGNATURE Signature) {
         if ((ParentAnnotatedFormula = GetAnnotatedFormulaFromListByName(Head,
 NameWithoutDetails)) == NULL) {
             FreeListOfAnnotatedFormulae(ParentList,Signature);
+            if (MissingNameIndex != NULL) {
+                *MissingNameIndex = ParentNumber;
+            }
             return(0);
         } else {
             AddListNode(AddHere,NULL,ParentAnnotatedFormula);

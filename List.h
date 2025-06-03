@@ -22,7 +22,7 @@ ANNOTATEDFORMULA GetAnnotatedFormulaFromListByNumber(LISTNODE Head,int Number);
 LISTNODE * GetNodeFromListByAnnotatedFormulaName(LISTNODE * Head,char * Name);
 ANNOTATEDFORMULA GetAnnotatedFormulaFromListByName(LISTNODE Head, char * Name);
 int GetNodesForNames(LISTNODE Head,StringParts ParentNames,int NumberOfParents,
-LISTNODE * ParentList,SIGNATURE Signature);
+LISTNODE * ParentList,int * MissingNameIndex,SIGNATURE Signature);
 LISTNODE * GetNodeFromListByAnnotatedFormula(LISTNODE * Head,ANNOTATEDFORMULA AnnotatedFormula);
 
 void RemoveAnnotatedFormulaWithRole(LISTNODE * Head,SIGNATURE Signature,StatusType Role);
