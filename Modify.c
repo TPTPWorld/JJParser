@@ -720,6 +720,7 @@ int DoAdd) {
 
 //----Done so that new info is placed in position of first old one
 //----Look through useful info list and remove all with this symbol
+//DEBUG printf("Add %s to ",UsefulInformation);PrintTSTPTerm(stdout,tptp_fof,TheList,0,0,1);
     NumberRemoved = 0;
     NumberAdded = 0;
     Index = 0;
@@ -753,6 +754,7 @@ int DoAdd) {
         TheList->Arguments = (TERMArray)Realloc((void *)TheList->Arguments,
 TheList->FlexibleArity * sizeof(TERM));
         TheList->Arguments[TheList->FlexibleArity - 1] = ListTerm;
+//DEBUG printf("Added %s to ",UsefulInformation);PrintTSTPTerm(stdout,tptp_fof,TheList,0,0,1);
     }
 }
 //-------------------------------------------------------------------------------------------------
