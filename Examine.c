@@ -3270,7 +3270,7 @@ SIGNATURE Signature) {
     *Parents = NULL;
     AllParentNames = GetNodeParentNames(AnnotatedFormula,0,NULL);
     NumberOfParents = Tokenize(AllParentNames,ParentNames,"\n");
-    if (!GetNodesForNames(Head,ParentNames,NumberOfParents,Parents,Signature)) {
+    if (!GetNodesForNames(Head,ParentNames,NumberOfParents,Parents,NULL,Signature)) {
         Free((void **)&AllParentNames);
         return(0);
     }
