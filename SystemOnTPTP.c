@@ -768,7 +768,7 @@ strstr(SystemOutputLine,"RESULT: ") == SystemOutputLine &&
             }
             *WCPart = ' ';
             GotResult = 1;
-//DEBUG printf("Got the result %s\n",PutResultHere);
+//DEBUG printf("Got the RESULT %s\n",PutResultHere);fflush(stdout);
         }
 //----If getting only the system output there is no "RESULT: ", so try get from "% Result     : "
         if (!GotResult && !strcmp(X2TSTPFlag,"-S") &&
@@ -853,7 +853,7 @@ Conjecture,conjecture)) {
     if (SystemOnTPTPGetResult(0,ProblemFileName,PositiveChecker,TimeLimit,"",
 SystemOutputPrefix,OptionalFlags,KeepOutputFiles,FilesDirectory,LocalUsersFileName,
 OutputFileName,SystemResult,NULL,LocalSoT)) {
-//DEBUG printf("Result for %s is %s want a %s\n",LocalUsersFileName,SystemResult,PositiveResult);
+//DEBUG printf("Result for %s is %s want a %s\n",LocalUsersFileName,SystemResult,PositiveResult);fflush(stdout);
 //----Have to check for Success separately because it is not SZSIsa (for some forgotten reason)
         if (StringToSZSResult(SystemResult) == SUC ||
 //----If required result has a leading "+" then it must be exact
