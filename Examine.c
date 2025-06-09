@@ -2899,6 +2899,7 @@ int * Index) {
     } else {
         strcpy(FinalSymbol,Symbol);
     }
+//----Calling routine decides where to start and sends it in Index
     for ( ; *Index < InferenceInfo->FlexibleArity; (*Index)++) {
         if (!strcmp(FinalSymbol,InferenceInfo->Arguments[*Index]->
 TheSymbol.NonVariable->NameSymbol)) {
@@ -2984,6 +2985,7 @@ GetArity(AnnotatedFormula->AnnotatedFormulaUnion.AnnotatedTSTPFormula.Source) >=
 //----The second argument must look like a list
 LooksLikeAList(AnnotatedFormula->AnnotatedFormulaUnion.AnnotatedTSTPFormula.Source->Arguments[1],
 -1,-1)) {
+//DEBUG printf("Look for the %s\n",InfoTermSymbol);
         Index = 0;
         return(GetSourceInfoTERMFromSourceInfo(AnnotatedFormula-> 
 AnnotatedFormulaUnion.AnnotatedTSTPFormula.Source->Arguments[1],InfoTermSymbol,
@@ -2994,15 +2996,14 @@ GetSymbol(AnnotatedFormula->AnnotatedFormulaUnion.AnnotatedTSTPFormula.Source->A
     }
 }
 //-------------------------------------------------------------------------------------------------
-//----Calling routine must provide enough space for info, or send NULL and
-//----take responsibility for the malloced memory.
+//----Calling routine must provide enough space for info, or send NULL and take responsibility for 
+//----the malloced memory.
 char * GetSourceInfoTerm(ANNOTATEDFORMULA AnnotatedFormula,char * SourceSymbol,
 char * InfoTermSymbol,char * PutInfoHere) {
 
     TERM SourceTerm;
 
-    if ((SourceTerm = GetSourceInfoTERM(AnnotatedFormula,SourceSymbol,
-InfoTermSymbol)) != NULL) {
+    if ((SourceTerm = GetSourceInfoTERM(AnnotatedFormula,SourceSymbol,InfoTermSymbol)) != NULL) {
         return(TSTPTermToString(SourceTerm,PutInfoHere));
     } else {
         return(NULL);
@@ -3019,8 +3020,8 @@ TERM GetInferenceInfoTERM(ANNOTATEDFORMULA AnnotatedFormula,char * Symbol) {
 }
 //-------------------------------------------------------------------------------------------------
 //----Gets a useful info term from an inference source
-//----Calling routine must provide enough space for info, or send NULL and
-//----take responsibility for the malloced memory.
+//----Calling routine must provide enough space for info, or send NULL and take responsibility for 
+//----the malloced memory.
 char * GetInferenceInfoTerm(ANNOTATEDFORMULA AnnotatedFormula,char * Symbol,char * PutInfoHere) {
 
     TERM InferenceTerm;
