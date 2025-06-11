@@ -802,6 +802,7 @@ GetArity(Source->Arguments[2]) == -1) {
     return(RemoveNamedTermFromList(ParentName,Source->Arguments[2],-1,Signature) > 0);
 }
 //-------------------------------------------------------------------------------------------------
+//----This adds the new parent name at the end of the list of parents.
 int AddParentToInferenceTerm(char * ParentName,TERM Source,SIGNATURE Signature) {
 
     TERM ParentList;
@@ -814,7 +815,7 @@ GetArity(Source->Arguments[2]) == -1) {
     }
 
     ParentList = Source->Arguments[2];
-//----This deal with the number of occurrences, so no need to increment when adding to parent
+//----This deals with the number of occurrences, so no need to increment when adding to parent
 //----list below.
     ParentNameInSignature = InsertIntoSignatureList(&(Signature->NonLogicals),ParentName,0,0,0,
 NULL);

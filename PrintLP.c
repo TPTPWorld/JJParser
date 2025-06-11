@@ -172,7 +172,8 @@ FormulaUnion.Atom))) {
                 }
                 Searcher = Searcher->Next;
             }
-            fprintf(Stream,"constant symbol %s : ",TPTPtoLPSymbol(Symbol,"",ToPrint));
+//OLD lambdapi fprintf(Stream,"constant symbol %s : ",TPTPtoLPSymbol(Symbol,"",ToPrint));
+            fprintf(Stream,"symbol %s : ",TPTPtoLPSymbol(Symbol,"",ToPrint));
 //----Find the symbol's declaration
             if (MatchingTypeFormula != NULL) {
                 if (MatchingTypeFormula->Type == binary) {
