@@ -137,6 +137,27 @@ AnnotatedTSTPFormulaType * GetAnnotatedTSTPFormula(ANNOTATEDFORMULA AnnotatedFor
     }
 }
 //-------------------------------------------------------------------------------------------------
+char * GetTypedSymbolName(ANNOTATEDFORMULA AnnotatedFormula,String TypedSymbolName) {
+
+    FORMULA PossibleTypingFormula;
+
+    if (GetRole(AnnotatedFormula,NULL) == type) {
+        PossibleTypingFormula = AnnotatedFormula->
+AnnotatedFormulaUnion.AnnotatedTSTPFormula.FormulaWithVariables->Formula;
+        if (PossibleTypingFormula->Type == type_declaration &&
+PossibleTypingFormula->FormulaUnion.BinaryFormula.Connective == typecolon &&
+PossibleTypingFormula->FormulaUnion.BinaryFormula.LHS->Type == atom) {
+            strcpy(TypedSymbolName,GetSymbol(PossibleTypingFormula->FormulaUnion.BinaryFormula.
+LHS->FormulaUnion.Atom));
+            return(TypedSymbolName);
+        } else {
+            return(NULL);
+        }
+    } else {
+        return(NULL);
+    }
+}
+//-------------------------------------------------------------------------------------------------
 AnnotatedTSTPFormulaType * GetListNodeAnnotatedTSTPFormula(LISTNODE List) {
 
     if (List != NULL && ReallyAnAnnotatedFormula(List->AnnotatedFormula)) {
@@ -2975,11 +2996,10 @@ char * InfoTermSymbol) {
 
     int Index;
 
-//DEBUG printf("SourceSymbol %s InfoTermSymbol %s\n",SourceSymbol,InfoTermSymbol);
 //----Source is any or as specified
-    if ((SourceSymbol == NULL ||
-!strcmp(GetSymbol(AnnotatedFormula->AnnotatedFormulaUnion.AnnotatedTSTPFormula.Source),
-SourceSymbol)) &&
+    if (GetSource(AnnotatedFormula) != NULL &&
+(SourceSymbol == NULL ||!strcmp(SourceSymbol,
+GetSymbol(AnnotatedFormula->AnnotatedFormulaUnion.AnnotatedTSTPFormula.Source))) &&
 //----Must have at least two arguments
 GetArity(AnnotatedFormula->AnnotatedFormulaUnion.AnnotatedTSTPFormula.Source) >= 2 &&
 //----The second argument must look like a list
@@ -2996,6 +3016,7 @@ GetSymbol(AnnotatedFormula->AnnotatedFormulaUnion.AnnotatedTSTPFormula.Source->A
     }
 }
 //-------------------------------------------------------------------------------------------------
+//----Gets a useful info term from inference or introduced or NULL for either
 //----Calling routine must provide enough space for info, or send NULL and take responsibility for 
 //----the malloced memory.
 char * GetSourceInfoTerm(ANNOTATEDFORMULA AnnotatedFormula,char * SourceSymbol,

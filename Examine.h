@@ -13,6 +13,7 @@ SyntaxType GetSyntax(ANNOTATEDFORMULA AnnotatedFormula);
 char * GetName(ANNOTATEDFORMULA AnnotatedFormula,char * PutNameHere);
 StatusType GetRole(ANNOTATEDFORMULA AnnotatedFormula,TERM * SubStatus);
 AnnotatedTSTPFormulaType * GetAnnotatedTSTPFormula(ANNOTATEDFORMULA AnnotatedFormula);
+char * GetTypedSymbolName(ANNOTATEDFORMULA AnnotatedFormula,String TypedSymbolName);
 AnnotatedTSTPFormulaType * GetListNodeAnnotatedTSTPFormula(LISTNODE List);
 StatusType GetListNodeStatus(LISTNODE List);
 FORMULA GetListNodeFormula(LISTNODE List);

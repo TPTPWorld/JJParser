@@ -12,8 +12,7 @@
 #include "Modify.h"
 #include "PrintTSTP.h"
 #include "PrintLP.h"
-//-------------------------------------------------------------------------------------------------
-void LPPrintFormula(FILE * Stream,FORMULA Formula);
+#include "/home/tptp/ServiceTools/GDVDir/GDV.h"
 //-------------------------------------------------------------------------------------------------
 static char * LAMBDAPI_RESERVED_WORDS[] = {
     "{|abort|}","{|admit|}","{|admitted|}","{|apply|}","{|as|}","{|assert|}","{|assertnot|}",
@@ -142,37 +141,78 @@ strcmp(TheType,"Type")) {
     }
 }
 //-------------------------------------------------------------------------------------------------
-int LPPrintSignatureList(FILE * Stream,SYMBOLNODE Node,LISTNODE TypeFormulae,char * ResultType) {
+void LPPrintLambdaQuantification(FILE * Stream,FORMULA Formula,char * SignaturePrefix) {
+
+    fprintf(Stream,"λ %s",GetSymbol(Formula->FormulaUnion.QuantifiedFormula.Variable));
+//----Frederic says: Instead, you can also put no type in abstractions and just write "(λ X,
+//---- ..." as Lambdapi is able to infer those types automatically. But for FOF he recants:
+//----You use typed FOL syntax and X11 could be of any type a priori.
+    fprintf(Stream," : ");
+    if (Formula->FormulaUnion.QuantifiedFormula.VariableType != NULL) {
+        PrintLPArgumentSignature(Stream,
+Formula->FormulaUnion.QuantifiedFormula.VariableType,SignaturePrefix);
+    } else {
+        fprintf(Stream,"τ ι");
+    }
+    fprintf(Stream,", ");
+}
+//-------------------------------------------------------------------------------------------------
+void LPPrintEpsilonTerm(FILE * Stream,FORMULA Formula) {
+
+//----This is a function, lambda for all the universals
+    while (Formula->Type == quantified) {
+        LPPrintLambdaQuantification(Stream,Formula,"");
+        Formula = Formula->FormulaUnion.QuantifiedFormula.Formula;
+    }
+//----It had better be a binary equation, or equivalncem or equality
+    if (Formula->Type == binary &&
+(Formula->FormulaUnion.BinaryFormula.Connective == equivalence ||
+ Formula->FormulaUnion.BinaryFormula.Connective == equation)) {
+        Formula = Formula->FormulaUnion.BinaryFormula.RHS;
+        LPPrintFormula(Stream,Formula,"");
+    } else {
+        fprintf(Stream,"MISSING EPSILON TERM");
+    }
+//    } else if (Formula->Type == atom && !strcmp(GetSymbol(Formula->FormulaUnion.Atom),"=")) {
+
+}
+//-------------------------------------------------------------------------------------------------
+int LPPrintSignatureList(FILE * Stream,SYMBOLNODE Node,LISTNODE TypeFormulae,char * OnlyTheseList,
+char * NotTheseList,char * ResultType,LISTNODE EpsilonTerms) {
 
     int NumberPrinted;
     int Index;
     String Symbol;
-    FORMULA SearchingTypeFormula,MatchingTypeFormula;
+    String SymbolComma;
+    FORMULA MatchingTypeFormula;
     LISTNODE Searcher;
+    String TypedSymbolName;
     String ToPrint;
+    String SkolemSymbol,InferenceInfo;
 
     if (Node != NULL) {
-        NumberPrinted = LPPrintSignatureList(Stream,Node->LastSymbol,TypeFormulae,ResultType);
+        NumberPrinted = LPPrintSignatureList(Stream,Node->LastSymbol,TypeFormulae,OnlyTheseList,
+NotTheseList,ResultType,EpsilonTerms);
         strcpy(Symbol,GetSignatureSymbol(Node));
+        strcpy(SymbolComma,Symbol);
+        strcat(SymbolComma,",");
 //----Suppress interpreted symbols
-        if (Symbol[0] != '$' && strcmp(Symbol,"=") && strcmp(Symbol,"!=")) {
+        if (Symbol[0] != '$' && strcmp(Symbol,"=") && strcmp(Symbol,"!=") &&
+(OnlyTheseList == NULL || (strstr(OnlyTheseList,SymbolComma) != NULL)) && 
+(NotTheseList == NULL || (strstr(NotTheseList,SymbolComma) == NULL))) {
             MatchingTypeFormula = NULL;
             Searcher = TypeFormulae;
             while (Searcher != NULL && MatchingTypeFormula == NULL) {
-                if (GetListNodeStatus(Searcher) == type) {
-                    SearchingTypeFormula = GetListNodeFormula(Searcher);
-                    if (
-SearchingTypeFormula->Type == type_declaration &&
-SearchingTypeFormula->FormulaUnion.BinaryFormula.Connective == typecolon &&
-SearchingTypeFormula->FormulaUnion.BinaryFormula.LHS->Type == atom &&
-!strcmp(Symbol,GetSymbol(SearchingTypeFormula->FormulaUnion.BinaryFormula.LHS->
-FormulaUnion.Atom))) {
-                        MatchingTypeFormula = SearchingTypeFormula;
-                    }
+                if (GetTypedSymbolName(Searcher->AnnotatedFormula,TypedSymbolName) != NULL &&
+!strcmp(Symbol,TypedSymbolName)) {
+                    MatchingTypeFormula = GetListNodeFormula(Searcher);
                 }
                 Searcher = Searcher->Next;
             }
-//OLD lambdapi fprintf(Stream,"constant symbol %s : ",TPTPtoLPSymbol(Symbol,"",ToPrint));
+//----Stupid lambdapi wants "constant" for non-epsilon definitions
+            if (EpsilonTerms == NULL) {
+                fprintf(Stream,"constant ");
+            }
             fprintf(Stream,"symbol %s : ",TPTPtoLPSymbol(Symbol,"",ToPrint));
 //----Find the symbol's declaration
             if (MatchingTypeFormula != NULL) {
@@ -183,29 +223,42 @@ FormulaUnion.Atom))) {
 MatchingTypeFormula->FormulaUnion.BinaryFormula.LHS,"");
                     fprintf(Stream," → ");
                 }
+                PrintLPArgumentSignature(Stream,
+MatchingTypeFormula->FormulaUnion.BinaryFormula.RHS,"");
+//----If no type declaration then just print default
             } else {
                 for (Index = 0;Index < GetSignatureArity(Node);Index++) {
                     fprintf(Stream,"τ ι → ");
-//----Was  fprintf(Stream,"κ → ");
                 }
-            }
-            if (MatchingTypeFormula != NULL) {
-                PrintLPArgumentSignature(Stream,
-MatchingTypeFormula->FormulaUnion.BinaryFormula.RHS,"");
-            } else {
                 fprintf(Stream,"%s",ResultType);
+            }
+//----If a Skolem symbol print its epsilon term
+            if (EpsilonTerms != NULL) {
+                fprintf(Stream," ≔ ");
+                Searcher = EpsilonTerms;
+                while (Searcher != NULL) {
+                    if ((ExtractNewSkolemSymbols(Searcher->AnnotatedFormula,InferenceInfo,
+SkolemSymbol) != NULL) && !strcmp(Symbol,SkolemSymbol)) {
+                        LPPrintEpsilonTerm(Stream,GetListNodeFormula(Searcher));
+//----Stop searching
+                        Searcher = NULL;
+                    } else {
+                        Searcher = Searcher->Next;
+                    }
+                }
             }
             fprintf(Stream," ;\n");
             NumberPrinted++;
         }
-        NumberPrinted += LPPrintSignatureList(Stream,Node->NextSymbol,TypeFormulae,ResultType);
+        NumberPrinted += LPPrintSignatureList(Stream,Node->NextSymbol,TypeFormulae,OnlyTheseList,
+NotTheseList,ResultType,EpsilonTerms);
     } else {
         NumberPrinted = 0;
     }
     return(NumberPrinted);
 }
 //-------------------------------------------------------------------------------------------------
-void LPPrintTerm(FILE * Stream,TERM Term) {
+void LPPrintTerm(FILE * Stream,TERM Term,char * SignaturePrefix) {
 
     int Index;
     String Symbol;
@@ -215,7 +268,7 @@ void LPPrintTerm(FILE * Stream,TERM Term) {
     switch (Term->Type) {
 //----Check if a nested formula - no symbol. This is for THF, TXF, TFF
         case formula:
-            LPPrintFormula(Stream,Term->TheSymbol.Formula);
+            LPPrintFormula(Stream,Term->TheSymbol.Formula,SignaturePrefix);
             break;
         case a_type:
         case atom_as_term:
@@ -224,19 +277,19 @@ void LPPrintTerm(FILE * Stream,TERM Term) {
             strcpy(Symbol,GetSymbol(Term));
             if (!strcmp(Symbol,"=")) {
                 fprintf(Stream,"(");
-                LPPrintTerm(Stream,Term->Arguments[0]);
+                LPPrintTerm(Stream,Term->Arguments[0],SignaturePrefix);
                 fprintf(Stream," = ");
-                LPPrintTerm(Stream,Term->Arguments[1]);
+                LPPrintTerm(Stream,Term->Arguments[1],SignaturePrefix);
                 fprintf(Stream,")");
             } else {
                 if (GetArity(Term) > 0 && Term->Arguments != NULL) {
                     fprintf(Stream,"(");
                 }
-                fprintf(Stream,"%s",TPTPtoLPSymbol(Symbol,"S.",ToPrint));
+                fprintf(Stream,"%s",TPTPtoLPSymbol(Symbol,SignaturePrefix,ToPrint));
                 if (GetArity(Term) > 0 && Term->Arguments != NULL) {
                     for (Index=0;Index < GetArity(Term);Index++) {
                         fprintf(Stream," ");
-                        LPPrintTerm(Stream,Term->Arguments[Index]);
+                        LPPrintTerm(Stream,Term->Arguments[Index],SignaturePrefix);
                     }
                 }
                 if (GetArity(Term) > 0 && Term->Arguments != NULL) {
@@ -253,52 +306,41 @@ TermTypeToString(Term->Type));
     }
 }
 //-------------------------------------------------------------------------------------------------
-void LPPrintFormula(FILE * Stream,FORMULA Formula) {
+void LPPrintFormula(FILE * Stream,FORMULA Formula,char * SignaturePrefix) {
 
     String ErrorMessage;
 
     fprintf(Stream,"(");
     switch (Formula->Type) {
         case quantified:
-            fprintf(Stream,"%s (λ %s",
-LPConnectiveToString(Formula->FormulaUnion.QuantifiedFormula.Quantifier),
-GetSymbol(Formula->FormulaUnion.QuantifiedFormula.Variable));
-//----Frederic says: Instead, you can also put no type in abstractions and just write "(λ X,
-//---- ..." as Lambdapi is able to infer those types automatically. But for FOF he recants:
-//----You use typed FOL syntax and X11 could be of any type a priori.
-            fprintf(Stream," : ");
-            if (Formula->FormulaUnion.QuantifiedFormula.VariableType != NULL) {
-                PrintLPArgumentSignature(Stream,
-Formula->FormulaUnion.QuantifiedFormula.VariableType,"S.");
-            } else {
-                fprintf(Stream,"τ ι");
-            }
-            fprintf(Stream,", ");
-            LPPrintFormula(Stream,Formula->FormulaUnion.QuantifiedFormula.Formula);
+            fprintf(Stream,"%s (",
+LPConnectiveToString(Formula->FormulaUnion.QuantifiedFormula.Quantifier));
+            LPPrintLambdaQuantification(Stream,Formula,SignaturePrefix);
+            LPPrintFormula(Stream,Formula->FormulaUnion.QuantifiedFormula.Formula,SignaturePrefix);
             fprintf(Stream,")");
             break;
         case binary:
 //----No xor, gotta hack it
             if (Formula->FormulaUnion.BinaryFormula.Connective == nonequivalence) {
                 fprintf(Stream," %s(",LPConnectiveToString(negation));
-                LPPrintFormula(Stream,Formula->FormulaUnion.BinaryFormula.LHS);
+                LPPrintFormula(Stream,Formula->FormulaUnion.BinaryFormula.LHS,SignaturePrefix);
                 fprintf(Stream," %s ",LPConnectiveToString(equivalence));
-                LPPrintFormula(Stream,Formula->FormulaUnion.BinaryFormula.RHS);
+                LPPrintFormula(Stream,Formula->FormulaUnion.BinaryFormula.RHS,SignaturePrefix);
                 fprintf(Stream,")");
             } else {
-                 LPPrintFormula(Stream,Formula->FormulaUnion.BinaryFormula.LHS);
+                 LPPrintFormula(Stream,Formula->FormulaUnion.BinaryFormula.LHS,SignaturePrefix);
                  fprintf(Stream," %s ",
 LPConnectiveToString(Formula->FormulaUnion.BinaryFormula.Connective));
-                 LPPrintFormula(Stream,Formula->FormulaUnion.BinaryFormula.RHS);
+                 LPPrintFormula(Stream,Formula->FormulaUnion.BinaryFormula.RHS,SignaturePrefix);
             }
             break;
         case unary:
             fprintf(Stream,"%s ",
 LPConnectiveToString(Formula->FormulaUnion.UnaryFormula.Connective));
-            LPPrintFormula(Stream,Formula->FormulaUnion.UnaryFormula.Formula);
+            LPPrintFormula(Stream,Formula->FormulaUnion.UnaryFormula.Formula,SignaturePrefix);
             break;
         case atom:
-            LPPrintTerm(Stream,Formula->FormulaUnion.Atom);
+            LPPrintTerm(Stream,Formula->FormulaUnion.Atom,SignaturePrefix);
             break;
         case type_declaration:
             break;
@@ -331,7 +373,7 @@ void LPPrintAnnotatedTSTPNode(FILE * Stream,ANNOTATEDFORMULA AnnotatedFormula,ch
         case tptp_fof:
             fprintf(Stream,"symbol %s : %s ",GetName(AnnotatedFormula,NULL),Label);
             LPPrintFormula(Stream,AnnotatedFormula->AnnotatedFormulaUnion.
-AnnotatedTSTPFormula.FormulaWithVariables->Formula);
+AnnotatedTSTPFormula.FormulaWithVariables->Formula,"S.");
             fprintf(Stream," ;\n");
             break;
         case tptp_cnf:
