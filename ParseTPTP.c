@@ -102,8 +102,7 @@ ParseTPTPClauseWithVariables(Stream,Signature);
     return(AnnotatedFormula);
 }
 //-------------------------------------------------------------------------------------------------
-ANNOTATEDFORMULA ParseAnnotatedTPTPFormula(READFILE Stream,
-SIGNATURE Signature) {
+ANNOTATEDFORMULA ParseAnnotatedTPTPFormula(READFILE Stream,SIGNATURE Signature) {
 
     ANNOTATEDFORMULA AnnotatedFormula;
 

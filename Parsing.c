@@ -240,6 +240,8 @@ void FreeTerm(TERM * Term,SIGNATURE Signature,VARIABLENODE * Variables) {
                 RemoveVariable(Variables,&((*Term)->TheSymbol.Variable));
                 assert((*Term)->TheSymbol.Variable == NULL);
             }
+//      } else if ((*Term)->Type == atom_as_term) {
+//            FreeFormula(&((*Term)->TheSymbol.Formula),Signature,Variables);
         } else if ((*Term)->Type == formula) {
 //DEBUG printf("Free formula term \n");
             FreeFormula(&((*Term)->TheSymbol.Formula),Signature,Variables);

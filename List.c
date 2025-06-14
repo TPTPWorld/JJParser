@@ -457,6 +457,54 @@ SIGNATURE Signature) {
     return(ListWithRole);
 }
 //-------------------------------------------------------------------------------------------------
+LISTNODE ExtractEpsilonTypes(LISTNODE * TypeFormulae,LISTNODE EpsilonTerms,SIGNATURE Signature,
+String ListOfSkolemNames) {
+
+    LISTNODE * PossibleEpsilonType;
+    LISTNODE EpsilonTypes;
+    LISTNODE * AddEpsilonTypeHere;
+    String InferenceInfo;
+    char * NewSymbolList;
+    String SkolemSymbol;
+
+//----Extract a list of Skolem symbols with commas
+    strcpy(ListOfSkolemNames,"");
+    while (EpsilonTerms != NULL) {
+        if (GetSourceInfoTerm(EpsilonTerms->AnnotatedFormula,NULL,"new_symbols",InferenceInfo) != 
+NULL && ExtractTermArguments(InferenceInfo) && strstr(InferenceInfo,"skolem,") == InferenceInfo &&
+(NewSymbolList = strchr(InferenceInfo,'[')) != NULL) {
+            strcpy(SkolemSymbol,NewSymbolList+1);
+            *strchr(SkolemSymbol,']') = '\0';
+            strcat(ListOfSkolemNames,SkolemSymbol);
+            strcat(ListOfSkolemNames,",");
+        } else {
+printf("error extracting skolem symbol\n");
+            return(NULL);
+        }
+        EpsilonTerms = EpsilonTerms->Next;
+    }
+
+    EpsilonTypes = NULL;
+    AddEpsilonTypeHere = &EpsilonTypes;
+    PossibleEpsilonType = TypeFormulae;
+    while (*PossibleEpsilonType != NULL) {
+//----Hacky way of checking is there is an epsilon definition
+        if (GetTypedSymbolName((*PossibleEpsilonType)->AnnotatedFormula,SkolemSymbol) != NULL) {
+            strcat(SkolemSymbol,",");
+        } else {
+             strcpy(SkolemSymbol,"");
+        }
+        if (strstr(ListOfSkolemNames,SkolemSymbol) != NULL) {
+            AddListNode(AddEpsilonTypeHere,NULL,(*PossibleEpsilonType)->AnnotatedFormula);
+            AddEpsilonTypeHere = &((*AddEpsilonTypeHere)->Next);
+            FreeAListNode(PossibleEpsilonType,Signature);
+        } else {
+            PossibleEpsilonType = &((*PossibleEpsilonType)->Next);
+        }
+    }
+    return(EpsilonTypes);
+}
+//-------------------------------------------------------------------------------------------------
 //----0 means empty intersection, 1 means non-empty intersection, 2 means Set1
 //----is a superset of Set2, 3 means they are equal, 4 means Set2 is a subset
 //----of Set2. Assumes all lists have been merged!

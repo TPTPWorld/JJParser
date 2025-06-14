@@ -33,6 +33,8 @@ SIGNATURE Signature);
 LISTNODE GetListWithSyntaxType(LISTNODE Head,SyntaxType DesiredSyntax);
 LISTNODE SelectListOfAnnotatedFormulaeWithParents(LISTNODE * Head,int DeletedSelected,
 SIGNATURE Signature);
+LISTNODE ExtractEpsilonTypes(LISTNODE * TypeFormulae,LISTNODE EpsilonTerms,SIGNATURE Signature,
+String ListOfSkolemNames);
 
 int SetRelationshipListOfAnnotatedFormulae(LISTNODE Set1,LISTNODE Set2,int AllowCommutation);
 LISTNODE MergeInListOfAnnotatedFormulaeByFields(LISTNODE * MainList,LISTNODE * MergeList,

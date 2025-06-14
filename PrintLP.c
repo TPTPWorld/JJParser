@@ -12,7 +12,6 @@
 #include "Modify.h"
 #include "PrintTSTP.h"
 #include "PrintLP.h"
-#include "/home/tptp/ServiceTools/GDVDir/GDV.h"
 //-------------------------------------------------------------------------------------------------
 static char * LAMBDAPI_RESERVED_WORDS[] = {
     "{|abort|}","{|admit|}","{|admitted|}","{|apply|}","{|as|}","{|assert|}","{|assertnot|}",
