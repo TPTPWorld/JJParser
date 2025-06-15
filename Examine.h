@@ -33,6 +33,8 @@ int CopiedAnnotatedFormula(ANNOTATEDFORMULA AnnotatedFormula);
 int InferredAnnotatedFormula(ANNOTATEDFORMULA AnnotatedFormula);
 int DerivedAnnotatedFormula(ANNOTATEDFORMULA AnnotatedFormula);
 int NestedFormulaType(TermType TheType,int IncludeNestedTerms);
+char * ExtractNewSkolemSymbols(ANNOTATEDFORMULA AnnotatedFormula,String InferenceInfo,
+String SkolemSymbol);
 int LooksLikeANumber(char * NumberString);
 int IsMathType(char * Symbol);
 int LooksLikeAList(TERM Term,int MinElements,int MaxElements);

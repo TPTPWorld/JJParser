@@ -309,6 +309,24 @@ FormulaTypeToString(TypeFormula->Type));
     }
 }
 //-------------------------------------------------------------------------------------------------
+char * ExtractNewSkolemSymbols(ANNOTATEDFORMULA AnnotatedFormula,String InferenceInfo,
+String SkolemSymbol) {
+
+    char * NewSymbolList;
+
+    strcpy(InferenceInfo,"");
+    strcpy(SkolemSymbol,"");
+    if (GetSourceInfoTerm(AnnotatedFormula,NULL,"new_symbols",InferenceInfo) != NULL &&
+ExtractTermArguments(InferenceInfo) && strstr(InferenceInfo,"skolem,") == InferenceInfo &&
+(NewSymbolList = strchr(InferenceInfo,'[')) != NULL ) {
+        strcpy(SkolemSymbol,NewSymbolList+1);
+        *strchr(SkolemSymbol,']') = '\0';
+        return(SkolemSymbol);
+    } else {
+        return(NULL);
+    }
+}
+//-------------------------------------------------------------------------------------------------
 int LooksLikeAReal(char * RealString) {
 
     int NumberScanned;
