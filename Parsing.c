@@ -51,8 +51,7 @@ GetSignatureArity(Variables->VariableName),Variables->NumberOfUses,Variables);
     printf("\n");
 }
 //-------------------------------------------------------------------------------------------------
-VARIABLENODE IsVariableInList(VARIABLENODE List,VARIABLENODE EndOfScope,
-char * Name) {
+VARIABLENODE IsVariableInList(VARIABLENODE List,VARIABLENODE EndOfScope,char * Name) {
 
     VARIABLENODE NodeFound;
 

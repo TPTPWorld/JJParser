@@ -116,9 +116,9 @@ printf("TESTING: Freed signature\n");
     return(EXIT_SUCCESS);
 
 //----Test lambdapi stuff
-    LPPrintSignatureList(stdout,Signature->Types,Head,"TYPE");
-    LPPrintSignatureList(stdout,Signature->Functions,Head,"κ");
-    LPPrintSignatureList(stdout,Signature->Predicates,Head,"Prop");
+    LPPrintSignatureList(stdout,Signature->Types,Head,NULL,NULL,"TYPE",NULL);
+    LPPrintSignatureList(stdout,Signature->Functions,Head,NULL,NULL,"κ",NULL);
+    LPPrintSignatureList(stdout,Signature->Predicates,Head,NULL,NULL,"Prop",NULL);
     PrintListOfAnnotatedTSTPNodes(stdout,Signature,Head,lambdapi,1);
 
 //----Test comparison of first two formula for being the same
@@ -259,7 +259,7 @@ AnnotatedFormulaUnion.AnnotatedTSTPFormula.FormulaWithVariables->Variables,NULL)
         printf("The inference rule is ==%s==\n",SymbolUsage);
         Free((void **)&SymbolUsage);
     }
-    if ((SymbolUsage = GetParentNames(AnnotatedFormula,NULL)) != NULL) {
+    if ((SymbolUsage = GetParentNames(AnnotatedFormula,0,NULL)) != NULL) {
         printf("The parents are ==%s==\n",SymbolUsage);
         Free((void **)&SymbolUsage);
     }
@@ -545,7 +545,7 @@ AnnotatedFormula->AnnotatedFormulaUnion.AnnotatedTSTPFormula.FormulaWithVariable
 
 //----Test getting parents' names
     if (AnnotatedFormula != NULL) {
-        printf("Parents are\n%s\n",GetParentNames(AnnotatedFormula,PutNamesHere));
+        printf("Parents are\n%s\n",GetParentNames(AnnotatedFormula,0,PutNamesHere));
     } else {
         printf("Formula of that name not found\n");
     }
