@@ -869,11 +869,14 @@ SIGNATURE Signature, char * UsefulInformation,int DoRemove,int DoAdd) {
         CodingError("Trying to add useful info to a non-formula");
     }
 
+    if (UsefulInformation != NULL && strlen(UsefulInformation) > 0) {
 //----Add source and useful info if there wasn't one before
-    EnsureLongForm(AnnotatedFormula,Signature);
+        EnsureLongForm(AnnotatedFormula,Signature);
 //----Get pointer to the list
-    DoUpdateRecordInList(AnnotatedFormula->AnnotatedFormulaUnion.AnnotatedTSTPFormula.UsefulInfo,
-Signature,UsefulInformation,DoRemove,DoAdd);
+        DoUpdateRecordInList(
+AnnotatedFormula->AnnotatedFormulaUnion.AnnotatedTSTPFormula.UsefulInfo,Signature,
+UsefulInformation,DoRemove,DoAdd);
+    }
 }
 //-------------------------------------------------------------------------------------------------
 void RemoveUsefulInformationFromAnnotatedFormula(ANNOTATEDFORMULA AnnotatedFormula,
