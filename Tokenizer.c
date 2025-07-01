@@ -151,8 +151,6 @@ Stream->StringFileContent[Stream->StringOffset];
 //-------------------------------------------------------------------------------------------------
 StatusType StringToStatus(char * StatusString) {
 
-    String ErrorMessage;
-
     if (!strcmp(StatusString,"initial")) {
         return(initial);
     }
@@ -294,8 +292,10 @@ StatusType StringToStatus(char * StatusString) {
     if (!strcmp(StatusString,"exit")) {
         return(tpi_exit);
     }
-    sprintf(ErrorMessage,"Not a string to make into a role: %s",StatusString);
-    CodingError(ErrorMessage);
+//----Now the caller must detect the error
+    // String ErrorMessage;
+    // sprintf(ErrorMessage,"Not a string to make into a role: %s",StatusString);
+    // CodingError(ErrorMessage);
     return(nonstatus);
 }
 //-------------------------------------------------------------------------------------------------

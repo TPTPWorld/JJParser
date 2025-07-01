@@ -52,8 +52,7 @@ Context,EndOfScope);
     }
 }
 //-------------------------------------------------------------------------------------------------
-FORMULAWITHVARIABLES ParseTPTPClauseWithVariables(READFILE Stream,
-SIGNATURE Signature) {
+FORMULAWITHVARIABLES ParseTPTPClauseWithVariables(READFILE Stream,SIGNATURE Signature) {
 
     FORMULAWITHVARIABLES TPTPClauseWithVariables;
     ContextType Context;
@@ -68,15 +67,13 @@ SIGNATURE Signature) {
     Context.Variables = &(TPTPClauseWithVariables->Variables);
     Context.Signature = Signature;
 
-    TPTPClauseWithVariables->Formula = ParseLiterals(Stream,Context,
-&EndOfScope);
+    TPTPClauseWithVariables->Formula = ParseLiterals(Stream,Context,&EndOfScope);
     AcceptToken(Stream,punctuation,"]");
 
     return(TPTPClauseWithVariables);
 }
 //-------------------------------------------------------------------------------------------------
-ANNOTATEDFORMULA ParseAnnotatedTPTPClause(READFILE Stream,
-SIGNATURE Signature) {
+ANNOTATEDFORMULA ParseAnnotatedTPTPClause(READFILE Stream,SIGNATURE Signature) {
 
     ANNOTATEDFORMULA AnnotatedFormula;
 
@@ -89,8 +86,10 @@ CopyHeapString(CurrentToken(Stream)->NameToken);
     AcceptTokenType(Stream,lower_word);
     AcceptToken(Stream,punctuation,",");
     EnsureTokenType(Stream,lower_word);
-    AnnotatedFormula->AnnotatedFormulaUnion.AnnotatedTSTPFormula.Status = 
-StringToStatus(CurrentToken(Stream)->NameToken);
+    if ((AnnotatedFormula->AnnotatedFormulaUnion.AnnotatedTSTPFormula.Status = 
+StringToStatus(CurrentToken(Stream)->NameToken)) == nonstatus) {
+        TokenError(Stream,"Invalid role");
+    }
     AcceptTokenType(Stream,lower_word);
     AcceptToken(Stream,punctuation,",");
     AnnotatedFormula->
@@ -115,8 +114,10 @@ CopyHeapString(CurrentToken(Stream)->NameToken);
     AcceptTokenType(Stream,lower_word);
     AcceptToken(Stream,punctuation,",");
     EnsureTokenType(Stream,lower_word);
-    AnnotatedFormula->AnnotatedFormulaUnion.AnnotatedTSTPFormula.Status = 
-StringToStatus(CurrentToken(Stream)->NameToken);
+    if ((AnnotatedFormula->AnnotatedFormulaUnion.AnnotatedTSTPFormula.Status = 
+StringToStatus(CurrentToken(Stream)->NameToken)) == nonstatus) {
+        TokenError(Stream,"Invalid role");
+    }
     AcceptTokenType(Stream,lower_word);
     AcceptToken(Stream,punctuation,",");
     AnnotatedFormula->

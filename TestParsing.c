@@ -72,7 +72,7 @@ int main(int argc, char *argv[]) {
 
 //----Get rid of blank lines, comments, etc
     SetNeedForNonLogicTokens(0);
-    SetAllowFreeVariables(1);
+    SetAllowFreeVariables(0);
     SetWarnings(1);
 
 printf("TESTING: Initialized\n");
