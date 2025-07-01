@@ -746,10 +746,19 @@ int VariablesMustBeQuantified) {
 
 //----Save the symbol for inserting in signature later
     PrefixSymbol = CopyHeapString(CurrentToken(Stream)->NameToken);
-//DEBUG printf("PrefixSymbol is %s\n",PrefixSymbol);
 //----Eat the symbol if not a list in []s (tuple) or ()s (NXF arguments)
-    if (strcmp(PrefixSymbol,"[") && strcmp(PrefixSymbol,"(")) {
-        NextToken(Stream);
+    if (CheckToken(Stream,punctuation,"(") || CheckToken(Stream,punctuation,"[")) {
+//----Do nothing here
+    } else {
+        if (CheckTokenType(Stream,upper_word)) {
+            NextToken(Stream);
+//----Variables can't have arguments
+            if (CheckToken(Stream,punctuation,"(")) {
+                TokenError(Stream,"Variables cannnot have arguments");
+            }
+        } else {
+            NextToken(Stream);
+        }
     }
 
     if (
