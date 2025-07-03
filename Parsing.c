@@ -1129,8 +1129,8 @@ ParseQuantifiedRemainder(Stream,Language,Context,EndOfScope,Quantifier,Variables
     }
 }
 //-------------------------------------------------------------------------------------------------
-FORMULA ParseQuantifiedFormula(READFILE Stream,SyntaxType Language,
-ContextType Context,VARIABLENODE * EndOfScope,int VariablesMustBeQuantified) {
+FORMULA ParseQuantifiedFormula(READFILE Stream,SyntaxType Language,ContextType Context,
+VARIABLENODE * EndOfScope,int VariablesMustBeQuantified) {
 
     FORMULA Formula;
     VARIABLENODE OldEndOfScope;
@@ -1147,8 +1147,8 @@ StringToConnective(CurrentToken(Stream)->NameToken);
 Formula->FormulaUnion.QuantifiedFormula.Quantifier,VariablesMustBeQuantified,
 &(Formula->FormulaUnion.QuantifiedFormula));
     Formula->FormulaUnion.QuantifiedFormula.Formula = ParseQuantifiedRemainder(
-Stream,Language,Context,EndOfScope,Formula->
-FormulaUnion.QuantifiedFormula.Quantifier,VariablesMustBeQuantified);
+Stream,Language,Context,EndOfScope,Formula->FormulaUnion.QuantifiedFormula.Quantifier,
+VariablesMustBeQuantified);
     *EndOfScope = OldEndOfScope;
 
     return(Formula);
@@ -1248,8 +1248,8 @@ Context,EndOfScope,1,1,VariablesMustBeQuantified,none);
     return(ITEFormula);
 }
 //-------------------------------------------------------------------------------------------------
-FORMULA ParseLETFormula(READFILE Stream,SyntaxType Language,
-ContextType Context,VARIABLENODE * EndOfScope,int VariablesMustBeQuantified) {
+FORMULA ParseLETFormula(READFILE Stream,SyntaxType Language,ContextType Context,
+VARIABLENODE * EndOfScope,int VariablesMustBeQuantified) {
 
     FORMULA LETFormula;
 
@@ -1464,7 +1464,8 @@ VariablesMustBeQuantified);
 (Language == tptp_tff || Language == tptp_tcf)) {
                 Formula = ParseITEFormula(Stream,Language,Context,EndOfScope,
 VariablesMustBeQuantified);
-            } else if (!strcmp(CurrentToken(Stream)->NameToken,"$let")) {
+            } else if (!strcmp(CurrentToken(Stream)->NameToken,"$let") &&
+(Language == tptp_tff || Language == tptp_tcf)) {
                 Formula = ParseLETFormula(Stream,Language,Context,EndOfScope,
 VariablesMustBeQuantified);
             } else {

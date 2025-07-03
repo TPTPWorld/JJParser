@@ -1476,7 +1476,7 @@ TOKEN GetNextToken(READFILE Stream) {
                 while (LocalValue[Index] == '$') {
                     Index++;
                 }
-                if (Index > 0 && !islower(LocalValue[Index])) {
+                if (Index > 0 && !isalnum(LocalValue[Index])) {
                     CharacterError(Stream);
                 }
                 return(BuildToken(lower_word,LocalValue));
