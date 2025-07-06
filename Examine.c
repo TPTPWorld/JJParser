@@ -2145,8 +2145,7 @@ FormulaTypeToString(Formula->Type));
     }
 }
 //-------------------------------------------------------------------------------------------------
-void CountTheConnective(ConnectiveType Connective,
-ConnectiveStatisticsType * ConnectiveStatistics) {
+void CountTheConnective(ConnectiveType Connective,ConnectiveStatisticsType * ConnectiveStatistics) {
 
     String ErrorMessage;
 
@@ -2376,6 +2375,16 @@ GetArity(VariableType->FormulaUnion.Atom) == 0 &&
  !strcmp(GetSymbol(VariableType->FormulaUnion.Atom),"$rat") ||
  !strcmp(GetSymbol(VariableType->FormulaUnion.Atom),"$real"))) {
                     ConnectiveStatistics.NumberOfMathVariables++;
+                }
+//----Count polymorphic and dependent type declarations
+                if (Formula->FormulaUnion.QuantifiedFormula.Quantifier == pibinder) {
+                    if (VariableType->Type == atom &&
+GetArity(VariableType->FormulaUnion.Atom) == 0 &&
+!strcmp(GetSymbol(VariableType->FormulaUnion.Atom),"$tType")) {
+                        ConnectiveStatistics.NumberOfPolymorphicPis++;
+                    } else {
+                        ConnectiveStatistics.NumberOfDependentPis++;
+                    }
                 }
             }
             MoreConnectiveStatistics = GetFormulaConnectiveUsage(

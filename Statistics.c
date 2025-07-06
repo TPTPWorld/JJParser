@@ -103,6 +103,8 @@ void InitializeConnectiveStatistics(ConnectiveStatisticsType * ConnectiveStatist
     ConnectiveStatistics->NumberOfUniversals = 0;
     ConnectiveStatistics->NumberOfExistentials = 0;
     ConnectiveStatistics->NumberOfPiBinders = 0;
+    ConnectiveStatistics->NumberOfPolymorphicPis = 0;
+    ConnectiveStatistics->NumberOfDependentPis = 0;
     ConnectiveStatistics->NumberOfSigmaBinders = 0;
     ConnectiveStatistics->NumberOfDescriptionBinders = 0;
     ConnectiveStatistics->NumberOfChoiceBinders = 0;
@@ -130,6 +132,8 @@ MoreConnectiveStatistics.NumberOfEqualitySymbols;
     ConnectiveStatistics->NumberOfTypeConnectives += 
 MoreConnectiveStatistics.NumberOfTypeConnectives;
     ConnectiveStatistics->NumberOfPis += MoreConnectiveStatistics.NumberOfPis;
+    ConnectiveStatistics->NumberOfPolymorphicPis += MoreConnectiveStatistics.NumberOfPolymorphicPis;
+    ConnectiveStatistics->NumberOfDependentPis += MoreConnectiveStatistics.NumberOfDependentPis;
     ConnectiveStatistics->NumberOfSigmas += MoreConnectiveStatistics.NumberOfSigmas;
     ConnectiveStatistics->NumberOfChoices += MoreConnectiveStatistics.NumberOfChoices;
     ConnectiveStatistics->NumberOfDescriptions += MoreConnectiveStatistics.NumberOfDescriptions;

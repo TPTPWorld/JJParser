@@ -149,6 +149,8 @@ typedef struct {
     int NumberOfEpsilons;
     int NumberOfLambdas;
     int NumberOfPiBinders;
+    int NumberOfPolymorphicPis;
+    int NumberOfDependentPis;
     int NumberOfSigmaBinders;
     int NumberOfChoiceBinders;
     int NumberOfDescriptionBinders;

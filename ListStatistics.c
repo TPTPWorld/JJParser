@@ -771,10 +771,14 @@ Statistics.SymbolStatistics.NumberOfUserTypes);
         fprintf(Stream,")\n");
 //----Print number of type declarations if more than type annotated formulae
         if (Statistics.ConnectiveStatistics.NumberOfGlobalTypeDecs > 
-Statistics.FormulaStatistics.NumberOfTypeFormulae) {
+Statistics.FormulaStatistics.NumberOfTypeFormulae ||
+Statistics.ConnectiveStatistics.NumberOfPolymorphicPis > 0 ||
+Statistics.ConnectiveStatistics.NumberOfDependentPis > 0) {
             fprintf(Stream,
-"%%            Number of type decls  : %4d\n",
-Statistics.ConnectiveStatistics.NumberOfGlobalTypeDecs);
+"%%            Number of type decls  : %4d (%4d !>P;%4d !>D)\n",
+Statistics.ConnectiveStatistics.NumberOfGlobalTypeDecs,
+Statistics.ConnectiveStatistics.NumberOfPolymorphicPis,
+Statistics.ConnectiveStatistics.NumberOfDependentPis);
         }
         fprintf(Stream,
 "%%            Number of type conns  : %4d (%4d   >;%4d   *;%4d   +;%4d  <<)\n",
