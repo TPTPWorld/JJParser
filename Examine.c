@@ -2359,6 +2359,10 @@ Formula->FormulaUnion.BinaryFormula.RHS);
         case type_declaration:
             ConnectiveStatistics = GetFormulaConnectiveUsage(
 Formula->FormulaUnion.BinaryFormula.RHS);
+            ConnectiveStatistics.NumberOfPolymorphicPis = 
+ConnectiveStatistics.NumberOfPolymorphicPis > 1 ? 1 : ConnectiveStatistics.NumberOfPolymorphicPis;
+            ConnectiveStatistics.NumberOfDependentPis = 
+ConnectiveStatistics.NumberOfDependentPis > 1 ? 1 : ConnectiveStatistics.NumberOfDependentPis;
             ConnectiveStatistics.NumberOfGlobalTypeDecs++;
             break;
         case quantified:
