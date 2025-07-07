@@ -871,7 +871,9 @@ SIGNATURE Signature, char * UsefulInformation,int DoRemove,int DoAdd) {
 
     if (UsefulInformation != NULL && strlen(UsefulInformation) > 0) {
 //----Add source and useful info if there wasn't one before
+//DEBUG printf("Add/Remove %d/%d useful info %s to formula\n",DoAdd,DoRemove,UsefulInformation);PrintAnnotatedTSTPNode(stdout,AnnotatedFormula,tptp,0);fflush(stdout);
         EnsureLongForm(AnnotatedFormula,Signature);
+//DEBUG printf("Did Add/Remove %d/%d useful info %s to formula\n",DoAdd,DoRemove,UsefulInformation);PrintAnnotatedTSTPNode(stdout,AnnotatedFormula,tptp,0);fflush(stdout);
 //----Get pointer to the list
         DoUpdateRecordInList(
 AnnotatedFormula->AnnotatedFormulaUnion.AnnotatedTSTPFormula.UsefulInfo,Signature,
