@@ -3234,7 +3234,9 @@ char * GetOneParentNames(TERM ParentSource,int IncludeDetails,char * PutNamesHer
     } else if (!strcmp(GetSymbol(ParentSource),"inference")) {
         ExtendAndFree(&Buffer,GetInferenceParentNames(ParentSource,IncludeDetails,NULL),
 &BufferSize);
-    } 
+    } else {
+//DEBUG printf("weird trying to get parent name from ");PrintTSTPTerm(stdout,tptp_fof,ParentSource,0,0,1);fflush(stdout);
+    }
 
     return(BufferReturn(&Buffer,PutNamesHere));
 }
