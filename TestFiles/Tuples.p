@@ -1,1 +1,1 @@
-tff(an,axiom,p([g([a,a],bb),b,c],f)).
+tff(an,axiom,p([g([a,a],bb),b,[]],f)).

@@ -234,6 +234,7 @@ typedef struct {
 } UnaryFormulaType;
 
 typedef struct {
+    char OpeningBracket;
     int NumberOfElements;
     struct FormulaTypetag ** Elements;
 } TupleFormulaType;

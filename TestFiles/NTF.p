@@ -35,7 +35,7 @@ tff(long_indexed,axiom,
     {$box(#1)} @ (p) ).
 
 tff(connected_long_indexed,axiom,
-    p & {$box(#1)} @ (p) & p ).
+    p & ({$box(#1)} @ (p)) & p ).
 
 thf(short_thf,axiom,
     [.] p ).

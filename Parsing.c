@@ -1172,11 +1172,17 @@ VARIABLENODE * EndOfScope,int AllowBinary,int VariablesMustBeQuantified,
 ConnectiveType LastConnective,int * NumberOfElements) {
 
     FORMULAArray TupleFormulae;
+    char * ClosingBracket;
 
     TupleFormulae = NULL;
     *NumberOfElements = 0;
-    AcceptToken(Stream,punctuation,"[");
-    if (!CheckToken(Stream,punctuation,"]")) {
+    if (CheckToken(Stream,punctuation,"[")) {
+        ClosingBracket = "]";
+    } else {
+        ClosingBracket = ")";
+    }
+    AcceptTokenType(Stream,punctuation);
+    if (!CheckToken(Stream,punctuation,ClosingBracket)) {
         (*NumberOfElements)++;
         TupleFormulae = (FORMULAArray)Malloc(sizeof(FORMULA));
         TupleFormulae[*NumberOfElements-1] = ParseFormula(Stream,Language,Context,EndOfScope,1,1,
@@ -1192,7 +1198,7 @@ VariablesMustBeQuantified,none);
     } else {
         TupleFormulae = NULL;
     }
-    AcceptToken(Stream,punctuation,"]");
+    AcceptToken(Stream,punctuation,ClosingBracket);
     return(TupleFormulae);
 }
 //-------------------------------------------------------------------------------------------------
@@ -1203,21 +1209,31 @@ ConnectiveType LastConnective) {
     FORMULA TupleOrSequent;
     FORMULAArray FirstTuple;
     int NumberOfElements;
+    char * OpeningBracket;
 
-    EnsureToken(Stream,punctuation,"[");
+    if (CheckToken(Stream,punctuation,"[")) {
+        OpeningBracket = "[";
+    } else {
+        OpeningBracket = "(";
+    }
+    EnsureToken(Stream,punctuation,OpeningBracket);
     TupleOrSequent = NewFormula();
     FirstTuple = ParseTupleFormulae(Stream,Language,Context,EndOfScope,AllowBinary,
 VariablesMustBeQuantified,LastConnective,&NumberOfElements);
-    if (CheckToken(Stream,binary_connective,"-->")) {
+//----If a []ed tuple, can be sequent
+    if (*OpeningBracket == '[' && CheckToken(Stream,binary_connective,"-->")) {
+        AcceptToken(Stream,binary_connective,"-->");
+//----Ensure next is []ed too
+        EnsureToken(Stream,punctuation,OpeningBracket);
         TupleOrSequent->Type = sequent;
         TupleOrSequent->FormulaUnion.SequentFormula.LHS = FirstTuple;
         TupleOrSequent->FormulaUnion.SequentFormula.NumberOfLHSElements = NumberOfElements;
-        AcceptToken(Stream,binary_connective,"-->");
         TupleOrSequent->FormulaUnion.SequentFormula.RHS = ParseTupleFormulae(Stream,Language,
 Context,EndOfScope,AllowBinary,VariablesMustBeQuantified,LastConnective,
 &(TupleOrSequent->FormulaUnion.SequentFormula.NumberOfRHSElements));
     } else {
         TupleOrSequent->Type = tuple;
+        TupleOrSequent->FormulaUnion.TupleFormula.OpeningBracket = *OpeningBracket;
         TupleOrSequent->FormulaUnion.TupleFormula.Elements = FirstTuple;
         TupleOrSequent->FormulaUnion.TupleFormula.NumberOfElements = NumberOfElements;
     }
@@ -1406,10 +1422,10 @@ ConnectiveType LastConnective) {
                 Formula = ParseTupleOrSequentFormula(Stream,Language,Context,
 EndOfScope,AllowBinary,VariablesMustBeQuantified,LastConnective);
             } else if (CheckToken(Stream,punctuation,"(")) {
+//----Application for NXF
                 if (Language == tptp_tff && LastConnective == application) {
-//DEBUG printf("Parsing a ()ed atom %s\n",CurrentToken(Stream)->NameToken);
-                Formula = ParseAtom(Stream,Language,Context,EndOfScope,VariablesMustBeQuantified);
-//DEBUG printf("Parsed as a ()ed atom with functor %s and arity %d\n",GetSymbol(Formula->FormulaUnion.Atom),GetArity(Formula->FormulaUnion.Atom));
+                    Formula = ParseTupleOrSequentFormula(Stream,Language,Context,
+EndOfScope,AllowBinary,VariablesMustBeQuantified,LastConnective);
                 } else {
                     AcceptToken(Stream,punctuation,"(");
                     Formula = ParseFormula(Stream,Language,Context,EndOfScope,1,1,
@@ -1430,10 +1446,9 @@ atom_as_term,none,NULL,VariablesMustBeQuantified);
                     BinaryFormula->Type = binary;
                     BinaryFormula->FormulaUnion.BinaryFormula.LHS = Formula;
                     BinaryFormula->FormulaUnion.BinaryFormula.Connective = application;
-                    AcceptToken(Stream,punctuation,"(");
+                    CheckToken(Stream,punctuation,"(");
                     BinaryFormula->FormulaUnion.BinaryFormula.RHS = ParseFormula(Stream,Language,
-Context,EndOfScope,1,1,VariablesMustBeQuantified,none);
-                    AcceptToken(Stream,punctuation,")");
+Context,EndOfScope,1,1,VariablesMustBeQuantified,application);
                     Formula = BinaryFormula;
                 } 
             } else {
