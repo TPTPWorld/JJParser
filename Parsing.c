@@ -319,6 +319,7 @@ void FreeFormula(FORMULA * Formula,SIGNATURE Signature,VARIABLENODE * Variables)
     SYMBOLNODE Symbol;
     String ErrorMessage;
 
+//DEBUG printf("Freeing formula\n"); PrintFileTSTPFormula(OpenFILEPrintFile(stdout,NULL),tptp_tff,*Formula,0,1,outermost,1);printf("\n");fflush(stdout);
     if (*Formula != NULL) {
         switch ((*Formula)->Type) {
             case tuple:
@@ -1546,6 +1547,14 @@ RightAssociative(ThisConnective)) {
                 BinaryFormula->Type = 
 (ThisConnective == assignmentsym || ThisConnective == identicalsym) ?  assignment : 
 ThisConnective == typecolon ? type_declaration : binary;
+                if (BinaryFormula->Type == type_declaration) {
+//----Make sure the LHS is an atom 
+                    if (Formula->Type != atom || GetArity(Formula->FormulaUnion.Atom) != 0) {
+                        sprintf(ErrorMessage,"Trying to declare a non-atomic symbol %s",
+GetSymbol(Formula->FormulaUnion.Atom));
+                        TokenError(Stream,ErrorMessage);
+                    }
+                }
                 BinaryFormula->FormulaUnion.BinaryFormula.LHS = Formula;
                 BinaryFormula->FormulaUnion.BinaryFormula.Connective = ThisConnective;
 //----For some things set the connective to "none" because ()s are not needed.
@@ -1564,6 +1573,7 @@ Context,EndOfScope,AllowBinary,1,VariablesMustBeQuantified,ThisConnective);
 FormulaUnion.Atom);
                     LHSSymbolArity = GetArity(BinaryFormula->FormulaUnion.BinaryFormula.LHS->
 FormulaUnion.Atom);
+//DEBUG printf("Found a type decl symbol %s arity %d\n",LHSSymbol,LHSSymbolArity);
 //----If a declaration of a type in THF or TFF, move the LHS to Types in signature
 //TODO What about TH1 with constructors?
                     if (LHSSymbolArity == 0 && 
