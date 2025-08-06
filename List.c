@@ -329,7 +329,9 @@ LISTNODE * ParentList,int * MissingNameIndex,SIGNATURE Signature) {
     AddHere = ParentList;
     for (ParentNumber = 0;ParentNumber < NumberOfParents;ParentNumber++) {
         strcpy(NameWithoutDetails,ParentNames[ParentNumber]);
-        if (NameWithoutDetails[0] != '\'' &&(Colon = strchr(NameWithoutDetails,':')) != NULL) {
+        if (NameWithoutDetails[0] == '\'' && (Colon = strchr(NameWithoutDetails,'\':')) != NULL) {
+            *(Colon + 1) = '\0';
+        else if ((Colon = strchr(NameWithoutDetails,':')) != NULL) {
             *Colon = '\0';
         }
         if ((ParentAnnotatedFormula = GetAnnotatedFormulaFromListByName(Head,
