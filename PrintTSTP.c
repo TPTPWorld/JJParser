@@ -1198,6 +1198,16 @@ TSTPSyntaxFlag);
     }
 }           
 //-------------------------------------------------------------------------------------------------
+void PrintStringTSTPFormula(char * PutOutputHere,SyntaxType Language,FORMULA Formula,int Pretty) {
+
+    PRINTFILE LocalStream;
+
+    if ((LocalStream = OpenStringPrintFile(PutOutputHere)) != NULL) {
+        PrintFileTSTPFormula(LocalStream,Language,Formula,0,0,outermost,1);
+        ClosePrintFile(LocalStream);
+    }
+}
+//-------------------------------------------------------------------------------------------------
 void PrintFileAnnotatedTSTPFormula(PRINTFILE Stream,SyntaxType Language,
 AnnotatedTSTPFormulaType AnnotatedTSTPFormula,PrintFormatType Format,int Pretty) {
 

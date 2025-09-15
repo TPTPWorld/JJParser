@@ -34,10 +34,11 @@ void PrintFileTSTPFormula(PRINTFILE Stream,SyntaxType Language,FORMULA Formula,
 int Indent,int Pretty,ConnectiveType LastConnective,int TSTPSyntaxFlag);
 void PrintTSTPFormula(FILE * Stream,SyntaxType Language,FORMULA Formula,int Indent,int Pretty,
 ConnectiveType LastConnective,int TSTPSyntaxFlag);
+void PrintStringTSTPFormula(char * PutOutputHere,SyntaxType Language,FORMULA Formula,int Pretty);
 void PrintAnnotatedTSTPFormula(FILE * Stream,SyntaxType Syntax,
 AnnotatedTSTPFormulaType AnnotatedTSTPFormula,PrintFormatType Format,int Pretty);
-void PrintStringAnnotatedTSTPNode(char * PutOutputHere,ANNOTATEDFORMULA 
-AnnotatedFormula,PrintFormatType Format,int Pretty);
+void PrintStringAnnotatedTSTPNode(char * PutOutputHere,ANNOTATEDFORMULA AnnotatedFormula,
+PrintFormatType Format,int Pretty);
 void PrintAnnotatedTSTPNode(FILE * Stream,ANNOTATEDFORMULA AnnotatedFormula,PrintFormatType Format,
 int Pretty);
 void PrintAnnotatedTSTPNodeWithStatus(FILE * Stream,ANNOTATEDFORMULA AnnotatedFormula,

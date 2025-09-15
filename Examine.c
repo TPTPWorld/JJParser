@@ -2849,8 +2849,7 @@ FORMULA GetLiteralFromClauseByNumber(FORMULA Clause,int Number) {
     }
 }
 //-------------------------------------------------------------------------------------------------
-FORMULA GetLiteralFromAnnotatedClauseByNumber(ANNOTATEDFORMULA AnnotatedClause,
-int Number) {
+FORMULA GetLiteralFromAnnotatedClauseByNumber(ANNOTATEDFORMULA AnnotatedClause,int Number) {
 
 //    FORMULAWITHVARIABLES FormulaWithVariables;
 
@@ -2858,8 +2857,7 @@ int Number) {
 //        FormulaWithVariables = AnnotatedClause->
 //AnnotatedFormulaUnion.AnnotatedTSTPFormula.FormulaWithVariables;
         return(GetLiteralFromClauseByNumber(AnnotatedClause->
-AnnotatedFormulaUnion.AnnotatedTSTPFormula.FormulaWithVariables->Formula,
-Number));
+AnnotatedFormulaUnion.AnnotatedTSTPFormula.FormulaWithVariables->Formula,Number));
     } else {
         return(NULL);
     }

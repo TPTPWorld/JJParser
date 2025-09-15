@@ -82,6 +82,7 @@ SyntaxType GetListSyntax(LISTNODE Head);
 void GetListSyntaxTypes(LISTNODE Head,String SyntaxTypes);
 FORMULA GetUniversalCoreFormula(FORMULA QuantifiedFormula);
 int ThereIsAConjecture(LISTNODE Head);
+FORMULA GetLiteralFromClauseByNumber(FORMULA Clause,int Number);
 FORMULA GetLiteralFromAnnotatedClauseByNumber(ANNOTATEDFORMULA Clause,int Number);
 
 TERM GetSourceTERM(ANNOTATEDFORMULA AnnotatedFormula,char * SourceSymbol);
