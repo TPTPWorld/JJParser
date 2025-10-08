@@ -996,7 +996,7 @@ Formula->FormulaUnion.QuantifiedFormula.Formula,Indent,Pretty,none,TSTPSyntaxFla
 (Equation(Formula,NULL,NULL) && 
 //----For languages where equality can apply to formulae, add ()s
  !(!(Language == tptp_tff || Language == tptp_thf) && LiteralOrTuple(SideFormula)) && 
- !NonVariableSymbolFormula(SideFormula) &&
+ !SymbolFormula(SideFormula) &&
  !NegatedEquation(SideFormula,NULL,NULL) && 
  !BinaryFormula(SideFormula))) {
 // (Equation(SideFormula,NULL,NULL) || !BinaryFormula(SideFormula)))) {
@@ -1053,7 +1053,7 @@ SideFormula->Type != tuple &&
  LeftAssociative(SideFormula->FormulaUnion.BinaryFormula.Connective)) ||
 (Equation(Formula,NULL,NULL) && 
  !(!(Language == tptp_tff || Language == tptp_thf) && LiteralOrTuple(SideFormula)) && 
- !NonVariableSymbolFormula(SideFormula) &&
+ !SymbolFormula(SideFormula) &&
  !NegatedEquation(SideFormula,NULL,NULL) && 
  !BinaryFormula(SideFormula)) ||
 (LHSWasAppliedConnective))) {
