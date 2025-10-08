@@ -290,6 +290,16 @@ int SymbolFormula(FORMULA Formula) {
     return(Formula->Type == atom || Formula->Type == ite_formula || Formula->Type == let_formula);
 }
 //-------------------------------------------------------------------------------------------------
+int NonVariableSymbolFormula(FORMULA Formula) {
+
+//----Atoms and FOL predicates are "symbols". Thus $ite() and $let() are in 
+//----this category. Note tuples have arity -1 and are not "symbols".
+    return(
+(Formula->Type == atom &&
+ ! VariableFormula(Formula)) || 
+Formula->Type == ite_formula || Formula->Type == let_formula);
+}
+//-------------------------------------------------------------------------------------------------
 int FlatSymbolFormula(FORMULA Formula) {
 
     return(Formula->Type == atom && FlatTermList(GetArity(Formula->FormulaUnion.Atom),
@@ -327,6 +337,12 @@ int UnarySymbolFormula(FORMULA Formula) {
     return(UnaryFormula(Formula) && SymbolFormula(Formula->FormulaUnion.UnaryFormula.Formula));
 }
 //-------------------------------------------------------------------------------------------------
+int NonVariableUnarySymbolFormula(FORMULA Formula) {
+
+    return(UnaryFormula(Formula) && 
+NonVariableSymbolFormula(Formula->FormulaUnion.UnaryFormula.Formula));
+}
+//-------------------------------------------------------------------------------------------------
 int FlatUnarySymbolFormula(FORMULA Formula) {
 
     return(UnaryFormula(Formula) && FlatSymbolFormula(Formula->FormulaUnion.UnaryFormula.Formula));
@@ -341,12 +357,30 @@ Formula->FormulaUnion.UnaryFormula.Formula));
 int LiteralFormula(FORMULA Formula) {
 
     return(SymbolFormula(Formula) ||
-(UnarySymbolFormula(Formula) && Formula->FormulaUnion.UnaryFormula.Connective == negation));
+(UnarySymbolFormula(Formula) && 
+ Formula->FormulaUnion.UnaryFormula.Connective == negation));
+}
+//-------------------------------------------------------------------------------------------------
+int NonVariableLiteralFormula(FORMULA Formula) {
+
+    return(SymbolFormula(Formula) ||
+(NonVariableUnarySymbolFormula(Formula) && 
+ Formula->FormulaUnion.UnaryFormula.Connective == negation));
+}
+//-------------------------------------------------------------------------------------------------
+int SymbolOrTuple(FORMULA Formula) {
+
+    return(SymbolFormula(Formula) || Formula->Type == tuple);
 }
 //-------------------------------------------------------------------------------------------------
 int LiteralOrTuple(FORMULA Formula) {
 
     return(LiteralFormula(Formula) || Formula->Type == tuple);
+}
+//-------------------------------------------------------------------------------------------------
+int NonVariableLiteralOrTuple(FORMULA Formula) {
+
+    return(NonVariableLiteralFormula(Formula) || Formula->Type == tuple);
 }
 //-------------------------------------------------------------------------------------------------
 int AtomicallyFlatLiteralFormula(FORMULA Formula) {
@@ -951,14 +985,20 @@ Formula->FormulaUnion.QuantifiedFormula.Formula,Indent,Pretty,none,TSTPSyntaxFla
 //DEBUG printf("Printing LHS %s with connective %s, last connective was %s, indent %d\n",FormulaTypeToString(SideFormula->Type),ConnectiveToString(Connective),ConnectiveToString(LastConnective),Indent);
             SideIndent = Indent;
             LHSWasAppliedConnective = SideFormula->Type == applied_connective;
-            if ((Associative(Connective) && !FullyAssociative(Connective) && 
-SideFormula->Type == binary &&
-RightAssociative(SideFormula->FormulaUnion.BinaryFormula.Connective)) ||
+            if (
+(Associative(Connective) && 
+ !FullyAssociative(Connective) && 
+ SideFormula->Type == binary &&
+ RightAssociative(SideFormula->FormulaUnion.BinaryFormula.Connective)) ||
 //----Need ()s around complex sides of equations. The BNF says negations are complex.
 //----Binary gets dealt with in recursion regarding associativity. But negated equations have
 //----to be dealt with here because later they are kinda binary with TSTPSyntaxFlag = 2.
-(Equation(Formula,NULL,NULL) && !LiteralOrTuple(SideFormula) && 
-!NegatedEquation(SideFormula,NULL,NULL) && !BinaryFormula(SideFormula))) {
+(Equation(Formula,NULL,NULL) && 
+//----For languages where equality can apply to formulae, add ()s
+ !(!(Language == tptp_tff || Language == tptp_thf) && LiteralOrTuple(SideFormula)) && 
+ !NonVariableSymbolFormula(SideFormula) &&
+ !NegatedEquation(SideFormula,NULL,NULL) && 
+ !BinaryFormula(SideFormula))) {
 // (Equation(SideFormula,NULL,NULL) || !BinaryFormula(SideFormula)))) {
                 FakeConnective = brackets;
                 PFprintf(Stream,"( ");
@@ -1007,11 +1047,16 @@ TSTPSyntaxFlag);
                 if (
 //----Tuples have their own ()s
 SideFormula->Type != tuple &&
-((Associative(Connective) && !FullyAssociative(Connective) && SideFormula->Type == binary && 
-  LeftAssociative(SideFormula->FormulaUnion.BinaryFormula.Connective)) ||
- (Equation(Formula,NULL,NULL) && !LiteralOrTuple(SideFormula) && 
-  !NegatedEquation(SideFormula,NULL,NULL) && !BinaryFormula(SideFormula)) ||
- (LHSWasAppliedConnective))) {
+((Associative(Connective) && 
+ !FullyAssociative(Connective) && 
+ SideFormula->Type == binary && 
+ LeftAssociative(SideFormula->FormulaUnion.BinaryFormula.Connective)) ||
+(Equation(Formula,NULL,NULL) && 
+ !(!(Language == tptp_tff || Language == tptp_thf) && LiteralOrTuple(SideFormula)) && 
+ !NonVariableSymbolFormula(SideFormula) &&
+ !NegatedEquation(SideFormula,NULL,NULL) && 
+ !BinaryFormula(SideFormula)) ||
+(LHSWasAppliedConnective))) {
 // (Equation(SideFormula,NULL,NULL) || !BinaryFormula(SideFormula)))) {
                     FakeConnective = brackets;
                     PFprintf(Stream,"( ");
