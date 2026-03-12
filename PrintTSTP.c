@@ -1418,7 +1418,7 @@ StatusToString(AnnotatedTSTPFormula.Status),(Pretty?"\n":""));
         case tptp_fof:
             PFprintf(Stream,"    (");
             PrintFileTSTPFormula(Stream,tptp_fof,
-AnnotatedTSTPFormula. FormulaWithVariables->Formula,6,Pretty,outermost,0);
+AnnotatedTSTPFormula.FormulaWithVariables->Formula,6,Pretty,outermost,0);
             PFprintf(Stream," )");
             break;
         case tptp_cnf:

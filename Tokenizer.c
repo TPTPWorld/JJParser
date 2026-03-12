@@ -1201,7 +1201,8 @@ TOKEN GetNextToken(READFILE Stream) {
             CurrentChar = NextCharacter(Stream);
             if (isalnum(CurrentChar)) {
 //----Copied from default case below
-                Index = 0;
+                LocalValue[0] = '#';
+                Index = 1;
                 do {
                     LocalValue[Index] = CurrentChar;
                     CurrentChar = NextCharacter(Stream);
