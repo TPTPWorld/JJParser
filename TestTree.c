@@ -27,9 +27,9 @@ int main(int argc, char *argv[]) {
 
 //    PrintListOfAnnotatedTSTPNodes(stdout,Signature,Head,tptp,1);
 
-printf("about to build root list\n");
+    printf("about to build root list\n");
     RootListHead = BuildRootList(Head);
-printf("built root list\n");
+    printf("built root list\n");
     PrintRootList(stdout,RootListHead);
 
 //----Test output in postorder

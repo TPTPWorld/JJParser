@@ -480,7 +480,7 @@ NULL && ExtractTermArguments(InferenceInfo) && strstr(InferenceInfo,"skolem,") =
             strcat(ListOfSkolemNames,SkolemSymbol);
             strcat(ListOfSkolemNames,",");
         } else {
-printf("error extracting skolem symbol\n");
+//DEBUG printf("error extracting skolem symbol\n");
             return(NULL);
         }
         EpsilonTerms = EpsilonTerms->Next;

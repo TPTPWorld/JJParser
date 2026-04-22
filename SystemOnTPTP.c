@@ -448,7 +448,7 @@ TheReturnedChars[NumberOfChars] = '\0';printf("The curled data as a string is %s
         fflush((FILE *)DataWriteHandle);
     }
 
-printf("Returning %d chars\n",(int)NumberOfElements);
+//DEBUG printf("Returning %d chars\n",(int)NumberOfElements);
     return(ElementSize*NumberOfElements);
 }
 //-------------------------------------------------------------------------------------------------

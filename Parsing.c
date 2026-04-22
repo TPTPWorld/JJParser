@@ -682,8 +682,8 @@ int VariablesMustBeQuantified) {
     Term = NewTerm();
     TypeIfInfix = nonterm;
 
-printf("ParseTerm with token %s\n",CurrentToken(Stream)->NameToken);
-printf("Hoping for a %s\n",TermTypeToString(DesiredType));
+//DEBUG printf("ParseTerm with token %s\n",CurrentToken(Stream)->NameToken);
+//DEBUG printf("Hoping for a %s\n",TermTypeToString(DesiredType));
 //----Record token type to check if brackets are legal later
     FunctorType = CurrentToken(Stream)->KindToken;
 
