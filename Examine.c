@@ -2836,7 +2836,11 @@ Role == negated_conjecture || Role == question) {
 //-------------------------------------------------------------------------------------------------
 FORMULA GetLiteralFromClauseByNumber(FORMULA Clause,int Number) {
 
-    if (Clause->Type == binary) {
+//----Remove any universal quantifiers (they are implicit in clauses, but sometimes made explicit)
+    if (Clause->Type == quantified && Clause->FormulaUnion.QuantifiedFormula.Quantifier ==
+universal) {
+        return(GetLiteralFromClauseByNumber(Clause->FormulaUnion.QuantifiedFormula.Formula,Number));
+    } else if (Clause->Type == binary) {
         if (Number == 1) {
             return(Clause->FormulaUnion.BinaryFormula.LHS);
         } else {
