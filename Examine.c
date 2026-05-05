@@ -3204,8 +3204,8 @@ char * ExtractAssumptionsList(TERM AssumptionsTerm) {
     }
 }
 //-------------------------------------------------------------------------------------------------
-//----Calling routine must provide enough space for info, or send NULL and
-//----take responsibility for the malloced memory.
+//----Calling routine must provide enough space for info, or send NULL and take responsibility for
+//----the malloced memory.
 char * GetOneParentNames(TERM ParentSource,int IncludeDetails,char * PutNamesHere) {
 
     char * Buffer;
@@ -3230,6 +3230,7 @@ char * GetOneParentNames(TERM ParentSource,int IncludeDetails,char * PutNamesHer
             ExtendString(&Buffer,DetailedTerm,&BufferSize);
             ExtendString(&Buffer,"\n",&BufferSize);
         } else {
+            Free((void **)&Buffer);
             return(GetOneParentNames(ParentSource->Arguments[0],IncludeDetails,PutNamesHere));
         }
 //----If a nested inference record
@@ -3301,6 +3302,8 @@ AnnotatedFormulaUnion.AnnotatedTSTPFormula.Source),&BufferSize);
 }
 //-------------------------------------------------------------------------------------------------
 //----Same as GetParentNames but no theory names
+//----Calling routine must provide enough space for info, or send NULL and take responsibility for 
+//----the malloced memory.
 char * GetNodeParentNames(ANNOTATEDFORMULA AnnotatedFormula,int IncludeDetails,
 char * PutNamesHere) {
 
