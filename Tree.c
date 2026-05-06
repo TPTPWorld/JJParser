@@ -332,6 +332,7 @@ LISTNODE GetRootList(LISTNODE Head,SIGNATURE Signature) {
     SuperString ParentName;
     BTREENODE ParentTree;
 
+//----Put all logic nodes in the RootList, then remove any that are not roots
     RootList = DuplicateListOfNodes(Head,0);
     ParentTree = NULL;
 
@@ -341,7 +342,7 @@ LISTNODE GetRootList(LISTNODE Head,SIGNATURE Signature) {
 //DEBUG PrintAnnotatedTSTPNode(stdout,Head->AnnotatedFormula,tptp,1);
 //----Immediately exclude types and logic
         if (LogicalAnnotatedFormulaWithRole(Head->AnnotatedFormula,logical_non_formula)) {
-//----Find in linear list and move to tree
+//----Find in linear RootList and move to tree
 //DEBUG printf("Remove at type or logic\n");
 //DEBUG PrintAnnotatedTSTPNode(stdout,Head->AnnotatedFormula,tptp,1);
             Remover = &RootList;
@@ -355,11 +356,11 @@ GetName((*Remover)->AnnotatedFormula,ParentName))) {
                 FreeAListNode(Remover,Signature);
             }
         } else {
+//----Remove all parents - they are not roots
 //DEBUG printf("remove parents of %s\n",GetName(Head->AnnotatedFormula,NULL));
             AllParentNames = GetParentNames(Head->AnnotatedFormula,0,NULL);
             NumberOfParents = Tokenize(AllParentNames,ParentNames,"\n");
-//----Remove all parents - they are not roots
-            for (ParentNumber = 0;ParentNumber< NumberOfParents;ParentNumber++) {
+            for (ParentNumber = 0;ParentNumber < NumberOfParents;ParentNumber++) {
 //DEBUG printf("    remove parent %s\n",ParentNames[ParentNumber]);
 //----Check if not already removed
                 if (GetNodeFromBTreeByAnnotatedFormulaName(&ParentTree,

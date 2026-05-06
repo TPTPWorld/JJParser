@@ -637,8 +637,8 @@ int ExtractTermArguments(String Term) {
     }
 }
 //-------------------------------------------------------------------------------------------------
-//----Calling routine must provide enough space for info, or send NULL and
-//----take responsibility for the malloced memory.
+//----Calling routine must provide enough space for info, or send NULL and take responsibility for
+//----the malloced memory.
 char * TSTPTermToString(TERM Term,char * PutTermHere) {
 
     char * Part;
@@ -690,14 +690,8 @@ char * TSTPTermToString(TERM Term,char * PutTermHere) {
             ExtendString(&Buffer,ClosingBracket,&BufferSize);
         }
     }
-//----Check if user provided memory or not
-    if (PutTermHere != NULL) {
-        strcpy(PutTermHere,Buffer);
-        Free((void **)&Buffer);
-        return(PutTermHere);
-    } else {
-        return(Buffer);
-    }
+
+    return(BufferReturn(&Buffer,PutTermHere));
 }
 //-------------------------------------------------------------------------------------------------
 int CountSimpleUsageInTERMArray(int NumberOfElements,TERMArray Terms,int (*CountFunction)(TERM)) {
@@ -2920,8 +2914,8 @@ Source->Arguments[0]);
     }
 }
 //-------------------------------------------------------------------------------------------------
-//----Calling routine must provide enough space for info, or send NULL and
-//----take responsibility for the malloced memory.
+//----Calling routine must provide enough space for info, or send NULL and take responsibility for
+//----the malloced memory.
 char * GetInferenceRule(ANNOTATEDFORMULA AnnotatedFormula,char * PutNameHere) {
 
     char * Buffer;
