@@ -699,9 +699,9 @@ int DoAdd) {
     int Index;
     int MoveIndex;
 
+    ListTerm = NULL;
 //----Check that the new term is well formed
     if (DoAdd && (ListTerm = ParseStringTerm(UsefulInformation,nontype,Signature,0)) == NULL) {
-        ListTerm = NULL;
         CodingError("Trying to add a bad term as useful info");
     }
 
