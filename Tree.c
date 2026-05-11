@@ -721,6 +721,9 @@ Signature) == NULL) {
     while (NodesNotInTree != NULL) {
         if (LogicalAnnotatedFormulaWithRole(NodesNotInTree->AnnotatedFormula,logical_non_formula)) {
             FreeAListNode(&NodesNotInTree,Signature);
+        } else {
+//----Advance when the head is not logical_non_formula to avoid an infinite loop
+            NodesNotInTree = NodesNotInTree->Next;
         }
     }
     if (NodesNotInTree != NULL) {

@@ -649,9 +649,7 @@ char * TSTPTermToString(TERM Term,char * PutTermHere) {
     int BufferSize;
 
 //----Build in malloced memory
-    Buffer = (char *)Malloc(sizeof(String));
-    Buffer[0] = '\0';
-    BufferSize = sizeof(String);
+    MakeBuffer(&Buffer,&BufferSize);
 
 //----Check if infix - or : (see also PrintTSTPTerm in PrintTSTP.c)
 //----No need to worry about infix equality here - only for non_logical_data
@@ -673,7 +671,7 @@ char * TSTPTermToString(TERM Term,char * PutTermHere) {
             strcpy(OpeningBracket,"(");
             strcpy(ClosingBracket,")");
         }
-        
+//----If there are term arguments or it's a list, output the bracketed list
         if ((Arity = GetArity(Term)) > 0 || !strcmp(OpeningBracket,"[")) {
             ExtendString(&Buffer,OpeningBracket,&BufferSize);
             if (Arity > 0) {
@@ -3058,6 +3056,8 @@ char * InfoTermSymbol,char * PutInfoHere) {
     }
 }
 //-------------------------------------------------------------------------------------------------
+//----Calling routine must provide enough space for info, or send NULL and take responsibility for 
+//----the malloced memory.
 TERM GetInferenceInfoTERM(ANNOTATEDFORMULA AnnotatedFormula,char * Symbol) {
 
     if (DerivedAnnotatedFormula(AnnotatedFormula)) {
