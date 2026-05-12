@@ -717,14 +717,10 @@ Signature) == NULL) {
     FreeListOfAnnotatedFormulae(&RootAnnotatedFormulae,Signature);
 //----Free binary tree
     FreeRootBTree(&BTreeOfTreeNodes,0,Signature);
-//----Should be none left not in tree, except type and logic
-    while (NodesNotInTree != NULL) {
-        if (LogicalAnnotatedFormulaWithRole(NodesNotInTree->AnnotatedFormula,logical_non_formula)) {
-            FreeAListNode(&NodesNotInTree,Signature);
-        } else {
-//----Advance when the head is not logical_non_formula to avoid an infinite loop
-            NodesNotInTree = NodesNotInTree->Next;
-        }
+//----Should be none left not in tree, except type and logic - delete them first
+    while (NodesNotInTree != NULL &&
+LogicalAnnotatedFormulaWithRole(NodesNotInTree->AnnotatedFormula,logical_non_formula)) {
+        FreeAListNode(&NodesNotInTree,Signature);
     }
     if (NodesNotInTree != NULL) {
         ReportError("InputError","Could not build root list",0);

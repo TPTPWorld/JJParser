@@ -541,8 +541,7 @@ int CheckRole(StatusType Role,StatusType DesiredRole) {
   Role == type || Role == logic)) ||
 (DesiredRole == logical_formula &&
  (CheckRole(Role,logical) && Role != type && Role != logic)) ||
-(DesiredRole == logical_non_formula &&
- (CheckRole(Role,logical) && (Role == type || Role == logic))) ||
+(DesiredRole == logical_non_formula && (Role == type || Role == logic)) ||
 (DesiredRole == not_conjecture && Role != conjecture && Role != negated_conjecture && 
 Role != question));
 }
