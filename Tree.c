@@ -611,17 +611,18 @@ ROOTBTREE * BTreeOfTreeNodes,SIGNATURE Signature) {
     int ParentIndex;
     String ErrorMessage;
 
-//DEBUG printf("Building tree for root %s \n",Name);fflush(stdout);
+printf("Building tree for root %s\n",Name);fflush(stdout);
+    strcpy(ErrorMessage,"");
 //----Try link to an existing node in the tree
     if ((InTree = GetNodeFromRootBTreeByAnnotatedFormulaName(BTreeOfTreeNodes,Name)) != NULL) {
-//DEBUG printf("%s is already in tree\n",Name);fflush(stdout);
+printf("%s is already in tree\n",Name);fflush(stdout);
         *TheTree = (*InTree)->TheTree;
         (*TheTree)->NumberOfUses++;
         return(*TheTree);
 
 //----Make new tree node
     } else {
-//DEBUG printf("Making the tree node for %s\n",Name);fflush(stdout);
+printf("Making the tree node for %s\n",Name);fflush(stdout);
         if ((PtrToNodeInList = GetNodeFromListByAnnotatedFormulaName(NodesNotInTree,Name)) == 
 NULL) {
             sprintf(ErrorMessage,"Could not find formula named %s",Name);
@@ -638,30 +639,28 @@ NULL) {
 //----Do parents if derived 
         if (DerivedAnnotatedFormula((*TheTree)->AnnotatedFormula)) {
             AllParentNames = GetNodeParentNames((*TheTree)->AnnotatedFormula,0,NULL);
-//DEBUG printf("Parents are %s\n",AllParentNames);fflush(stdout);
+printf("Parents are %s\n",AllParentNames);fflush(stdout);
             if (((*TheTree)->NumberOfParents = Tokenize(AllParentNames,ParentNames,"\n")) == 0) {
-//DEBUG printf("There are no parents\n");fflush(stdout);
+printf("There are no parents - must be a tautology\n");fflush(stdout);
 //----Derived but no parents - for tautologies which are inferred from nothing
-                (*TheTree)->Parents = NULL;
             } else {
-//DEBUG printf("Make list for the %d parents\n",(*TheTree)->NumberOfParents);fflush(stdout);
+printf("Make list for the %d parents\n",(*TheTree)->NumberOfParents);fflush(stdout);
                 (*TheTree)->Parents = NewParentsList((*TheTree)->NumberOfParents);
-//DEBUG printf("Loop for parents\n");fflush(stdout);
+printf("Loop for parents\n");fflush(stdout);
                 for (ParentIndex = 0;ParentIndex < (*TheTree)->NumberOfParents;ParentIndex++) {
-//DEBUG printf("Dealing with parent %s\n",ParentNames[ParentIndex]);fflush(stdout);
+printf("Dealing with parent %s\n",ParentNames[ParentIndex]);fflush(stdout);
                     if (BuildTree(NodesNotInTree,ParentNames[ParentIndex],
 &((*TheTree)->Parents[ParentIndex]),BTreeOfTreeNodes,Signature) == NULL) {
-//DEBUG printf("ERROR: Could not build parent trees\n");fflush(stdout);
+printf("ERROR: Could not build parent trees\n");fflush(stdout);
                         return(NULL);
                     } else {
-//DEBUG printf("Built parent tree for %s\n",ParentNames[ParentIndex]);fflush(stdout);
+printf("Built parent tree for %s\n",ParentNames[ParentIndex]);fflush(stdout);
                     }
                 }
             }
             Free((void **)&AllParentNames);
         } else {
-            (*TheTree)->NumberOfParents = 0;
-            (*TheTree)->Parents = NULL;
+printf("It is not derived\n");
         }
     }
     return(*TheTree);
