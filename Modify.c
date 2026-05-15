@@ -823,7 +823,7 @@ NULL);
         return(0);
     } else {
         ParentList->Arguments = (TERMArray)Realloc((void *)ParentList->Arguments,
-ParentList->FlexibleArity+1 * sizeof(TERM));
+(ParentList->FlexibleArity+1) * sizeof(TERM));
         ParentList->Arguments[ParentList->FlexibleArity] = NewTerm();
         ParentList->Arguments[ParentList->FlexibleArity]->Type = non_logical_data;
         ParentList->Arguments[ParentList->FlexibleArity]->TheSymbol.NonVariable =
