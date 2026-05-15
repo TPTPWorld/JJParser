@@ -686,6 +686,7 @@ ROOTLIST BuildRootList(LISTNODE Head,SIGNATURE Signature) {
 
 //----List of nodes not yet in tree
     NodesNotInTree = DuplicateListOfNodes(Head,0);
+//DEBUG PrintListOfAnnotatedTSTPNodes(stdout,Signature,NodesNotInTree,tptp,1);
 //----Keep a pointer to last link field in the list of tree roots
     NextRootList = &RootListHead;
 //----Find all the root annotated formulae - each will start a tree
@@ -717,10 +718,12 @@ Signature) == NULL) {
 //----Free binary tree
     FreeRootBTree(&BTreeOfTreeNodes,0,Signature);
 //----Should be none left not in tree, except type and logic - delete them first
+//DEBUG printf("NodesNotInTree is %s\n",NodesNotInTree == NULL ? "null" : "not null");
     while (NodesNotInTree != NULL &&
 LogicalAnnotatedFormulaWithRole(NodesNotInTree->AnnotatedFormula,logical_non_formula)) {
         FreeAListNode(&NodesNotInTree,Signature);
     }
+//DEBUG printf("After deleting types etc, NodesNotInTree is %s\n",NodesNotInTree == NULL ? "null" : "not null");
     if (NodesNotInTree != NULL) {
         ReportError("InputError","Could not build root list",0);
         FreeRootList(&RootListHead,1,Signature);
