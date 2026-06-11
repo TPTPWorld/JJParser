@@ -187,7 +187,7 @@ char * NotTheseList,char * ResultType,LISTNODE EpsilonTerms) {
     LISTNODE Searcher;
     String TypedSymbolName;
     String ToPrint;
-    String SkolemSymbol,InferenceInfo;
+    TERM NewSymbolsList;
 
     if (Node != NULL) {
         NumberPrinted = LPPrintSignatureList(Stream,Node->LastSymbol,TypeFormulae,OnlyTheseList,
@@ -236,8 +236,9 @@ MatchingTypeFormula->FormulaUnion.BinaryFormula.RHS,"");
                 fprintf(Stream," ≔ ");
                 Searcher = EpsilonTerms;
                 while (Searcher != NULL) {
-                    if ((ExtractNewSkolemSymbols(Searcher->AnnotatedFormula,InferenceInfo,
-SkolemSymbol) != NULL) && !strcmp(Symbol,SkolemSymbol)) {
+//----Assumes only one SKolem symbol
+                    if ((NewSymbolsList = GetNewSymbolsList(Searcher->AnnotatedFormula)) != NULL && 
+!strcmp(Symbol,GetSymbol(NewSymbolsList->Arguments[0]))) {
                         LPPrintEpsilonTerm(Stream,GetListNodeFormula(Searcher));
 //----Stop searching
                         Searcher = NULL;

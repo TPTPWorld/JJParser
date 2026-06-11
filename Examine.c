@@ -309,19 +309,18 @@ FormulaTypeToString(TypeFormula->Type));
     }
 }
 //-------------------------------------------------------------------------------------------------
-char * ExtractNewSkolemSymbols(ANNOTATEDFORMULA AnnotatedFormula,String InferenceInfo,
-String SkolemSymbol) {
+//----Get the flexible arity list of new symbols
+TERM GetNewSymbolsList(ANNOTATEDFORMULA AnnotatedFormula) {
 
-    char * NewSymbolList;
+    TERM NewSymbolsRecord;
 
-    strcpy(InferenceInfo,"");
-    strcpy(SkolemSymbol,"");
-    if (GetSourceInfoTerm(AnnotatedFormula,NULL,"new_symbols",InferenceInfo) != NULL &&
-ExtractTermArguments(InferenceInfo) && strstr(InferenceInfo,"skolem,") == InferenceInfo &&
-(NewSymbolList = strchr(InferenceInfo,'[')) != NULL ) {
-        strcpy(SkolemSymbol,NewSymbolList+1);
-        *strchr(SkolemSymbol,']') = '\0';
-        return(SkolemSymbol);
+//----Get from any kind of source (NULL, i.e., inference or introduced for now), get the
+//----new_symbols() record
+    if ((NewSymbolsRecord = GetSourceInfoTERM(AnnotatedFormula,NULL,"new_symbols")) != NULL &&
+GetArity(NewSymbolsRecord) >= 2 &&
+NewSymbolsRecord->Arguments[1]->Type == non_logical_data &&
+!strcmp(GetSymbol(NewSymbolsRecord->Arguments[1]),"[]")) {
+        return(NewSymbolsRecord->Arguments[1]);
     } else {
         return(NULL);
     }
@@ -587,6 +586,18 @@ AnnotatedFormula->AnnotatedFormulaUnion.AnnotatedTSTPFormula.Source != NULL &&
 //----Source is a single word, not "unknown", i.e., a node name
 GetArity(AnnotatedFormula->AnnotatedFormulaUnion.AnnotatedTSTPFormula.Source) == 0 &&
 strcmp(GetSymbol(AnnotatedFormula->AnnotatedFormulaUnion.AnnotatedTSTPFormula.Source),"unknown"));
+}
+//-------------------------------------------------------------------------------------------------
+int IntroducedAnnotatedFormula(ANNOTATEDFORMULA AnnotatedFormula) {
+
+//----Logical
+    return(LogicalAnnotatedFormula(AnnotatedFormula) &&
+//----Has a source
+AnnotatedFormula->AnnotatedFormulaUnion.AnnotatedTSTPFormula.Source != NULL && 
+//----Source is introduced
+!strcmp(GetSymbol(AnnotatedFormula->AnnotatedFormulaUnion.AnnotatedTSTPFormula.Source),
+"introduced") &&
+GetArity(AnnotatedFormula->AnnotatedFormulaUnion.AnnotatedTSTPFormula.Source) == 3);
 }
 //-------------------------------------------------------------------------------------------------
 int InferredAnnotatedFormula(ANNOTATEDFORMULA AnnotatedFormula) {
@@ -3015,6 +3026,8 @@ AnnotatedFormulaUnion.AnnotatedTSTPFormula.Source,Symbol,&ArrayOfInfoTERMs,Numbe
     return(ArrayOfInfoTERMs);
 }
 //-------------------------------------------------------------------------------------------------
+//----Gets a useful info TERM for InfoTermSymbol, e.g., new_symbols, from SourceSymbol = 
+//----inference or introduced or NULL for either.
 TERM GetSourceInfoTERM(ANNOTATEDFORMULA AnnotatedFormula,char * SourceSymbol,
 char * InfoTermSymbol) {
 
@@ -3040,7 +3053,8 @@ GetSymbol(AnnotatedFormula->AnnotatedFormulaUnion.AnnotatedTSTPFormula.Source->A
     }
 }
 //-------------------------------------------------------------------------------------------------
-//----Gets a useful info term from inference or introduced or NULL for either
+//----Gets a useful info term for InfoTermSymbol, e.g., new_symbols, from SourceSymbol = 
+//----inference or introduced or NULL for either.
 //----Calling routine must provide enough space for info, or send NULL and take responsibility for 
 //----the malloced memory.
 char * GetSourceInfoTerm(ANNOTATEDFORMULA AnnotatedFormula,char * SourceSymbol,

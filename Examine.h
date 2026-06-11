@@ -30,11 +30,11 @@ int LogicalAnnotatedFormulaWithRole(ANNOTATEDFORMULA AnnotatedFormula,StatusType
 int TPIAnnotatedFormula(ANNOTATEDFORMULA AnnotatedFormula);
 int ReallyAnAnnotatedFormula(ANNOTATEDFORMULA AnnotatedFormula);
 int CopiedAnnotatedFormula(ANNOTATEDFORMULA AnnotatedFormula);
+int IntroducedAnnotatedFormula(ANNOTATEDFORMULA AnnotatedFormula);
 int InferredAnnotatedFormula(ANNOTATEDFORMULA AnnotatedFormula);
 int DerivedAnnotatedFormula(ANNOTATEDFORMULA AnnotatedFormula);
 int NestedFormulaType(TermType TheType,int IncludeNestedTerms);
-char * ExtractNewSkolemSymbols(ANNOTATEDFORMULA AnnotatedFormula,String InferenceInfo,
-String SkolemSymbol);
+TERM GetNewSymbolsList(ANNOTATEDFORMULA AnnotatedFormula);
 int LooksLikeANumber(char * NumberString);
 int IsMathType(char * Symbol);
 int LooksLikeAList(TERM Term,int MinElements,int MaxElements);

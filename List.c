@@ -471,6 +471,7 @@ String ListOfSkolemNames) {
 
 //----Extract a list of Skolem symbols with commas
     strcpy(ListOfSkolemNames,"");
+// CAN USE ExtractNewSymbols
     while (EpsilonTerms != NULL) {
         if (GetSourceInfoTerm(EpsilonTerms->AnnotatedFormula,NULL,"new_symbols",InferenceInfo) != 
 NULL && ExtractTermArguments(InferenceInfo) && strstr(InferenceInfo,"skolem,") == InferenceInfo &&
