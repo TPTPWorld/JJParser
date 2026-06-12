@@ -3345,8 +3345,8 @@ SIGNATURE Signature) {
     return(1);
 }
 //-------------------------------------------------------------------------------------------------
-//----Calling routine must provide enough space for info, or send NULL and
-//----take responsibility for the malloced memory.
+//----Calling routine must provide enough space for info, or send NULL and take responsibility for 
+//----the malloced memory.
 char * GetFileSourceNameAndNode(ANNOTATEDFORMULA AnnotatedFormula,char * PutResultHere) {
 
     TERM FileTerm;

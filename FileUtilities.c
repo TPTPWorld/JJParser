@@ -65,6 +65,19 @@ void PathBasename(char * Path,String Basename,char * Suffix) {
     }
 }
 //-------------------------------------------------------------------------------------------------
+void PathDirname(char * Path,String Dirname) {
+
+    char * Slash;
+
+//----Take upto the last slash
+    strcpy(Dirname,Path);
+    if ((Slash = strrchr(Dirname,'/')) != NULL) {
+        *(Slash+1) = '\0';
+    } else {
+        strcpy(Dirname,"");
+    }
+}
+//-------------------------------------------------------------------------------------------------
 char * ExpandFileName(char * FileName,String ExpandedFileName) {
 
     char * Home;

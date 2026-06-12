@@ -5,6 +5,7 @@
 #include <stdarg.h>
 //-------------------------------------------------------------------------------------------------
 void PathBasename(char * Path,String Basename,char * Suffix);
+void PathDirname(char * Path,String Dirname);
 char * CleanTheFileName(char * OriginalFileName,char * CleanFileName);
 FILE * OpenFileInMode(String FileName,char * Mode);
 
