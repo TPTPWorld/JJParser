@@ -143,9 +143,6 @@ strcmp(TheType,"Type")) {
 void LPPrintLambdaQuantification(FILE * Stream,FORMULA Formula,char * SignaturePrefix) {
 
     fprintf(Stream,"λ %s",GetSymbol(Formula->FormulaUnion.QuantifiedFormula.Variable));
-//----Frederic says: Instead, you can also put no type in abstractions and just write "(λ X,
-//---- ..." as Lambdapi is able to infer those types automatically. But for FOF he recants:
-//----You use typed FOL syntax and X11 could be of any type a priori.
     fprintf(Stream," : ");
     if (Formula->FormulaUnion.QuantifiedFormula.VariableType != NULL) {
         PrintLPArgumentSignature(Stream,

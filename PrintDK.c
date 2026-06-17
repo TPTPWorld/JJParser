@@ -16,16 +16,14 @@
 void DKPrintFormula(FILE * Stream,FORMULA Formula);
 //-------------------------------------------------------------------------------------------------
 static char * LAMBDAPI_RESERVED_WORDS[] = {
-    "{|abort|}","{|admit|}","{|admitted|}","{|apply|}","{|as|}","{|assert|}","{|assertnot|}",
-    "{|associative|}","{|assume|}","{|begin|}","{|builtin|}","{|coerce_rule|}","{|commutative|}",
-    "{|compute|}","{|constant|}","{|debug|}","{|end|}","{|fail|}","{|flag|}","{|generalize|}",
-    "{|have|}","{|in|}","{|induction|}","{|inductive|}","{|infix|}","{|injective|}","{|left|}",
-    "{|let|}","{|notation|}","{|off|}","{|on|}","{|opaque|}","{|open|}","{|postfix|}","{|prefix|}",
-    "{|print|}","{|private|}","{|proofterm|}","{|protected|}","{|prover|}","{|prover_timeout|}",
-    "{|quantifier|}","{|refine|}","{|reflexivity|}","{|remove|}","{|require|}","{|rewrite|}",
-    "{|right|}","{|rule|}","{|search|}","{|sequential|}","{|simplify|}","{|solve|}","{|symbol|}",
-    "{|symmetry|}","{|try|}","{|type|}","{|unif_rule|}","{|verbose|}","{|why3|}","{|with" };
-//----Looks like a variable   "TYPE",
+"{|Type|}",
+"{|def|}",
+"{|defac|}",
+"{|defacu|}",
+"{|injective|}",
+"{|thm|}",
+"{|private|}"
+};
 
 char * DeduktiReserved(char * Symbol) {
 
@@ -49,13 +47,13 @@ char * TPTPtoDKSymbol(char * TPTPSymbol) {
     char * DKBracketed;
 
     if (!strcmp(TPTPSymbol,"$i")) {
-        return("ι");  //----Was return("κ");
+        return("zenon.iota");
     } else if (!strcmp(TPTPSymbol,"$o")) {
-        return("prop");
+        return("zenon.prop");
     } else if (!strcmp(TPTPSymbol,"$false")) {
-        return("False");
+        return("zenon.False");
     } else if (!strcmp(TPTPSymbol,"$true")) {
-        return("True");
+        return("zenon.True");
     } else if (!strcmp(TPTPSymbol,"$tType")) {
         return("type");
     } else if (islower(TPTPSymbol[0]) && (DKBracketed = DeduktiReserved(TPTPSymbol)) != NULL) {
@@ -89,7 +87,7 @@ char * DKConnectiveToString(ConnectiveType Connective) {
             return("<=");
             break;
         case lambda:
-            return("");
+            return("λ");
             break;
         case negation:
             return("zenon.not");
@@ -121,13 +119,13 @@ void PrintDKArgumentSignature(FILE * Stream,FORMULA TypeSignature) {
 
     if (TypeSignature->Type == binary) {
         PrintDKArgumentSignature(Stream,TypeSignature->FormulaUnion.BinaryFormula.LHS);
-        fprintf(Stream," → ");
+        fprintf(Stream," -> ");
         PrintDKArgumentSignature(Stream,TypeSignature->FormulaUnion.BinaryFormula.RHS);
     } else {
         TheType = GetSymbol(TypeSignature->FormulaUnion.Atom);
         if (strcmp(TheType,"$o") && strcmp(TheType,"$tType") && strcmp(TheType,"prop") && 
 strcmp(TheType,"Type")) {
-            fprintf(Stream,"term ");
+            fprintf(Stream,"zenon.term");
         }
         fprintf(Stream,"%s",TPTPtoDKSymbol(TheType));
     }
@@ -162,29 +160,30 @@ FormulaUnion.Atom))) {
                 }
                 Searcher = Searcher->Next;
             }
-            fprintf(Stream,"%s : ",TPTPtoDKSymbol(Symbol));
+            fprintf(Stream,"%s : (",TPTPtoDKSymbol(Symbol));
 //----Find the symbol's declaration
             if (MatchingTypeFormula != NULL) {
                 if (MatchingTypeFormula->Type == binary) {
 //----Move over to the type itself
+                    fprintf(Stream,"(");
                     MatchingTypeFormula = MatchingTypeFormula->FormulaUnion.BinaryFormula.LHS;
                     PrintDKArgumentSignature(Stream,
 MatchingTypeFormula->FormulaUnion.BinaryFormula.LHS);
-                    fprintf(Stream," → ");
+                    fprintf(Stream,") -> (");
                 }
             } else {
                 for (Index = 0;Index < GetSignatureArity(Node);Index++) {
-                    fprintf(Stream,"term iota → ");
-//----Was  fprintf(Stream,"κ → ");
+                    fprintf(Stream,"(zenon.term zenon.iota) -> ");
                 }
             }
             if (MatchingTypeFormula != NULL) {
                 PrintDKArgumentSignature(Stream,
 MatchingTypeFormula->FormulaUnion.BinaryFormula.RHS);
+                fprintf(Stream,")");
             } else {
                 fprintf(Stream,"%s",ResultType);
             }
-            fprintf(Stream," .\n");
+            fprintf(Stream,").\n");
             NumberPrinted++;
         }
         NumberPrinted += DKPrintSignatureList(Stream,Node->NextSymbol,TypeFormulae,ResultType);
@@ -248,13 +247,20 @@ void DKPrintFormula(FILE * Stream,FORMULA Formula) {
     fprintf(Stream,"(");
     switch (Formula->Type) {
         case quantified:
-            fprintf(Stream,"%s (%s: ",
-DKConnectiveToString(Formula->FormulaUnion.QuantifiedFormula.Quantifier),
+            fprintf(Stream,"%s ",
+DKConnectiveToString(Formula->FormulaUnion.QuantifiedFormula.Quantifier));
+            if (Formula->FormulaUnion.QuantifiedFormula.VariableType != NULL) {
+                fprintf(Stream,"%s",TPTPtoDKSymbol(GetSymbol(
+Formula->FormulaUnion.QuantifiedFormula.VariableType->FormulaUnion.Atom)));
+            } else {
+                fprintf(Stream,"zenon.iota");
+            }
+            fprintf(Stream," (%s: ",
 GetSymbol(Formula->FormulaUnion.QuantifiedFormula.Variable));
             if (Formula->FormulaUnion.QuantifiedFormula.VariableType != NULL) {
                 PrintDKArgumentSignature(Stream,Formula->FormulaUnion.QuantifiedFormula.VariableType);
             } else {
-                fprintf(Stream,"term iota");
+                fprintf(Stream,"(zenon.term zenon.iota)");
             }
             fprintf(Stream," => ");
             DKPrintFormula(Stream,Formula->FormulaUnion.QuantifiedFormula.Formula);
@@ -302,7 +308,7 @@ char * Label) {
 
     switch (AnnotatedFormula->Syntax) {
         case comment:
-            fprintf(Stream,"//----%s\n",AnnotatedFormula->AnnotatedFormulaUnion.Comment);
+            fprintf(Stream,"(; %s ;)\n",AnnotatedFormula->AnnotatedFormulaUnion.Comment);
             break;
         case blank_line:
             fprintf(Stream,"\n");
@@ -314,10 +320,10 @@ char * Label) {
                 break;
             }
         case tptp_fof:
-            fprintf(Stream,"%s %s : %s ",Prefix,GetName(AnnotatedFormula,NULL),Label);
+            fprintf(Stream,"%s %s : (%s ",Prefix,GetName(AnnotatedFormula,NULL),Label);
             DKPrintFormula(Stream,AnnotatedFormula->AnnotatedFormulaUnion.
 AnnotatedTSTPFormula.FormulaWithVariables->Formula);
-            fprintf(Stream," .\n");
+            fprintf(Stream,").\n");
             break;
         case tptp_cnf:
             FOFify(AnnotatedFormula,universal);
