@@ -163,10 +163,10 @@ FormulaUnion.Atom))) {
             fprintf(Stream,"%s : (",TPTPtoDKSymbol(Symbol));
 //----Find the symbol's declaration
             if (MatchingTypeFormula != NULL) {
-                if (MatchingTypeFormula->Type == binary) {
+                if (MatchingTypeFormula->Type == type_declaration) {
 //----Move over to the type itself
                     fprintf(Stream,"(");
-                    MatchingTypeFormula = MatchingTypeFormula->FormulaUnion.BinaryFormula.LHS;
+//                    MatchingTypeFormula = MatchingTypeFormula->FormulaUnion.BinaryFormula.LHS;
                     PrintDKArgumentSignature(Stream,
 MatchingTypeFormula->FormulaUnion.BinaryFormula.LHS);
                     fprintf(Stream,") -> (");
