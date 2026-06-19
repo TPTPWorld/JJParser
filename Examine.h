@@ -34,7 +34,7 @@ int IntroducedAnnotatedFormula(ANNOTATEDFORMULA AnnotatedFormula);
 int InferredAnnotatedFormula(ANNOTATEDFORMULA AnnotatedFormula);
 int DerivedAnnotatedFormula(ANNOTATEDFORMULA AnnotatedFormula);
 int NestedFormulaType(TermType TheType,int IncludeNestedTerms);
-TERM GetNewSymbolsList(ANNOTATEDFORMULA AnnotatedFormula);
+TERM GetNewSymbolsList(ANNOTATEDFORMULA AnnotatedFormula,char * SourceOfSymbols);
 int LooksLikeANumber(char * NumberString);
 int IsMathType(char * Symbol);
 int LooksLikeAList(TERM Term,int MinElements,int MaxElements);

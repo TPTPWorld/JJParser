@@ -310,14 +310,16 @@ FormulaTypeToString(TypeFormula->Type));
 }
 //-------------------------------------------------------------------------------------------------
 //----Get the flexible arity list of new symbols
-TERM GetNewSymbolsList(ANNOTATEDFORMULA AnnotatedFormula) {
+TERM GetNewSymbolsList(ANNOTATEDFORMULA AnnotatedFormula,char * SourceOfSymbols) {
 
     TERM NewSymbolsRecord;
 
 //----Get from any kind of source (NULL, i.e., inference or introduced for now), get the
 //----new_symbols() record
     if ((NewSymbolsRecord = GetSourceInfoTERM(AnnotatedFormula,NULL,"new_symbols")) != NULL &&
-GetArity(NewSymbolsRecord) >= 2 &&
+GetArity(NewSymbolsRecord) == 2 &&
+//----Check the source
+(SourceOfSymbols == NULL || !strcmp(SourceOfSymbols,GetSymbol(NewSymbolsRecord->Arguments[0]))) &&
 NewSymbolsRecord->Arguments[1]->Type == non_logical_data &&
 !strcmp(GetSymbol(NewSymbolsRecord->Arguments[1]),"[]")) {
         return(NewSymbolsRecord->Arguments[1]);

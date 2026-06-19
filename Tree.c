@@ -686,16 +686,16 @@ ROOTLIST BuildRootList(LISTNODE Head,SIGNATURE Signature) {
 
 //----List of nodes not yet in tree
     NodesNotInTree = DuplicateListOfNodes(Head,0);
-//DEBUG PrintListOfAnnotatedTSTPNodes(stdout,Signature,NodesNotInTree,tptp,1);
+//DEBUG PrintListOfAnnotatedTSTPNodes(stdout,Signature,NodesNotInTree,tptp,1);fflush(stdout);
 //----Keep a pointer to last link field in the list of tree roots
     NextRootList = &RootListHead;
 //----Find all the root annotated formulae - each will start a tree
     RootAnnotatedFormulae = GetRootList(Head,Signature);
-//DEBUG printf("Found roots\n");
+//DEBUG printf("Found roots\n");fflush(stdout);
     RootAnnotatedFormulaNode = RootAnnotatedFormulae;
     while (RootAnnotatedFormulaNode != NULL) {
         GetName(RootAnnotatedFormulaNode->AnnotatedFormula,RootName);
-//DEBUG printf("Doing root %s\n",RootName);
+//DEBUG printf("Doing root %s\n",RootName);fflush(stdout);
         *NextRootList = NewRootNode(NULL);
         if (BuildTree(&NodesNotInTree,RootName,&((*NextRootList)->TheTree),&BTreeOfTreeNodes,
 Signature) == NULL) {
@@ -707,7 +707,7 @@ Signature) == NULL) {
             FreeListOfAnnotatedFormulae(&NodesNotInTree,Signature);
             return(NULL);
         } else {
-//DEBUG printf("Built tree for %s\n",RootName);
+//DEBUG printf("Built tree for %s\n",RootName);fflush(stdout);
             NextRootList = &((*NextRootList)->Next);
         }
         RootAnnotatedFormulaNode = RootAnnotatedFormulaNode->Next;
@@ -718,12 +718,12 @@ Signature) == NULL) {
 //----Free binary tree
     FreeRootBTree(&BTreeOfTreeNodes,0,Signature);
 //----Should be none left not in tree, except type and logic - delete them first
-//DEBUG printf("NodesNotInTree is %s\n",NodesNotInTree == NULL ? "null" : "not null");
+//DEBUG printf("NodesNotInTree is %s\n",NodesNotInTree == NULL ? "null" : "not null");fflush(stdout);
     while (NodesNotInTree != NULL &&
 LogicalAnnotatedFormulaWithRole(NodesNotInTree->AnnotatedFormula,logical_non_formula)) {
         FreeAListNode(&NodesNotInTree,Signature);
     }
-//DEBUG printf("After deleting types etc, NodesNotInTree is %s\n",NodesNotInTree == NULL ? "null" : "not null");
+//DEBUG printf("After deleting types etc, NodesNotInTree is %s\n",NodesNotInTree == NULL ? "null" : "not null");fflush(stdout);
     if (NodesNotInTree != NULL) {
         ReportError("InputError","Could not build root list",0);
         FreeRootList(&RootListHead,1,Signature);

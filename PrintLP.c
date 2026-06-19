@@ -234,8 +234,8 @@ MatchingTypeFormula->FormulaUnion.BinaryFormula.RHS,"");
                 Searcher = EpsilonTerms;
                 while (Searcher != NULL) {
 //----Assumes only one SKolem symbol
-                    if ((NewSymbolsList = GetNewSymbolsList(Searcher->AnnotatedFormula)) != NULL && 
-!strcmp(Symbol,GetSymbol(NewSymbolsList->Arguments[0]))) {
+                    if ((NewSymbolsList = GetNewSymbolsList(Searcher->AnnotatedFormula,"skolem")) 
+!= NULL && !strcmp(Symbol,GetSymbol(NewSymbolsList->Arguments[0]))) {
                         LPPrintEpsilonTerm(Stream,GetListNodeFormula(Searcher));
 //----Stop searching
                         Searcher = NULL;
