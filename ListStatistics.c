@@ -19,6 +19,7 @@
 int ListCount(SIGNATURE Signature,LISTNODE List,CountType WhatToCount) {
 
     int Counter;
+    TERM Subrole;
 
     Counter = 0;
     while (List != NULL) {
@@ -67,6 +68,18 @@ int ListCount(SIGNATURE Signature,LISTNODE List,CountType WhatToCount) {
                     break;
                 case type_formulae:
                     if (GetRole(List->AnnotatedFormula,NULL) == type) {
+                        Counter += 1;
+                    }
+                    break;
+                case datatype_formulae:
+                    if (GetRole(List->AnnotatedFormula,&Subrole) == type && Subrole != NULL &&
+!strcmp(GetSymbol(Subrole),"datatype")) {
+                        Counter += 1;
+                    }
+                    break;
+                case codatatype_formulae:
+                    if (GetRole(List->AnnotatedFormula,&Subrole) == type && Subrole != NULL && 
+!strcmp(GetSymbol(Subrole),"codatatype")) {
                         Counter += 1;
                     }
                     break;
@@ -451,6 +464,10 @@ StatisticsType GetListStatistics(LISTNODE ListHead,SIGNATURE Signature) {
 unit_formulae);
     Statistics.FormulaStatistics.NumberOfTypeFormulae = HeadListCount(Signature,&HeadListNode,
 type_formulae);
+    Statistics.FormulaStatistics.NumberOfDatatypeFormulae = HeadListCount(Signature,&HeadListNode,
+datatype_formulae);
+    Statistics.FormulaStatistics.NumberOfCodatatypeFormulae = HeadListCount(Signature,&HeadListNode,
+codatatype_formulae);
     Statistics.FormulaStatistics.NumberOfDefnFormulae = HeadListCount(Signature,&HeadListNode,
 defn_formulae);
     Statistics.FormulaStatistics.NumberOfSequents = HeadListCount(Signature,&HeadListNode,
@@ -765,8 +782,14 @@ Statistics.FormulaStatistics.NumberOfTCF > 0) {
         fprintf(Stream,"%%            Number of types       : %4d (%4d usr",
 Statistics.SymbolStatistics.NumberOfTypes,
 Statistics.SymbolStatistics.NumberOfUserTypes);
-        if (Statistics.SymbolStatistics.NumberOfMathTypes > 0) {
-            fprintf(Stream,";%4d ari",Statistics.SymbolStatistics.NumberOfMathTypes);
+        if (
+Statistics.SymbolStatistics.NumberOfMathTypes > 0 ||
+Statistics.FormulaStatistics.NumberOfDatatypeFormulae > 0 ||
+Statistics.FormulaStatistics.NumberOfCodatatypeFormulae > 0) {
+            fprintf(Stream,";%4d ari;%4d dat;%4d cdt",
+Statistics.SymbolStatistics.NumberOfMathTypes,
+Statistics.FormulaStatistics.NumberOfDatatypeFormulae,
+Statistics.FormulaStatistics.NumberOfCodatatypeFormulae);
         }
         fprintf(Stream,")\n");
 //----Print number of type declarations if more than type annotated formulae

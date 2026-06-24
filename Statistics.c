@@ -15,6 +15,8 @@ void InitializeFormulaStatistics(FormulaStatisticsType * FormulaStatistics) {
     FormulaStatistics->NumberOfCNF = 0;
 
     FormulaStatistics->NumberOfTypeFormulae = 0;
+    FormulaStatistics->NumberOfDatatypeFormulae = 0;
+    FormulaStatistics->NumberOfCodatatypeFormulae = 0;
     FormulaStatistics->NumberOfDefnFormulae = 0;
     FormulaStatistics->NumberOfSequents = 0;
     FormulaStatistics->NumberOfUnitFormulae = 0;  

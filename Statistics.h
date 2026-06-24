@@ -19,6 +19,8 @@ typedef enum {
 //----Whole annotated formulae
     unit_formulae,
     type_formulae,
+    datatype_formulae,
+    codatatype_formulae,
     defn_formulae,
     sequent_formulae,
 //----Within formulae
@@ -62,6 +64,8 @@ typedef struct {
     int NumberOfCNF;
 
     int NumberOfTypeFormulae;
+    int NumberOfDatatypeFormulae;
+    int NumberOfCodatatypeFormulae;
     int NumberOfDefnFormulae;
     int NumberOfSequents;
     int NumberOfUnitFormulae;  //----Doubles as NumberOfUnitClauses;
