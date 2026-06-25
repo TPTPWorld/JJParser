@@ -3,7 +3,9 @@
 #include <assert.h>
 #include <ctype.h>
 #include <stdlib.h>
+#ifndef JJPARSER_DISABLE_CURL
 #include <curl/curl.h>
+#endif
 
 #include "DataTypes.h"
 #include "Utilities.h"
@@ -420,6 +422,7 @@ QuietnessFlag,QuietnessLevel,OptionalFlags,ATPSystem,TimeLimit,X2TSTPFlag,Proble
     return(SystemPipe);
 }
 //-------------------------------------------------------------------------------------------------
+#ifndef JJPARSER_DISABLE_CURL
 size_t ReadCallback(void * TheReturnedData,size_t ElementSize,size_t NumberOfElements,
 void * DataWriteHandle) {
 
@@ -1004,6 +1007,7 @@ FilesDirectory,OutputFileName,OutputFileName,SZSOutput,LocalSoT);
 
     return(SZSResult);
 }
+#endif
 //-------------------------------------------------------------------------------------------------
 LISTNODE ApplyExternalProgram(LISTNODE Head,StatusType AsStatus,ANNOTATEDFORMULA Conjecture,
 const char * ExecuteFormatString,SIGNATURE Signature) {
