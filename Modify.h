@@ -35,6 +35,8 @@ int RemoveParentFromInferenceTerm(char * ParentName,TERM Source,SIGNATURE Signat
 int AddParentToInferredFormula(ANNOTATEDFORMULA NewParent,ANNOTATEDFORMULA Inferred,
 SIGNATURE Signature);
 int SetSourceFromString(ANNOTATEDFORMULA AnnotatedFormula,SIGNATURE Signature,char * StringSource);
+int RemoveSourceInfoTerm(ANNOTATEDFORMULA AnnotatedFormula,SIGNATURE Signature,char * SourceSymbol,
+char * UsefulSymbol);
 void RemoveUsefulInformationFromAnnotatedFormula(ANNOTATEDFORMULA AnnotatedFormula,
 SIGNATURE Signature,char * PrincipleSymbol);
 void AddUsefulInformationToAnnotatedFormula(ANNOTATEDFORMULA AnnotatedFormula,

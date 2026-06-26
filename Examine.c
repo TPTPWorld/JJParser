@@ -3037,7 +3037,7 @@ char * InfoTermSymbol) {
 
 //----Source is any or as specified
     if (GetSource(AnnotatedFormula) != NULL &&
-(SourceSymbol == NULL ||!strcmp(SourceSymbol,
+(SourceSymbol == NULL || !strcmp(SourceSymbol,
 GetSymbol(AnnotatedFormula->AnnotatedFormulaUnion.AnnotatedTSTPFormula.Source))) &&
 //----Must have at least two arguments
 GetArity(AnnotatedFormula->AnnotatedFormulaUnion.AnnotatedTSTPFormula.Source) >= 2 &&

@@ -862,6 +862,24 @@ char * SourceString) {
     }
 }
 //-------------------------------------------------------------------------------------------------
+int RemoveSourceInfoTerm(ANNOTATEDFORMULA AnnotatedFormula,SIGNATURE Signature,char * SourceSymbol,
+char * UsefulSymbol) {
+
+    if (GetSource(AnnotatedFormula) != NULL &&
+(SourceSymbol == NULL || !strcmp(SourceSymbol,
+GetSymbol(AnnotatedFormula->AnnotatedFormulaUnion.AnnotatedTSTPFormula.Source))) &&
+//----Must have at least two arguments
+GetArity(AnnotatedFormula->AnnotatedFormulaUnion.AnnotatedTSTPFormula.Source) >= 2 &&
+//----The second argument must look like a list
+LooksLikeAList(AnnotatedFormula->AnnotatedFormulaUnion.AnnotatedTSTPFormula.Source->Arguments[1],
+-1,-1)) {
+        return(RemoveNamedTermFromList(UsefulSymbol,
+AnnotatedFormula->AnnotatedFormulaUnion.AnnotatedTSTPFormula.Source->Arguments[1],1,Signature));
+    } else {
+        return(0);
+    }
+}
+//-------------------------------------------------------------------------------------------------
 void DoUpdateUsefulInformationInAnnotatedFormula(ANNOTATEDFORMULA AnnotatedFormula,
 SIGNATURE Signature, char * UsefulInformation,int DoRemove,int DoAdd) {
 
