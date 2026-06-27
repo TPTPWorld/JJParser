@@ -2,7 +2,9 @@
 #define SYSTEMONTPTP_H
 //-------------------------------------------------------------------------------------------------
 #include <unistd.h>
+#ifndef JJPARSER_DISABLE_CURL
 #include <curl/curl.h>
+#endif
 
 #include "DataTypes.h"
 #include "PrintTSTP.h"
@@ -74,6 +76,7 @@ int SZSOutputIsA(SZSOutputType SZSOutput,SZSOutputType DesiredOutput);
 void SystemOnTPTPFileName(char * Directory,char * BaseName,char * Extension,String FileName);
 int MakeProblemFile(char * FilesDirectory,char * BaseName,char * Extension,String ProblemFileName,
 LISTNODE Head,StatusType AxiomsStatus,ANNOTATEDFORMULA Conjecture,StatusType ConjectureStatus);
+#ifndef JJPARSER_DISABLE_CURL
 int SystemOnTPTP(LISTNODE Axioms,ANNOTATEDFORMULA Conjecture,char * PositiveChecker,
 char * PositiveResult,int TestNegative,char * NegativeChecker,char * NegativeResult,int TimeLimit,
 char * SystemOutputPrefix,char * OptionalFlags,int KeepOutputFiles,char * FilesDirectory,
@@ -92,6 +95,7 @@ SZSResultType SZSSystemOnTPTP(LISTNODE Axioms,ANNOTATEDFORMULA Conjecture,char *
 SZSResultType DesiredResult,int QuietnessLevel,int TimeLimit,char * X2TSTPFlag,
 char * SystemOutputPrefix,char * OptionalFlags,int KeepOutputFiles,char * FilesDirectory,
 char * UsersOutputFileName,String OutputFileName,SZSOutputType * SZSOutput,int LocalSoT);
+#endif
 
 LISTNODE ApplyExternalProgram(LISTNODE Head,StatusType AsStatus,ANNOTATEDFORMULA Conjecture,
 const char * ExecuteFormatString,SIGNATURE Signature);
