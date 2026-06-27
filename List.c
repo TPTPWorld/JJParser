@@ -183,7 +183,7 @@ char * GetAllNames(LISTNODE Head,char ** Names) {
     return(*Names);
 }
 //-------------------------------------------------------------------------------------------------
-int UniquelyNamed(LISTNODE Head) {
+int UniquelyNamed(LISTNODE Head,String GuiltyFormulaName) {
 
     char * AllNames;
     StringParts Names;
@@ -200,6 +200,7 @@ int UniquelyNamed(LISTNODE Head) {
     for (Original = 0;OKSoFar && Original < NumberOfNames;Original++) {
         for (Copy = Original+1;OKSoFar && Copy < NumberOfNames;Copy++) {
             if (!strcmp(Names[Original],Names[Copy])) {
+                strcpy(GuiltyFormulaName,Names[Original]);
                 OKSoFar = 0;
             }
         }

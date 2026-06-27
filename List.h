@@ -16,7 +16,7 @@ LISTNODE AppendListsOfAnnotatedTSTPNodes(LISTNODE List1,LISTNODE List2);
 LISTNODE * GetLastNext(LISTNODE * Head);
 
 char * GetAllNames(LISTNODE Head,char ** Names);
-int UniquelyNamed(LISTNODE Head);
+int UniquelyNamed(LISTNODE Head,String GuiltyFormulaName);
 LISTNODE * GetNodeFromListByNumber(LISTNODE * Head,int Number);
 ANNOTATEDFORMULA GetAnnotatedFormulaFromListByNumber(LISTNODE Head,int Number);
 LISTNODE * GetNodeFromListByAnnotatedFormulaName(LISTNODE * Head,char * Name);
