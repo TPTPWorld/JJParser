@@ -103,6 +103,9 @@ char * LPConnectiveToString(ConnectiveType Connective) {
         case epsilon:
             return("ε");
             break;
+        case pibinder:
+            return("Π");
+            break;
         case universal:
             return("∀");
             break;
@@ -126,17 +129,27 @@ void PrintLPArgumentSignature(FILE * Stream,FORMULA TypeSignature,char * Prefix)
     char * TheType;
     String ToPrint;
 
-    if (TypeSignature->Type == binary) {
+    if (TypeSignature->Type == quantified &&
+TypeSignature->FormulaUnion.QuantifiedFormula.Quantifier == pibinder) {
+        fprintf(Stream,"%s %s,",LPConnectiveToString(pibinder),
+GetSymbol(TypeSignature->FormulaUnion.QuantifiedFormula.Variable));
+        PrintLPArgumentSignature(Stream,TypeSignature->FormulaUnion.QuantifiedFormula.Formula,
+Prefix);
+    } else if (TypeSignature->Type == binary) {
         PrintLPArgumentSignature(Stream,TypeSignature->FormulaUnion.BinaryFormula.LHS,Prefix);
         fprintf(Stream," → ");
         PrintLPArgumentSignature(Stream,TypeSignature->FormulaUnion.BinaryFormula.RHS,Prefix);
-    } else {
+    } else if (TypeSignature->Type == atom) {
         TheType = GetSymbol(TypeSignature->FormulaUnion.Atom);
         if (strcmp(TheType,"$o") && strcmp(TheType,"$tType") && strcmp(TheType,"Prop") && 
 strcmp(TheType,"Type")) {
             fprintf(Stream,"τ ");
         }
         fprintf(Stream,"%s",TPTPtoLPSymbol(TheType,Prefix,ToPrint));
+    } else {
+printf("ERROR: Don't know what to do with signature:\n");
+PrintTSTPFormula(stdout,tptp,TypeSignature,0,1,none,1);
+fflush(stdout);
     }
 }
 //-------------------------------------------------------------------------------------------------
@@ -213,6 +226,7 @@ NotTheseList,ResultType,EpsilonTerms);
 //----Find the symbol's declaration
             if (MatchingTypeFormula != NULL) {
                 if (MatchingTypeFormula->Type == binary) {
+printf("I SHOULD NEVER GET HERE\n");fflush(stdout);
 //----Move over to the type itself
                     MatchingTypeFormula = MatchingTypeFormula->FormulaUnion.BinaryFormula.LHS;
                     PrintLPArgumentSignature(Stream,
