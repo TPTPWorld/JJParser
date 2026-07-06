@@ -41,5 +41,6 @@ int UniquifyStringParts(StringParts Parts);
 void PrintTimeStamp(char * Message);
 void Trim(char * TheString);
 void StringToLower(char * TheString);
+int RunSystemCommand(char * Command);
 //-------------------------------------------------------------------------------------------------
 #endif

@@ -23,14 +23,17 @@ void SetSZSStatusReporting(int UseSZSStatusReporting) {
 //-------------------------------------------------------------------------------------------------
 void ReportError(const char * SZSStatus,char * ErrorDetails,int Exit) {
 
-    if (SZSStatusReporting) {
+    if (SZSStatusReporting && SZSStatus != NULL) {
         printf("%% SZS status %s : %s\n",SZSStatus,ErrorDetails);
     } else {
-        printf("ERROR: %s\n",ErrorDetails);
+        printf("ERROR: %s",ErrorDetails);
     }
     if (Exit) {
+        printf(", exiting\n");
+        fflush(stdout);
         exit(EXIT_FAILURE);
     }
+    fflush(stdout);
 }
 //-------------------------------------------------------------------------------------------------
 void CodingError(char * ErrorMessage) {
@@ -297,6 +300,31 @@ void StringToLower(char * TheString) {
     while (TheString[Index] != '\0') {
         TheString[Index] = tolower(TheString[Index]);
         Index++;
+    }
+}
+//-------------------------------------------------------------------------------------------------
+int RunSystemCommand(char * Command) {
+
+    int Status;
+    String ErrorMessage;
+
+    Status = system(Command);
+
+    if (Command == NULL) {
+        return(Status != 0);
+    } else if (Status == -1) {
+//---- system() failed
+        sprintf(ErrorMessage,"Execution of system(%s) failed",Command);
+        ReportError(NULL,ErrorMessage,1);
+        return(0);
+    } else if (WIFEXITED(Status) && WEXITSTATUS(Status) == 0) {
+//----Command succeeded
+        return(1);
+    } else {
+//----Command failed
+        sprintf(ErrorMessage,"Execution of %s failed",Command);
+        ReportError(NULL,ErrorMessage,1);
+        return(0);
     }
 }
 //-------------------------------------------------------------------------------------------------

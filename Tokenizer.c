@@ -72,7 +72,9 @@ void CharacterError(READFILE Stream) {
 
     strcpy(RestOfLine,"");
     if (Stream->FileHandle != NULL) {
-        fgets(RestOfLine,20,Stream->FileHandle);
+        if (fgets(RestOfLine,20,Stream->FileHandle) == NULL) {
+           strcpy(RestOfLine,"end_of_file or read_error");
+        }
     } else if (Stream->StringFileContent != NULL) {
         strncat(RestOfLine,Stream->StringFileContent + Stream->StringOffset,20);
     }
@@ -1007,7 +1009,7 @@ void FreeToken(TOKEN * Pointer) {
 void IncrementTokenIndex(READFILE Stream,int* Index) {
 
     (*Index)++;
-    if (*Index >= SUPERSUPERSTRINGLENGTH) {
+    if (*Index >= SUPERSUPERSTRINGLENGTH-1) {
         ReportError("InputError","Token too long",0);
         CharacterError(Stream);
     }
@@ -1568,7 +1570,9 @@ void TokenError(READFILE Stream,char * Message) {
 
     strcpy(RestOfLine,"");
     if (Stream->FileHandle != NULL) {
-        fgets(RestOfLine,20,Stream->FileHandle);
+        if (fgets(RestOfLine,20,Stream->FileHandle) == NULL) {
+           strcpy(RestOfLine,"end_of_file or read_error");
+        }
     } else if (Stream->StringFileContent != NULL) {
         strncat(RestOfLine,Stream->StringFileContent + Stream->StringOffset,20);
     }

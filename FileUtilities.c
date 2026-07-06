@@ -144,6 +144,7 @@ char * ExpandAndFindFileName(char * FileName,char * IncludingFileName,String Exp
     char * Slash;
     char * Home;
     struct passwd *PasswdEntry;
+    String ErrorMessage;
 
 //DEBUG printf("Start looking for ---%s--- relative to ---%s---\n",FileName,IncludingFileName);
 //----Expand ~ and ~user
@@ -178,7 +179,12 @@ char * ExpandAndFindFileName(char * FileName,char * IncludingFileName,String Exp
 
 //----If the including file has no name, use CWD
     if (IncludingFileName == NULL) {
-        getcwd(ExpandedFileName,MAXPATHLEN);
+        if (getcwd(ExpandedFileName,MAXPATHLEN) == NULL) {
+            perror("Getting CWD");
+            sprintf(ErrorMessage,"Could not get the CWD");
+            ReportError("OSError",ErrorMessage,0);
+            return(NULL);
+        }
 //DEBUG printf("Look relative to CWD %s\n",ExpandedFileName);
         strcat(ExpandedFileName,"/");
         strcat(ExpandedFileName,FileName);
