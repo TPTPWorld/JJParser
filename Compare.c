@@ -75,9 +75,9 @@ VARIABLERENAMING * RenamedVariables) {
     }
 
 //DEBUG printf("Comparing terms with symbols %s and %s\n",GetSymbol(Term1),GetSymbol(Term2));
-//DEBUG printf("Types %s and %s or different flex %d and %d\n",TermTypeToString(Term1->Type),TermTypeToString(Term2->Type),Term1->FlexibleArity,Term2->FlexibleArity);
     if (Term1->Type != Term2->Type || Term1->FlexibleArity != Term2->FlexibleArity) {
-        //DEBUG return(0);
+//DEBUG printf("Types %s and %s or different flex %d and %d\n",TermTypeToString(Term1->Type),TermTypeToString(Term2->Type),Term1->FlexibleArity,Term2->FlexibleArity);
+        return(0);
     }
 
     switch (Term1->Type) {
@@ -117,6 +117,7 @@ SameArguments(Term1->Arguments,Term2->Arguments,Term1->TheSymbol.NonVariable->Ar
 AllowVariableRenaming,RenamedVariables));
             break;
         case variable:
+//DEBUG printf("Compare variables %s and %s\n",GetSymbol(Term1),GetSymbol(Term2));fflush(stdout);
             return(SameVariables(Term1->TheSymbol.Variable,Term2->TheSymbol.Variable,
 AllowVariableRenaming,RenamedVariables));
             break;
@@ -221,10 +222,10 @@ int SameFormula(FORMULA Formula1,FORMULA Formula2,int AllowVariableRenaming,int 
 int SameFormulaInAnnotatedFormulae(ANNOTATEDFORMULA AnnotatedFormula1,
 ANNOTATEDFORMULA AnnotatedFormula2,int AllowVariableRenaming,int AllowCommutation) {
 
-//DEBUG printf("Compare in SameFormulaInAnnotatedFormulae\n");
-//DEBUG PrintAnnotatedTSTPNode(stdout,AnnotatedFormula1,tptp,1);
-//DEBUG printf("with\n");
-//DEBUG PrintAnnotatedTSTPNode(stdout,AnnotatedFormula2,tptp,1);
+//DEBUG printf("Compare in SameFormulaInAnnotatedFormulae\n");fflush(stdout);
+//DEBUG PrintAnnotatedTSTPNode(stdout,AnnotatedFormula1,tptp,1);fflush(stdout);
+//DEBUG printf("with\n");fflush(stdout);
+//DEBUG PrintAnnotatedTSTPNode(stdout,AnnotatedFormula2,tptp,1);fflush(stdout);
     if (LogicalAnnotatedFormula(AnnotatedFormula1)) {
         return(CheckAnnotatedFormula(AnnotatedFormula2,AnnotatedFormula1->Syntax) &&
 SameFormula(AnnotatedFormula1->AnnotatedFormulaUnion.AnnotatedTSTPFormula.FormulaWithVariables->
