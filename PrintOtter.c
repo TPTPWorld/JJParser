@@ -67,14 +67,14 @@ Formula->FormulaUnion.QuantifiedFormula.Quantifier));
             fprintf(Stream,"%s",GetSymbol(Formula->FormulaUnion.QuantifiedFormula.Variable));
 //----Here's where types will be printed, in a future TSTP
 //----List variables for same quantifiers
-            while (Pretty && 
-Formula->FormulaUnion.QuantifiedFormula.Formula->Type == quantified &&
-Formula->FormulaUnion.QuantifiedFormula.Quantifier ==
-Formula->FormulaUnion.QuantifiedFormula.Formula->FormulaUnion.QuantifiedFormula.Quantifier) {
-                Formula = Formula->FormulaUnion.QuantifiedFormula.Formula;
-                fprintf(Stream," %s",
-GetSymbol(Formula->FormulaUnion.QuantifiedFormula.Variable));
-            }
+//            while (Pretty && 
+//Formula->FormulaUnion.QuantifiedFormula.Formula->Type == quantified &&
+//Formula->FormulaUnion.QuantifiedFormula.Quantifier ==
+//Formula->FormulaUnion.QuantifiedFormula.Formula->FormulaUnion.QuantifiedFormula.Quantifier) {
+//                Formula = Formula->FormulaUnion.QuantifiedFormula.Formula;
+//                fprintf(Stream," %s",
+//GetSymbol(Formula->FormulaUnion.QuantifiedFormula.Variable));
+//            }
             fprintf(Stream," ( ");
 //----If unary or atom, do on same line
             if ((Formula->FormulaUnion.QuantifiedFormula.Formula->Type == 
