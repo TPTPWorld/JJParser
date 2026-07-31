@@ -1093,12 +1093,14 @@ TOKEN QuotedToken(READFILE Stream,char OpeningQuote,TokenType Type) {
 //----static so it doesn't have to get allocated everytime (very often!)
     static SuperSuperString LocalValue;
     int Index;
+    int QuotedLast;
 
     Index = 0;
     LocalValue[Index] = OpeningQuote;
     do {
         IncrementTokenIndex(Stream,&Index);
         LocalValue[Index] = NextCharacter(Stream);
+//DEBUG printf("In QuotedToken found a %c\n",LocalValue[Index]);
 //----Check legality - only visibles and only quote and escape escaped
         if (LocalValue[Index] < ' ' || LocalValue[Index] > '~') {
             CharacterError(Stream);
@@ -1106,12 +1108,12 @@ TOKEN QuotedToken(READFILE Stream,char OpeningQuote,TokenType Type) {
         if (LocalValue[Index] == '\\') {
             IncrementTokenIndex(Stream,&Index);
             LocalValue[Index] = NextCharacter(Stream);
-            if (LocalValue[Index] != OpeningQuote && 
-LocalValue[Index] != '\\') {
-                CharacterError(Stream);
-            }
+            QuotedLast = 1;
+        } else {
+            QuotedLast = 0;
         }
-    } while (LocalValue[Index] != OpeningQuote || LocalValue[Index-1] == '\\');
+//DEBUG printf("In QuotedToken found a %c looking to close with %c\n",LocalValue[Index],OpeningQuote);
+    } while (LocalValue[Index] != OpeningQuote || QuotedLast);
     IncrementTokenIndex(Stream,&Index);
     LocalValue[Index] = '\0';
 
