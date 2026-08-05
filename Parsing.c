@@ -794,7 +794,8 @@ VariablesMustBeQuantified);
         AcceptToken(Stream,punctuation,"(");
         Term->TheSymbol.NestedFormula = ParseFormulaWithVariables(Stream,
 DesiredType == nested_thf ? tptp_thf :
-DesiredType == nested_tff ? tptp_tff : DesiredType == nested_tcf ? tptp_tcf :
+DesiredType == nested_tff ? tptp_tff : 
+DesiredType == nested_tcf ? tptp_tcf :
 DesiredType == nested_fof ? tptp_fof : tptp_cnf,Context.Signature,0);
 //----Have to allow unbound variables in nested terms, e.g., for bind/2
 //----terms in inference() terms where the list of bindings together makes

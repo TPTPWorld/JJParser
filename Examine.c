@@ -30,6 +30,26 @@ char * GetSymbol(TERM Term) {
 
 //DEBUG printf("Get symbol for term of type %s\n",TermTypeToString(Term->Type));fflush(stdout);
     switch (Term->Type) {
+//----Catch logic wrappers first because they are not in the signature
+        case nested_thf:
+//DEBUG printf("It's a $thf: ");
+            return("$thf");
+            break;
+        case nested_tff:
+            return("$tff");
+            break;
+        case nested_tcf:
+            return("$tcf");
+            break;
+        case nested_fof:
+            return("$fof");
+            break;
+        case nested_cnf:
+            return("$cnf");
+            break;
+        case nested_fot:
+            return("$fot");
+            break;
         case atom_as_term:
         case connective:
         case function:
@@ -62,6 +82,14 @@ int GetArity(TERM Term) {
     }
 
     switch (Term->Type) {
+        case nested_thf:
+        case nested_tff:
+        case nested_tcf:
+        case nested_fof:
+        case nested_cnf:
+        case nested_fot:
+            return(1);
+            break;
         case atom_as_term:
         case connective:
         case function:
@@ -653,55 +681,92 @@ int ExtractTermArguments(String Term) {
 //----the malloced memory.
 char * TSTPTermToString(TERM Term,char * PutTermHere) {
 
-    char * Part;
-    int Index;
-    int Arity;
-    String OpeningBracket,ClosingBracket;
+    SuperString StaticPart;
     char * Buffer;
     int BufferSize;
 
 //----Build in malloced memory
     MakeBuffer(&Buffer,&BufferSize);
-
-//----Check if infix - or : (see also PrintTSTPTerm in PrintTSTP.c)
-//----No need to worry about infix equality here - only for non_logical_data
-    if (!strcmp(GetSymbol(Term),"-") || !strcmp(GetSymbol(Term),":")) {
-        Part = TSTPTermToString(Term->Arguments[0],NULL);
-        ExtendString(&Buffer,Part,&BufferSize);
-        Free((void **)&Part);
-        ExtendString(&Buffer,GetSymbol(Term),&BufferSize);
-        Part = TSTPTermToString(Term->Arguments[1],NULL);
-        ExtendString(&Buffer,Part,&BufferSize);
-        Free((void **)&Part);
-    } else {
-//----Check if a list
-        if (!strcmp(GetSymbol(Term),"[]")) {
-            strcpy(OpeningBracket,"[");
-            strcpy(ClosingBracket,"]");
-        } else {
-            ExtendString(&Buffer,GetSymbol(Term),&BufferSize);
-            strcpy(OpeningBracket,"(");
-            strcpy(ClosingBracket,")");
-        }
-//----If there are term arguments or it's a list, output the bracketed list
-        if ((Arity = GetArity(Term)) > 0 || !strcmp(OpeningBracket,"[")) {
-            ExtendString(&Buffer,OpeningBracket,&BufferSize);
-            if (Arity > 0) {
-                Part = TSTPTermToString(Term->Arguments[0],NULL);
-                ExtendString(&Buffer,Part,&BufferSize);
-                Free((void **)&Part);
-                for (Index=1;Index < Arity;Index++) {
-                    ExtendString(&Buffer,",",&BufferSize);
-                    Part = TSTPTermToString(Term->Arguments[Index],NULL);
-                    ExtendString(&Buffer,Part,&BufferSize);
-                    Free((void **)&Part);
-                }
-            }
-            ExtendString(&Buffer,ClosingBracket,&BufferSize);
-        }
-    }
-
+    PrintStringTSTPTerm(StaticPart,Term->Type,Term,0,0,1);
+    ExtendString(&Buffer,StaticPart,&BufferSize);
     return(BufferReturn(&Buffer,PutTermHere));
+
+//----Now using the print to string feature - this was largely duplicated there
+//OLD     char * Part;
+//OLD     int Index;
+//OLD     int Arity;
+//OLD     String OpeningBracket,ClosingBracket;
+//OLD     char * PrincipleSymbol;
+//OLD     SyntaxType NestedFormulaType;
+//OLD //DEBUG printf("START HERE\n");fflush(stdout);
+//OLD     PrincipleSymbol = GetSymbol(Term);
+//OLD //----Check if infix - or : (see also PrintTSTPTerm in PrintTSTP.c)
+//OLD //----No need to worry about infix equality here - only for non_logical_data
+//OLD     if (!strcmp(PrincipleSymbol,"-") || !strcmp(PrincipleSymbol,":")) {
+//OLD         Part = TSTPTermToString(Term->Arguments[0],NULL);
+//OLD         ExtendString(&Buffer,Part,&BufferSize);
+//OLD         Free((void **)&Part);
+//OLD         ExtendString(&Buffer,PrincipleSymbol,&BufferSize);
+//OLD         Part = TSTPTermToString(Term->Arguments[1],NULL);
+//OLD         ExtendString(&Buffer,Part,&BufferSize);
+//OLD         Free((void **)&Part);
+//OLD     } else {
+//OLD //----Check if a list
+//OLD         if (!strcmp(PrincipleSymbol,"[]")) {
+//OLD             strcpy(OpeningBracket,"[");
+//OLD             strcpy(ClosingBracket,"]");
+//OLD         } else {
+//OLD             ExtendString(&Buffer,PrincipleSymbol,&BufferSize);
+//OLD //DEBUG printf("0 Added %s of arity %d to get %s\n",PrincipleSymbol,GetArity(Term),Buffer);fflush(stdout);
+//OLD             strcpy(OpeningBracket,"(");
+//OLD             strcpy(ClosingBracket,")");
+//OLD         }
+//OLD //----If there are term arguments or it's a list, output the bracketed list
+//OLD         if ((Arity = GetArity(Term)) > 0 || !strcmp(OpeningBracket,"[")) {
+//OLD             ExtendString(&Buffer,OpeningBracket,&BufferSize);
+//OLD //DEBUG printf("1 Added %s to get %s\n",OpeningBracket,Buffer);fflush(stdout);
+//OLD //----Catch nested formula first
+//OLD             if (!strcmp(PrincipleSymbol,"$thf")) {
+//OLD                 NestedFormulaType = tptp_thf;
+//OLD             } else if (!strcmp(PrincipleSymbol,"$tff")) {
+//OLD                 NestedFormulaType = tptp_tff;
+//OLD             } else if (!strcmp(PrincipleSymbol,"$tcf")) {
+//OLD                 NestedFormulaType = tptp_tcf;
+//OLD             } else if (!strcmp(PrincipleSymbol,"$fof")) {
+//OLD                 NestedFormulaType = tptp_fof;
+//OLD             } else if (!strcmp(PrincipleSymbol,"$cnf")) {
+//OLD                 NestedFormulaType = tptp_cnf;
+//OLD             } else {
+//OLD                 NestedFormulaType = nontype;
+//OLD             }
+//OLD             if (NestedFormulaType != nontype) {
+//OLD //DEBUG printf("Off to PrintStringTSTPFormula\n");fflush(stdout);
+//OLD                 PrintStringTSTPTerm(StaticPart,NestedFormulaType,Term,0,0,1);
+//OLD                 ExtendString(&Buffer,StaticPart,&BufferSize);
+//OLD //DEBUG printf("2 Added %s to get %s\n",StaticPart,Buffer);fflush(stdout);
+//OLD             } else if (!strcmp(PrincipleSymbol,"$fot")) {
+//OLD                 Part = TSTPTermToString(Term->Arguments[0]->TheSymbol.NestedTerm->Term,NULL);
+//OLD                 ExtendString(&Buffer,Part,&BufferSize);
+//OLD //DEBUG printf("3 Added %s to get %s\n",Part,Buffer);fflush(stdout);
+//OLD                 Free((void **)&Part);
+//OLD             } else if (Arity > 0) {
+//OLD                 Part = TSTPTermToString(Term->Arguments[0],NULL);
+//OLD                 ExtendString(&Buffer,Part,&BufferSize);
+//OLD //DEBUG printf("4 Added %s to get %s\n",Part,Buffer);fflush(stdout);
+//OLD                 Free((void **)&Part);
+//OLD                 for (Index=1;Index < Arity;Index++) {
+//OLD                     ExtendString(&Buffer,",",&BufferSize);
+//OLD                     Part = TSTPTermToString(Term->Arguments[Index],NULL);
+//OLD                     ExtendString(&Buffer,Part,&BufferSize);
+//OLD //DEBUG printf("5 Added %s to get %s\n",Part,Buffer);fflush(stdout);
+//OLD                     Free((void **)&Part);
+//OLD                 }
+//OLD             }
+//OLD             ExtendString(&Buffer,ClosingBracket,&BufferSize);
+//OLD         }
+//OLD     }
+//OLD 
+//OLD     return(BufferReturn(&Buffer,PutTermHere));
 }
 //-------------------------------------------------------------------------------------------------
 int CountSimpleUsageInTERMArray(int NumberOfElements,TERMArray Terms,int (*CountFunction)(TERM)) {
@@ -2952,11 +3017,13 @@ int * Index) {
 
     String FinalSymbol;
 
+//DEBUG printf("Start GetSourceInfoTERMFromSourceInfo\n");fflush(stdout);
     if (!strcmp(Symbol,"__inference_rule__")) {
         strcpy(FinalSymbol,InferenceRuleName);
     } else {
         strcpy(FinalSymbol,Symbol);
     }
+//DEBUG printf("Getting from start index %d for list length %d looking for %s\n",*Index,InferenceInfo->FlexibleArity,FinalSymbol);fflush(stdout);
 //----Calling routine decides where to start and sends it in Index
     for ( ; *Index < InferenceInfo->FlexibleArity; (*Index)++) {
         if (!strcmp(FinalSymbol,InferenceInfo->Arguments[*Index]->
@@ -3035,6 +3102,7 @@ char * InfoTermSymbol) {
 
     int Index;
 
+//DEBUG printf("Start GetSourceInfoTERM\n");fflush(stdout);
 //----Source is any or as specified
     if (GetSource(AnnotatedFormula) != NULL &&
 (SourceSymbol == NULL || !strcmp(SourceSymbol,
@@ -3064,7 +3132,9 @@ char * InfoTermSymbol,char * PutInfoHere) {
 
     TERM SourceTerm;
 
+//DEBUG printf("Start GetSourceInfoTerm\n");fflush(stdout);
     if ((SourceTerm = GetSourceInfoTERM(AnnotatedFormula,SourceSymbol,InfoTermSymbol)) != NULL) {
+//DEBUG printf("Got the GetSourceInfoTERM for %s and info %s\n",SourceSymbol,InfoTermSymbol);
         return(TSTPTermToString(SourceTerm,PutInfoHere));
     } else {
         return(NULL);
@@ -3075,7 +3145,9 @@ char * InfoTermSymbol,char * PutInfoHere) {
 //----the malloced memory.
 TERM GetInferenceInfoTERM(ANNOTATEDFORMULA AnnotatedFormula,char * Symbol) {
 
+//DEBUG printf("Start GetInferenceInfoTERM\n");fflush(stdout);
     if (DerivedAnnotatedFormula(AnnotatedFormula)) {
+//DEBUG printf("Off to get the inference term for %s\n",Symbol);fflush(stdout);
         return(GetSourceInfoTERM(AnnotatedFormula,"inference",Symbol));
     } else {
         return(NULL);
@@ -3089,7 +3161,9 @@ char * GetInferenceInfoTerm(ANNOTATEDFORMULA AnnotatedFormula,char * Symbol,char
 
     TERM InferenceTerm;
 
+//DEBUG printf("Start GetInferenceInfoTerm\n");fflush(stdout);
     if ((InferenceTerm = GetInferenceInfoTERM(AnnotatedFormula,Symbol)) != NULL) {
+//DEBUG printf("In GetInferenceInfoTerm I got the InferenceTerm, now make a string\n");fflush(stdout);
         return(TSTPTermToString(InferenceTerm,PutInfoHere));
     } else {
         return(NULL);
