@@ -36,6 +36,7 @@ typedef enum {
     tuples,
     ite_forms,
     let_forms,
+    distinct_forms,
     math_atoms,
     math_terms,
     math_variables,
@@ -86,6 +87,7 @@ typedef struct {
     int NumberOfTuples;
     int NumberOfITEs;
     int NumberOfLets;
+    int NumberOfDistincts;
     int NumberOfMathAtoms;
     int NumberOfMathTerms;
     int NumberOfNumbers;

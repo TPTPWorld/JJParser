@@ -38,6 +38,7 @@ void InitializeFormulaStatistics(FormulaStatisticsType * FormulaStatistics) {
     FormulaStatistics->NumberOfTuples = 0;
     FormulaStatistics->NumberOfITEs = 0;
     FormulaStatistics->NumberOfLets = 0;
+    FormulaStatistics->NumberOfDistincts = 0;
     FormulaStatistics->NumberOfMathAtoms = 0;
     FormulaStatistics->NumberOfMathTerms = 0;
     FormulaStatistics->NumberOfNumbers = 0;

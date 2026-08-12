@@ -1415,7 +1415,7 @@ ConnectiveType LastConnective) {
     char * LHSSymbol;
     int LHSSymbolArity;
 
-//DEBUG printf("ParseFormula for %s, with token %s, allow binary %d, last connective %s\n",SyntaxToString(Language),CurrentToken(Stream)->NameToken,AllowBinary,ConnectiveToString(LastConnective));
+//DEBUG printf("ParseFormula for %s, with token %s of type %s, allow binary %d, last connective %s\n",SyntaxToString(Language),CurrentToken(Stream)->NameToken,TokenTypeToString(CurrentToken(Stream)->KindToken),AllowBinary,ConnectiveToString(LastConnective));
     switch (CurrentToken(Stream)->KindToken) {
 //----Three types of punctuation - ( for ()ed, [ for tuple, { for non-classical
         case punctuation:
@@ -1478,11 +1478,12 @@ VariablesMustBeQuantified);
 //----For THF $ite are parsed as binary formulae, because the application might be partial.
 //----Luckily ListStatistics counts $ite by looking at the symbol, not the FormulaTypeType.
             if (!strcmp(CurrentToken(Stream)->NameToken,"$ite") && 
+//----THF $ite done as application
 (Language == tptp_tff || Language == tptp_tcf)) {
                 Formula = ParseITEFormula(Stream,Language,Context,EndOfScope,
 VariablesMustBeQuantified);
             } else if (!strcmp(CurrentToken(Stream)->NameToken,"$let") &&
-(Language == tptp_tff || Language == tptp_tcf)) {
+(Language == tptp_thf || Language == tptp_tff || Language == tptp_tcf)) {
                 Formula = ParseLETFormula(Stream,Language,Context,EndOfScope,
 VariablesMustBeQuantified);
             } else {
@@ -1550,7 +1551,8 @@ RightAssociative(ThisConnective)) {
 ThisConnective == typecolon ? type_declaration : binary;
                 if (BinaryFormula->Type == type_declaration) {
 //----Make sure the LHS is an atom 
-                    if (Formula->Type != atom || GetArity(Formula->FormulaUnion.Atom) != 0) {
+//DEBUG printf("The symbol %s of type is %s with arity %d\n",GetSymbol(Formula->FormulaUnion.Atom),FormulaTypeToString(Formula->Type),GetArity(Formula->FormulaUnion.Atom));fflush(stdout);
+                    if (Formula->Type != atom) {
                         sprintf(ErrorMessage,"Trying to declare a non-atomic symbol %s",
 GetSymbol(Formula->FormulaUnion.Atom));
                         TokenError(Stream,ErrorMessage);

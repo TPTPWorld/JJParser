@@ -155,6 +155,12 @@ GetSyntax(List->AnnotatedFormula) == tptp_tff || GetSyntax(List->AnnotatedFormul
                         Counter += CountFormulaAtomsByPredicate(Signature,GetListNodeFormula(List),
 "$let",1);
                     }
+                case distinct_forms:
+                    if (GetSyntax(List->AnnotatedFormula) == tptp_thf ||
+GetSyntax(List->AnnotatedFormula) == tptp_tff || GetSyntax(List->AnnotatedFormula) == tptp_tcf) {
+                        Counter += CountFormulaAtomsByPredicate(Signature,GetListNodeFormula(List),
+"$distinct",1);
+                    }
                     break;
                 case math_atoms:
                     if (GetSyntax(List->AnnotatedFormula) == tptp_thf ||
@@ -590,6 +596,7 @@ boolean_variables);
     Statistics.FormulaStatistics.NumberOfTuples = HeadListCount(Signature,&HeadListNode,tuples);
     Statistics.FormulaStatistics.NumberOfITEs = HeadListCount(Signature,&HeadListNode,ite_forms);
     Statistics.FormulaStatistics.NumberOfLets = HeadListCount(Signature,&HeadListNode,let_forms);
+    Statistics.FormulaStatistics.NumberOfDistincts = HeadListCount(Signature,&HeadListNode,distinct_forms);
     Statistics.FormulaStatistics.NumberOfMathAtoms = HeadListCount(Signature,&HeadListNode,
 math_atoms);
     Statistics.FormulaStatistics.NumberOfMathTerms = HeadListCount(Signature,&HeadListNode,
@@ -749,13 +756,14 @@ Statistics.SymbolStatistics.NumberOfBooleanVariables);
     if (
 Statistics.FormulaStatistics.NumberOfTuples > 0 ||
 Statistics.FormulaStatistics.NumberOfITEs > 0 ||
-Statistics.FormulaStatistics.NumberOfLets > 0) {
+Statistics.FormulaStatistics.NumberOfLets > 0 ||
+Statistics.FormulaStatistics.NumberOfDistincts) {
         fprintf(Stream,
-"%%            Number of X terms     : %4d (%4d  [];%4d ite;%4d let)\n",
+"%%            Number of X terms     : %4d (%4d  [];%4d ite;%4d let;%4d dis)\n",
 Statistics.FormulaStatistics.NumberOfTuples +
 Statistics.FormulaStatistics.NumberOfITEs + Statistics.FormulaStatistics.NumberOfLets,
 Statistics.FormulaStatistics.NumberOfTuples,Statistics.FormulaStatistics.NumberOfITEs,
-Statistics.FormulaStatistics.NumberOfLets);
+Statistics.FormulaStatistics.NumberOfLets,Statistics.FormulaStatistics.NumberOfDistincts);
     }
 
     if (
