@@ -2,6 +2,7 @@
 #include <string.h>
 #include <assert.h>
 #include <ctype.h>
+#include <signal.h>
 #include <stdlib.h>
 #ifndef JJPARSER_DISABLE_CURL
 #include <curl/curl.h>
@@ -575,6 +576,8 @@ curl_easy_setopt(CurlHandle,CURLOPT_USERAGENT,"libcurl-agent/1.0") != CURLE_OK) 
         curl_easy_setopt(CurlHandle,CURLOPT_WRITEDATA,(void *)DataWriteHandle);
 //----Default works, so I don't need my own ReadCallback
 // CurlResult = curl_easy_setopt(CurlHandle,CURLOPT_WRITEFUNCTION,ReadCallback);
+//----I need the child process to be reaped, but I can't save the ChildPID, so ignore
+        signal(SIGCHLD,SIG_IGN);
         switch (fork()) {
             case -1:
                 printf("ERROR: Cannot fork to run curl for %s on %s\n",ATPSystem,ProblemFileName);
@@ -590,10 +593,15 @@ curl_easy_setopt(CurlHandle,CURLOPT_USERAGENT,"libcurl-agent/1.0") != CURLE_OK) 
                 }
                 curl_mime_free(MultipartForm);
                 FinalizeRemoteSoT(CurlHandle);
-                exit(EXIT_SUCCESS);
+                fflush(stdout); 
+//----Avoid calls to atexit functions
+                _exit(EXIT_SUCCESS);
                 break;
             default:
                 fclose(DataWriteHandle);
+                curl_mime_free(MultipartForm);
+                FinalizeRemoteSoT(CurlHandle);
+                fflush(stdout); 
                 return(DataReadHandle);
                 break;
         }
@@ -716,8 +724,10 @@ char * PutOutputHere,int LocalSoT) {
        SystemPipe = StartLocalSoT(QuietnessFlag,QuietnessLevel,ProblemFileName,ATPSystem,
 TimeLimit,X2TSTPFlag,OptionalFlags);
     } else {
+//DEBUG printf("About to do StartRemoteSoT\n");fflush(stdout);
        SystemPipe = StartRemoteSoT(QuietnessFlag,QuietnessLevel,ProblemFileName,ATPSystem,
 TimeLimit,X2TSTPFlag,NULL);
+//DEBUG printf("Done StartRemoteSoT\n");fflush(stdout);
     }
     if (SystemPipe == NULL) {
         printf("ERROR: Could not start %s SystemOnTPTP\n",LocalSoT ? "local" : "remote");
@@ -755,7 +765,6 @@ TimeLimit,X2TSTPFlag,NULL);
         if (KeepOutputFiles) {
             fputs(SystemOutputLine,OutputFileHandle);
         }
-//DEBUG printf("Line is %s",SystemOutputLine);
         if (!GotResult && 
 strstr(SystemOutputLine,"RESULT: ") == SystemOutputLine &&
 (SaysPart = strstr(SystemOutputLine," says ")) != NULL &&
