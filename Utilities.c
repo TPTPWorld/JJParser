@@ -5,6 +5,7 @@
 #include <assert.h>
 #include <string.h>
 #include <time.h>
+#include <errno.h>
 #include <stdlib.h>
 #include <sys/times.h>
 #include "Utilities.h"
@@ -314,7 +315,7 @@ int RunSystemCommand(char * Command) {
         return(Status != 0);
     } else if (Status == -1) {
 //---- system() failed
-        sprintf(ErrorMessage,"Execution of system(%s) failed",Command);
+        sprintf(ErrorMessage,"Execution of system(%s) failed, due to %s",Command,strerror(errno));
         ReportError(NULL,ErrorMessage,1);
         return(0);
     } else if (WIFEXITED(Status) && WEXITSTATUS(Status) == 0) {
@@ -322,7 +323,7 @@ int RunSystemCommand(char * Command) {
         return(1);
     } else {
 //----Command failed
-        sprintf(ErrorMessage,"Execution of %s failed",Command);
+        sprintf(ErrorMessage,"Execution of %s failed, due to %s",Command,strerror(errno));
         ReportError(NULL,ErrorMessage,1);
         return(0);
     }

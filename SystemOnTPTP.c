@@ -4,6 +4,7 @@
 #include <ctype.h>
 #include <signal.h>
 #include <stdlib.h>
+#include <sys/wait.h>
 #ifndef JJPARSER_DISABLE_CURL
 #include <curl/curl.h>
 #endif
@@ -532,7 +533,7 @@ void FinalizeRemoteSoT(CURL * CurlHandle) {
 }
 //-------------------------------------------------------------------------------------------------
 FILE * StartRemoteSoT(char * QuietnessFlag,int QuietnessLevel,char * ProblemFileName,
-char * ATPSystem,int TimeLimit,char * X2TSTPFlag,curl_mime * MultipartForm) {
+char * ATPSystem,int TimeLimit,char * X2TSTPFlag,curl_mime * MultipartForm,int * ChildPID) {
 
     CURL * CurlHandle;
     CURLcode CurlResult;
@@ -577,8 +578,7 @@ curl_easy_setopt(CurlHandle,CURLOPT_USERAGENT,"libcurl-agent/1.0") != CURLE_OK) 
 //----Default works, so I don't need my own ReadCallback
 // CurlResult = curl_easy_setopt(CurlHandle,CURLOPT_WRITEFUNCTION,ReadCallback);
 //----I need the child process to be reaped, but I can't save the ChildPID, so ignore
-        signal(SIGCHLD,SIG_IGN);
-        switch (fork()) {
+        switch (*ChildPID = fork()) {
             case -1:
                 printf("ERROR: Cannot fork to run curl for %s on %s\n",ATPSystem,ProblemFileName);
                 return(NULL);
@@ -695,6 +695,7 @@ char * PutOutputHere,int LocalSoT) {
     String InternalOutputFileName;
     FILE * OutputFileHandle;
     FILE * SystemPipe;
+    int ChildPID;
     int GotResult;
     int GotOutput;
     SuperString SystemOutputLine;
@@ -726,7 +727,7 @@ TimeLimit,X2TSTPFlag,OptionalFlags);
     } else {
 //DEBUG printf("About to do StartRemoteSoT\n");fflush(stdout);
        SystemPipe = StartRemoteSoT(QuietnessFlag,QuietnessLevel,ProblemFileName,ATPSystem,
-TimeLimit,X2TSTPFlag,NULL);
+TimeLimit,X2TSTPFlag,NULL,&ChildPID);
 //DEBUG printf("Done StartRemoteSoT\n");fflush(stdout);
     }
     if (SystemPipe == NULL) {
@@ -762,6 +763,7 @@ TimeLimit,X2TSTPFlag,NULL);
     GotResult = 0;
     GotOutput = 0;
     while (fgets(SystemOutputLine,SUPERSTRINGLENGTH,SystemPipe) != NULL) {
+//DEBUG printf("Got line %s",SystemOutputLine);fflush(stdout);
         if (KeepOutputFiles) {
             fputs(SystemOutputLine,OutputFileHandle);
         }
@@ -829,7 +831,9 @@ strstr(SystemOutputLine,"% Output     : ") == SystemOutputLine &&
     if (KeepOutputFiles && OutputFileHandle != stdout) {
         fclose(OutputFileHandle);
     }
-
+    if (! LocalSoT) {
+        waitpid(ChildPID,NULL,0);
+    }
     return(GotResult);
 }
 //-------------------------------------------------------------------------------------------------

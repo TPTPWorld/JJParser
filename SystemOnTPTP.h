@@ -85,7 +85,7 @@ size_t ReadCallback(void * TheReturnedData,size_t ElementSize,size_t NumberOfEle
 void * DataWriteHandle);
 CURL * InitializeRemoteSoT();
 FILE * StartRemoteSoT(char * QuietnessFlag,int QuietnessLevel,char * ProblemFileName,
-char * ATPSystem,int TimeLimit,char * X2TSTPFlag,curl_mime * MultipartForm);
+char * ATPSystem,int TimeLimit,char * X2TSTPFlag,curl_mime * MultipartForm,int * ChildPID);
 int SystemOnTPTPAvailable(int UseLocalSoT);
 int SystemOnTPTPGetResult(int QuietnessLevel,char * ProblemFileName,char * ATPSystem,int TimeLimit,
 char * X2TSTPFlag,char * SystemOutputPrefix,char * OptionalFlags,int KeepOutputFiles,
