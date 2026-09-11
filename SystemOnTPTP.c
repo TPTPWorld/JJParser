@@ -878,8 +878,8 @@ SZSIsA(StringToSZSResult(SystemResult),StringToSZSResult(PositiveResult)))) {
 //DEBUG printf("That works that %s is a %s\n",SystemResult,PositiveResult);
             Correct = 1;
 //----Should not trust prover's disproofs
-//        } else if (!strcmp(SystemResult,NegativeResult)) {
-//            Correct = -1;
+        } else if (TestNegative > 1 && !strcmp(SystemResult,NegativeResult)) {
+            Correct = -1;
         }
     }
 
