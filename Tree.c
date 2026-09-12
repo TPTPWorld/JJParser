@@ -514,14 +514,14 @@ void FreeRootList(ROOTLIST * Head,int MustFreeTree,SIGNATURE Signature) {
     }
 }
 //-------------------------------------------------------------------------------------------------
-TREENODE DoAnnotatedFormulaInTree(TREENODE ATree,ANNOTATEDFORMULA 
-LookingForThis) {
+TREENODE DoAnnotatedFormulaInTree(TREENODE ATree,ANNOTATEDFORMULA LookingForThis) {
 
     int ParentIndex;
     TREENODE AncestorNode;
 
     if (ATree != NULL) {
         if (!ATree->Visited) {
+            ATree->Visited = 1;
 //----Is this the one?
             if (ATree->AnnotatedFormula == LookingForThis) {
                 return(ATree);
@@ -535,12 +535,10 @@ Parents[ParentIndex],LookingForThis)) != NULL) {
                     }
                 }
             }
-            ATree->Visited = 1;
         } else {
             return(NULL);
         }
     } 
-
     return(NULL);
 }
 //-------------------------------------------------------------------------------------------------
