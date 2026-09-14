@@ -3,7 +3,7 @@ TPTP_HOME ?= /home/tptp
 JJPARSER = $(TPTP_HOME)/ServiceTools/JJParser
 
 CC = gcc
-CFLAGS = -Wall -Wno-format-overflow -I/usr/include/x86_64-linux-gnu -I$(JJPARSER) -D TPTP_HOME=\"$(TPTP_HOME)\"
+CFLAGS = -Wall -Wimplicit-fallthrough -Wno-format-overflow -I/usr/include/x86_64-linux-gnu -I$(JJPARSER) -D TPTP_HOME=\"$(TPTP_HOME)\"
 LFLAGS = -lcurl -lm -L/usr/lib/x86_64-linux-gnu 
 #----x86_64-linux-gnu for bits/libc-header-start.h and curl/curl.h
 

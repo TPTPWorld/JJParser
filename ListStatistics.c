@@ -23,6 +23,8 @@ int ListCount(SIGNATURE Signature,LISTNODE List,CountType WhatToCount) {
 
     Counter = 0;
     while (List != NULL) {
+//DEBUG PrintAnnotatedTSTPNode(stdout,List->AnnotatedFormula,tptp,1);
+//DEBUG printf("COunting %d Before %d\n",WhatToCount,Counter);
 //----Ignore comments
         if (LogicalAnnotatedFormulaWithRole(List->AnnotatedFormula,logical)) {
             switch (WhatToCount) {
@@ -155,6 +157,7 @@ GetSyntax(List->AnnotatedFormula) == tptp_tff || GetSyntax(List->AnnotatedFormul
                         Counter += CountFormulaAtomsByPredicate(Signature,GetListNodeFormula(List),
 "$let",1);
                     }
+                    break;
                 case distinct_forms:
                     if (GetSyntax(List->AnnotatedFormula) == tptp_thf ||
 GetSyntax(List->AnnotatedFormula) == tptp_tff || GetSyntax(List->AnnotatedFormula) == tptp_tcf) {
@@ -213,6 +216,7 @@ GetSyntax(List->AnnotatedFormula) == tptp_tff || GetSyntax(List->AnnotatedFormul
                     CodingError("Don't know what to count in list");
                     break;
             }
+//DEBUG printf("COunting %d after %d\n",WhatToCount,Counter);
         }
         List = List->Next;
     }
@@ -760,8 +764,8 @@ Statistics.FormulaStatistics.NumberOfLets > 0 ||
 Statistics.FormulaStatistics.NumberOfDistincts) {
         fprintf(Stream,
 "%%            Number of X terms     : %4d (%4d  [];%4d ite;%4d let;%4d dis)\n",
-Statistics.FormulaStatistics.NumberOfTuples +
-Statistics.FormulaStatistics.NumberOfITEs + Statistics.FormulaStatistics.NumberOfLets,
+Statistics.FormulaStatistics.NumberOfTuples + Statistics.FormulaStatistics.NumberOfITEs + 
+Statistics.FormulaStatistics.NumberOfLets + Statistics.FormulaStatistics.NumberOfDistincts,
 Statistics.FormulaStatistics.NumberOfTuples,Statistics.FormulaStatistics.NumberOfITEs,
 Statistics.FormulaStatistics.NumberOfLets,Statistics.FormulaStatistics.NumberOfDistincts);
     }
