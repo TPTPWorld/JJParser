@@ -107,6 +107,8 @@ Term2->Arguments,Term1->TheSymbol.NonVariable->Arity,AllowVariableRenaming,Renam
                     return(0);
                 }
             }
+//----If not equality, treat as function.
+        __attribute__((fallthrough));
         case a_type:
         case function:
 //DEBUG printf("Compare %s type for %s and %s\n",TermTypeToString(Term1->Type),GetSymbol(Term1),GetSymbol(Term2));

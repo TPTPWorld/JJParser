@@ -444,6 +444,7 @@ void UniqueifyVariableNames(ANNOTATEDFORMULA AnnotatedFormula) {
     VARIABLENODE SameNameNode;
     int UniqueIndex;
     String NewName;
+    int TransferCount;
 
     if (!LogicalAnnotatedFormula(AnnotatedFormula)) {
         CodingError("Trying to rename variables in a non-formula");
@@ -455,11 +456,15 @@ void UniqueifyVariableNames(ANNOTATEDFORMULA AnnotatedFormula) {
         SameNameNode = VariableNode->NextVariable;
         while (SameNameNode != NULL) {
             if (VariableNode->VariableName == SameNameNode->VariableName) {
-                sprintf(NewName,"%s_NN_%d",
+                TransferCount = SameNameNode->NumberOfUses;
+                sprintf(NewName,"%s__%d",
 GetSignatureSymbol(VariableNode->VariableName),UniqueIndex++);
+                IncreaseSymbolUseCount(VariableNode->VariableName,-TransferCount);
                 SameNameNode->VariableName = InsertIntoSignatureList(
 &(VariableNode->VariableName->NextSymbol),NewName,0,-1,0,NULL);
-                IncreaseSymbolUseCount(VariableNode->VariableName,-1);
+//----InsertIntoSignatureList/NewSignatureNode already set the new symbol's count to 1;
+//----bring it up to the number of references actually being moved onto it.
+                IncreaseSymbolUseCount(SameNameNode->VariableName,TransferCount - 1);
             }
            SameNameNode = SameNameNode->NextVariable;
         }

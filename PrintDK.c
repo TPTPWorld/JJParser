@@ -313,12 +313,13 @@ char * Label) {
         case blank_line:
             fprintf(Stream,"\n");
             break;
-//----Note fall through to tptp_fof
         case tptp_thf:
         case tptp_tff:
             if (GetRole(AnnotatedFormula,NULL) == type) {
                 break;
             }
+//----If not TFF or THF type, treat like FOF
+            __attribute__((fallthrough));
         case tptp_fof:
             fprintf(Stream,"%s %s : (%s ",Prefix,GetName(AnnotatedFormula,NULL),Label);
             DKPrintFormula(Stream,AnnotatedFormula->AnnotatedFormulaUnion.

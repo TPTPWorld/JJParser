@@ -1,7 +1,12 @@
-fof(dv,axiom, (
-    ! [X,Y] :
-      ( p(X,Y)
-     => ( ? [X,Y] : 
-            ( ! [X] : p(X,X)
-            | p(Y,Y) )
-        & ? [Y] : q(Y,Y) ) ) )).
+% fof(dv,axiom, (
+%     ! [X,Y] :
+%       ( p(X,Y)
+%      => ( ? [X,Y] : 
+%             ( ! [X] : p(X,X)
+%             | p(Y,Y) )
+%         & ? [Y] : q(Y,Y) ) ) )).
+
+fof(dv,axiom,
+    ( ? [Y] : p(Y)
+    & ? [Y] : q(Y) ),
+    file('Problems/PRV087+1.p',a1) ).

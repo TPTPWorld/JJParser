@@ -94,10 +94,23 @@ printf("TESTING: Printed formulae\n");
 printf("TESTING: Got statistics\n");
     PrintListStatistics(stdout,ListStatistics);
 printf("TESTING: Printed statistics\n");
-//     PrintSignature(Signature);
-// printf("TESTING: Reprinted cleaned signature\n");
-//     PrintListOfAnnotatedTSTPNodes(stdout,Signature,Head,tptp,1);
-// printf("TESTING: Reprinted formulae\n");
+//----Test uniqueify variable names
+    AnnotatedFormula = GetAnnotatedFormulaFromListByName(Head,"dv");
+    if (AnnotatedFormula != NULL) {
+        PrintAnnotatedTSTPNode(stdout,AnnotatedFormula,tptp,1);
+        PrintSignature(Signature);
+        UniqueifyVariableNames(AnnotatedFormula);
+        PrintAnnotatedTSTPNode(stdout,AnnotatedFormula,tptp,1);
+        PrintSignature(Signature);
+    } else {
+        printf("Could not get formula dv\n");
+    }
+    // return(EXIT_SUCCESS);
+
+    PrintSignature(Signature);
+printf("TESTING: Reprinted cleaned signature\n");
+    PrintListOfAnnotatedTSTPNodes(stdout,Signature,Head,tptp,1);
+printf("TESTING: Reprinted formulae\n");
     FreeListOfAnnotatedFormulae(&Head,Signature);
 printf("TESTING: Freed formulae\n");
     assert(Head == NULL);
@@ -566,19 +579,6 @@ AnnotatedFormula->AnnotatedFormulaUnion.AnnotatedTSTPFormula.FormulaWithVariable
         printf("%d removed\n",NumberRemoved);
     } else {
         printf("Could not get first formula\n");
-    }
-    return(EXIT_SUCCESS);
-
-//----Test uniqueify variable names
-    AnnotatedFormula = GetAnnotatedFormulaFromListByName(Head,"dv");
-    if (AnnotatedFormula != NULL) {
-        PrintAnnotatedTSTPNode(stdout,AnnotatedFormula,tptp,1);
-        PrintSignature(Signature);
-        UniqueifyVariableNames(AnnotatedFormula);
-        PrintAnnotatedTSTPNode(stdout,AnnotatedFormula,tptp,1);
-        PrintSignature(Signature);
-    } else {
-        printf("Could not get formula dv\n");
     }
     return(EXIT_SUCCESS);
 

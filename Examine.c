@@ -64,6 +64,8 @@ char * GetSymbol(TERM Term) {
             if (Term->TheSymbol.Formula->Type == atom) {
                 return(GetSymbol(Term->TheSymbol.Formula->FormulaUnion.Atom));
             }
+//----If not an atom formula, something is wrong
+        __attribute__((fallthrough));
         default:
             sprintf(ErrorMessage,"Invalid term type %s to get symbol\n",
 TermTypeToString(Term->Type));
@@ -1436,9 +1438,10 @@ PutPositivesHere,PositivesLength,PutNegativesHere,NegativesLength);
 PutPositivesHere,PositivesLength,PutNegativesHere,NegativesLength);
                 CollectVariablesOfPolarity(DisjunctionOrLiteral->FormulaUnion.BinaryFormula.RHS,
 PutPositivesHere,PositivesLength,PutNegativesHere,NegativesLength);
-//----Oh my goodness, what a bit of trickery for TXF. If an equation then head on down to atom
                 break;
             }
+//----Oh my goodness, what a bit of trickery for TXF. If an equation then head on down to atom
+        __attribute__((fallthrough));
         case unary:
         case atom:
         case applied_connective:

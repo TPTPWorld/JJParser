@@ -375,12 +375,13 @@ void LPPrintAnnotatedTSTPNode(FILE * Stream,ANNOTATEDFORMULA AnnotatedFormula,ch
         case blank_line:
             fprintf(Stream,"\n");
             break;
-//----Note fall through to tptp_fof
         case tptp_thf:
         case tptp_tff:
             if (GetRole(AnnotatedFormula,NULL) == type) {
                 break;
             }
+//----If not TFF or THF type, treat like FOF
+            __attribute__((fallthrough));
         case tptp_fof:
             fprintf(Stream,"symbol %s : %s ",GetName(AnnotatedFormula,NULL),Label);
             LPPrintFormula(Stream,AnnotatedFormula->AnnotatedFormulaUnion.
