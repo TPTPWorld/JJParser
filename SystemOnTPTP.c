@@ -877,13 +877,13 @@ OutputFileName,SystemResult,NULL,LocalSoT)) {
 SZSIsA(StringToSZSResult(SystemResult),StringToSZSResult(PositiveResult)))) {
 //DEBUG printf("That works that %s is a %s\n",SystemResult,PositiveResult);
             Correct = 1;
-//----Should not trust prover's disproofs
-        } else if (TestNegative > 1 && !strcmp(SystemResult,NegativeResult)) {
+//----Trust system's negative results
+        } else if (TestNegative == 1 && !strcmp(SystemResult,NegativeResult)) {
             Correct = -1;
         }
     }
 
-//----Check if really not provable
+//----If no result then check if really not provable
     if (Correct == 0 && TestNegative) {
 //----Set to empty if nothing given, to cause use of mktemp
         strcpy(LocalUsersFileName,CopyUsersFileName);
