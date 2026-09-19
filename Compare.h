@@ -15,5 +15,7 @@ typedef VariableRenamingNode * VARIABLERENAMING;
 int SameFormula(FORMULA Formula1,FORMULA Formula2,int AllowVariableRenaming,int AllowCommutation);
 int SameFormulaInAnnotatedFormulae(ANNOTATEDFORMULA AnnotatedFormula1,
 ANNOTATEDFORMULA AnnotatedFormula2,int AllowVariableRenaming,int AllowCommutation);
+int SameAnnotatedFormula(ANNOTATEDFORMULA AnnotatedFormula1,ANNOTATEDFORMULA AnnotatedFormula2,
+int CheckName,int CheckRole,int AllowVariableRenaming,int AllowCommutation);
 //-------------------------------------------------------------------------------------------------
 #endif

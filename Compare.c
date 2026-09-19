@@ -164,6 +164,7 @@ int DoSameFormula(FORMULA Formula1,FORMULA Formula2,int AllowVariableRenaming,
 int AllowCommutation,VARIABLERENAMING * RenamedVariables) {
 
     String ErrorMessage;
+    int Result;
 
     if (Formula1 == NULL || Formula2 == NULL) {
         return(Formula1 == Formula2);
@@ -176,29 +177,50 @@ int AllowCommutation,VARIABLERENAMING * RenamedVariables) {
 
     switch (Formula1->Type) {
         case quantified:
-            return(SameQuantifiedFormula(Formula1->FormulaUnion.QuantifiedFormula,
-Formula2->FormulaUnion.QuantifiedFormula,AllowVariableRenaming,AllowCommutation,RenamedVariables));
+            Result = SameQuantifiedFormula(Formula1->FormulaUnion.QuantifiedFormula,
+Formula2->FormulaUnion.QuantifiedFormula,AllowVariableRenaming,AllowCommutation,RenamedVariables);
+//DEBUG printf("Result from comparing these two quantified is %d:\n",Result);
+//DEBUG PrintTSTPFormula(stdout,tptp_fof,Formula1,0,1,none,0);
+//DEBUG printf("\n");
+//DEBUG PrintTSTPFormula(stdout,tptp_fof,Formula2,0,1,none,0);
+//DEBUG printf("\n");
             break;
         case binary:
-            return(SameBinaryFormula(Formula1->FormulaUnion.BinaryFormula,
-Formula2->FormulaUnion.BinaryFormula,AllowVariableRenaming,AllowCommutation,RenamedVariables));
+            Result = SameBinaryFormula(Formula1->FormulaUnion.BinaryFormula,
+Formula2->FormulaUnion.BinaryFormula,AllowVariableRenaming,AllowCommutation,RenamedVariables);
+//DEBUG printf("Result from comparing these two binary is %d:\n",Result);
+//DEBUG PrintTSTPFormula(stdout,tptp_fof,Formula1,0,1,none,0);
+//DEBUG printf("\n");
+//DEBUG PrintTSTPFormula(stdout,tptp_fof,Formula2,0,1,none,0);
+//DEBUG printf("\n");
             break;
         case unary:
-            return(SameUnaryFormula(Formula1->FormulaUnion.UnaryFormula,
-Formula2->FormulaUnion.UnaryFormula,AllowVariableRenaming,AllowCommutation,RenamedVariables));
+            Result = SameUnaryFormula(Formula1->FormulaUnion.UnaryFormula,
+Formula2->FormulaUnion.UnaryFormula,AllowVariableRenaming,AllowCommutation,RenamedVariables);
+//DEBUG printf("Result from comparing these two unary is %d:\n",Result);
+//DEBUG PrintTSTPFormula(stdout,tptp_fof,Formula1,0,1,none,0);
+//DEBUG printf("\n");
+//DEBUG PrintTSTPFormula(stdout,tptp_fof,Formula2,0,1,none,0);
+//DEBUG printf("\n");
             break;
         case atom:
         case applied_connective:
-            return(SameTerm(Formula1->FormulaUnion.Atom,Formula2->FormulaUnion.Atom,
-AllowVariableRenaming,AllowCommutation,RenamedVariables));
+            Result = SameTerm(Formula1->FormulaUnion.Atom,Formula2->FormulaUnion.Atom,
+AllowVariableRenaming,AllowCommutation,RenamedVariables);
+//DEBUG printf("Result from comparing these two atom is %d:\n",Result);
+//DEBUG PrintTSTPFormula(stdout,tptp_fof,Formula1,0,1,none,0);
+//DEBUG printf("\n");
+//DEBUG PrintTSTPFormula(stdout,tptp_fof,Formula2,0,1,none,0);
+//DEBUG printf("\n");
             break;
         default:
             sprintf(ErrorMessage,"ERROR: %s is not a formula type for comparison",
 FormulaTypeToString(Formula1->Type));
             CodingError(ErrorMessage);
-            return(0);
+            Result = 0;
             break;
     }
+    return(Result);
 }
 //-------------------------------------------------------------------------------------------------
 int SameFormula(FORMULA Formula1,FORMULA Formula2,int AllowVariableRenaming,int AllowCommutation) {
@@ -208,8 +230,18 @@ int SameFormula(FORMULA Formula1,FORMULA Formula2,int AllowVariableRenaming,int 
     int Result;
 
     RenamedVariables = NULL;
+//DEBUG printf("Compare these two:\n");
+//DEBUG PrintTSTPFormula(stdout,tptp_fof,Formula1,0,1,none,0);
+//DEBUG printf("\n");
+//DEBUG PrintTSTPFormula(stdout,tptp_fof,Formula2,0,1,none,0);
+//DEBUG printf("\n");
     Result = DoSameFormula(Formula1,Formula2,AllowVariableRenaming,AllowCommutation,
 &RenamedVariables);
+//DEBUG printf("Result from comparing these two is %d:\n",Result);
+//DEBUG PrintTSTPFormula(stdout,tptp_fof,Formula1,0,1,none,0);
+//DEBUG printf("\n");
+//DEBUG PrintTSTPFormula(stdout,tptp_fof,Formula2,0,1,none,0);
+//DEBUG printf("\n");
 
 //----Free renamed variable list
     while (RenamedVariables != NULL) {
@@ -236,6 +268,16 @@ Formula,AllowVariableRenaming,AllowCommutation));
     } else {
         return(0);
     }
+}
+//-------------------------------------------------------------------------------------------------
+int SameAnnotatedFormula(ANNOTATEDFORMULA AnnotatedFormula1,ANNOTATEDFORMULA AnnotatedFormula2,
+int CheckName,int CheckRole,int AllowVariableRenaming,int AllowCommutation) {
+
+    return(
+(!CheckName || !strcmp(GetName(AnnotatedFormula1,NULL),GetName(AnnotatedFormula2,NULL))) &&
+(!CheckRole || GetRole(AnnotatedFormula1,NULL) == GetRole(AnnotatedFormula2,NULL)) &&
+SameFormulaInAnnotatedFormulae(AnnotatedFormula1,AnnotatedFormula2,AllowVariableRenaming,
+AllowCommutation)); 
 }
 //-------------------------------------------------------------------------------------------------
 //int SameFormulaInAnnotatedFormulaString(ANNOTATEDFORMULA AnnotatedFormula,
