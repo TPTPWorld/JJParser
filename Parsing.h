@@ -33,6 +33,7 @@ FORMULA ParseUnaryFormula(READFILE Stream,SyntaxType Language,ContextType Contex
 VARIABLENODE * EndOfScope,int VariablesMustBeQuantifiedAlready);
 FORMULA DuplicateFormula(FORMULA Original,ContextType Context,int ForceNewVariables);
 int RightAssociative(ConnectiveType Connective);
+int CanBeRightAssociative(ConnectiveType Connective);
 int LeftAssociative(ConnectiveType Connective);
 int Associative(ConnectiveType Connective);
 int FullyAssociative(ConnectiveType Connective);

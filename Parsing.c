@@ -972,7 +972,12 @@ non_logical_data,none,NULL,VariablesMustBeQuantified);
 //-------------------------------------------------------------------------------------------------
 int RightAssociative(ConnectiveType Connective) {
 
-    return(Connective == disjunction || Connective == conjunction || Connective == maparrow);
+    return(Connective == maparrow);
+}
+//-------------------------------------------------------------------------------------------------
+int CanBeRightAssociative(ConnectiveType Connective) {
+
+    return(RightAssociative(Connective) || Connective == disjunction || Connective == conjunction);
 }
 //-------------------------------------------------------------------------------------------------
 int LeftAssociative(ConnectiveType Connective) {
@@ -988,7 +993,7 @@ int Associative(ConnectiveType Connective) {
 //-------------------------------------------------------------------------------------------------
 int FullyAssociative(ConnectiveType Connective) {
 
-    return(RightAssociative(Connective) && LeftAssociative(Connective));
+    return(CanBeRightAssociative(Connective) && LeftAssociative(Connective));
 }
 //-------------------------------------------------------------------------------------------------
 int Symmetric(ConnectiveType Connective) {
@@ -1534,8 +1539,7 @@ AllowBinary &&
   ) ) ) {
 //----Make sure it's a legitimate type declaration
         if (CheckToken(Stream,punctuation,":") && 
-(Formula->Type != atom ||
- Formula->FormulaUnion.Atom->Type == variable)) {
+(Formula->Type != atom || Formula->FormulaUnion.Atom->Type == variable)) {
             TokenError(Stream,"Type declaration for non-atomic symbol");
             return(NULL);
         }
@@ -1642,11 +1646,12 @@ AllowInfixEquality,VariablesMustBeQuantified,BinaryFormula));
                     BinaryFormula = NewFormula();
                     BinaryFormula->Type = 
 (ThisConnective == assignmentsym || ThisConnective == identicalsym) ? assignment : binary;
-                    BinaryFormula->FormulaUnion.BinaryFormula.LHS = Formula;
+//----THIS WAS WRONG - I WAS BUILDING RIGHTWARDS!
+                    BinaryFormula->FormulaUnion.BinaryFormula.RHS = Formula;
                     BinaryFormula->FormulaUnion.BinaryFormula.Connective = ThisConnective;
 //----Only binary connectives are left associative, so I can "AcceptToken"
                     AcceptTokenType(Stream,binary_connective);
-                    BinaryFormula->FormulaUnion.BinaryFormula.RHS = ParseFormula(Stream,Language,
+                    BinaryFormula->FormulaUnion.BinaryFormula.LHS = ParseFormula(Stream,Language,
 Context,EndOfScope,0,1,VariablesMustBeQuantified,ThisConnective);
                     Formula = BinaryFormula;
                     LastConnective = ThisConnective;

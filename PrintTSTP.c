@@ -989,7 +989,7 @@ Formula->FormulaUnion.QuantifiedFormula.Formula,Indent,Pretty,none,TSTPSyntaxFla
 (Associative(Connective) && 
  !FullyAssociative(Connective) && 
  SideFormula->Type == binary &&
- RightAssociative(SideFormula->FormulaUnion.BinaryFormula.Connective)) ||
+ CanBeRightAssociative(SideFormula->FormulaUnion.BinaryFormula.Connective)) ||
 //----Need ()s around complex sides of equations. The BNF says negations are complex.
 //----Binary gets dealt with in recursion regarding associativity. But negated equations have
 //----to be dealt with here because later they are kinda binary with TSTPSyntaxFlag = 2.
