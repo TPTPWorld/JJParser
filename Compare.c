@@ -273,6 +273,10 @@ Formula,AllowVariableRenaming,AllowCommutation));
 int SameAnnotatedFormula(ANNOTATEDFORMULA AnnotatedFormula1,ANNOTATEDFORMULA AnnotatedFormula2,
 int CheckName,int CheckRole,int AllowVariableRenaming,int AllowCommutation) {
 
+//DEBUG printf("Compare in SameAnnotatedFormula\n");fflush(stdout);
+//DEBUG PrintAnnotatedTSTPNode(stdout,AnnotatedFormula1,tptp,1);fflush(stdout);
+//DEBUG printf("with\n");fflush(stdout);
+//DEBUG PrintAnnotatedTSTPNode(stdout,AnnotatedFormula2,tptp,1);fflush(stdout);
     return(
 (!CheckName || !strcmp(GetName(AnnotatedFormula1,NULL),GetName(AnnotatedFormula2,NULL))) &&
 (!CheckRole || GetRole(AnnotatedFormula1,NULL) == GetRole(AnnotatedFormula2,NULL)) &&

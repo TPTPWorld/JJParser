@@ -105,7 +105,9 @@ printf("TESTING: Reprinted formulae\n");
     PrintSignature(Signature);
     AnnotatedFormula = GetAnnotatedFormulaFromListByName(Head,"c");
     AnotherAnnotatedFormula = GetAnnotatedFormulaFromListByName(AnotherHead,"c");
+    printf("The first formula:\n");
     PrintAnnotatedTSTPNode(stdout,AnnotatedFormula,tptp,1);
+    printf("The second formula:\n");
     PrintAnnotatedTSTPNode(stdout,AnotherAnnotatedFormula,tptp,1);
     if (SameFormulaInAnnotatedFormulae(AnnotatedFormula,AnotherAnnotatedFormula,0,1)) {
         printf("They are identical\n");
