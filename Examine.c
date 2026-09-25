@@ -3037,7 +3037,7 @@ TheSymbol.NonVariable->NameSymbol)) {
     return(NULL);
 }
 //-------------------------------------------------------------------------------------------------
-void DoGetInferenceInfoTERMsFromInferenceRecord(TERM InferenceRecord,char * Symbol,
+int DoGetInferenceInfoTERMsFromInferenceRecord(TERM InferenceRecord,char * Symbol,
 TERMArray * ArrayOfInfoTERMs,int * NumberOfTerms) {
 
     TERM ThisInfoTERM;
@@ -3057,26 +3057,34 @@ GetSymbol(InferenceRecord->Arguments[0]),&Index)) != NULL) {
 (*NumberOfTerms) * sizeof(TERM));
         (*ArrayOfInfoTERMs)[(*NumberOfTerms) - 1] = ThisInfoTERM;
         Index++;
+//----Check that there's maximally 1 status in the layer
+        if (!strcmp(Symbol,"status") && Index > 1) {
+            return(0);
+        }
     }
 
-//----Now look in the parents list for nested inferences
+//----Now look in the parents list for nested inferences. If something goes wrong, bail
     ParentsList = InferenceRecord->Arguments[2];
     for (Index=0;Index < ParentsList->FlexibleArity;Index++) {
         if (!strcmp(GetSymbol(ParentsList->Arguments[Index]),"inference")) {
-            DoGetInferenceInfoTERMsFromInferenceRecord(ParentsList->
-Arguments[Index],Symbol,ArrayOfInfoTERMs,NumberOfTerms);
+            if (!DoGetInferenceInfoTERMsFromInferenceRecord(ParentsList->
+Arguments[Index],Symbol,ArrayOfInfoTERMs,NumberOfTerms)) {
+                *NumberOfTerms = 0;
+                return(0);
+            }
         }
     }
+    return(1);
 }
 //-------------------------------------------------------------------------------------------------
 //----Gets one from this layer, then looks through the parents to get more from nested inference 
 //----records
-void GetInferenceInfoTERMsFromInferenceRecord(TERM InferenceRecord,char * Symbol,
+int GetInferenceInfoTERMsFromInferenceRecord(TERM InferenceRecord,char * Symbol,
 TERMArray * ArrayOfInfoTERMs,int * NumberOfTerms) {
 
     *NumberOfTerms = 0;
-    DoGetInferenceInfoTERMsFromInferenceRecord(InferenceRecord,Symbol,ArrayOfInfoTERMs,
-NumberOfTerms);
+    return(DoGetInferenceInfoTERMsFromInferenceRecord(InferenceRecord,Symbol,ArrayOfInfoTERMs,
+NumberOfTerms));
 }
 //-------------------------------------------------------------------------------------------------
 TERMArray GetInferenceInfoTERMs(ANNOTATEDFORMULA AnnotatedFormula,char * Symbol,
@@ -3092,8 +3100,14 @@ DerivedAnnotatedFormula(AnnotatedFormula) &&
 //----Source is an inference term
 !strcmp(GetSymbol(AnnotatedFormula->AnnotatedFormulaUnion.AnnotatedTSTPFormula.
 Source),"inference")) {
-        GetInferenceInfoTERMsFromInferenceRecord(AnnotatedFormula->
-AnnotatedFormulaUnion.AnnotatedTSTPFormula.Source,Symbol,&ArrayOfInfoTERMs,NumberOfTerms);
+//DEBUG printf("Getting %s terms from\n",Symbol);PrintAnnotatedTSTPNode(stdout,AnnotatedFormula,tptp,1);
+//----If something goes wrong, free what ever has been malloced and return NULL
+        if (!GetInferenceInfoTERMsFromInferenceRecord(AnnotatedFormula->
+AnnotatedFormulaUnion.AnnotatedTSTPFormula.Source,Symbol,&ArrayOfInfoTERMs,NumberOfTerms)) {
+            Free((void **)&ArrayOfInfoTERMs);
+            *NumberOfTerms = 0;
+            return(NULL);
+        }
     }
     return(ArrayOfInfoTERMs);
 }
@@ -3183,7 +3197,9 @@ SZSResultArray ArrayOfSZSStatuses,int * NumberOfSZSResults) {
     int Index;
 
     ArrayOfStatusTERMs = GetInferenceInfoTERMs(AnnotatedFormula,"status",&NumberOfTerms);
+//----Either none, or set to 0 by error situation
     if (NumberOfTerms == 0) {
+//----Should be NULL!
         if (ArrayOfStatusTERMs != NULL) {
             Free((void **)&ArrayOfStatusTERMs);
         }

@@ -98,7 +98,15 @@ printf("TESTING: Printed statistics\n");
 printf("TESTING: Reprinted cleaned signature\n");
     PrintListOfAnnotatedTSTPNodes(stdout,Signature,Head,tptp,1);
 printf("TESTING: Reprinted formulae\n");
+    FreeListOfAnnotatedFormulae(&Head,Signature);
+printf("TESTING: Freed formulae\n");
+    assert(Head == NULL);
+    FreeSignature(&Signature);
+printf("TESTING: Freed signature\n");
+    assert(Signature == NULL);
+    return(EXIT_SUCCESS);
 
+//-------------------------------------------------------------------------------------------------
 //----Test comparison of first two formula for being the same
     AnotherHead = ParseFileOfFormulae(argv[2],NULL,Signature,1,NULL);
     PrintListOfAnnotatedTSTPNodes(stdout,Signature,AnotherHead,tptp,1);
@@ -120,15 +128,6 @@ printf("TESTING: Reprinted formulae\n");
     }
     FreeListOfAnnotatedFormulae(&AnotherHead,Signature);
 
-    FreeListOfAnnotatedFormulae(&Head,Signature);
-printf("TESTING: Freed formulae\n");
-    assert(Head == NULL);
-    FreeSignature(&Signature);
-printf("TESTING: Freed signature\n");
-    assert(Signature == NULL);
-    return(EXIT_SUCCESS);
-
-//-------------------------------------------------------------------------------------------------
 //----Test uniqueify variable names
     AnnotatedFormula = GetAnnotatedFormulaFromListByName(Head,"dv");
     if (AnnotatedFormula != NULL) {

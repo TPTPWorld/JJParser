@@ -43,6 +43,7 @@ int CheckRole(StatusType Role,StatusType DesiredRole);
 int ExtractTermArguments(String Term);
 char * TSTPTermToString(TERM Term,char * PutTermHere);
 
+//----These are broken but left because they are needed by the compiler
 int CountVariableUsageInFormula(FORMULA Formula,VARIABLENODE Variable,int * QuantifiedOccurences);
 void NormalizeSymbolUsage(char * SymbolUsage);
 char * GetLiteralSymbolUsage(FORMULA Literal,char ** PutUsageHere,char ** VariablesStartHere);
@@ -55,8 +56,10 @@ char ** VariableCollector,int * VariableCollectorLength,char ** TypeCollector,
 int * TypeCollectorLength);
 char * GetAnnotatedFormulaSymbolUsage(ANNOTATEDFORMULA AnnotatedTSTPFormula,char ** PutUsageHere,
 char ** FunctorUsageStartsHere,char ** VariableUsageStartsHere,char ** TypeUsageStartsHere);
-//---- This is broken char * GetListOfAnnotatedFormulaSymbolUsage(LISTNODE ListNode,char ** PutUsageHere,
-//---- This is broken char ** FunctorUsageStartsHere,char ** VariableUsageStartsHere,char ** TypeUsageStartsHere);
+/*----This is broken
+char * GetListOfAnnotatedFormulaSymbolUsage(LISTNODE ListNode,char ** PutUsageHere,
+char ** FunctorUsageStartsHere,char ** VariableUsageStartsHere,char ** TypeUsageStartsHere);
+----*/
 
 int GetSymbolUses(SIGNATURE Signature,TermType Type,char * Name,int Arity);
 int CountLiteralsOfPolarity(ANNOTATEDFORMULA AnnotatedFormula,int * Positive,int * Negative);
