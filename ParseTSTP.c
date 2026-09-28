@@ -144,11 +144,13 @@ ANNOTATEDFORMULA ParseAnnotatedTSTPFormula(READFILE Stream,SIGNATURE Signature) 
         Language = tptp_fof;
         AnnotatedFormula = NewAnnotatedTSTPFormula(tptp_fof);
         VariablesMustBeQuantifiedAlready = 1;
-    } else {
+    } else if (CheckToken(Stream,lower_word,"cnf")) {
         AcceptToken(Stream,lower_word,"cnf");
         Language = tptp_cnf;
         AnnotatedFormula = NewAnnotatedTSTPFormula(tptp_cnf);
         VariablesMustBeQuantifiedAlready = 0;
+    } else {
+        TokenError(Stream,"Invalid annotated formula type");
     }
     AcceptToken(Stream,punctuation,"(");
     EnsureTokenType(Stream,name);
@@ -184,10 +186,16 @@ ParseTerm(Stream,nontype,Context,&EndOfScope,non_logical_data,none,NULL,0);
 //DEBUG printf("The source is \n");
 //DEBUG PrintTSTPTerm(stdout,Language,AnnotatedFormula->AnnotatedFormulaUnion.AnnotatedTSTPFormula.Source,0,1,-1);
 //----Check inference record has three arguments
-        if (!strcmp(GetSymbol(AnnotatedFormula->AnnotatedFormulaUnion.
-AnnotatedTSTPFormula.Source),"inference") && GetArity(AnnotatedFormula->
-AnnotatedFormulaUnion.AnnotatedTSTPFormula.Source) != 3) {
-            TokenError(Stream,"Inference record must have three arguments");
+        if (
+(!strcmp(GetSymbol(AnnotatedFormula->AnnotatedFormulaUnion.AnnotatedTSTPFormula.Source),
+ "inference") && 
+ GetArity(AnnotatedFormula->AnnotatedFormulaUnion.AnnotatedTSTPFormula.Source) != 3) ||
+(!strcmp(GetSymbol(AnnotatedFormula->AnnotatedFormulaUnion.AnnotatedTSTPFormula.Source),
+ "introduced") && 
+ GetArity(AnnotatedFormula->AnnotatedFormulaUnion.AnnotatedTSTPFormula.Source) != 3) ||
+(!strcmp(GetSymbol(AnnotatedFormula->AnnotatedFormulaUnion.AnnotatedTSTPFormula.Source),"file") && 
+ GetArity(AnnotatedFormula->AnnotatedFormulaUnion.AnnotatedTSTPFormula.Source) != 2)) {
+            TokenError(Stream,"Invalid source record");
         }
 //----Don't check that inference sources have at least one parent - must allow
 //----derived but no parents - for tautologies which are inferred from nothing
