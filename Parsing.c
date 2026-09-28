@@ -1646,12 +1646,12 @@ AllowInfixEquality,VariablesMustBeQuantified,BinaryFormula));
                     BinaryFormula = NewFormula();
                     BinaryFormula->Type = 
 (ThisConnective == assignmentsym || ThisConnective == identicalsym) ? assignment : binary;
-//----THIS WAS WRONG - I WAS BUILDING RIGHTWARDS!
-                    BinaryFormula->FormulaUnion.BinaryFormula.RHS = Formula;
+//----THIS WAS WRONG - I WAS BUILDING RIGHTWARDS! REVERTED BECAUSE APPLY SEQUENCES CAME OUT WRONG
+                    BinaryFormula->FormulaUnion.BinaryFormula.LHS = Formula;
                     BinaryFormula->FormulaUnion.BinaryFormula.Connective = ThisConnective;
 //----Only binary connectives are left associative, so I can "AcceptToken"
                     AcceptTokenType(Stream,binary_connective);
-                    BinaryFormula->FormulaUnion.BinaryFormula.LHS = ParseFormula(Stream,Language,
+                    BinaryFormula->FormulaUnion.BinaryFormula.RHS = ParseFormula(Stream,Language,
 Context,EndOfScope,0,1,VariablesMustBeQuantified,ThisConnective);
                     Formula = BinaryFormula;
                     LastConnective = ThisConnective;
