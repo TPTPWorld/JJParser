@@ -189,12 +189,13 @@ ParseTerm(Stream,nontype,Context,&EndOfScope,non_logical_data,none,NULL,0);
         if (
 (!strcmp(GetSymbol(AnnotatedFormula->AnnotatedFormulaUnion.AnnotatedTSTPFormula.Source),
  "inference") && 
- GetArity(AnnotatedFormula->AnnotatedFormulaUnion.AnnotatedTSTPFormula.Source) != 3) ||
+ GetArity(AnnotatedFormula->AnnotatedFormulaUnion.AnnotatedTSTPFormula.Source) != 3 ) ||
 (!strcmp(GetSymbol(AnnotatedFormula->AnnotatedFormulaUnion.AnnotatedTSTPFormula.Source),
  "introduced") && 
- GetArity(AnnotatedFormula->AnnotatedFormulaUnion.AnnotatedTSTPFormula.Source) != 3) ||
+ GetArity(AnnotatedFormula->AnnotatedFormulaUnion.AnnotatedTSTPFormula.Source) != 3 ) ||
 (!strcmp(GetSymbol(AnnotatedFormula->AnnotatedFormulaUnion.AnnotatedTSTPFormula.Source),"file") && 
- GetArity(AnnotatedFormula->AnnotatedFormulaUnion.AnnotatedTSTPFormula.Source) != 2)) {
+ GetArity(AnnotatedFormula->AnnotatedFormulaUnion.AnnotatedTSTPFormula.Source) != 2 &&
+ GetArity(AnnotatedFormula->AnnotatedFormulaUnion.AnnotatedTSTPFormula.Source) != 1 ) ) {
             TokenError(Stream,"Invalid source record");
         }
 //----Don't check that inference sources have at least one parent - must allow
