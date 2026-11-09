@@ -73,7 +73,7 @@ char * TPTPtoLPSymbol(char * TPTPSymbol,char * Prefix,String PutFinalHere) {
 //-------------------------------------------------------------------------------------------------
 char * LPConnectiveToString(ConnectiveType Connective) {
 
-    String ErrorMessage;
+    static String ErrorMessage;
 
     switch (Connective) {
         case application:
@@ -273,7 +273,7 @@ void LPPrintTerm(FILE * Stream,TERM Term,char * SignaturePrefix) {
 
     int Index;
     String Symbol;
-    String ErrorMessage;
+    static String ErrorMessage;
     String ToPrint;
 
     switch (Term->Type) {
@@ -319,7 +319,7 @@ TermTypeToString(Term->Type));
 //-------------------------------------------------------------------------------------------------
 void LPPrintFormula(FILE * Stream,FORMULA Formula,char * SignaturePrefix) {
 
-    String ErrorMessage;
+    static String ErrorMessage;
 
     fprintf(Stream,"(");
     switch (Formula->Type) {
@@ -366,7 +366,7 @@ FormulaTypeToString(Formula->Type));
 //-------------------------------------------------------------------------------------------------
 void LPPrintAnnotatedTSTPNode(FILE * Stream,ANNOTATEDFORMULA AnnotatedFormula,char * Label) {
 
-    String ErrorMessage;
+    static String ErrorMessage;
 
     switch (AnnotatedFormula->Syntax) {
         case comment:

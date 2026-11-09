@@ -453,7 +453,7 @@ StatisticsType GetListStatistics(LISTNODE ListHead,SIGNATURE Signature) {
     StatisticsType Statistics;
     HeadListType HeadListNode;
     int NumberOfTerms;
-    String ErrorMessage;
+    static String ErrorMessage;
 
 //----Make a single node for list of lists
     HeadListNode.TheList = ListHead;

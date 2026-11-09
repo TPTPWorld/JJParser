@@ -226,7 +226,7 @@ SIGNATURE Signature) {
     int NumberOfDischarges;
     int DischargeNumber;
     TERM DischargedNamesList;
-    String ErrorMessage;
+    static String ErrorMessage;
 
 //DEBUG printf("------- Expanding assumptions in\n");
 //DEBUG PrintAnnotatedTSTPNode(stdout,AnnotatedFormula,tptp,1);

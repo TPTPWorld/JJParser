@@ -22,7 +22,7 @@ int CountArgumentVariablesByType(TERM Term,char * Type);
 //-------------------------------------------------------------------------------------------------
 char * GetSymbol(TERM Term) {
 
-    String ErrorMessage;
+    static String ErrorMessage;
 
     if (Term == NULL) {
         CodingError("Getting symbol for NULL term");
@@ -77,7 +77,7 @@ TermTypeToString(Term->Type));
 //-------------------------------------------------------------------------------------------------
 int GetArity(TERM Term) {
 
-    String ErrorMessage;
+    static String ErrorMessage;
 
     if (Term == NULL) {
         CodingError("Getting arity for NULL term");
@@ -293,7 +293,7 @@ int GetArityFromTyping(READFILE Stream,FORMULA TypeFormula) {
 
     int Arity;
     FORMULA Side;
-    String ErrorMessage;
+    static String ErrorMessage;
 
 //DEBUG printf("Get arity from type %s\n",FormulaTypeToString(TypeFormula->Type));
     switch (TypeFormula->Type) {
@@ -832,7 +832,7 @@ int CountVariableUsageInTERMArray(int NumberOfElements,TERMArray Terms,VARIABLEN
 int CountVariableUsageInTerm(TERM Term,VARIABLENODE Variable) {
 
     int LocalQuantifiedUsage;
-    String ErrorMessage;
+    static String ErrorMessage;
 
     switch (Term->Type) {
         case variable:
@@ -1023,7 +1023,7 @@ char ** FunctorCollector,int * FunctorCollectorLength,char ** VariableCollector,
 int * VariableCollectorLength,char ** TypeCollector,int * TypeCollectorLength) {
 
     SuperString TermData;
-    String ErrorMessage;
+    static String ErrorMessage;
 
     switch (Term->Type) {
         case connective:
@@ -1149,7 +1149,7 @@ int * PredicateCollectorLength,char ** FunctorCollector,int * FunctorCollectorLe
 char ** VariableCollector,int * VariableCollectorLength,char ** TypeCollector,
 int * TypeCollectorLength) {
 
-    String ErrorMessage;
+    static String ErrorMessage;
 
     switch (Formula->Type) {
         case sequent:
@@ -1421,7 +1421,7 @@ int * PositivesLength,char ** PutNegativesHere,int * NegativesLength) {
 
     char * LiteralSymbols;
     char * LiteralVariables;
-    String ErrorMessage;
+    static String ErrorMessage;
 
     if (DisjunctionOrLiteral == NULL) {
         return;
@@ -1523,7 +1523,7 @@ AnnotatedTSTPFormula.FormulaWithVariables->Formula,&PutPositivesHere,
 //-------------------------------------------------------------------------------------------------
 int CountFormulaLiteralsOfPolarity(FORMULA DisjunctionOrLiteral,int Sign) {
 
-    String ErrorMessage;
+    static String ErrorMessage;
 
     if (DisjunctionOrLiteral == NULL) {
         return(0);
@@ -1567,7 +1567,7 @@ int GetSymbolUses(SIGNATURE Signature,TermType Type,char * Name,int Arity) {
 
     SYMBOLNODE List;
     SYMBOLNODE SymbolNode;
-    String ErrorMessage;
+    static String ErrorMessage;
 
     switch (Type) {
         case atom_as_term:
@@ -1713,7 +1713,7 @@ GetArguments(Terms[ElementNumber]));
 //-------------------------------------------------------------------------------------------------
 int CountNestedFormulae(SIGNATURE Signature,FORMULA Formula,int NestedYet) {
 
-    String ErrorMessage;
+    static String ErrorMessage;
     int Count;
     
 //DEBUG printf("Look at formula with type %s, NestedYet is %d\n",FormulaTypeToString(Formula->Type),NestedYet);
@@ -1846,7 +1846,7 @@ int CountArgumentVariablesByType(TERM Term,char * Type)  {
 int CountVariablesInFormulaByType(FORMULA Formula,char * Type) {
 
     int Count;
-    String ErrorMessage;
+    static String ErrorMessage;
 
     Count = 0;
     switch (Formula->Type) {
@@ -1926,7 +1926,7 @@ FormulaTypeToString(Formula->Type));
 //-------------------------------------------------------------------------------------------------
 int CountFormulaTuples(FORMULA Formula) {
 
-    String ErrorMessage;
+    static String ErrorMessage;
 
     switch (Formula->Type) {
         case sequent:
@@ -1998,7 +1998,7 @@ int CountTermTerms(TERM Term) {
 //-------------------------------------------------------------------------------------------------
 int CountFormulaTerms(FORMULA Formula) {
 
-    String ErrorMessage;
+    static String ErrorMessage;
 
     switch(Formula->Type) {
         case sequent:
@@ -2096,7 +2096,7 @@ int CountFormulaAtomsByPredicate(SIGNATURE Signature,FORMULA Formula,char * Pred
 int DoNested) {
 
     int Count;
-    String ErrorMessage;
+    static String ErrorMessage;
 
 //DEBUG printf("Counting %s (DoNested=%d) in\n",Predicate,DoNested); PrintFileTSTPFormula(OpenFILEPrintFile(stdout,NULL),tptp_thf,Formula,0,1,outermost,1);printf("\n");
     Count = 0;
@@ -2219,7 +2219,7 @@ FormulaTypeToString(Formula->Type));
 //-------------------------------------------------------------------------------------------------
 void CountTheConnective(ConnectiveType Connective,ConnectiveStatisticsType * ConnectiveStatistics) {
 
-    String ErrorMessage;
+    static String ErrorMessage;
 
     switch(Connective) {
 //----Quantifiers and binders
@@ -2406,7 +2406,7 @@ ConnectiveStatisticsType GetFormulaConnectiveUsage(FORMULA Formula) {
     ConnectiveStatisticsType ConnectiveStatistics;
     ConnectiveStatisticsType MoreConnectiveStatistics;
     FormulaType * VariableType;
-    String ErrorMessage;
+    static String ErrorMessage;
     char * AtomSymbol;
 
     InitializeConnectiveStatistics(&ConnectiveStatistics);
@@ -2670,7 +2670,7 @@ TupleFormulae[ElementNumber]));
 //----Dig down to atoms and get max term depth. Nested formula have no term depth.
 int MaxFormulaTermDepth(FORMULA Formula) {
 
-    String ErrorMessage;
+    static String ErrorMessage;
 
     switch(Formula->Type) {
         case sequent:
@@ -2771,7 +2771,7 @@ int SumTupleFormulaeTermDepth(int NumberOfElements,FORMULAArray TupleFormulae) {
 //-------------------------------------------------------------------------------------------------
 int SumFormulaTermDepth(FORMULA Formula) {
 
-    String ErrorMessage;
+    static String ErrorMessage;
 
     switch(Formula->Type) {
         case sequent:

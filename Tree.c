@@ -607,7 +607,7 @@ ROOTBTREE * BTreeOfTreeNodes,SIGNATURE Signature) {
     char * AllParentNames;
     StringParts ParentNames;
     int ParentIndex;
-    String ErrorMessage;
+    static String ErrorMessage;
 
 //DEBUG printf("Building tree for root %s\n",Name);fflush(stdout);
     strcpy(ErrorMessage,"");
@@ -673,7 +673,7 @@ ROOTLIST BuildRootList(LISTNODE Head,SIGNATURE Signature) {
     LISTNODE RootAnnotatedFormulae;
     LISTNODE RootAnnotatedFormulaNode;
     SuperString RootName;
-    String ErrorMessage;
+    static String ErrorMessage;
 
 //----This is the binary tree of all tree nodes
     BTreeOfTreeNodes = NULL;

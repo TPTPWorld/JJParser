@@ -230,7 +230,7 @@ RootListHead->TheTree->NumberOfParents > 0) {
 SZSOutputType GetSZSOutputType(LISTNODE Head,ROOTLIST * RootListHead,int * FiniteDomainSize,
 SIGNATURE Signature,SZSOutputType ClaimedSZSOuput) {
 
-    String ErrorMessage;
+    static String ErrorMessage;
 
     *RootListHead = NULL;
     if (Head == NULL) {

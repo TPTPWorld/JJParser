@@ -144,7 +144,7 @@ char * ExpandAndFindFileName(char * FileName,char * IncludingFileName,String Exp
     char * Slash;
     char * Home;
     struct passwd *PasswdEntry;
-    String ErrorMessage;
+    static String ErrorMessage;
 
 //DEBUG printf("Start looking for ---%s--- relative to ---%s---\n",FileName,IncludingFileName);
 //----Expand ~ and ~user
@@ -277,7 +277,7 @@ CleanFileName[0] == CleanFileName[strlen(CleanFileName)-1]) {
 FILE * OpenFileInMode(String FileName,char * Mode) {
     
     FILE * Stream;
-    String ErrorMessage;
+    static String ErrorMessage;
     
     if ((Stream = fopen(FileName,Mode)) == NULL) {
         perror("Opening file");
@@ -481,7 +481,7 @@ void CloseReadFile(READFILE Stream) {
 //-------------------------------------------------------------------------------------------------
 void RemoveFile(String FileName) {
 
-    String ErrorMessage;
+    static String ErrorMessage;
 
     if (unlink(FileName) == -1) {
         perror("Deleting file/directory");

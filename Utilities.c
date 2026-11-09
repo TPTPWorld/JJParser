@@ -307,7 +307,7 @@ void StringToLower(char * TheString) {
 int RunSystemCommand(char * Command) {
 
     int Status;
-    String ErrorMessage;
+    static String ErrorMessage;
 
     Status = system(Command);
 

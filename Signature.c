@@ -561,7 +561,7 @@ NodeToInsert->Arity);
 SYMBOLNODE InsertIntoSignature(SIGNATURE Signature,TermType Type,char * Name,int Arity,
 int AppliedArity,int InternalSymbol,READFILE Stream) {
 
-    String ErrorMessage;
+    static String ErrorMessage;
     int IsInternal;
 
     IsInternal = InternalSymbol || IsAnInternalSymbol(Name);

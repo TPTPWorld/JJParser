@@ -51,7 +51,7 @@ char * GetPrintSymbol(TERM Term) {
 //-------------------------------------------------------------------------------------------------
 PrintFormatType StringToPrintFormat(char * FormatString) {
 
-    String ErrorMessage;
+    static String ErrorMessage;
 
     if (!strcmp(FormatString,"tptp")) {
         return(tptp);

@@ -65,7 +65,7 @@ char * TPTPtoDKSymbol(char * TPTPSymbol) {
 //-------------------------------------------------------------------------------------------------
 char * DKConnectiveToString(ConnectiveType Connective) {
 
-    String ErrorMessage;
+    static String ErrorMessage;
 
     switch (Connective) {
         case application:
@@ -197,7 +197,7 @@ void DKPrintTerm(FILE * Stream,TERM Term) {
 
     int Index;
     String Symbol;
-    String ErrorMessage;
+    static String ErrorMessage;
 
     switch (Term->Type) {
 //----Check if a nested formula - no symbol. This is for THF, TXF, TFF
@@ -242,7 +242,7 @@ TermTypeToString(Term->Type));
 //-------------------------------------------------------------------------------------------------
 void DKPrintFormula(FILE * Stream,FORMULA Formula) {
 
-    String ErrorMessage;
+    static String ErrorMessage;
 
     fprintf(Stream,"(");
     switch (Formula->Type) {
@@ -304,7 +304,7 @@ FormulaTypeToString(Formula->Type));
 void DKPrintAnnotatedTSTPNode(FILE * Stream,ANNOTATEDFORMULA AnnotatedFormula,char * Prefix,
 char * Label) {
 
-    String ErrorMessage;
+    static String ErrorMessage;
 
     switch (AnnotatedFormula->Syntax) {
         case comment:

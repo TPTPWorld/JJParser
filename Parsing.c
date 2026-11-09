@@ -116,7 +116,7 @@ int MustBeQuantifiedAlready) {
 
     VARIABLENODE Variable;
     VARIABLENODE FoundVariable;
-    String ErrorMessage;
+    static String ErrorMessage;
 
 //DEBUG printf("Variable %s forced = %d allowfree = %d mbqa = %d\n",VariableName,ForceNew,AllowFreeVariables,MustBeQuantifiedAlready);
 //DEBUG PrintVariableList(*Variables,*EndOfScope);
@@ -317,7 +317,7 @@ VARIABLENODE * Variables) {
 void FreeFormula(FORMULA * Formula,SIGNATURE Signature,VARIABLENODE * Variables) {
 
     SYMBOLNODE Symbol;
-    String ErrorMessage;
+    static String ErrorMessage;
 
 //DEBUG printf("Freeing formula\n"); PrintFileTSTPFormula(OpenFILEPrintFile(stdout,NULL),tptp_tff,*Formula,0,1,outermost,1);printf("\n");fflush(stdout);
     if (*Formula != NULL) {
@@ -495,7 +495,7 @@ TERM DuplicateTerm(TERM Original,ContextType Context,int ForceNewVariables) {
 
     TERM Term;
     VARIABLENODE Variable;
-    String ErrorMessage;
+    static String ErrorMessage;
     TermType ActualType;
 
     if (Original == NULL) {
@@ -677,7 +677,7 @@ int VariablesMustBeQuantified) {
     char * InfixToken;
     int SearchNumberOfArguments;
     SYMBOLNODE FoundSymbol;
-    String ErrorMessage;
+    static String ErrorMessage;
 
     Term = NewTerm();
     TypeIfInfix = nonterm;
@@ -1299,7 +1299,7 @@ VARIABLENODE * EndOfScope,int VariablesMustBeQuantified) {
 FORMULA DuplicateFormula(FORMULA Original,ContextType Context,int ForceNewVariables) {
 
     FORMULA Formula;
-    String ErrorMessage;
+    static String ErrorMessage;
     SYMBOLNODE Symbol;
 
     if (Original == NULL) {
@@ -1413,7 +1413,7 @@ ConnectiveType LastConnective) {
     FORMULA BinaryFormula = NULL;
     FORMULA InfixFormula = NULL;
     ConnectiveType ThisConnective;
-    String ErrorMessage;
+    static String ErrorMessage;
     TermType NewTermType;
     SYMBOLNODE * ToDeletePtr;
     SYMBOLNODE ExistingType;
@@ -1970,7 +1970,7 @@ ANNOTATEDFORMULA AnnotatedFormula) {
     SuperString IncludeFilter;
     LISTNODE IncludedHead;
     LISTNODE HeaderNode;
-    String ErrorMessage;
+    static String ErrorMessage;
 
     GetIncludeParts(AnnotatedFormula,IncludeFile,IncludeFilter);
 //DEBUG printf("Have to include %s filtered by %s\n",IncludeFile,IncludeFilter);
@@ -2067,7 +2067,7 @@ char * NameFilter) {
     String IncludedNames;
     LISTNODE IncludedHead,Mover;
     LISTNODE * Current;
-    String ErrorMessage;
+    static String ErrorMessage;
 
     Head = NULL;
     Current = &Head;

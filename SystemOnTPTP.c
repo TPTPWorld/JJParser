@@ -169,7 +169,7 @@ static SZSOutputType OutputIsaPairs[][2] = {
 SZSResultType StringToSZSResult(char * SZSResult) {
 
     int Index;
-    String ErrorMessage;
+    static String ErrorMessage;
 
     for (Index = 0;Index < sizeof(ResultTriples)/sizeof(SZSResultTripleType);Index++) {
         if (!strcasecmp(SZSResult,ResultTriples[Index].TLAString) ||
@@ -239,7 +239,7 @@ int StringIsASZSResultTLA(char * PossibleResultTLA) {
 SZSOutputType StringToSZSOutput(char * SZSOutput) {
 
     int Index;
-    String ErrorMessage;
+    static String ErrorMessage;
 
     for (Index = 0;Index < sizeof(OutputTriples)/sizeof(SZSOutputTripleType);Index++) {
         if (!strcasecmp(SZSOutput,OutputTriples[Index].TLAString) ||
@@ -404,7 +404,7 @@ char * ATPSystem,int TimeLimit,char * X2TSTPFlag,char * OptionalFlags) {
     char * TPTPHome;
     FILE * SystemPipe;
     String UNIXCommand;
-    String ErrorMessage;
+    static String ErrorMessage;
 
 //----First look if user has a TPTP_HOME environment variable
     if ((TPTPHome = getenv("TPTP_HOME")) != NULL) {
@@ -1029,7 +1029,7 @@ const char * ExecuteFormatString,SIGNATURE Signature) {
     String ExecuteCommand;
     FILE * ProcessHandle;
     LISTNODE AppliedHead;
-    String ErrorMessage;
+    static String ErrorMessage;
 
     if(!MakeProblemFile((char *)"/tmp",NULL,NULL,ProblemFileName,Head,AsStatus,Conjecture,
 conjecture)) {

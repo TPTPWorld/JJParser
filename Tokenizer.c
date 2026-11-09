@@ -68,7 +68,7 @@ int EndFile(TOKEN CurrentToken) {
 void CharacterError(READFILE Stream) {
 
     String RestOfLine;
-    String ErrorMessage;
+    static String ErrorMessage;
 
     strcpy(RestOfLine,"");
     if (Stream->FileHandle != NULL) {
@@ -303,7 +303,7 @@ StatusType StringToStatus(char * StatusString) {
 //-------------------------------------------------------------------------------------------------
 char * StatusToString(StatusType Status) {
 
-    String ErrorMessage;
+    static String ErrorMessage;
 
      switch (Status) {
         case initial:
@@ -457,7 +457,7 @@ char * StatusToString(StatusType Status) {
 //-------------------------------------------------------------------------------------------------
 ConnectiveType StringToConnective(char * ConnectiveString) {
 
-    String ErrorMessage;
+    static String ErrorMessage;
 
     if (!strcmp(ConnectiveString,"|")) {
         return(disjunction);
@@ -580,7 +580,7 @@ ConnectiveType StringToConnective(char * ConnectiveString) {
 //-------------------------------------------------------------------------------------------------
 char * ConnectiveToString(ConnectiveType Connective) {
 
-    String ErrorMessage;
+    static String ErrorMessage;
 
     switch (Connective) {
         case disjunction:
@@ -713,7 +713,7 @@ char * ConnectiveToString(ConnectiveType Connective) {
 //-------------------------------------------------------------------------------------------------
 SyntaxType StringToSyntax(char * SyntaxString) {
 
-    String ErrorMessage;
+    static String ErrorMessage;
 
     if (!strcmp(SyntaxString,"tpi")) {
         return(tptp_tpi);
@@ -743,7 +743,7 @@ SyntaxType StringToSyntax(char * SyntaxString) {
 //-------------------------------------------------------------------------------------------------
 char * TokenTypeToString(TokenType Type) {
 
-    String ErrorMessage;
+    static String ErrorMessage;
 
     switch (Type) {
         case punctuation:
@@ -801,7 +801,7 @@ char * TokenTypeToString(TokenType Type) {
 //-------------------------------------------------------------------------------------------------
 char * SyntaxToString(SyntaxType Syntax) {
 
-    String ErrorMessage;
+    static String ErrorMessage;
 
     switch (Syntax) {
         case tptp_tpi:
@@ -847,7 +847,7 @@ char * SyntaxToString(SyntaxType Syntax) {
 //-------------------------------------------------------------------------------------------------
 char * TermTypeToString(TermType Type) {
 
-    String ErrorMessage;
+    static String ErrorMessage;
 
     switch (Type) {
         case connective:
@@ -908,7 +908,7 @@ char * TermTypeToString(TermType Type) {
 //-------------------------------------------------------------------------------------------------
 SyntaxType NestedTermTypeToSyntax(TermType Type) {
 
-    String ErrorMessage;
+    static String ErrorMessage;
 
     switch (Type) {
         case nested_thf:
@@ -1568,7 +1568,7 @@ Stream->Line,Stream->Character,CurrentToken(Stream)->NameToken,Message);
 void TokenError(READFILE Stream,char * Message) {
 
     String RestOfLine;
-    String ErrorMessage;
+    static String ErrorMessage;
 
     strcpy(RestOfLine,"");
     if (Stream->FileHandle != NULL) {
@@ -1628,7 +1628,7 @@ int CheckToken(READFILE Stream,TokenType Type,char * Value) {
 //--------------------------------------------------------------------------------------------------
 int TakeTokenType(READFILE Stream,TokenType Type) {
 
-    String ErrorMessage;
+    static String ErrorMessage;
 
     if (CheckTokenType(Stream,Type)) {
         TakeCurrentToken(Stream);
@@ -1642,7 +1642,7 @@ int TakeTokenType(READFILE Stream,TokenType Type) {
 //--------------------------------------------------------------------------------------------------
 int TakeToken(READFILE Stream,TokenType Type,char * Value) {
 
-    String ErrorMessage;
+    static String ErrorMessage;
 
     if (CheckTokenType(Stream,Type) && !strcmp(CurrentToken(Stream)->NameToken,Value)) {
         TakeCurrentToken(Stream); 
@@ -1657,7 +1657,7 @@ TokenTypeToString(Type),Value);
 //--------------------------------------------------------------------------------------------------
 void EnsureTokenType(READFILE Stream,TokenType Type) {
 
-    String ErrorMessage;
+    static String ErrorMessage;
 
     if (!CheckTokenType(Stream,Type)) {
         sprintf(ErrorMessage,"Wrong token type, expected %s",TokenTypeToString(Type));
@@ -1667,7 +1667,7 @@ void EnsureTokenType(READFILE Stream,TokenType Type) {
 //--------------------------------------------------------------------------------------------------
 void EnsureTokenNotType(READFILE Stream,TokenType NotType) {
 
-    String ErrorMessage;
+    static String ErrorMessage;
 
     if (CheckTokenType(Stream,NotType)) {
         sprintf(ErrorMessage,"Wrong token type, not expecting %s",TokenTypeToString(NotType));
@@ -1677,7 +1677,7 @@ void EnsureTokenNotType(READFILE Stream,TokenType NotType) {
 //--------------------------------------------------------------------------------------------------
 void EnsureToken(READFILE Stream,TokenType Type,char * Value) {
 
-    String ErrorMessage;
+    static String ErrorMessage;
 
     if (!CheckToken(Stream,Type,Value)) {
         sprintf(ErrorMessage,"Wrong token type or value, expected %s with value \"%s\"",
@@ -1688,7 +1688,7 @@ TokenTypeToString(Type),Value);
 //--------------------------------------------------------------------------------------------------
 int AcceptTokenType(READFILE Stream,TokenType Type) {
 
-    String ErrorMessage;
+    static String ErrorMessage;
 
     if (CheckTokenType(Stream,Type)) {
         NextToken(Stream); 

@@ -68,7 +68,7 @@ VARIABLERENAMING * RenamedVariables) {
 
     TERM TermSwapper;
     int SameModuloCommutation;
-    String ErrorMessage;
+    static String ErrorMessage;
 
     if (Term1 == NULL || Term2 == NULL) {
         return(Term1 == Term2);
@@ -163,7 +163,7 @@ AllowCommutation,RenamedVariables));
 int DoSameFormula(FORMULA Formula1,FORMULA Formula2,int AllowVariableRenaming,
 int AllowCommutation,VARIABLERENAMING * RenamedVariables) {
 
-    String ErrorMessage;
+    static String ErrorMessage;
     int Result;
 
     if (Formula1 == NULL || Formula2 == NULL) {
